@@ -811,6 +811,7 @@ textarea{
 .twin-select-reason{font-size:12px;color:var(--ink-muted);line-height:1.5;margin:4px 0 2px;}
 .twin-kind-caption{font-size:12px;color:var(--ink-muted);background:var(--surface-alt);border-radius:8px;padding:7px 10px;margin:8px 0;line-height:1.5;}
 .twin-kind-caption b{color:var(--ink);}
+.rental-heavy-chip{display:inline-block;font-size:11px;font-weight:700;color:var(--warn);background:var(--warn-bg);border-radius:999px;padding:1px 8px;vertical-align:middle;white-space:nowrap;}
 .card.empty{align-items:center;justify-content:center;color:var(--ink-faint);font-size:13px;min-height:150px;text-align:center;}
 
 .table-wrap{overflow-x:auto;border:1px solid var(--border);border-radius:12px;background:var(--surface);box-shadow:var(--shadow);}
@@ -1943,6 +1944,21 @@ function regionSuffix(name){
   // 지역을 붙여놔서, 그대로 또 붙이면 "주공뜨란채(부평)(부평)"이 된다.
   if (!region || String(name).includes('('+region+')')) return '';
   return '('+region+')';
+}
+// 임대 과다 표시(2026-09-28 세션) — 임대 비율이 높은 단지는 거래·선호가 일반
+// 단지와 달라, 기준단지로 쓰면 비교단지 "이어서 계산" 값이 약 5%p 낮게 나오는
+// 경향이 있었다(같은 구 기준단지 쌍 실측). seed의 rentalHouseholds는 보강표
+// 매칭이 안 된 단지는 null(정보 없음)이라, null이면 표시하지 않는다.
+const RENTAL_HEAVY_RATIO = 30;
+function findRentalRatio(name){
+  const entry = (window.SEED_COMPLEXES||[]).find(x=>x.name===name);
+  if (!entry || entry.rentalHouseholds == null || !entry.units) return null;
+  return entry.rentalHouseholds / entry.units * 100;
+}
+function rentalHeavyChip(name){
+  const ratio = findRentalRatio(name);
+  if (ratio == null || ratio < RENTAL_HEAVY_RATIO) return '';
+  return ' <span class="rental-heavy-chip" title="총 세대 중 임대 세대 비율이 '+RENTAL_HEAVY_RATIO+'% 이상인 단지예요">임대 과다 · 임대 '+Math.round(ratio)+'%</span>';
 }
 function complexMetaLabel(name){
   const builtYear = findBuiltYear(name);
@@ -4029,7 +4045,7 @@ function buildTwinCardHtml(t, idx, comp, r, bestFairPriceCandidate, iMode, iRang
   const favActive = isTwinFavorited(comp.name, t.name);
   const favBtnHtml = '<button class="twin-fav-btn'+(favActive?' active':'')+'" data-twin-fav="'+idx+'" type="button" aria-label="즐겨찾기">'+(favActive?'★':'☆')+'</button>';
   return '<div class="twin-card">'+
-    '<div class="twin-card-head">'+twinMatchTypeTag(t)+' '+twinOngoingBadge(t)+' '+esc(t.name)+esc(regionSuffix(t.name))+' <span class="cell-ratio">('+corrDisplay+', 겹치는 구간 '+t.overlapMonths+'개월)</span>'+favBtnHtml+'</div>'+
+    '<div class="twin-card-head">'+twinMatchTypeTag(t)+' '+twinOngoingBadge(t)+' '+esc(t.name)+esc(regionSuffix(t.name))+rentalHeavyChip(t.name)+' <span class="cell-ratio">('+corrDisplay+', 겹치는 구간 '+t.overlapMonths+'개월)</span>'+favBtnHtml+'</div>'+
     itemToggleRowHtml+
     '<div class="twin-chart-note">'+(iMode==='price'?'실제 가격(억원) · 같은 축 공유':'양쪽 모두 시작 시점 대비 상승률(%) · 그래프의 지점을 클릭하면 그 지점을 새 기준점으로 다시 계산합니다')+(iRangeMode==='full' ? '' : decoupleNoteHtml+(hasDrawableEpisodes?' · 파란 음영=과거 완결된 갭메우기 에피소드':''))+benchLineNoteHtml+rangeNoteHtml+'</div>'+
     predictionNoteHtml+
@@ -4375,7 +4391,7 @@ function buildEstRefCardHtml(r, idx, usedInAvg, mode, namePrefix, rangeMode, sho
     (mode==='price' ? '' : '<button class="chart-mode-toggle" data-'+namePrefix+'-item-bench-toggle="'+idx+'">'+(showBenchLine?'🏙️선도단지 끄기':'🏙️선도단지 보기')+'</button>')+
   '</div>';
   return '<div class="twin-card">'+
-    '<div class="twin-card-head">'+(usedInAvg?'<span class="twin-match-tag similar">평균 반영</span> ':'<span class="twin-match-tag">참고</span> ')+lowConfTag+esc(r.referenceName)+esc(regionSuffix(r.referenceName))+' <span class="cell-ratio">(상관계수 '+r.correlation.toFixed(2)+', 겹치는 구간 '+r.overlapMonths+'개월'+(r.tier?', '+SYNC_TIER_LABEL[r.tier]:'')+')</span></div>'+
+    '<div class="twin-card-head">'+(usedInAvg?'<span class="twin-match-tag similar">평균 반영</span> ':'<span class="twin-match-tag">참고</span> ')+lowConfTag+esc(r.referenceName)+esc(regionSuffix(r.referenceName))+rentalHeavyChip(r.referenceName)+' <span class="cell-ratio">(상관계수 '+r.correlation.toFixed(2)+', 겹치는 구간 '+r.overlapMonths+'개월'+(r.tier?', '+SYNC_TIER_LABEL[r.tier]:'')+')</span></div>'+
     selectReasonHtml+
     itemToggleRowHtml+
     '<div class="twin-chart-note">'+(mode==='price'?'실제 가격(억원) · 같은 축 공유':'양쪽 모두 겹치는 구간 첫 달 대비 상승률(%) · 그래프의 지점을 클릭하면 그 지점을 새 기준점으로 다시 계산합니다')+benchLineNoteHtml+rangeNoteHtml+'</div>'+
@@ -5140,7 +5156,9 @@ function renderLibraryOptions(selectEl, currentValue){
     entries.map(e=>'<option value="'+esc(e.name)+'">'+esc(e.name)+esc(regionSuffix(e.name))+' ('+libraryEntryMonthCount(e)+'개월)'+(e.shared?' · 공용':'')+'</option>').join('');
   selectEl.value = cur && entries.some(e=>e.name===cur) ? cur : '';
 }
-function wireLibrarySearch(inputEl, selectEl, renderFn, autocompleteEl){
+// showRentalChip: 기준단지 검색창에만 켠다(2026-09-28 세션) — 임대 비율이 문제가
+// 되는 건 그 단지를 기준단지로 고를 때라, 다른 검색창엔 넣지 않는다.
+function wireLibrarySearch(inputEl, selectEl, renderFn, autocompleteEl, showRentalChip){
   if (!inputEl || !selectEl) return;
   const doRender = renderFn || (()=>renderLibraryOptions(selectEl));
   function updateAutocomplete(){
@@ -5159,7 +5177,7 @@ function wireLibrarySearch(inputEl, selectEl, renderFn, autocompleteEl){
         '<a href="https://kbland.kr/today" target="_blank" rel="noopener" class="kb-guide-link">KB부동산</a>에서 로그인 후 검색창에 "'+esc(filter)+'"을(를) 입력해 시세를 직접 확인해보세요.</div></div>';
     } else {
       autocompleteEl.innerHTML = matches.map(e =>
-        '<div class="lib-ac-item" data-name="'+esc(e.name)+'">'+esc(e.name)+esc(regionSuffix(e.name))+' ('+libraryEntryMonthCount(e)+'개월)'+(e.shared?' · 공용':'')+'</div>'
+        '<div class="lib-ac-item" data-name="'+esc(e.name)+'">'+esc(e.name)+esc(regionSuffix(e.name))+' ('+libraryEntryMonthCount(e)+'개월)'+(e.shared?' · 공용':'')+(showRentalChip ? rentalHeavyChip(e.name) : '')+'</div>'
       ).join('');
     }
     autocompleteEl.hidden = false;
@@ -5569,7 +5587,7 @@ function buildDiagCardBody(i, comp, r, sync, wide, estimate, benchStatusHtml, ke
         '<button class="frame-btn'+(frame==='base'?' active':'')+'" data-frame="base">기준단지 기준</button>'+
       '</div>'
     : '<div class="frame-toggle frame-toggle-placeholder" aria-hidden="true"><button class="frame-btn" tabindex="-1" disabled>선도단지 기준</button></div>';
-  const headHtml = '<div class="card-head"><span class="swatch" style="background:var('+(SLOT_COLORS[i]||'--series-base')+')"></span><span class="name">'+esc(comp.name)+esc(complexMetaLabel(comp.name))+'</span>'+(headBadgeHtml||'')+'</div>'+frameToggleHtml+toneBadge(headlineDiag);
+  const headHtml = '<div class="card-head"><span class="swatch" style="background:var('+(SLOT_COLORS[i]||'--series-base')+')"></span><span class="name">'+esc(comp.name)+esc(complexMetaLabel(comp.name))+rentalHeavyChip(comp.name)+'</span>'+(headBadgeHtml||'')+'</div>'+frameToggleHtml+toneBadge(headlineDiag);
   // 항목 3(2026-09-21 세션) — 배율(%)만 보여주면 실제 금액 감이 바로 안
   // 온다는 지적을 받아, 매매 배율/갭 바로 위에 "현재가 / 적정가" 실제
   // 금액을 한 줄로 추가한다. buildFairPriceSummaryCard의 "적정가는 N억로
@@ -6138,7 +6156,7 @@ function renderSingleDiag(name){
   // 순서 유지)까지만 여기서 그리고, 상세 진단카드(resultEl)는 정적 마크업상
   // #singleChartSection보다 뒤에 오는 별도 컨테이너에 그린다.
   headEl.innerHTML =
-    '<div class="single-target-head"><span class="name">'+esc(name)+esc(complexMetaLabel(name))+'</span>'+
+    '<div class="single-target-head"><span class="name">'+esc(name)+esc(complexMetaLabel(name))+rentalHeavyChip(name)+'</span>'+
       '<span class="bench-tag">'+(groupKey==='rebuild'?'🏗️ 재건축 선도단지':'🏙️ 서울 선도단지')+' 기준</span>'+
       '<button class="btn small single-add-compare-btn" id="singleAddCompareBtn">➕ 비교 단지 추가</button></div>'+
     caveatHtml+
@@ -6547,12 +6565,12 @@ function renderSummaryCards(base){
     const card = document.createElement('div');
     card.className = 'card';
     if (!base.rows.length){
-      card.innerHTML = '<div class="card-head"><span class="swatch" style="background:var('+SLOT_COLORS[i]+')"></span><span class="name">'+esc(comp.name)+esc(complexMetaLabel(comp.name))+'</span></div><div class="card-msg">기준단지 데이터를 먼저 입력하세요.</div>';
+      card.innerHTML = '<div class="card-head"><span class="swatch" style="background:var('+SLOT_COLORS[i]+')"></span><span class="name">'+esc(comp.name)+esc(complexMetaLabel(comp.name))+rentalHeavyChip(comp.name)+'</span></div><div class="card-msg">기준단지 데이터를 먼저 입력하세요.</div>';
       grid.appendChild(card); continue;
     }
     const r = computeSlot(base, comp);
     if (r.error){
-      card.innerHTML = '<div class="card-head"><span class="swatch" style="background:var('+SLOT_COLORS[i]+')"></span><span class="name">'+esc(comp.name)+esc(complexMetaLabel(comp.name))+'</span></div><div class="card-msg">'+r.error+'</div>';
+      card.innerHTML = '<div class="card-head"><span class="swatch" style="background:var('+SLOT_COLORS[i]+')"></span><span class="name">'+esc(comp.name)+esc(complexMetaLabel(comp.name))+rentalHeavyChip(comp.name)+'</span></div><div class="card-msg">'+r.error+'</div>';
       grid.appendChild(card); continue;
     }
     // 선도단지 현재 위치 카드 — 다중 비교 화면에도 "우리 단지 진단하기"와
@@ -6614,12 +6632,12 @@ function renderSummaryTable(base){
     any = true;
     const tr = document.createElement('tr');
     if (!base.rows.length){
-      tr.innerHTML = '<td class="name-cell"><span class="swatch" style="width:9px;height:9px;border-radius:50%;background:var('+SLOT_COLORS[i]+')"></span>'+esc(comp.name)+esc(complexMetaLabel(comp.name))+'</td><td colspan="7">기준단지 데이터 필요</td>';
+      tr.innerHTML = '<td class="name-cell"><span class="swatch" style="width:9px;height:9px;border-radius:50%;background:var('+SLOT_COLORS[i]+')"></span>'+esc(comp.name)+esc(complexMetaLabel(comp.name))+rentalHeavyChip(comp.name)+'</td><td colspan="7">기준단지 데이터 필요</td>';
       tbody.appendChild(tr); continue;
     }
     const r = computeSlot(base, comp);
     if (r.error){
-      tr.innerHTML = '<td class="name-cell"><span class="swatch" style="width:9px;height:9px;border-radius:50%;background:var('+SLOT_COLORS[i]+')"></span>'+esc(comp.name)+esc(complexMetaLabel(comp.name))+'</td><td colspan="7">'+r.error+'</td>';
+      tr.innerHTML = '<td class="name-cell"><span class="swatch" style="width:9px;height:9px;border-radius:50%;background:var('+SLOT_COLORS[i]+')"></span>'+esc(comp.name)+esc(complexMetaLabel(comp.name))+rentalHeavyChip(comp.name)+'</td><td colspan="7">'+r.error+'</td>';
       tbody.appendChild(tr); continue;
     }
     const curSalePrice = r.curSaleYm!=null ? comp.rowMap.get(r.curSaleYm).saleMid : null;
@@ -6630,7 +6648,7 @@ function renderSummaryTable(base){
     const saleCellClass = r.saleDiff==null ? '' : r.saleDiff <= -state.threshold ? ' cell-under' : r.saleDiff >= state.threshold ? ' cell-over' : '';
     const jeonseCellClass = r.jeonseDiff==null ? '' : r.jeonseDiff <= -state.threshold ? ' cell-under' : r.jeonseDiff >= state.threshold ? ' cell-over' : '';
     tr.innerHTML =
-      '<td class="name-cell"><span class="swatch" style="width:9px;height:9px;border-radius:50%;background:var('+SLOT_COLORS[i]+')"></span>'+esc(comp.name)+esc(complexMetaLabel(comp.name))+'</td>'+
+      '<td class="name-cell"><span class="swatch" style="width:9px;height:9px;border-radius:50%;background:var('+SLOT_COLORS[i]+')"></span>'+esc(comp.name)+esc(complexMetaLabel(comp.name))+rentalHeavyChip(comp.name)+'</td>'+
       '<td class="num'+saleCellClass+'">'+priceWithRatioCell(curSalePrice, r.currentSaleRatio)+'</td>'+
       '<td class="num">'+priceWithRatioCell(fairSale, r.avgSaleRatio)+'</td>'+
       '<td class="num">'+fmtPP(r.saleDiff)+'</td>'+
@@ -8024,7 +8042,7 @@ function wireStaticEvents(){
     state.baseText = entry.text; state.baseName = entry.name; state.basePreset = 'custom'; usingSeed = false;
     saveState(); render();
   });
-  wireLibrarySearch(document.getElementById('baseLibSearch'), document.getElementById('baseLibSelect'), null, document.getElementById('baseLibAutocomplete'));
+  wireLibrarySearch(document.getElementById('baseLibSearch'), document.getElementById('baseLibSelect'), null, document.getElementById('baseLibAutocomplete'), true);
   document.querySelectorAll('#topModeTabs .top-mode-btn').forEach(b=>{
     b.addEventListener('click', ()=>{ saveState(); setTopMode(b.dataset.topMode); });
   });
