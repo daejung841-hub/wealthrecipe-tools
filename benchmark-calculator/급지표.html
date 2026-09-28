@@ -86,6 +86,30 @@
   }
   .all-grid thead th:first-child.region-start{ box-shadow: inset -1px -1px 0 0 var(--border); }
   .region-tag{ display:block; font-size:9px; color:var(--base-color); font-weight:700; margin-bottom:1px; }
+  /* 좌측 구/시 체크박스 트리 패널(2026-09-29 세션 추가 요청). 접으면 .layout에
+     .panel-collapsed가 붙어 패널이 사라지고 그리드가 전체 폭을 쓴다. */
+  .layout{ display:flex; align-items:flex-start; }
+  .main-col{ flex:1; min-width:0; }
+  .region-panel{ width:210px; flex:none; box-sizing:border-box; position:sticky; top:0; max-height:calc(100vh - 60px); overflow-y:auto; background:var(--card-bg); border-right:1px solid var(--border); border-bottom:1px solid var(--border); padding:8px 10px 12px; font-size:12px; }
+  .layout.panel-collapsed .region-panel{ display:none; }
+  .region-panel .panel-actions{ display:flex; gap:6px; margin-bottom:6px; }
+  .region-panel .panel-actions button{ padding:3px 9px; border-radius:12px; border:1px solid var(--border); background:var(--card-bg); cursor:pointer; font-size:11px; }
+  .region-panel .panel-actions button:hover{ background:var(--bg); }
+  .region-group{ margin-bottom:4px; }
+  .region-group-head{ display:flex; align-items:center; gap:4px; font-weight:700; padding:3px 0; }
+  .region-group-head .caret{ border:none; background:none; cursor:pointer; padding:0 2px; font-size:11px; color:var(--muted); width:16px; }
+  .region-group-head label{ display:flex; align-items:center; gap:4px; cursor:pointer; flex:1; }
+  .region-children{ margin-left:20px; }
+  .region-group.collapsed .region-children{ display:none; }
+  .region-children label{ display:flex; align-items:center; gap:5px; padding:2px 0; cursor:pointer; font-weight:400; }
+  .region-children label.unchecked{ color:var(--muted); }
+  .region-count{ color:var(--muted); font-size:10px; margin-left:auto; }
+  .region-panel input[type=checkbox]{ margin:0; cursor:pointer; }
+  .filters .panel-toggle{ font-weight:700; }
+  @media (max-width:700px){
+    .layout{ flex-direction:column; }
+    .region-panel{ width:100%; position:static; max-height:38vh; border-right:none; }
+  }
 </style>
 
 <div class="header">
@@ -93,9 +117,14 @@
   <div class="criteria">분류 기준: 최신월 매매일반평균가</div>
   <div class="criteria" id="dataMonth"></div>
 </div>
-<div class="tabs" id="priceTabs"></div>
-<div class="filters" id="filterBar"></div>
-<div id="bandContent"></div>
+<div class="layout" id="layout">
+  <aside class="region-panel" id="regionPanel"></aside>
+  <div class="main-col">
+    <div class="tabs" id="priceTabs"></div>
+    <div class="filters" id="filterBar"></div>
+    <div id="bandContent"></div>
+  </div>
+</div>
 <div class="bottom-bar" id="bottomBar"></div>
 
 <script src="shared.js"></script>
@@ -368,9 +397,102 @@ function complexPassesFilters(c){
   return true;
 }
 
+// 구/시 체크박스 필터(2026-09-29 세션 추가 요청) — 좌측 트리 패널에서 체크
+// 해제한 컬럼(colKey)을 hiddenCols에 모은다. 연식/세대수 필터와 같은
+// module-level 상태라 탭을 오가도 유지되고, 그리드에서는 이 컬럼을 뺀 나머지만
+// 그린다(AND 조건 — 컬럼이 숨겨지면 그 단지도 40억 이상/가격대 행 집계에서
+// 함께 빠진다). 기본값은 빈 Set = 전체 체크.
+const hiddenCols = new Set();
+const collapsedGroups = new Set();
+let panelCollapsed = false;
+
+const REGION_GROUP_ORDER = ['seoul', 'gyeonggi', 'incheon', 'unclassified'];
+const REGION_GROUP_LABEL = { seoul: '서울특별시', gyeonggi: '경기도', incheon: '인천광역시', unclassified: '미분류' };
+
+// 트리에 보여줄 (권역 → 컬럼 목록). 현재 탭의 권역 단지만 대상으로 하고, 연식/
+// 세대수 필터와 무관하게 시세가 있는 전 단지 기준으로 만들어 체크박스가 필터
+// 조작에 따라 사라지거나 흔들리지 않게 한다.
+function regionTreeData(){
+  const cfg = TAB_CONFIG[activeTab];
+  const priced = ALL.filter(cfg.filter).filter(c => priceInEok(c) != null);
+  const counts = new Map();
+  priced.forEach(c => { const k = colKeyOfComplex(c); counts.set(k, (counts.get(k) || 0) + 1); });
+  const groups = new Map();
+  buildColumns(priced).forEach(col => {
+    if (!groups.has(col.region)) groups.set(col.region, []);
+    groups.get(col.region).push({ key: col.key, label: col.label, count: counts.get(col.key) || 0 });
+  });
+  return REGION_GROUP_ORDER.filter(r => groups.has(r)).map(r => ({ region: r, cols: groups.get(r) }));
+}
+
+function renderRegionPanel(){
+  const el = document.getElementById('regionPanel');
+  if (!el) return;
+  const savedTop = el.scrollTop;
+  const tree = regionTreeData();
+  let html = '<div class="panel-actions"><button type="button" data-act="all">전체 선택</button><button type="button" data-act="none">전체 해제</button></div>';
+  tree.forEach(g => {
+    const total = g.cols.length;
+    const on = g.cols.filter(c => !hiddenCols.has(c.key)).length;
+    const groupCount = g.cols.reduce((s, c) => s + c.count, 0);
+    html += '<div class="region-group'+(collapsedGroups.has(g.region) ? ' collapsed' : '')+'" data-region="'+g.region+'">' +
+      '<div class="region-group-head"><button type="button" class="caret" data-caret="'+g.region+'" title="접기/펼치기">'+(collapsedGroups.has(g.region) ? '▸' : '▾')+'</button>' +
+      '<label><input type="checkbox" data-group="'+g.region+'"'+(on === total ? ' checked' : '')+'> '+esc(REGION_GROUP_LABEL[g.region])+
+      '<span class="region-count">'+groupCount+'</span></label></div>' +
+      '<div class="region-children">' +
+      g.cols.map(c => '<label class="'+(hiddenCols.has(c.key) ? 'unchecked' : '')+'"><input type="checkbox" data-col="'+esc(c.key)+'"'+(hiddenCols.has(c.key) ? '' : ' checked')+'> '+esc(c.label)+'<span class="region-count">'+c.count+'</span></label>').join('') +
+      '</div></div>';
+  });
+  el.innerHTML = html;
+  // 하위 일부만 체크된 시/도는 indeterminate(부분 선택) 표시
+  tree.forEach(g => {
+    const on = g.cols.filter(c => !hiddenCols.has(c.key)).length;
+    const box = el.querySelector('input[data-group="'+g.region+'"]');
+    if (box) box.indeterminate = on > 0 && on < g.cols.length;
+  });
+  el.scrollTop = savedTop;
+
+  el.querySelectorAll('input[data-col]').forEach(box => {
+    box.addEventListener('change', () => {
+      if (box.checked) hiddenCols.delete(box.dataset.col); else hiddenCols.add(box.dataset.col);
+      renderRegionPanel(); renderBandContent();
+    });
+  });
+  el.querySelectorAll('input[data-group]').forEach(box => {
+    box.addEventListener('change', () => {
+      const g = tree.find(t => t.region === box.dataset.group);
+      if (!g) return;
+      g.cols.forEach(c => { if (box.checked) hiddenCols.delete(c.key); else hiddenCols.add(c.key); });
+      renderRegionPanel(); renderBandContent();
+    });
+  });
+  el.querySelectorAll('button[data-caret]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const r = btn.dataset.caret;
+      if (collapsedGroups.has(r)) collapsedGroups.delete(r); else collapsedGroups.add(r);
+      renderRegionPanel();
+    });
+  });
+  el.querySelectorAll('button[data-act]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      // 현재 탭에 보이는 구/시에만 적용(다른 탭 권역의 체크 상태는 건드리지 않음)
+      tree.forEach(g => g.cols.forEach(c => { if (btn.dataset.act === 'all') hiddenCols.delete(c.key); else hiddenCols.add(c.key); }));
+      renderRegionPanel(); renderBandContent();
+    });
+  });
+}
+
+function setPanelCollapsed(collapsed){
+  panelCollapsed = collapsed;
+  document.getElementById('layout').classList.toggle('panel-collapsed', collapsed);
+  const btn = document.getElementById('panelToggle');
+  if (btn) btn.textContent = collapsed ? '▸ 지역 패널 열기' : '◂ 지역 패널 접기';
+}
+
 function initFilterBar(){
   const el = document.getElementById('filterBar');
   el.innerHTML =
+    '<button id="panelToggle" class="panel-toggle" type="button"></button>' +
     '<div class="filter-group"><label>연식</label>' +
     '<select id="ageMode">' +
       '<option value="none">전체</option>' +
@@ -410,8 +532,12 @@ function initFilterBar(){
     ageYearsEl.value = '20';
     ageYearsEl.disabled = true;
     unitsMinEl.value = '';
+    hiddenCols.clear();
+    renderRegionPanel();
     renderBandContent();
   });
+  document.getElementById('panelToggle').addEventListener('click', () => setPanelCollapsed(!panelCollapsed));
+  setPanelCollapsed(panelCollapsed);
 }
 
 const TAB_CONFIG = {
@@ -430,7 +556,7 @@ function renderTabs(){
     const btn = document.createElement('button');
     btn.className = 'tab-btn' + (activeTab===key ? ' active' : '');
     btn.textContent = TAB_CONFIG[key].label;
-    btn.addEventListener('click', () => { activeTab=key; renderTabs(); renderBandContent(); });
+    btn.addEventListener('click', () => { activeTab=key; renderTabs(); renderRegionPanel(); renderBandContent(); });
     el.appendChild(btn);
   });
 }
@@ -544,12 +670,16 @@ function entriesInCol(list, col){
 
 function renderPriceRowGrid(content, regionFilterFn, showRegionLabel){
   const inRegion = ALL.filter(regionFilterFn);
+  // 구/시 체크박스에서 해제된 컬럼의 단지는 여기서 함께 걸러낸다 — 그래야 40억 이상
+  // 통합행/가격대 행 집계에도 안 잡히고, 숨긴 컬럼만 있던 가격대 행은 사라진다.
   const priced = inRegion
     .map(c => ({ complex: c, price: priceInEok(c) }))
-    .filter(p => p.price != null);
+    .filter(p => p.price != null)
+    .filter(p => !hiddenCols.has(colKeyOfComplex(p.complex)));
 
   if (!priced.length){
-    content.innerHTML = '<div class="district-section"><div style="color:var(--muted);font-size:13px;padding:16px 20px;">해당 지역에 단지가 없습니다.</div></div>';
+    const msg = hiddenCols.size ? '선택된 구/시(또는 연식·세대수 조건)에 해당하는 단지가 없습니다.' : '해당 지역에 단지가 없습니다.';
+    content.innerHTML = '<div class="district-section"><div style="color:var(--muted);font-size:13px;padding:16px 20px;">'+msg+'</div></div>';
     return;
   }
 
@@ -558,6 +688,9 @@ function renderPriceRowGrid(content, regionFilterFn, showRegionLabel){
     content.innerHTML = '<div class="district-section"><div style="color:var(--muted);font-size:13px;padding:16px 20px;">해당 지역에 단지가 없습니다.</div></div>';
     return;
   }
+  // 권역 첫 컬럼 구분선/태그는 "실제로 보이는" 컬럼 기준으로 다시 계산한다(서울이
+  // 전부 숨겨지면 경기의 첫 보이는 컬럼이 구분선을 받아야 함).
+  { const seen = new Set(); cols.forEach(col => { col.regionStart = !seen.has(col.region); seen.add(col.region); }); }
 
   const high = priced.filter(p => p.price >= HIGH_PRICE_THRESHOLD).sort(sortByPriceDesc);
   const normal = priced.filter(p => p.price < HIGH_PRICE_THRESHOLD);
@@ -702,6 +835,7 @@ function init(){
     renderDataMonth();
     renderTabs();
     initFilterBar();
+    renderRegionPanel();
     renderBandContent();
     renderBottomBar();
   } catch (err) {
