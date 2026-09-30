@@ -11,6 +11,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="shared.js"></script>
 <script src="seedComplexes.js"></script>
+<script src="seedChips.js"></script>
 <script src="m2Series.js"></script>
 <style>
 :root{
@@ -268,6 +269,13 @@ textarea{
 .clear-link{background:none;border:none;color:var(--ink-faint);font-size:11px;text-decoration:underline;padding:4px;flex:none;}
 .clear-link:hover{color:var(--bad);}
 .visible-check{display:flex;align-items:center;gap:6px;margin-top:8px;font-size:11.5px;color:var(--ink-muted);cursor:pointer;}
+/* 평형 칩(2026-09-30 세션, 1단계: 읽기 전용) — 현재 슬롯 시세가 어느 평형인지만 강조한다. */
+.pyeong-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;}
+.pyeong-chip{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border:1px solid var(--border-strong);border-radius:999px;background:var(--surface);color:var(--ink-muted);font-size:11.5px;cursor:default;white-space:nowrap;}
+.pyeong-chip b{font-weight:700;color:var(--ink);}
+.pyeong-chip.current{background:var(--accent);border-color:var(--accent);color:#fff;}
+.pyeong-chip.current b{color:#fff;}
+.pyeong-chip.other{border-style:dashed;}
 .visible-check input{margin:0;}
 
 .toolbar{display:flex;gap:8px;flex-direction:column;}
@@ -1018,6 +1026,7 @@ footer{margin-top:36px;color:var(--ink-faint);font-size:12px;text-align:center;}
             <input type="file" id="baseUploadInput" accept=".xlsx,.xls" multiple hidden>
           </div>
           <div class="status-line" id="baseStatus"><span class="dot"></span><span>데이터를 붙여넣어주세요</span></div>
+          <div id="baseChips"></div>
           <div id="baseFairSummary"></div>
         </div>
       </details>
@@ -2096,6 +2105,7 @@ function loadState(){
   if (raw){
     try {
       const saved = JSON.parse(raw);
+      if (Array.isArray(saved.library)) saved.library = expandSavedLibrary(saved.library);
       Object.assign(state, saved);
       if (!state.gasUrl && window.SHARED_LIBRARY_URL) state.gasUrl = window.SHARED_LIBRARY_URL;
       normalizeCompares();
@@ -2116,8 +2126,38 @@ function loadState(){
   normalizeCompares();
   migrateLibraryIds();
 }
+// 상태 저장 크기 줄이기(2026-09-30 세션). 예전엔 라이브러리 전체(seed 1,768개의 시세 text 포함,
+// 약 1,850만 자)를 통째로 저장해 크롬의 localStorage 한도(출처당 약 520만 자)를 넘었고,
+// setItem이 QuotaExceededError로 조용히 실패해 슬롯·토글이 저장되지 않았다(라이브 크롬 실측).
+// 이제 seed와 내용이 같은 라이브러리 항목은 {id, seedRef:1, savedAt}로만 저장하고(순서 유지 —
+// 이름이 같은 항목이 여럿이면 앞의 것이 쓰이므로 순서가 결과에 영향을 준다), 불러올 때
+// seed에서 name/text를 채워 되살린다. 사용자가 추가한 항목(seed id가 아니거나 내용이 다른
+// 항목)과 슬롯·토글은 예전처럼 그대로 저장한다. 예전 형식(모든 항목에 text가 있음)도 그대로 읽힌다.
+function serializeLibraryForSave(library){
+  const seedById = new Map((window.SEED_COMPLEXES || []).map(s => [s.id, s]));
+  return library.map(e => {
+    const s = e && seedById.get(e.id);
+    if (s && e.name === s.name && e.text === s.text) return { id: e.id, seedRef: 1, savedAt: e.savedAt };
+    return e;
+  });
+}
+function expandSavedLibrary(library){
+  const seedById = new Map((window.SEED_COMPLEXES || []).map(s => [s.id, s]));
+  const out = [];
+  library.forEach(e => {
+    if (!e) return;
+    if (!e.seedRef){ out.push(e); return; }
+    const s = seedById.get(e.id);
+    if (s) out.push({ id: s.id, name: s.name, text: s.text, savedAt: e.savedAt }); // seed에서 사라진 참조는 되살릴 text가 없어 버린다
+  });
+  return out;
+}
+function serializeState(){
+  return JSON.stringify(Object.assign({}, state, { library: serializeLibraryForSave(state.library) }));
+}
 function saveState(){
-  try { localStorage.setItem(STORE_KEY, JSON.stringify(state)); } catch(e){}
+  try { localStorage.setItem(STORE_KEY, serializeState()); }
+  catch(e){ console.warn('계산기 상태 저장 실패:', e && e.name); }
 }
 
 // ---- 동조율 낮음 전용 "팩터 모델" (2026-09-27 세션) ----
@@ -4901,8 +4941,62 @@ function renderBaseFairSummary(base){
   const r = computeSlot(bench, base);
   el.innerHTML = r.error ? '' : buildFairPriceSummaryCard(r);
 }
+// ---- 평형 칩(2026-09-30 세션, 1단계: 읽기 전용) ----
+// seedChips.js(build_seed_chips.py 생성)의 단지별 평형 정보로 "25평 48세대 / 34평 204세대" 칩을
+// 기준단지 패널과 비교 슬롯에 보여준다. 이번 단계에서는 클릭해도 전환하지 않고, 슬롯에 지금 들어
+// 있는 시세가 어느 평형인지만 강조한다. 슬롯에는 단지 id가 없어서(이름/시세 text만 저장) 시세 text가
+// seed와 같은 단지로 찾고, 없으면 이름이 정확히 하나만 일치하는 seed 단지로 찾는다. 사용자가 직접
+// 넣은 데이터(엑셀 업로드 등)는 seed와 맞지 않으므로 칩을 표시하지 않는다.
+// 배열 형식은 seedChips.js 머리말 참고: [s, a, b, o, x, q, d]
+let _seedIdByText = null, _seedIdsByName = null;
+function seedIdForSlot(text, name){
+  const seeds = window.SEED_COMPLEXES || [];
+  if (!_seedIdByText){
+    _seedIdByText = new Map(); _seedIdsByName = new Map();
+    seeds.forEach(s => {
+      if (s.text && !_seedIdByText.has(s.text)) _seedIdByText.set(s.text, s.id);
+      if (!_seedIdsByName.has(s.name)) _seedIdsByName.set(s.name, []);
+      _seedIdsByName.get(s.name).push(s.id);
+    });
+  }
+  if (text && _seedIdByText.has(text)) return _seedIdByText.get(text);
+  const byName = name ? _seedIdsByName.get(name) : null;
+  return (byName && byName.length === 1) ? byName[0] : null;
+}
+function fmtM2Range(lo, hi){ return lo === hi ? lo+'㎡' : lo+'~'+hi+'㎡'; }
+function pyeongChipsHtml(text, name){
+  const chips = window.SEED_CHIPS;
+  if (!chips || !text) return '';
+  const id = seedIdForSlot(text, name);
+  const c = id ? chips[id] : null;
+  if (!c) return '';
+  const [s, a, b, o, x, q] = c;
+  const has34 = s === 34, has25 = !!q;
+  if (!has34 && !has25) return ''; // 25평·34평 칩이 없는 단지는 표시하지 않는다
+  const seedBasisText = '시세는 '+x[0]+'㎡ 타입'+(x[1]!=null ? '('+x[1]+'세대)' : '')+' 기준 · xlsx 선택';
+  const basis25Text = q ? '시세는 '+q[0]+'㎡ 타입 기준 · '+(q[1] ? '가중평균('+q[2]+'개 타입)' : '최다타입('+q[2]+'세대)') : '';
+  const out = [];
+  if (has25){
+    const cur = s === 25; // seed 시세 자체가 25평대 타입인 단지 — 지금 슬롯 시세는 xlsx 선택 타입이다
+    let tip = b ? '25평대(전용 '+fmtM2Range(b[1], b[2])+') 전체 '+b[0]+'세대\n' : '';
+    tip += cur ? seedBasisText+'\n(25평 데이터로 전환하면 '+basis25Text.replace('시세는 ', '')+')' : basis25Text;
+    out.push('<span class="pyeong-chip'+(cur?' current':'')+'" title="'+esc(tip)+'"><b>25평</b>'+(b ? b[0]+'세대' : '')+'</span>');
+  }
+  if (has34){
+    const tip = (a ? '34평대(전용 '+fmtM2Range(a[1], a[2])+') 전체 '+a[0]+'세대\n' : '34평대 세대수 정보 없음(KB 타입 정보에 81~86㎡ 없음)\n') + seedBasisText;
+    out.push('<span class="pyeong-chip current" title="'+esc(tip)+'"><b>34평</b>'+(a ? a[0]+'세대' : '')+'</span>');
+  }
+  if (s === 0){
+    // seed 시세가 25·34평대가 아닌 타입 — 지금 슬롯에 들어 있는 평형을 "기타"로 표시한다(전환 대상 아님)
+    out.push('<span class="pyeong-chip other current" title="'+esc(seedBasisText)+'"><b>기타</b>'+Math.floor(x[0])+'㎡</span>');
+  }
+  return '<div class="pyeong-chips">'+out.join('')+'</div>';
+}
+
 function renderBaseStatus(base){
   const el = document.getElementById('baseStatus');
+  const chipsEl = document.getElementById('baseChips');
+  if (chipsEl) chipsEl.innerHTML = base.isVirtualBenchmark ? '' : pyeongChipsHtml(state.baseText, state.baseName);
   renderBaseFairSummary(base);
   if (!base.rows.length){
     el.className = 'status-line';
@@ -4957,6 +5051,7 @@ function renderCompareTabs(base){
         '<button class="clear-link" data-role="makeBase" title="이 단지를 기준단지로 전환">⇄ 기준단지로</button>'+
         '<button class="clear-link" data-role="clear">비우기</button>'+
       '</div>'+
+      pyeongChipsHtml(state.compares[i].text, state.compares[i].name)+
       '<label class="visible-check">'+
         '<input type="checkbox" data-role="visible"'+(state.compares[i].visible?' checked':'')+'>'+
         '<span>그래프에 표시</span>'+
