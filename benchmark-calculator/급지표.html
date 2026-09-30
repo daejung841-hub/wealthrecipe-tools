@@ -57,7 +57,10 @@
   .ctx-menu{ position:fixed; background:var(--card-bg); border:1px solid var(--border); border-radius:6px; box-shadow:0 4px 12px rgba(0,0,0,.15); padding:4px 0; z-index:100; }
   .ctx-menu button{ display:block; width:100%; padding:8px 16px; border:none; background:none; text-align:left; cursor:pointer; font-size:13px; }
   .ctx-menu button:hover{ background:var(--bg); }
-  .all-grid-wrap{ overflow:auto; max-height:calc(100vh - 200px); padding:0 20px 20px; background:var(--bg); }
+  /* 왼쪽 padding을 두면 sticky left:0인 가격축 열이 컨테이너 끝이 아니라 padding 안쪽(20px 지점)에
+     붙어, 가로 스크롤 시 그 틈으로 카드 조각이 비쳐 보였다(2026-09-30 확인: 스크롤 후 th.left-wrap.left=20px).
+     그래서 왼쪽 padding을 0으로 하고 오른쪽·아래 여백만 둔다. */
+  .all-grid-wrap{ overflow:auto; max-height:calc(100vh - 200px); padding:0 20px 20px 0; background:var(--bg); }
   /* border-collapse:collapse는 sticky 셀과 함께 쓰면 셀 사이 경계선이
      스크롤 시 함께 이동하지 않아 그 틈으로 뒤쪽 콘텐츠가 비쳐 보이는
      브라우저 렌더링 버그가 있다. border-collapse:separate + box-shadow
@@ -110,6 +113,27 @@
     .layout{ flex-direction:column; }
     .region-panel{ width:100%; position:static; max-height:38vh; border-right:none; }
   }
+  /* 평형 모드 선택(평형: 34평 | 25평 | 전체 보기) — 지역 탭·필터·체크박스와 독립적으로 동작한다. */
+  .mode-bar{ display:flex; align-items:center; gap:10px; padding:10px 20px 0; flex-wrap:wrap; }
+  .mode-bar .mode-label{ font-size:12px; color:var(--muted); }
+  .mode-seg{ display:inline-flex; border:1px solid var(--border); border-radius:8px; overflow:hidden; background:var(--card-bg); }
+  .mode-seg button{ padding:6px 16px; border:none; border-right:1px solid var(--border); background:none; cursor:pointer; font-size:13px; }
+  .mode-seg button:last-child{ border-right:none; }
+  .mode-seg button.active{ background:var(--base-color); color:#fff; font-weight:700; }
+  .mode-seg button:disabled{ cursor:wait; opacity:.6; }
+  .mode-status{ font-size:12px; color:var(--muted); }
+  .mode-status.err{ color:#c0392b; }
+  /* 25평/34평 카드 구분 — "25평" 태그와 다른 배경색(전체 보기에서 두 평형이 한 축에 섞일 때) */
+  .badge.badge-kind25{ background:#d97706; color:#fff; font-weight:700; }
+  .badge.badge-kind34{ background:#64748b; color:#fff; font-weight:700; }
+  .badge.badge-stale{ background:#fee2e2; color:#b91c1c; }
+  .badge.badge-m2{ background:#fef3c7; color:#92400e; }
+  .complex-card.kind-25{ background:#fff7e6; border-color:#f0c987; }
+  .complex-card.has-kind .badges{ flex-wrap:wrap; row-gap:2px; }
+  .complex-card.role-base.kind-25{ border-color:var(--base-color); }
+  .complex-card.role-compare.kind-25{ border-color:var(--compare-color); }
+  .bottom-bar button:disabled[title]{ cursor:not-allowed; }
+  .bottom-bar .cmp-wrap{ margin-left:auto; cursor:not-allowed; }
 </style>
 
 <div class="header">
@@ -120,6 +144,7 @@
 <div class="layout" id="layout">
   <aside class="region-panel" id="regionPanel"></aside>
   <div class="main-col">
+    <div class="mode-bar" id="modeBar"></div>
     <div class="tabs" id="priceTabs"></div>
     <div class="filters" id="filterBar"></div>
     <div id="bandContent"></div>
@@ -296,6 +321,102 @@ const DISPLAY_NAME_BY_ID = (function(){
 })();
 function displayName(complex){ return DISPLAY_NAME_BY_ID.get(complex.id) || complex.name; }
 
+// ─── 평형 모드(2026-09-29 세션 추가): 평형: [34평 | 25평 | 전체 보기] ───────────────────
+// 34평 모드는 이 기능이 생기기 전과 화면·HTML이 완전히 같아야 한다(회귀 금지) — 34평 카드는
+// seedComplexes.js의 단지 객체를 그대로 쓰고(_kind 없음), 25평 카드만 seedComplexes25.js의
+// text를 얹은 파생 객체(_kind:'25')로 만든다. 25평 데이터(약 10.6MB)는 25평/전체 보기를
+// 처음 고를 때만 <script>로 동적으로 불러와 한 번만 쓴다. 선택(기준/비교) 상태는 카드 key로
+// 관리한다 — 34평 카드 key = seed 단지 id(기존과 동일), 25평 카드 key = '25:'+id.
+let viewMode = '34'; // '34' | '25' | 'both'
+const MODE_LABEL = { '34': '34평', '25': '25평', 'both': '전체 보기' };
+const SEED25_URL = 'seedComplexes25.js';
+// 25평 카드의 "전용 ○○.○○㎡" 배지는 대표 전용면적이 이 범위(58.00~60.00㎡, 경계 포함)면 숨긴다.
+const M2_BADGE_HIDE_MIN = 58;
+const M2_BADGE_HIDE_MAX = 60;
+let seed25State = 'idle'; // 'idle' | 'loading' | 'loaded' | 'error'
+let seed25Promise = null;
+let SEED25_BY_ID = new Map();
+let SEED25_LATEST_YM = null;
+const DERIVED25 = new Map(); // seed id -> 25평 파생 단지 객체(재사용)
+
+function cardKey(complex){ return complex._kind === '25' ? '25:' + complex.id : complex.id; }
+function realIdOfKey(key){ return String(key).replace(/^25:/, ''); }
+function isKey25(key){ return String(key).startsWith('25:'); }
+
+function loadSeed25(){
+  if (seed25State === 'loaded') return Promise.resolve();
+  if (seed25Promise) return seed25Promise;
+  seed25State = 'loading';
+  seed25Promise = new Promise((resolve, reject) => {
+    const s = document.createElement('script');
+    s.src = SEED25_URL;
+    s.onload = () => {
+      const list = window.SEED_COMPLEXES_25;
+      if (!Array.isArray(list) || !list.length){ seed25State = 'error'; seed25Promise = null; reject(new Error('empty')); return; }
+      SEED25_BY_ID = new Map(list.map(e => [e.id, e]));
+      let maxYm = null;
+      list.forEach(e => { const ym = latestSaleYm(e.text); if (ym != null && (maxYm == null || ym > maxYm)) maxYm = ym; });
+      SEED25_LATEST_YM = maxYm;
+      seed25State = 'loaded';
+      resolve();
+    };
+    s.onerror = () => { seed25State = 'error'; seed25Promise = null; s.remove(); reject(new Error('load failed')); };
+    document.head.appendChild(s);
+  });
+  return seed25Promise;
+}
+
+function latestSaleYm(text){
+  const rows = window.SharedLib.parseComplexCsv(text);
+  for (let i = rows.length - 1; i >= 0; i--) if (rows[i].saleMid != null) return rows[i].ym;
+  return null;
+}
+function fmtYm(ym){ return Math.floor(ym / 100) + '.' + String(ym % 100).padStart(2, '0'); }
+
+// 34평 모드 표시 대상: 공급평 30~39평이거나 전용 81~86㎡인 단지. 그 밖(대형·소형 등)은 34평 모드에서 숨기고 전체 보기에서만 보인다.
+function is84m2(c){ return c.exclusiveArea != null && c.exclusiveArea >= 81 && c.exclusiveArea <= 86; }
+function in34Set(c){ return (c.pyeongType != null && c.pyeongType >= 30 && c.pyeongType <= 39) || is84m2(c); }
+// ㎡는 화면 표기에서만 소수점 이하를 버린다(59.96 → 59). 데이터 값은 그대로 둔다.
+function m2Text(v){ return String(Math.floor(v)); }
+function has25Type(c){ return SEED25_BY_ID.has(c.id); }
+function derived25(c){
+  let d = DERIVED25.get(c.id);
+  if (!d){
+    d = Object.assign({}, c, { text: SEED25_BY_ID.get(c.id).text, _kind: '25', _e25: SEED25_BY_ID.get(c.id) });
+    DERIVED25.set(c.id, d);
+  }
+  return d;
+}
+// 모드별로 그릴 카드 목록: [{complex, price}] (가격 없는 단지는 제외). 34평 모드는 예전 식 그대로다.
+const DERIVED34 = new Map(); // 전체 보기의 34평 카드용 파생 객체(매 렌더마다 복제하지 않고 재사용)
+function derived34(c){
+  let d = DERIVED34.get(c.id);
+  if (!d){ d = Object.assign({}, c, { _kind: '34' }); DERIVED34.set(c.id, d); }
+  return d;
+}
+// 34평 모드: 34평 표시 대상(in34Set)만 / 25평 모드: 25평 데이터가 있는 단지의 25평 카드만 /
+// 전체 보기: 34평 대상은 34평 카드, 그 밖의 단지는 기타 평형 카드(seed 시세, 태그 없음), 25평 데이터가 있으면 25평 카드를 추가.
+function buildModeItems(list){
+  const out = [];
+  list.forEach(c => {
+    if (viewMode === '34'){
+      if (in34Set(c)) out.push({ complex: c, price: priceInEok(c) });
+      return;
+    }
+    const h25 = has25Type(c);
+    if (viewMode === 'both'){
+      // seed 시세 자체가 25평대(전용 56~62㎡)이고 25평 카드가 있는 단지는 기타 카드를 만들지 않는다(25평 카드와 중복).
+      const dup25 = !in34Set(c) && h25 && c.exclusiveArea != null && c.exclusiveArea >= 56 && c.exclusiveArea <= 62;
+      if (!dup25) out.push({ complex: in34Set(c) ? derived34(c) : c, price: priceInEok(c) });
+    }
+    if (h25){
+      const d = derived25(c);
+      out.push({ complex: d, price: priceInEok(d) });
+    }
+  });
+  return out.filter(p => p.price != null);
+}
+
 const MAX_TOTAL_SELECTED = 11; // 기준 1 + 비교 10 (계산기 MAX_SLOTS와 동일)
 let baseId = null;
 let compareIds = []; // 클릭 순서 유지
@@ -323,16 +444,35 @@ function selectAsBase(id){
   baseId = id;
 }
 
+// 기준/비교 선택이 바뀌었을 때 그리드 전체를 다시 그리지 않고, 역할이 바뀐 카드(이전·현재 선택 카드)의
+// 클래스와 역할 배지 글자만 갱신한다. 결과 HTML은 cardHtml이 그린 것과 같다(클래스 순서 포함).
+let renderedSelection = [];
+function currentSelectionIds(){ return (baseId ? [baseId] : []).concat(compareIds); }
+function refreshSelectionView(){
+  const wrap = document.getElementById('bandContent');
+  const ids = new Set(renderedSelection.concat(currentSelectionIds()));
+  ids.forEach(id => {
+    const card = wrap.querySelector('.complex-card[data-id="'+CSS.escape(id)+'"]');
+    if (!card) return;
+    const role = roleOf(id);
+    const rest = [...card.classList].filter(x => x !== 'complex-card' && x !== 'role-base' && x !== 'role-compare');
+    card.className = 'complex-card' + (role ? ' role-'+role : '') + (rest.length ? ' '+rest.join(' ') : '');
+    const rb = card.querySelector('.role-badge');
+    if (rb) rb.textContent = role === 'base' ? '기준단지' : role === 'compare' ? '비교단지' : '';
+  });
+  renderedSelection = currentSelectionIds();
+}
+
 function toggleCard(id){
   if (id === baseId){
     baseId = null;
-    renderBandContent(); renderBottomBar();
+    refreshSelectionView(); renderBottomBar();
     return;
   }
   const compareIdx = compareIds.indexOf(id);
   if (compareIdx >= 0){
     compareIds.splice(compareIdx, 1);
-    renderBandContent(); renderBottomBar();
+    refreshSelectionView(); renderBottomBar();
     return;
   }
   if (totalSelectedCount() >= MAX_TOTAL_SELECTED){
@@ -344,27 +484,32 @@ function toggleCard(id){
   } else {
     compareIds.push(id);
   }
-  renderBandContent(); renderBottomBar();
+  refreshSelectionView(); renderBottomBar();
 }
 
 function renderBottomBar(){
   const bar = document.getElementById('bottomBar');
   const chips = [];
+  const suffix = key => isKey25(key) ? ' (25평)' : '';
   if (baseId){
-    const c = ALL.find(x=>x.id===baseId);
-    if (c) chips.push('<span class="chip base">기준: '+esc(displayName(c))+'</span>');
+    const c = ALL.find(x=>x.id===realIdOfKey(baseId));
+    if (c) chips.push('<span class="chip base">기준: '+esc(displayName(c)+suffix(baseId))+'</span>');
   }
   compareIds.forEach(id => {
-    const c = ALL.find(x=>x.id===id);
-    if (c) chips.push('<span class="chip compare">'+esc(displayName(c))+'</span>');
+    const c = ALL.find(x=>x.id===realIdOfKey(id));
+    if (c) chips.push('<span class="chip compare">'+esc(displayName(c)+suffix(id))+'</span>');
   });
+  // 계산기는 아직 25평을 지원하지 않는다 — 25평 카드가 기준·비교에 하나라도 들어 있으면 시세비교를 막는다.
+  const has25Selected = (baseId && isKey25(baseId)) || compareIds.some(isKey25);
   bar.innerHTML = (chips.length ? chips.join('') : '<span class="empty">단지를 클릭해 선택하세요</span>') +
-    '<button id="compareBtn"'+(baseId ? '' : ' disabled')+'>시세비교</button>';
+    (has25Selected
+      ? '<span class="cmp-wrap" title="계산기는 34평 기준"><button id="compareBtn" disabled title="계산기는 34평 기준">시세비교</button></span>'
+      : '<button id="compareBtn"'+(baseId ? '' : ' disabled')+'>시세비교</button>');
   document.getElementById('compareBtn').addEventListener('click', goToCalculator);
 }
 
 function goToCalculator(){
-  if (!baseId) return;
+  if (!baseId || isKey25(baseId) || compareIds.some(isKey25)) return;
   const params = new URLSearchParams();
   params.set('기준단지', baseId);
   if (compareIds.length) params.set('비교단지', compareIds.join(','));
@@ -414,7 +559,8 @@ const REGION_GROUP_LABEL = { seoul: '서울특별시', gyeonggi: '경기도', in
 // 조작에 따라 사라지거나 흔들리지 않게 한다.
 function regionTreeData(){
   const cfg = TAB_CONFIG[activeTab];
-  const priced = ALL.filter(cfg.filter).filter(c => priceInEok(c) != null);
+  // 트리의 구/시 목록·개수도 현재 모드의 카드 기준으로 만든다(34평 모드는 예전과 같은 결과).
+  const priced = buildModeItems(ALL.filter(cfg.filter)).map(p => p.complex);
   const counts = new Map();
   priced.forEach(c => { const k = colKeyOfComplex(c); counts.set(k, (counts.get(k) || 0) + 1); });
   const groups = new Map();
@@ -513,16 +659,19 @@ function initFilterBar(){
     ageYearsEl.disabled = (ageFilterMode === 'none');
     renderBandContent();
   });
+  // 숫자 입력은 키를 누를 때마다 그리드를 다시 그리지 않도록 입력이 멈춘 뒤(250ms) 한 번만 반영한다.
+  let filterTimer = null;
+  const renderSoon = () => { clearTimeout(filterTimer); filterTimer = setTimeout(renderBandContent, 250); };
   ageYearsEl.addEventListener('input', () => {
     const v = parseInt(ageYearsEl.value, 10);
     ageFilterYears = (Number.isFinite(v) && v >= 0) ? v : 0;
-    if (ageFilterMode !== 'none') renderBandContent();
+    if (ageFilterMode !== 'none') renderSoon();
   });
   unitsMinEl.addEventListener('input', () => {
     const raw = unitsMinEl.value.trim();
     const v = parseInt(raw, 10);
     unitsFilterMin = (raw === '' || !Number.isFinite(v) || v <= 0) ? null : v;
-    renderBandContent();
+    renderSoon();
   });
   document.getElementById('filterReset').addEventListener('click', () => {
     ageFilterMode = 'none';
@@ -548,6 +697,42 @@ const TAB_CONFIG = {
 };
 const TAB_KEYS = ['all', 'seoul', 'gyeonggi', 'incheon'];
 let activeTab = 'all';
+
+// 평형 모드 선택 바 — 지역 탭·연식/세대수 필터·구/시 체크박스는 모드와 무관하게 그대로 AND로 적용된다.
+function renderModeBar(statusText, isError){
+  const el = document.getElementById('modeBar');
+  if (!el) return;
+  const busy = seed25State === 'loading';
+  el.innerHTML = '<span class="mode-label">평형:</span><div class="mode-seg">' +
+    ['34', '25', 'both'].map(m => '<button type="button" data-mode="'+m+'" class="'+(viewMode === m ? 'active' : '')+'"'+(busy ? ' disabled' : '')+'>'+MODE_LABEL[m]+'</button>').join('') +
+    '</div><span class="mode-status'+(isError ? ' err' : '')+'" id="modeStatus">'+esc(statusText || '')+'</span>';
+  el.querySelectorAll('button[data-mode]').forEach(btn => btn.addEventListener('click', () => setMode(btn.dataset.mode)));
+}
+
+async function setMode(m){
+  if (m === viewMode || seed25State === 'loading') return;
+  if (m !== '34' && seed25State !== 'loaded'){
+    const loading = loadSeed25(); // 먼저 시작해 상태를 'loading'으로 만든 뒤 표시(로딩 중 모드 버튼 잠금)
+    renderModeBar('⏳ 25평 시세 데이터를 불러오는 중… (약 10MB, 처음 한 번만)', false);
+    try {
+      await loading;
+    } catch (err) {
+      console.error('급지표: 25평 데이터 로드 실패', err);
+      renderModeBar('25평 데이터를 불러오지 못했습니다. seedComplexes25.js가 급지표.html과 같은 폴더에 있는지 확인하세요.', true);
+      return;
+    }
+  }
+  viewMode = m;
+  if (m === '34'){
+    // 34평 화면에는 25평 카드가 없으므로 선택에서도 뺀다
+    if (baseId && isKey25(baseId)) baseId = null;
+    compareIds = compareIds.filter(k => !isKey25(k));
+  }
+  renderModeBar('', false);
+  renderRegionPanel();
+  renderBandContent();
+  renderBottomBar();
+}
 
 function renderTabs(){
   const el = document.getElementById('priceTabs');
@@ -583,40 +768,90 @@ function ageBadgeText(builtYear){
 // 바로 배지를 띄운다. (81~86㎡ 범위는 2026-09 세션에서 장미(1차)/(2차)
 // 82.45㎡, 반포센트레빌아스테리움 82.01㎡처럼 84형과 사실상 같게 보는
 // 경계 사례를 반영해 83~86㎡에서 넓힌 것 — 사용자 확인 완료.)
+// (2026-09-30 세션) 표기 규칙 변경: 전용 81~86㎡ 카드는 배지 없음, 그 밖의 카드는 "○○평 · ○○㎡"
+// (공급평 · 전용㎡ 정수). 공급평이나 전용면적 중 하나가 없으면 있는 쪽만 표시한다.
 function pyeongBadgeText(pyeongType, exclusiveArea){
-  if (pyeongType == null) return null;
-  const maybeStandard = pyeongType >= 31 && pyeongType <= 38;
-  if (maybeStandard && exclusiveArea != null && exclusiveArea >= 81 && exclusiveArea <= 86) return null;
-  return pyeongType + '평';
+  if (exclusiveArea != null && exclusiveArea >= 81 && exclusiveArea <= 86) return null;
+  const parts = [];
+  if (pyeongType != null) parts.push(pyeongType + '평');
+  if (exclusiveArea != null) parts.push(m2Text(exclusiveArea) + '㎡');
+  return parts.length ? parts.join(' · ') : null;
 }
 
 // 갭투자금(2026-09-22 세션) — 매매가-전세가(부대비용 별도). shared.js의
 // getLatestGapInvestment를 재사용해 계산기 화면(saleStatsHtml)과 같은
-// 로직·같은 숫자를 쓴다. priceInEok과 같은 패턴으로 매번 complex.text를
-// 파싱한다(캐싱 없음 — 이 화면 규모에서 병목 아님, 기존 priceInEok도 동일).
-function gapInEok(complex){
-  const rows = window.SharedLib.parseComplexCsv(complex.text);
-  const g = window.SharedLib.getLatestGapInvestment(rows);
-  if (!g) return null;
-  return Math.round(g.gap / 1000) / 10; // 0.1억 단위 반올림
+// 로직·같은 숫자를 쓴다.
+// (2026-09-30 세션) 시세 CSV 파싱 결과에서 화면에 필요한 값(가격·갭·기준월)만 카드 key별로 한 번만 계산해
+// 캐시한다 — 필터·탭·체크박스를 바꿀 때마다 전 단지 CSV를 다시 파싱하던 것이 반응 지연의 주원인이었다.
+// 시세 데이터는 페이지 수명 동안 바뀌지 않으므로 무효화가 필요 없다.
+const CARD_INFO = new Map(); // cardKey -> { price(억), gap(억), saleYm(최신 매매 유효월), lastYm(마지막 행 월) }
+function cardInfo(complex){
+  const key = cardKey(complex);
+  let info = CARD_INFO.get(key);
+  if (!info){
+    const rows = window.SharedLib.parseComplexCsv(complex.text);
+    const priceManwon = window.SharedLib.getLatestSaleMid(rows);
+    const g = window.SharedLib.getLatestGapInvestment(rows);
+    let saleYm = null;
+    for (let i = rows.length - 1; i >= 0; i--) if (rows[i].saleMid != null){ saleYm = rows[i].ym; break; }
+    info = {
+      price: priceManwon == null ? null : Math.round(priceManwon / 1000) / 10, // 0.1억 단위 반올림
+      gap: g ? Math.round(g.gap / 1000) / 10 : null,                           // 0.1억 단위 반올림
+      saleYm,
+      lastYm: rows.length ? rows[rows.length - 1].ym : null
+    };
+    CARD_INFO.set(key, info);
+  }
+  return info;
+}
+function gapInEok(complex){ return cardInfo(complex).gap; }
+
+// 카드 HTML 중 선택 상태(기준/비교)와 무관한 부분(클래스 접미·툴팁·이름·배지)은 카드 key+모드+가격표시 여부별로 캐시한다.
+const CARD_STATIC = new Map();
+function cardHtml(complex, priceLabel){
+  const key = cardKey(complex);
+  const role = roleOf(key);
+  const roleLabel = role === 'base' ? '기준단지' : role === 'compare' ? '비교단지' : '';
+  const sk = key + '|' + viewMode + '|' + (priceLabel != null ? priceLabel : '');
+  let st = CARD_STATIC.get(sk);
+  if (!st){ st = cardStatic(complex, priceLabel, key); CARD_STATIC.set(sk, st); }
+  return '<div class="complex-card'+(role ? ' role-'+role : '')+st.cls+'" data-id="'+esc(key)+'"'+st.title+'>' +
+    st.inner +
+    '<div class="role-badge">'+esc(roleLabel)+'</div>' +
+    '</div>';
 }
 
-function cardHtml(complex, priceLabel){
-  const role = roleOf(complex.id);
-  const roleClass = role ? ' role-'+role : '';
-  const roleLabel = role === 'base' ? '기준단지' : role === 'compare' ? '비교단지' : '';
+function cardStatic(complex, priceLabel, key){
+  const kind = complex._kind || null; // '25' | '34'(전체 보기의 34평 카드) | null(34평 모드 카드·전체 보기의 기타 평형 카드)
+  const clsSuffix = (kind ? ' has-kind' : '') + (kind === '25' && viewMode === 'both' ? ' kind-25' : '');
+  const kindBadge = kind === '25' ? '<span class="badge badge-kind25"'+(complex._e25 ? ' title="대표 전용 '+m2Text(complex._e25.exclusiveM2)+'㎡ · '+(complex._e25.method === '가중평균' ? '세대수 가중평균('+complex._e25.typeCount+'개 타입)' : '최다 세대수 타입('+complex._e25.repUnits+'세대) 기준')+'"' : '')+'>25평</span>'
+    : kind === '34' ? '<span class="badge badge-kind34">34평</span>' : '';
   const ageBadge = '<span class="badge">'+esc(ageBadgeText(complex.builtYear))+'</span>';
   const unitsBadge = '<span class="badge">'+esc(complex.units!=null ? complex.units+'세대' : '정보없음')+'</span>';
   const pyeongText = pyeongBadgeText(complex.pyeongType, complex.exclusiveArea);
-  const pyeongBadge = pyeongText!=null ? '<span class="badge badge-pyeong">'+esc(pyeongText)+'</span>' : '';
+  const pyeongBadge = (pyeongText!=null && kind !== '25') ? '<span class="badge badge-pyeong">'+esc(pyeongText)+'</span>' : '';
+  // 25평 카드: 대표 전용면적 + 시세가 끊긴 단지는 시세 기준월을 표시(최신 25평 데이터 월보다 오래된 경우)
+  let e25Badge = '', cardTitle = '';
+  if (kind === '25' && complex._e25){
+    const e = complex._e25;
+    // 대표 전용면적이 58.00~60.00㎡(25평 표준대)면 배지를 숨긴다 — 그 밖(58 미만/60 초과)일 때만 표시.
+    // 배지를 숨겨도 "25평" 태그의 툴팁에는 대표 전용㎡와 산정 방식이 남는다.
+    if (e.exclusiveM2 < M2_BADGE_HIDE_MIN || e.exclusiveM2 > M2_BADGE_HIDE_MAX){
+      e25Badge = '<span class="badge badge-m2">전용 '+m2Text(e.exclusiveM2)+'㎡</span>';
+    }
+    const ym = cardInfo(complex).saleYm;
+    if (ym != null && SEED25_LATEST_YM != null && ym < SEED25_LATEST_YM) e25Badge += '<span class="badge badge-stale">시세 기준월 '+fmtYm(ym)+'</span>';
+    cardTitle = ' title="25평형(전용 '+m2Text(e.exclusiveM2)+'㎡) · '+(e.method === '가중평균' ? '세대수 가중평균('+e.typeCount+'개 타입)' : '최다 세대수 타입('+e.repUnits+'세대) 기준')+'"';
+  }
   const gapEok = gapInEok(complex);
   const gapBadge = gapEok!=null ? '<span class="badge badge-gap" title="갭투자금(매매가-전세가, 부대비용 별도)">갭 '+gapEok.toFixed(1)+'억</span>' : '';
   const priceBadge = priceLabel!=null ? '<span class="badge badge-price">'+priceLabel.toFixed(1)+'억</span>' : '';
-  return '<div class="complex-card'+roleClass+'" data-id="'+esc(complex.id)+'">' +
-    '<div class="name">'+esc(displayName(complex))+'</div>' +
-    '<div class="badges">'+ageBadge+unitsBadge+pyeongBadge+gapBadge+priceBadge+'</div>' +
-    '<div class="role-badge">'+esc(roleLabel)+'</div>' +
-    '</div>';
+  return {
+    cls: clsSuffix,
+    title: cardTitle,
+    inner: '<div class="name">'+esc(displayName(complex))+'</div>' +
+      '<div class="badges">'+kindBadge+ageBadge+unitsBadge+pyeongBadge+e25Badge+gapBadge+priceBadge+'</div>'
+  };
 }
 
 function wireCardEvents(container){
@@ -629,32 +864,44 @@ function wireCardEvents(container){
   });
 }
 
-function priceInEok(complex){
-  const rows = window.SharedLib.parseComplexCsv(complex.text);
-  const priceManwon = window.SharedLib.getLatestSaleMid(rows);
-  if (priceManwon == null) return null;
-  return Math.round(priceManwon / 1000) / 10; // 0.1억 단위 반올림
-}
+function priceInEok(complex){ return cardInfo(complex).price; }
 
 // 항목1(2026-09 세션) — 40억 이상은 통합 행, 30~40억은 3억 단위,
 // 30억 미만은 기존처럼 0.5억 단위로 묶는다. 30~40억 구간은 정확히
 // 40억에서 끝나야 해서 마지막 구간(39~40억)만 폭이 1억으로 잘린다
 // (사용자 예시와 일치하는 의도된 동작).
-const HIGH_PRICE_THRESHOLD = 40; // 억
-const MID_BAND_START = 30; // 억 — 이 이상 HIGH_PRICE_THRESHOLD 미만은 3억 단위
-const MID_BIN_WIDTH = 3;
-const LOW_BIN_WIDTH = 0.5; // 억 — MID_BAND_START 미만 구간 폭
-
-function binLowFor(price){
-  if (price >= MID_BAND_START){
-    return MID_BAND_START + Math.floor((price - MID_BAND_START) / MID_BIN_WIDTH) * MID_BIN_WIDTH;
-  }
-  const tenths = Math.round(price * 10);
-  return Math.floor(tenths / (LOW_BIN_WIDTH * 10)) * LOW_BIN_WIDTH;
+// (2026-09-29 세션) 가격 구간을 모드별 설정 객체로 분리했다 — 구간을 바꾸려면 이 객체만 고치면 된다.
+//  · highThreshold: 이 가격(억) 이상은 "통합 행" 하나로 묶고(가격 순 정렬, 카드에 "(oo.o억)" 표기)
+//  · segments: start(억) 이상 구간의 묶음 폭(억). 마지막으로 start를 넘은 segment가 적용되고,
+//    폭이 1억 미만이면 0.1억 반올림 후 폭 단위로, 1억 이상이면 start 기준으로 나눈다.
+//    구간 끝은 highThreshold를 넘지 않게 잘린다(34평: 39~40억, 25평: 28~30억).
+// 34평: 40억 이상 통합 / 30~40억 3억 단위 / 30억 미만 0.5억 단위(2026-09 세션 항목1, 현행 유지)
+// 25평: 30억 이상 통합 / 20~30억 2억 단위 / 8~20억 1억 단위 / 8억 미만 0.5억 단위
+// 전체 보기: 34평과 같은 구간(같은 가격 축에 두 평형을 올리므로 현행 34평 구간 그대로)
+const PRICE_BIN_CONFIG_34 = { highThreshold: 40, segments: [ { start: 0, width: 0.5 }, { start: 30, width: 3 } ] };
+const PRICE_BIN_CONFIGS = {
+  '34': PRICE_BIN_CONFIG_34,
+  '25': { highThreshold: 30, segments: [ { start: 0, width: 0.5 }, { start: 8, width: 1 }, { start: 20, width: 2 } ] },
+  'both': PRICE_BIN_CONFIG_34
+};
+function binConfig(){ return PRICE_BIN_CONFIGS[viewMode] || PRICE_BIN_CONFIG_34; }
+function segmentFor(price, cfg){
+  let seg = cfg.segments[0];
+  cfg.segments.forEach(s => { if (price >= s.start) seg = s; });
+  return seg;
 }
-function binHighFor(binLow){
-  if (binLow >= MID_BAND_START) return Math.min(binLow + MID_BIN_WIDTH, HIGH_PRICE_THRESHOLD);
-  return binLow + LOW_BIN_WIDTH;
+
+function binLowFor(price, cfg){
+  const seg = segmentFor(price, cfg);
+  if (seg.width < 1){
+    const tenths = Math.round(price * 10);
+    return Math.floor(tenths / (seg.width * 10)) * seg.width;
+  }
+  return seg.start + Math.floor((price - seg.start) / seg.width) * seg.width;
+}
+function binHighFor(binLow, cfg){
+  const seg = segmentFor(binLow, cfg);
+  return Math.min(binLow + seg.width, cfg.highThreshold);
 }
 function fmtBin(binLow, binHigh){
   return binLow.toFixed(1) + '~' + binHigh.toFixed(1) + '억';
@@ -672,9 +919,7 @@ function renderPriceRowGrid(content, regionFilterFn, showRegionLabel){
   const inRegion = ALL.filter(regionFilterFn);
   // 구/시 체크박스에서 해제된 컬럼의 단지는 여기서 함께 걸러낸다 — 그래야 40억 이상
   // 통합행/가격대 행 집계에도 안 잡히고, 숨긴 컬럼만 있던 가격대 행은 사라진다.
-  const priced = inRegion
-    .map(c => ({ complex: c, price: priceInEok(c) }))
-    .filter(p => p.price != null)
+  const priced = buildModeItems(inRegion)
     .filter(p => !hiddenCols.has(colKeyOfComplex(p.complex)));
 
   if (!priced.length){
@@ -692,12 +937,13 @@ function renderPriceRowGrid(content, regionFilterFn, showRegionLabel){
   // 전부 숨겨지면 경기의 첫 보이는 컬럼이 구분선을 받아야 함).
   { const seen = new Set(); cols.forEach(col => { col.regionStart = !seen.has(col.region); seen.add(col.region); }); }
 
-  const high = priced.filter(p => p.price >= HIGH_PRICE_THRESHOLD).sort(sortByPriceDesc);
-  const normal = priced.filter(p => p.price < HIGH_PRICE_THRESHOLD);
+  const bcfg = binConfig();
+  const high = priced.filter(p => p.price >= bcfg.highThreshold).sort(sortByPriceDesc);
+  const normal = priced.filter(p => p.price < bcfg.highThreshold);
 
   const binMap = new Map(); // binLow -> [{complex, price}]
   normal.forEach(p => {
-    const binLow = binLowFor(p.price);
+    const binLow = binLowFor(p.price, bcfg);
     if (!binMap.has(binLow)) binMap.set(binLow, []);
     binMap.get(binLow).push(p);
   });
@@ -712,7 +958,7 @@ function renderPriceRowGrid(content, regionFilterFn, showRegionLabel){
   html += '</tr></thead><tbody>';
 
   if (high.length){
-    html += '<tr><th class="band-high">'+HIGH_PRICE_THRESHOLD+'억 이상</th>';
+    html += '<tr><th class="band-high">'+bcfg.highThreshold+'억 이상</th>';
     cols.forEach(col => {
       const entries = entriesInCol(high, col);
       const cls = col.regionStart ? ' class="region-start"' : '';
@@ -722,7 +968,7 @@ function renderPriceRowGrid(content, regionFilterFn, showRegionLabel){
   }
 
   bins.forEach(binLow => {
-    const binHigh = binHighFor(binLow);
+    const binHigh = binHighFor(binLow, bcfg);
     const list = binMap.get(binLow);
     html += '<tr><th>'+fmtBin(binLow, binHigh)+'</th>';
     cols.forEach(col => {
@@ -744,7 +990,7 @@ function scrollToAnchorComplex(){
   didInitialScroll = true;
   const anchor = ALL.find(c => c.name === '잠실엘스');
   if (!anchor) return;
-  const card = document.querySelector('.complex-card[data-id="'+CSS.escape(anchor.id)+'"]');
+  const card = document.querySelector('.complex-card[data-id="'+CSS.escape(anchor.id)+'"]') || document.querySelector('.complex-card[data-id="'+CSS.escape('25:'+anchor.id)+'"]');
   const wrap = document.querySelector('.all-grid-wrap');
   if (!card || !wrap) return;
   // scrollIntoView({block:'center'})는 sticky thead가 차지하는 영역까지
@@ -769,6 +1015,7 @@ function renderBandContent(){
   const newWrap = content.querySelector('.all-grid-wrap');
   if (newWrap) { newWrap.scrollLeft = savedScrollLeft; newWrap.scrollTop = savedScrollTop; }
   wireCardEvents(content);
+  renderedSelection = currentSelectionIds(); // 전체 재렌더 시점의 선택 상태(refreshSelectionView의 기준)
   if (activeTab === 'all'){
     // 페이지 최초 로드 시 100vh 기반 max-height(.all-grid-wrap)가 첫 렌더
     // 프레임에는 아직 최종값으로 반영되지 않을 수 있어, 두 프레임 뒤로
@@ -788,7 +1035,7 @@ function showContextMenu(x, y, id){
   menu.querySelector('#ctxMakeBase').addEventListener('click', () => {
     selectAsBase(id);
     closeContextMenu();
-    renderBandContent(); renderBottomBar();
+    refreshSelectionView(); renderBottomBar();
   });
   setTimeout(() => document.addEventListener('click', closeContextMenu, { once:true }), 0);
 }
@@ -808,9 +1055,8 @@ function renderDataMonth(){
   // 별도의 "기준월" 필드가 없어서 매번 스캔하지만, 1200개 규모에서도 비용이 미미하다.
   let latestYm = null;
   ALL.forEach(c => {
-    const rows = window.SharedLib.parseComplexCsv(c.text);
-    if (!rows.length) return;
-    const last = rows[rows.length - 1].ym;
+    const last = cardInfo(c).lastYm; // 파싱 결과는 캐시되어 첫 그리드 렌더에서 재사용된다
+    if (last == null) return;
     if (latestYm == null || last > latestYm) latestYm = last;
   });
   const el = document.getElementById('dataMonth');
@@ -833,6 +1079,7 @@ function init(){
       return;
     }
     renderDataMonth();
+    renderModeBar('', false);
     renderTabs();
     initFilterBar();
     renderRegionPanel();
