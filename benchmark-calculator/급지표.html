@@ -132,8 +132,6 @@
   .complex-card.has-kind .badges{ flex-wrap:wrap; row-gap:2px; }
   .complex-card.role-base.kind-25{ border-color:var(--base-color); }
   .complex-card.role-compare.kind-25{ border-color:var(--compare-color); }
-  .bottom-bar button:disabled[title]{ cursor:not-allowed; }
-  .bottom-bar .cmp-wrap{ margin-left:auto; cursor:not-allowed; }
 </style>
 
 <div class="header">
@@ -499,20 +497,19 @@ function renderBottomBar(){
     const c = ALL.find(x=>x.id===realIdOfKey(id));
     if (c) chips.push('<span class="chip compare">'+esc(displayName(c)+suffix(id))+'</span>');
   });
-  // 계산기는 아직 25평을 지원하지 않는다 — 25평 카드가 기준·비교에 하나라도 들어 있으면 시세비교를 막는다.
-  const has25Selected = (baseId && isKey25(baseId)) || compareIds.some(isKey25);
+  // (2026-09-30) 계산기가 25평을 지원하므로 25평 카드도 시세비교로 넘긴다. 25평·34평이 섞여도 막지 않는다.
   bar.innerHTML = (chips.length ? chips.join('') : '<span class="empty">단지를 클릭해 선택하세요</span>') +
-    (has25Selected
-      ? '<span class="cmp-wrap" title="계산기는 34평 기준"><button id="compareBtn" disabled title="계산기는 34평 기준">시세비교</button></span>'
-      : '<button id="compareBtn"'+(baseId ? '' : ' disabled')+'>시세비교</button>');
+    '<button id="compareBtn"'+(baseId ? '' : ' disabled')+'>시세비교</button>';
   document.getElementById('compareBtn').addEventListener('click', goToCalculator);
 }
 
+// 계산기 URL: 34평 카드는 기존과 같은 id 그대로, 25평 카드는 비교단지에 "id:25", 기준단지면 기준평형=25를 붙인다.
 function goToCalculator(){
-  if (!baseId || isKey25(baseId) || compareIds.some(isKey25)) return;
+  if (!baseId) return;
   const params = new URLSearchParams();
-  params.set('기준단지', baseId);
-  if (compareIds.length) params.set('비교단지', compareIds.join(','));
+  params.set('기준단지', realIdOfKey(baseId));
+  if (isKey25(baseId)) params.set('기준평형', '25');
+  if (compareIds.length) params.set('비교단지', compareIds.map(k => isKey25(k) ? realIdOfKey(k) + ':25' : k).join(','));
   window.location.href = '벤치마크_배율_계산기.html?' + params.toString();
 }
 
