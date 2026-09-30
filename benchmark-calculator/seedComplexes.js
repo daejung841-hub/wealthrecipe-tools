@@ -105981,7 +105981,7 @@ window.SEED_COMPLEXES = [
     dong: "송도동",
     builtYear: 2016,
     builtMonth: 3,
-    complexId: "27877",
+    complexId: "27067",
     rentalHouseholds: 0,
     units: 1230,
     pyeongType: 36,
