@@ -1125,6 +1125,7 @@ footer{margin-top:36px;color:var(--ink-faint);font-size:12px;text-align:center;}
               <button class="btn small fair-cta" id="ratioPeakToggle">📈 최고점 표시(전세가율)</button>
               <button class="btn small fair-cta" id="ratioTroughToggle">📉 최저점 표시(전세가율)</button>
               <button class="btn small fair-cta" id="benchmarkOverlayToggle">🏙️ 선도단지 표시</button>
+              <button class="btn small fair-cta" id="fairCompAlsoToggle" style="display:none" title="선도단지 대비 적정가에 더해, 고른 기준단지 대비 적정가도 같은 점선으로(연한 색) 함께 봅니다">(비교단지 대비 적정가도 보기)</button>
               <span class="info-icon info-icon-lead" tabindex="0"><span class="info-tip-html">
                 <div class="tip-sec"><b>선도단지란?</b>선도단지는 서울에서 가장 먼저 움직이며, 서울 전체 흐름을 대표하는 단지들을 묶어놓은 기준선입니다.</div>
                 <div class="tip-sec"><b>왜 필요한가요?</b>부동산 시장은 모든 단지가 동시에 오르지 않습니다. 자금과 관심이 먼저 몰리는 곳이 먼저 움직이고, 그 흐름이 시차를 두고 주변 단지로 번져갑니다. 선도단지는 이 흐름의 출발점 역할을 하는 기준점입니다.</div>
@@ -5078,11 +5079,15 @@ function serializeSlotForSave(s){
   if (!ref) return s; // 직접 넣은 데이터(엑셀 업로드 등)는 text째 저장한다
   return { id: ref.id, pyeong: ref.pyeong, name: s.name, visible: s.visible };
 }
+// 급지표 주소로 들어와 이번 방문에만 "여러 단지 비교"를 첫 탭으로 보여주는 동안(applyUrlParams)은 저장하는 topMode를 원래 값으로 둔다.
+// 사용자가 다른 탭으로 옮기면(setTopMode) 그때부터는 평소처럼 현재 탭이 저장된다.
+let urlTopModeTransient = false, urlTopModeBefore = null;
 function serializeStateObject(){
   const out = Object.assign({}, state, {
     library: serializeLibraryForSave(state.library),
     compares: state.compares.map(serializeSlotForSave)
   });
+  if (urlTopModeTransient) out.topMode = urlTopModeBefore;
   delete out.baseId; delete out.basePyeong; delete out.basePending25;
   const baseRef = baseIsVirtualPreset() ? null : slotRef(baseSlot(), false);
   if (baseRef){ out.baseText = ''; out.baseRef = { id: baseRef.id, pyeong: baseRef.pyeong }; }
@@ -6760,6 +6765,7 @@ function renderSingleActiveChart(bench, target){
 }
 function setTopMode(mode){
   state.topMode = mode;
+  if (urlTopModeTransient && mode !== 'multi') urlTopModeTransient = false; // 주소로 들어온 탭을 벗어남 — 이후엔 평소처럼 저장
   document.querySelectorAll('#topModeTabs .top-mode-btn').forEach(b=>{
     b.classList.toggle('active', b.dataset.topMode===mode);
   });
@@ -7485,9 +7491,40 @@ function updateBenchmarkOverlayToggle(){
   btn.textContent = state.benchmarkOverlayOn ? '🏙️ 선도단지 표시 중 (끄기)' : '🏙️ 선도단지 표시';
   sel.value = state.benchmarkOverlayGroup;
 }
+// "(비교단지 대비 적정가도 보기)" — 선도단지 대비 적정가가 그려지는 중(가격 그래프 + 적정가 켬 + 선도단지 표시가 실제로 쓰임)에만 보인다.
+function updateFairCompAlsoToggle(base){
+  const btn = document.getElementById('fairCompAlsoToggle');
+  if (!btn) return;
+  const isPrice = state.activeChart==='sale' || state.activeChart==='jeonse';
+  const overlay = state.benchmarkOverlayOn ? getVirtualBenchmarkComplex(state.benchmarkOverlayGroup) : null;
+  const usable = !!overlay && !(base && base.isVirtualBenchmark && base.groupKey===overlay.groupKey);
+  const fairOn = effectiveFairLine();
+  btn.style.display = (isPrice && fairOn && usable) ? '' : 'none';
+  btn.classList.toggle('active', fairCompAlsoOn);
+  btn.textContent = fairCompAlsoOn ? '(비교단지 대비 적정가도 보기 ✓)' : '(비교단지 대비 적정가도 보기)';
+}
 
 function chartFontColor(){ return cssVar('--ink-muted'); }
 function chartGridColor(){ return cssVar('--border'); }
+
+// ---- 적정가 선의 스타일·이름 (2026-10 세션) ----
+// 선도단지 대비 적정가도, 비교단지 대비 적정가도 같은 점선(굵기 1.5, 긴 점선 5-4, 마커 없음)으로 그린다. 예전엔 선도단지 대비 선이
+// 짧은 점-선 패턴(3,2,1,2)이라 1px 점이 좁쌀처럼 보였다. 이름은 범례·툴팁이 모두 dataset.label에서 오므로 아래 한 곳의 문자열만 쓴다.
+const FAIR_LINE_STYLE = { borderWidth: 1.5, borderDash: [5, 4], pointRadius: 0 };
+const FAIR_BASIS_LABELS = { bench: '선도단지 대비 적정가', comp: '비교단지 대비 적정가' };
+function fairLineLabel(name, basis){ return name + ' ' + FAIR_BASIS_LABELS[basis]; }
+// "(비교단지 대비 적정가도 보기)"로 추가하는 선의 색 — 'tint' = 슬롯 색과 같은 계열의 밝은 색, 'distinct' = 별도 고정색(보라)
+const FAIR_COMP_EXTRA_COLOR_MODE = 'tint';
+const FAIR_COMP_EXTRA_DISTINCT = '#7C3AED';
+function fairExtraColor(slotColor, mode){
+  if ((mode || FAIR_COMP_EXTRA_COLOR_MODE) === 'distinct') return FAIR_COMP_EXTRA_DISTINCT;
+  const m = /^#([0-9a-f]{6})$/i.exec(String(slotColor || '').trim());
+  if (!m) return slotColor;
+  const n = parseInt(m[1], 16), mix = (c) => Math.round(c + (255 - c) * 0.5);
+  return '#' + [(n >> 16) & 255, (n >> 8) & 255, n & 255].map(c => mix(c).toString(16).padStart(2, '0')).join('');
+}
+// 선도단지 표시 + 적정가가 켜진 가격 그래프에서 "(비교단지 대비 적정가도 보기)" 토글 — 저장하지 않는 화면 상태(새로고침하면 꺼짐)
+let fairCompAlsoOn = false;
 
 // 적정가 표시는 "적정가 확인하기"(showFair) 토글 하나로 통일한다 — 어떤
 // 종류의 적정가를 보여줄지는 "선도단지 표시" 여부(benchmarkUsable)가 자동으로
@@ -7495,7 +7532,7 @@ function chartGridColor(){ return cssVar('--border'); }
 // 기준단지 대비 적정가만 그린다. 예전엔 이 둘이 fairLineOverride/benchFairOn
 // 두 개의 독립된 토글이라 동시에 켜지면 comp마다 점선이 2개씩 겹쳐 그려지는
 // 문제가 있었다.
-function priceChartConfig(base, comps, field, ratioField, showFair, benchmarkOverlay){
+function priceChartConfig(base, comps, field, ratioField, showFair, benchmarkOverlay, opts){
   const allYms = new Set(base.rows.map(r=>r.ym));
   comps.forEach(({c}) => c.rows.forEach(r=>allYms.add(r.ym)));
   if (benchmarkOverlay) benchmarkOverlay.rows.forEach(r=>allYms.add(r.ym));
@@ -7522,9 +7559,9 @@ function priceChartConfig(base, comps, field, ratioField, showFair, benchmarkOve
       const baseAvgRatio = rBase.error ? null : (ratioField==='sale' ? rBase.avgSaleRatio : rBase.avgJeonseRatio);
       if (baseAvgRatio!=null){
         datasets.push({
-          label: (base.name||'기준단지')+' 선도단지대비 적정가', _kind:'benchFair',
+          label: fairLineLabel(base.name||'기준단지', 'bench'), _kind:'benchFair',
           data: labels.map(ym => benchmarkOverlay.rowMap.get(ym) ? benchmarkOverlay.rowMap.get(ym)[field]*baseAvgRatio/100 : null),
-          borderColor: cssVar('--series-base'), backgroundColor: cssVar('--series-base'), borderWidth: 1.5, borderDash:[3,2,1,2], pointRadius:0, tension:.15, spanGaps:false
+          borderColor: cssVar('--series-base'), backgroundColor: cssVar('--series-base'), ...FAIR_LINE_STYLE, tension:.15, spanGaps:false
         });
       }
     }
@@ -7540,19 +7577,24 @@ function priceChartConfig(base, comps, field, ratioField, showFair, benchmarkOve
       const benchAvgRatio = rBench.error ? null : (ratioField==='sale' ? rBench.avgSaleRatio : rBench.avgJeonseRatio);
       if (benchAvgRatio!=null){
         datasets.push({
-          label: c.name+' 선도단지대비 적정가', _kind:'benchFair',
+          label: fairLineLabel(c.name, 'bench'), _kind:'benchFair',
           data: labels.map(ym => benchmarkOverlay.rowMap.get(ym) ? benchmarkOverlay.rowMap.get(ym)[field]*benchAvgRatio/100 : null),
-          borderColor: color, backgroundColor: color, borderWidth: 1.5, borderDash:[3,2,1,2], pointRadius:0, tension:.15, spanGaps:false
+          borderColor: color, backgroundColor: color, ...FAIR_LINE_STYLE, tension:.15, spanGaps:false
         });
       }
-    } else if (showFair){
+    }
+    // 선도단지 표시를 켠 상태에서는 비교단지 대비 적정가를 기본으로 숨긴다 — "(비교단지 대비 적정가도 보기)"를 켜면 같은 점선에 색만 달리해 추가
+    const compFairWanted = showFair && (!benchmarkUsable || (opts && opts.compFairToo && !base.isVirtualBenchmark));
+    if (compFairWanted){
       const r = computeSlot(base, c);
       const avgRatio = r.error ? null : (ratioField==='sale' ? r.avgSaleRatio : r.avgJeonseRatio);
       if (avgRatio!=null){
+        const lineColor = benchmarkUsable ? fairExtraColor(color) : color;
         datasets.push({
-          label: c.name+' 적정가', _kind:'fair',
+          // 선도단지 그룹을 기준으로 그린 경우(기준이 가상 선도단지 자체)는 "선도단지 대비", 그 밖엔 사용자가 고른 기준단지 대비다
+          label: fairLineLabel(c.name, base.isVirtualBenchmark ? 'bench' : 'comp'), _kind:'fair',
           data: labels.map(ym => base.rowMap.get(ym) ? base.rowMap.get(ym)[field]*avgRatio/100 : null),
-          borderColor: color, backgroundColor: color, borderWidth: 1.5, borderDash:[5,4], pointRadius:0, tension:.15, spanGaps:false
+          borderColor: lineColor, backgroundColor: lineColor, ...FAIR_LINE_STYLE, tension:.15, spanGaps:false
         });
       }
     }
@@ -8194,6 +8236,7 @@ function renderActiveChart(base){
   updateRatioPeakToggle();
   updateRatioTroughToggle();
   updateBenchmarkOverlayToggle();
+  updateFairCompAlsoToggle(base);
   const fairNoteEl = document.getElementById('fairOutlookNote');
   if (fairNoteEl) fairNoteEl.innerHTML = '';
   if (!base.rows.length){
@@ -8228,7 +8271,7 @@ function renderActiveChart(base){
     const showFair = effectiveFairLine(comps.length);
     const benchmarkOverlay = state.benchmarkOverlayOn ? getVirtualBenchmarkComplex(state.benchmarkOverlayGroup) : null;
     const benchmarkUsable = benchmarkOverlay && !(base.isVirtualBenchmark && base.groupKey===benchmarkOverlay.groupKey);
-    const cfg = priceChartConfig(base, comps, field, ratioField, showFair, benchmarkOverlay);
+    const cfg = priceChartConfig(base, comps, field, ratioField, showFair, benchmarkOverlay, { compFairToo: fairCompAlsoOn });
     charts.mainCanvas = new Chart(document.getElementById('mainCanvas'), cfg);
     if (fairNoteEl) fairNoteEl.innerHTML = buildFairOutlookNote(base, comps, ratioField, showFair, benchmarkUsable);
     document.getElementById('recentTable').innerHTML = buildRecentTable(base, comps, field, ratioField, benchmarkOverlay);
@@ -8393,6 +8436,10 @@ function wireStaticEvents(){
   document.getElementById('ratioTroughToggle').addEventListener('click', ()=>{
     state.ratioTroughOn = !state.ratioTroughOn;
     saveState(); render();
+  });
+  document.getElementById('fairCompAlsoToggle').addEventListener('click', ()=>{
+    fairCompAlsoOn = !fairCompAlsoOn; // 저장하지 않는다(새로고침하면 꺼짐)
+    render();
   });
   document.getElementById('benchmarkOverlayToggle').addEventListener('click', ()=>{
     state.benchmarkOverlayOn = !state.benchmarkOverlayOn;
@@ -8611,16 +8658,18 @@ function findLibraryEntryById(id){
       || null;
 }
 
+// 반환: 주소의 단지를 실제로 적용했으면 true(시작 탭을 "여러 단지 비교"로 바꾸는 근거), 파라미터 없음·단지 못 찾음·확인 창 취소는 false.
+// 적용에 성공하면 이번 방문에만 "여러 단지 비교"를 보여주고, 저장되는 탭(state.topMode)은 원래 값으로 둔다(urlTopModeTransient).
 function applyUrlParams(){
   const params = new URLSearchParams(window.location.search);
   const baseId = params.get('기준단지');
   const compareIdsRaw = params.get('비교단지');
-  if (!baseId) return;
+  if (!baseId) return false;
 
   const baseEntry = findLibraryEntryById(baseId);
   if (!baseEntry){
     console.warn('applyUrlParams: 기준단지 id를 찾을 수 없습니다:', baseId);
-    return;
+    return false;
   }
 
   // 평형(2026-09-30, 2-4): 기준평형=25, 비교단지=id:25,id2:34,id3 — 없으면 34(기존 링크 그대로).
@@ -8631,7 +8680,7 @@ function applyUrlParams(){
   const compareLabels = compareSpecs.map(sp => { const e = findLibraryEntryById(sp.id); return e ? specLabel(e, sp.id, sp.pyeong) : null; }).filter(Boolean);
   if (!confirm('급지표에서 선택한 단지로 기준/비교단지를 채웁니다.\n기준: '+specLabel(baseEntry, baseId, basePyeongReq)+
     (compareLabels.length ? '\n비교: '+compareLabels.join(', ') : '')+
-    '\n현재 입력된 내용은 대체됩니다. 계속할까요?')) return;
+    '\n현재 입력된 내용은 대체됩니다. 계속할까요?')) return false;
 
   const want25 = (id, p, name) => {
     if (p !== 25) return false;
@@ -8656,14 +8705,19 @@ function applyUrlParams(){
       : { text: entry.text, name: entry.name, visible: true };
   });
   usingSeed = false;
+  // 급지표에서 넘어온 링크는 "여러 단지 비교"가 첫 탭이다. 다만 이 탭 전환은 이번 방문에만 쓰고 저장하지 않는다 —
+  // 저장되는 topMode는 주소로 들어오기 전 값을 유지해서, 이후 주소 없는 직접 진입의 첫 탭이 달라지지 않게 한다.
+  urlTopModeBefore = state.topMode || 'single';
+  urlTopModeTransient = true;
   saveState();
+  return true;
 }
 
 loadState();
-applyUrlParams();
+const urlApplied = applyUrlParams();
 resumePendingPyeong(); // 저장·URL로 들어온 25평 슬롯이 있으면 25평 시세를 불러와 채운다
 wireStaticEvents();
-setTopMode(state.topMode || 'single');
+setTopMode(urlApplied ? 'multi' : (state.topMode || 'single'));
 // 항목 1(2026-09-21 세션, 다크모드 토글 작업 중 발견) — 여기서 항상
 // render()(다중비교 전용, renderActiveChart 안에서 그 시점에 등록된 모든
 // Chart.js 인스턴스를 무조건 파괴함)를 불렀는데, topMode가 'single'로
