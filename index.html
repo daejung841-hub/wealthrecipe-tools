@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>투자 도구 모음</title>
+<title>부의 레시피 LAB</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@600;700&family=Noto+Sans+KR:wght@400;500;700&family=JetBrains+Mono:wght@400;500;600&display=swap">
 <script src="config.js"></script>
@@ -78,6 +78,31 @@ button{cursor:pointer;}
 .tool-card .badge{display:inline-block;margin-top:12px;padding:3px 10px;border-radius:999px;font-size:11px;font-weight:700;background:var(--good-bg);color:var(--good);}
 .tool-card.disabled{opacity:.5;cursor:not-allowed;pointer-events:none;}
 .tool-card.disabled .badge{background:var(--neutral-bg);color:var(--ink-faint);}
+
+body{background:var(--bg);}
+.hero{position:relative;overflow:hidden;border-radius:18px;padding:40px clamp(22px,4vw,44px) 34px;margin:6px 0 28px;color:#fff;
+  background:radial-gradient(900px 300px at 85% -20%, rgba(255,255,255,.18), transparent 60%),linear-gradient(135deg,#0A3F4A 0%,#0E5C6B 55%,#1B8A86 100%);box-shadow:var(--shadow);}
+:root[data-theme="dark"] .hero{background:radial-gradient(900px 300px at 85% -20%, rgba(79,186,198,.18), transparent 60%),linear-gradient(135deg,#0F2A31 0%,#14424B 55%,#1B5F62 100%);}
+.hero .eyebrow{display:inline-block;font-size:11.5px;letter-spacing:.14em;font-weight:700;padding:4px 11px;border-radius:999px;background:rgba(255,255,255,.16);margin-bottom:14px;}
+.hero h1{font-size:clamp(30px,5.2vw,46px);line-height:1.15;font-weight:700;letter-spacing:-.02em;}
+.hero h1 small{display:block;font-family:var(--font-body);font-size:clamp(14px,2vw,17px);font-weight:500;opacity:.88;letter-spacing:0;margin-top:10px;}
+.hero .tagline{margin:16px 0 0;font-size:13.5px;opacity:.82;max-width:520px;}
+.hero .theme{position:absolute;top:16px;right:16px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.35);color:#fff;padding:7px 13px;border-radius:8px;font-size:12px;}
+.hero .theme:hover{background:rgba(255,255,255,.26);}
+.hero .deco{position:absolute;right:-30px;bottom:-40px;font-size:150px;opacity:.09;transform:rotate(-12deg);pointer-events:none;user-select:none;}
+.sec-title{font-family:var(--font-display);font-size:15px;color:var(--ink-muted);margin:0 0 12px;letter-spacing:.02em;}
+.tool-card{--c:var(--accent);--cs:var(--accent-soft);padding:22px 20px 18px;border-top:3px solid var(--c);}
+.tool-card .ico{width:42px;height:42px;border-radius:11px;background:var(--cs);display:grid;place-items:center;font-size:21px;margin-bottom:14px;}
+.tool-card:hover{box-shadow:0 10px 24px -12px var(--c);}
+.tool-card .go{float:right;margin-top:12px;color:var(--c);font-weight:700;font-size:13px;transition:transform .12s;}
+.tool-card:hover .go{transform:translateX(3px);}
+.tool-card .badge{background:var(--cs);color:var(--c);}
+.tool-card.c1{--c:#0E5C6B;--cs:#E4F0F1;} .tool-card.c2{--c:#B7791F;--cs:#FBF0DC;}
+.tool-card.c3{--c:#2F6FB5;--cs:#E6EFFA;} .tool-card.c4{--c:#7A4FB0;--cs:#F0E9F8;}
+:root[data-theme="dark"] .tool-card.c1{--c:#4FBAC6;--cs:#193338;} :root[data-theme="dark"] .tool-card.c2{--c:#E3B25A;--cs:#3A2E15;}
+:root[data-theme="dark"] .tool-card.c3{--c:#79AEEA;--cs:#1B2B40;} :root[data-theme="dark"] .tool-card.c4{--c:#B995E3;--cs:#2A2038;}
+.tool-card.disabled{border-top-color:var(--border-strong);}
+.footer{margin-top:34px;text-align:center;color:var(--ink-faint);font-size:12px;}
 [hidden]{display:none !important;}
 </style>
 </head>
@@ -95,45 +120,32 @@ button{cursor:pointer;}
   </div>
 
   <div id="mainScreen" hidden>
-    <div class="topbar">
-      <div>
-        <h1>투자 도구 모음</h1>
-        <div class="sub">재개발·재건축 투자 분석용 계산기 모음입니다</div>
-      </div>
-      <button class="btn" id="themeToggle" type="button">다크모드</button>
-    </div>
-
+    <section class="hero">
+      <button class="btn theme" id="themeToggle" type="button">다크모드</button>
+      <span class="eyebrow">WEALTH RECIPE LAB</span>
+      <h1 id="hTitle">부의 레시피 LAB<small id="hSub">데이터로 읽는 저평가</small></h1>
+      <p class="tagline">재개발·아파트 저평가 단지를 숫자로 찾고, 급지와 사업성까지 한 곳에서 확인하세요.</p>
+      <div class="deco">🍳</div>
+    </section>
+    <h2 class="sec-title">도구 바로가기</h2>
     <div class="card-grid">
-      <a class="tool-card" href="benchmark-calculator/벤치마크_배율_계산기.html">
-        <h3>저평가 단지 계산기</h3>
-        <p>대장 단지 대비 매매·전세 배율로 이론적 성장가를 역산해 저평가·고평가 단지를 진단합니다.</p>
-        <span class="badge">바로가기</span>
-      </a>
-
-      <a class="tool-card" href="rate-simulator/비례율_시뮬레이터.html">
-        <h3>추가분담금 / 비례율 계산기</h3>
-        <p>공사비·분양가 변경이 비례율과 추가분담금에 미치는 영향을 계산합니다.</p>
-        <span class="badge">바로가기</span>
-      </a>
-
-      <a class="tool-card" href="benchmark-calculator/급지표.html">
-        <h3>급지표</h3>
-        <p>가격대별 단지를 지역·구간별로 한눈에 훑어보고, 계산기로 바로 넘길 수 있습니다.</p>
-        <span class="badge">바로가기</span>
-      </a>
-
-      <a class="tool-card" href="redevelopment-list/재개발_목록표.html">
-        <h3>재개발 목록표</h3>
-        <p>서울 재개발 구역의 단계·일반분양비율·사업성등급을 한눈에 볼 수 있습니다.</p>
-        <span class="badge">바로가기</span>
-      </a>
-
-      <div class="tool-card disabled">
-        <h3>시세보정 계산기</h3>
-        <p>시점·층·향 등 개별 요인을 반영해 시세를 보정하는 도구를 준비 중입니다.</p>
-        <span class="badge">준비중</span>
-      </div>
+      <a class="tool-card c1" href="benchmark-calculator/벤치마크_배율_계산기.html"><div class="ico">📈</div>
+        <h3>저평가 단지 계산기</h3><p>대장 단지 대비 매매·전세 배율로 이론적 성장가를 역산해 저평가·고평가 단지를 진단합니다.</p>
+        <span class="badge">바로가기</span><span class="go">→</span></a>
+      <a class="tool-card c3" href="benchmark-calculator/급지표.html"><div class="ico">🗂️</div>
+        <h3>급지표</h3><p>가격대별 단지를 지역·구간별로 한눈에 훑어보고, 계산기로 바로 넘길 수 있습니다.</p>
+        <span class="badge">바로가기</span><span class="go">→</span></a>
+      <a class="tool-card c4" href="redevelopment-list/재개발_목록표.html"><div class="ico">🏗️</div>
+        <h3>재개발 목록표</h3><p>서울 재개발 구역의 단계·일반분양비율·사업성등급을 한눈에 볼 수 있습니다.</p>
+        <span class="badge">바로가기</span><span class="go">→</span></a>
+      <a class="tool-card c2" href="rate-simulator/비례율_시뮬레이터.html"><div class="ico">🧮</div>
+        <h3>추가분담금 / 비례율 계산기</h3><p>공사비·분양가 변경이 비례율과 추가분담금에 미치는 영향을 계산합니다.</p>
+        <span class="badge">바로가기</span><span class="go">→</span></a>
+      <div class="tool-card disabled"><div class="ico">🛠️</div>
+        <h3>시세보정 계산기</h3><p>시점·층·향 등 개별 요인을 반영해 시세를 보정하는 도구를 준비 중입니다.</p>
+        <span class="badge">준비중</span></div>
     </div>
+    <div class="footer">부의 레시피 LAB · 투자 판단의 참고용 도구이며 결과에 대한 책임은 본인에게 있습니다</div>
   </div>
 
 </div>
@@ -172,6 +184,7 @@ button{cursor:pointer;}
       input.focus();
     }
   });
+
 })();
 </script>
 </body>
