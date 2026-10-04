@@ -361,6 +361,35 @@ button.pyeong-chip{font:inherit;font-size:11.5px;}
    전체 컨테이너 폭을 1100px대→1500px로 넓혀 시세표·그래프가 더 넓게 보이게 한다. */
 .single-diag-wrap{max-width:1500px;margin:0 auto;}
 .single-search-wrap{margin-bottom:18px;}
+/* 묶음 L16(18단계): 최근 본 단지 — 넓은 화면(1101px 이상)은 단일 진단 왼쪽 칸, 좁은 화면은 검색창 아래 가로 스크롤 칩 줄.
+   목록이 비면(.has-recent 없음) 예전 배치 그대로. */
+.recent-rail, .recent-chips{display:none;}
+@media (min-width:1101px){
+  body.l16 .single-diag-wrap.has-recent{max-width:calc(1500px + 206px);display:grid;grid-template-columns:190px minmax(0,1fr);column-gap:16px;align-items:start;}
+  body.l16 .single-diag-wrap.has-recent > *{grid-column:2;min-width:0;}
+  body.l16 .single-diag-wrap.has-recent > .recent-rail{grid-column:1;grid-row:1 / span 8;display:block;position:sticky;top:12px;}
+}
+@media (max-width:1100px){
+  body.l16 .single-diag-wrap.has-recent .recent-chips{display:flex;}
+}
+.recent-rail{font-size:13px;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:10px 8px;}
+.recent-head{display:flex;justify-content:space-between;align-items:center;font-weight:700;font-size:12.5px;color:var(--ink-muted);margin:0 2px 6px;}
+.recent-clear{background:none;border:none;font-size:11.5px;color:var(--ink-muted);cursor:pointer;padding:4px 6px;min-height:28px;white-space:nowrap;}
+.recent-clear:hover{color:var(--accent);}
+.recent-item{display:flex;align-items:center;gap:2px;border-radius:8px;}
+.recent-item:hover{background:var(--surface-alt);}
+.recent-open{flex:1;min-width:0;text-align:left;background:none;border:none;cursor:pointer;color:var(--ink);padding:6px 4px;display:flex;flex-direction:column;gap:2px;font:inherit;}
+.recent-name{display:flex;align-items:center;gap:4px;min-width:0;}
+.recent-nm{font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0;}
+.recent-py{flex:none;font-size:10.5px;font-weight:700;border:1px solid var(--accent);color:var(--accent);border-radius:999px;padding:0 6px;line-height:16px;}
+.recent-region{font-size:11px;color:var(--ink-faint);}
+.recent-x{flex:none;background:none;border:none;color:var(--ink-faint);cursor:pointer;font-size:15px;line-height:1;min-width:28px;min-height:28px;border-radius:6px;}
+.recent-x:hover{color:var(--bad);background:var(--surface-alt);}
+.recent-chips{gap:6px;overflow-x:auto;padding:8px 0 2px;align-items:center;max-width:100%;scrollbar-width:thin;}
+.recent-chips-label{flex:none;font-size:12px;font-weight:700;color:var(--ink-muted);}
+.recent-chip{flex:none;display:inline-flex;align-items:center;border:1px solid var(--border);border-radius:999px;background:var(--surface);font-size:13px;}
+.recent-chip .recent-open{flex-direction:row;align-items:center;gap:4px;padding:5px 2px 5px 10px;white-space:nowrap;}
+.recent-chip .recent-nm{max-width:9em;}
 .topbar-actions a.btn{text-decoration:none;}
 .single-target-head{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
 .single-add-compare-btn{margin-left:auto;}
@@ -504,6 +533,18 @@ button.pyeong-chip{font:inherit;font-size:11.5px;}
 .concl-box.tone-warn .concl-main{color:var(--warn);}
 .concl-amt{font-size:22px;font-weight:800;letter-spacing:-.01em;white-space:nowrap;}
 .concl-fair{font-size:14px;font-weight:700;color:var(--ink);}
+/* 묶음 L15: 배지 옆 "현재 X억 / 적정 Y억" — 적정가를 배지보다 크고 굵게. 좁은 화면에서는 가격 묶음이 통째로 다음 줄로 내려간다. */
+.concl-top{display:flex;align-items:center;flex-wrap:wrap;gap:6px 14px;}
+.concl-top .badge.concl-badge{flex:none;}
+.concl-prices{display:inline-flex;align-items:baseline;flex-wrap:wrap;gap:2px 8px;color:var(--ink);}
+.concl-cur{font-size:14px;font-weight:600;color:var(--ink-muted);white-space:nowrap;}
+.concl-cur b{font-size:19px;font-weight:700;color:var(--ink);}
+.concl-sep{font-size:18px;color:var(--ink-faint);}
+.concl-fairv{font-size:14px;font-weight:700;color:var(--ink);white-space:nowrap;}
+.concl-fairv b{font-size:25px;font-weight:800;letter-spacing:-.01em;}
+.concl-box.tone-good .concl-fairv b{color:var(--good);}
+.concl-box.tone-bad .concl-fairv b{color:var(--bad);}
+.concl-box.tone-warn .concl-fairv b{color:var(--warn);}
 .concl-evidence{font-size:12.5px;color:var(--ink-muted);}
 .concl-more{margin-top:2px;}
 .concl-toggle{background:none;border:none;padding:6px 0;min-height:32px;font-size:13px;color:var(--ink-muted);cursor:pointer;display:inline-flex;align-items:center;gap:4px;}
@@ -582,6 +623,25 @@ body:not(.no-h4) .chart-box, body:not(.no-h4) .chart-canvas-wrap, body:not(.no-h
 .info-icon.info-icon-lead:hover, .info-icon.info-icon-lead:focus-visible{
   background:var(--accent-ink);color:var(--accent);border-color:var(--accent-ink);
 }
+/* 묶음 L17(18단계): 그래프 버튼 옆 ⓘ 통일 — 선도단지(단일 진단·여러 단지 비교)·상승률 보기·모양 겹쳐보기 ⓘ를 같은 아이콘(선도단지 ⓘ의
+   진한 원 20px)과 같은 팝업(폭 260px border-box, 글자 12px, 같은 그림자·화살표)으로. 닫혀 있을 때는 팝업을 그리지 않아(display:none)
+   숨은 팝업이 380px 화면 폭을 밀지 않는다(H4·L9 문제 재발 방지). 터치는 눌러서 열고, 다시 누르거나 바깥을 누르면 닫힌다(.tip-open). */
+body.l17 .info-icon.tip-unified{
+  width:20px;height:20px;font-size:13px;font-weight:700;
+  background:var(--accent);color:var(--accent-ink);
+  border:1.5px solid var(--accent);box-shadow:0 0 0 3px color-mix(in srgb, var(--accent) 20%, transparent);
+}
+body.l17 .info-icon.tip-unified:hover, body.l17 .info-icon.tip-unified:focus-visible, body.l17 .info-icon.tip-unified.tip-open{
+  background:var(--accent-ink);color:var(--accent);border-color:var(--accent-ink);
+}
+body.l17 .info-icon.tip-unified::after, body.l17 .info-icon.tip-unified .info-tip-html{box-sizing:border-box;width:260px;font-size:12px;line-height:1.6;padding:10px 12px;}
+body.l17 .info-icon.tip-unified:not(:hover):not(:focus-visible):not(.tip-open)::after,
+body.l17 .info-icon.tip-unified:not(:hover):not(:focus-visible):not(.tip-open)::before,
+body.l17 .info-icon.tip-unified:not(:hover):not(:focus-visible):not(.tip-open) .info-tip-html{display:none;}
+body.l17 .info-icon.tip-unified.tip-open::after, body.l17 .info-icon.tip-unified.tip-open::before, body.l17 .info-icon.tip-unified.tip-open .info-tip-html{opacity:1;visibility:visible;}
+body.l17 .info-icon.tip-unified.tip-suppress:not(.tip-open)::after, body.l17 .info-icon.tip-unified.tip-suppress:not(.tip-open)::before, body.l17 .info-icon.tip-unified.tip-suppress:not(.tip-open) .info-tip-html{display:none;}
+body.l17 .btn-tip-pair .info-icon.tip-unified.tip-open::after, body.l17 .btn-tip-pair .info-icon.tip-unified.tip-open .info-tip-html{left:calc(50% + var(--tip-shift-x, 0px));right:auto;transform:translateX(-50%);}
+body.l17 .btn-tip-pair .info-icon.tip-unified.tip-open::before{left:50%;right:auto;transform:translateX(-50%);}
 /* [data-tip] 가드 — data-tip 속성이 없는 아이콘(아래 .info-tip-html을 쓰는
    "굵게 강조" 버전, 2026-09-19 세션 항목 1)에는 이 ::after가 안 붙어야
    한다. attr(data-tip)은 속성이 없으면 빈 문자열이 되는데, 그래도
@@ -1040,12 +1100,14 @@ footer{margin-top:36px;color:var(--ink-faint);font-size:12px;text-align:center;}
   </div>
 
   <section id="singleDiagSection" class="single-diag-wrap" hidden>
+    <aside class="recent-rail" id="recentRail" aria-label="최근 본 단지"></aside>
     <div class="single-search-wrap">
       <div class="lib-search-wrap">
         <input class="textish lib-search" id="singleLibSearch" placeholder="🔍 우리 단지명을 검색하세요..." autocomplete="off">
         <div class="lib-autocomplete" id="singleLibAutocomplete" hidden></div>
       </div>
       <select id="singleLibSelect" hidden><option value="">선택 안 함</option></select>
+      <div class="recent-chips" id="recentChips" aria-label="최근 본 단지"></div>
     </div>
     <div id="singleDiagHead"></div>
     <div id="singleChartSection" style="margin-top:20px;">
@@ -1930,6 +1992,9 @@ function seoulHistoricalAvg(){
 //   3단계 A1(L2 문장에 두 상승률 나란히)은 L2, A2(적정가 메뉴 비활성 버튼)는 L5에 들어 있다.
 //   (4단계, 2026-10-03) L12 단일 진단 적정가·선도단지 선 기본 켜짐 + "선도단지 표시"가 선도단지 선을 실제로 켜고 끔,
 //   L13 상승률 보기 시작 기본값(모든 선에 시세가 있는 가장 이른 달)·설명, L14 기준단지 대비 적정가 선 둥근 점선·다크 모드 색.
+//   (18단계, 2026-10-04) L15 결론 박스 배지 옆 "현재 X억 / 적정 Y억"(적정가 줄 대신), L16 단일 진단 "최근 본 단지"(localStorage 한 키),
+//   L17 ⓘ 툴팁 디자인 통일(선도단지·상승률 보기·모양 겹쳐보기)·고를 것이 하나뿐인 "서울 선도단지(일반)" 드롭박스 숨김. 셋 다 계산은 그대로.
+//   (22단계, 2026-10-04) L18 옛 저장 목록 정리 — 예전 seed id로 저장된 라이브러리 항목을 지금 id로 옮기고 지운다(새 브라우저와 같은 값).
 // K(2026-10-02): K1 고평가 최소 격차 문턱(5%), K2 차트 적정가 설명·선도단지 상태 칩 문구, K4 표시 이름(seedDisplayNames.js).
 //   K4는 F4처럼 seed를 읽을 때 이름을 바꾸므로 주소 플래그로만 끌 수 있다(런타임 setBundles로는 안 됨).
 // 주소에서는 ?bundles=A,B,C,D(D1~D4 모두) 또는 ?bundles=A,B,C,D1,D4처럼 쓴다(E·F·H·L·K도 같은 방식).
@@ -1938,9 +2003,9 @@ function seoulHistoricalAvg(){
 // 라이브는 주소 플래그를 읽지 않으므로 이 기본값이 그대로 동작한다.
 const BUNDLES = { A:false, B:false, C:false, D1:false, D2:false, D3:false, D4:false, E1:true, E2:false, E3:true, F1:true, F2:true, F3:true, F4:false,
   H1:false, H2:true, H3:true, H4:true, H5:true, H6:true, H7:true,
-  L1:true, L2:true, L3:true, L4:true, L5:true, L6:false, L7:true, L8:true, L9:true, L10:true, L11:true, L12:true, L13:true, L14:true, K1:false, K2:true, K4:false };
+  L1:true, L2:true, L3:true, L4:true, L5:true, L6:false, L7:true, L8:true, L9:true, L10:true, L11:true, L12:true, L13:true, L14:true, L15:true, L16:true, L17:true, L18:true, K1:false, K2:true, K4:false };
 const BUNDLE_GROUPS = { D:['D1','D2','D3','D4'], E:['E1','E2','E3'], F:['F1','F2','F3','F4'], H:['H1','H2','H3','H4','H5','H6','H7'],
-  L:['L1','L2','L3','L4','L5','L6','L7','L8','L9','L10','L11','L12','L13','L14'], K:['K1','K2','K4'] };
+  L:['L1','L2','L3','L4','L5','L6','L7','L8','L9','L10','L11','L12','L13','L14','L15','L16','L17','L18'], K:['K1','K2','K4'] };
 function setBundles(next){
   next = Object.assign({}, next||{});
   // D·E 하나로 D1~D4·E1~E3을 한꺼번에 끄고 켤 수 있다(개별 키가 있으면 그쪽이 우선).
@@ -1960,7 +2025,9 @@ function setBundles(next){
 function applyBundleBodyClasses(){
   try { if (document && document.body && document.body.classList) document.body.classList.toggle('no-h4', !BUNDLES.H4); } catch (e) {}
   try { if (document && document.body && document.body.classList) document.body.classList.toggle('l10', !!BUNDLES.L10); } catch (e) {}
+  try { if (document && document.body && document.body.classList){ document.body.classList.toggle('l15', !!BUNDLES.L15); document.body.classList.toggle('l16', !!BUNDLES.L16); document.body.classList.toggle('l17', !!BUNDLES.L17); } } catch (e) {}
   if (typeof applyL9Toolbar === 'function') applyL9Toolbar();
+  if (typeof applyL17Tips === 'function') applyL17Tips();
 }
 (function applyBundlesFromUrl(){
   try {
@@ -2559,6 +2626,74 @@ function syncLibraryWithSeed(){
   }
   if (changed) saveState();
 }
+// ---- 묶음 L18(22단계, 2026-10-04): 옛 저장 목록 정리 ----
+// 문제(21단계): 라이브 초기(2026-09-19~20 등) seed로 저장된 브라우저 라이브러리에는, 이후 seed에서 id가 바뀐 단지의 예전 항목이 남는다.
+// syncLibraryWithSeed는 "지금 seed에 없는 id = 사용자 항목"으로 보고 그대로 두고 새 id 항목을 뒤에 붙이므로, 이름 조회(findLibraryComplexByName 등)
+// 에서 예전 항목이 먼저 잡혀 선도단지 지수·그 단지 자신의 시세가 예전 값으로 계산됐다(삼성래미안트리베라(2차)·강동롯데캐슬퍼스트 등).
+// 정리: 아래 표(과거 라이브 seed 17판 7d8529d~394c7a7에서 지금 seed 653f8178에 없는 id 74개 → KB complexId 15개·같은 이름 59개로 대응시킨
+// 지금 id)에 있는 id이고 새 id가 지금 seed에 있으면 예전 seed에서 온 항목으로 보고 지운다(새 id 항목은 syncLibraryWithSeed가 이미 넣어 둠).
+// 표에 없는 id(사용자가 붙여넣기·엑셀·"라이브러리에 저장"으로 넣은 단지)와 공용 라이브러리 항목(shared)은 건드리지 않는다.
+// 같은 이름 여러 단지가 seed 순서와 다르게 쌓여 이름 조회 결과가 새 브라우저와 달라지는 경우도 있어, seed 항목끼리만 seed 순서로 다시 놓는다
+// (사용자 항목의 자리는 그대로). 상태에 남은 옛 id(단일 진단·기준단지·비교단지·최근 본 단지)도 새 id로 옮긴다. 저장 형식은 그대로,
+// 두 번째 실행에서는 바뀌는 것이 없다. 즐겨찾기는 이름으로 저장되고 74개 모두 지금 이름이 같아 그대로 이어진다.
+const SEED_ID_RENAMES = {
+  "DMC래미안이편한세상-과거시세":"DMC래미안이편한세상", "갈매스타힐스":"갈매스타힐스-갈매4단지", "공릉한보에스티지":"공릉동한보", "관악드림타운":"관악드림타운-과거시세", "관악휴먼시아1단지":"관악산휴먼시아-1단지",
+  "관악휴먼시아2단지":"관악산휴먼시아-2단지", "구로주공2차":"구로주공", "그린힐반도유보라아이비파크1":"그린힐반도유보라아이비파크10-0", "남산타운":"남산다운", "다산펜테리움리버테라스2":"다산펜테리움리버테라스2_33-111A_84-89",
+  "대치2단지":"대치", "대치삼성1차":"대치삼성-래미안", "도덕파크타운":"도덕파크타운-2단지", "동아에코빌-과거시세":"동아에코빌", "동탄금강펜테리움센트럴파크Ⅳ":"동탄금강펜테리움센트럴파크4차", "동탄레이크지엔쓰르지오":"동탄레이크자연앤푸르지오",
+  "동탄역반도유보라아이비파크2":"동탄역반도유보라아이비파크2-0", "동탄역신안인스빌리베라":"동탄역신안인스빌리베라1차", "등작상피빌":"동작상떼빌", "래미안석관-과거시세":"래미안석관", "래미안트리베라2차":"삼성래미안트리베라-2차",
+  "레이크힐반도유보라아이비파크":"레이크힐반도유보라아이비파크10-2", "롯데캐슬골드2단지":"롯데캐슬골드-2단지-과거시세", "롯데캐슬퍼스트":"강동롯데캐슬퍼스트", "마곡엠벨리6단지":"마곡엠밸리6단지", "마포아이파크포레":"마포아이파크",
+  "명일현대아파트":"현대-명일현대", "목동신시가지-13단지":"목동신시가지13단지", "목동신시가지-14단지":"목동신시가지14단지", "목동신시가지-7단지":"목동신시가지7단지", "문래자이":"문래자이-과거시세",
+  "미사강변골든센트로":"미사강변골든센트로-미사강변도시28단지", "미성-미륭-삼호3차":"미성-미륭-삼호3차-과거시세", "미아뉴타운경남아너스빌":"경남아너스빌-1356", "방배래미안1차":"방배래미안아파트", "삼성래미안1단지":"방학삼성래미안",
+  "삼성래미안트리베라2차":"삼성래미안트리베라-2차", "삼익그린맨션-2차":"삼익그린맨션-2차-과거시세", "삼풍-과거시세":"삼풍", "상도래미안1차":"상도동삼성래미안1차", "성내상성":"성내삼성", "성산시영":"성산시영-과거시세",
+  "시흥은행푸르지오":"시흥은행4차푸르지오", "신도림대림1_2차e편한세상":"신도림대림-1차", "신도림동아3차":"신도림3차", "신동아-1-2차-과거시세":"신동아-1-2차", "신안인스빌1080":"다산신안인스빌퍼스트포레", "압구정신현대":"현대-신현대",
+  "야당역롯데캐슬파크타운1차":"롯데캐슬파크타운", "야당역롯데캐슬파크타운2차":"롯데캐슬파크타운2", "오산대우":"오산대우-1-2차", "올림픽선수기자촌":"올림픽선수기자촌-과거시세", "의정부SKVIEW":"의정부SK뷰",
+  "이문아이파크자이":"이문아이파크자이-3-1BL", "죽현마을아이파크":"죽현마을아이파크-1차", "중계그린아파트":"중계그린", "중봉마을신안실크밸리":"중봉마을신안실크밸리-3차", "진농우성":"전농우성", "창동주공19단지":"주공-상계19단지",
+  "청벽4단지":"청백-4단지", "초원2단지대림":"초원-대림", "취경리오포레":"휘경해모로프레스티지", "토평마을SK신명":"신명-토평", "평택센트럴해링턴플레이스":"평택센트럴헤링턴플레이스", "하계현대":"하계2차현대", "한가람이촌동":"한가람-과거시세",
+  "한미술":"한마을", "한보미도맨션":"한보미도맨션-과거시세", "햇빛마을21단지주공-20단지대체":"햇빛-주공20단지", "행당동대림":"행당대림", "현대307":"현대-1차-_31-산곡동", "호반써밋목동-과거시세":"호반써밋목동",
+  "호원아이파크":"IPARK호원동", "호평마을중흥S클래스":"호평마을중흥S-CLASS"
+};
+function migrateStaleSeedLibrary(){
+  if (!BUNDLES.L18) return 0;
+  const seeds = window.SEED_COMPLEXES || [];
+  if (!seeds.length || !Array.isArray(state.library)) return 0;
+  const seedIndex = new Map(seeds.map((s, i) => [s.id, i]));
+  let removed = 0;
+  const kept = state.library.filter(e => {
+    if (!e || !e.id || e.shared || seedIndex.has(e.id)) return true;
+    const nid = SEED_ID_RENAMES[e.id];
+    if (!nid || !seedIndex.has(nid)) return true;
+    removed++;
+    return false;
+  });
+  // 지운 항목의 새 id가 라이브러리에 없으면(정상 경로에선 없음) seed 항목을 넣는다
+  const have = new Set(kept.map(e => e && e.id));
+  state.library.forEach(e => { if (e && e.id && !seedIndex.has(e.id) && !e.shared && SEED_ID_RENAMES[e.id] && !have.has(SEED_ID_RENAMES[e.id]) && seedIndex.has(SEED_ID_RENAMES[e.id])){
+    const s = seeds[seedIndex.get(SEED_ID_RENAMES[e.id])]; kept.push({ id: s.id, name: s.name, text: s.text, savedAt: new Date().toISOString() }); have.add(s.id); } });
+  // seed 항목끼리만 seed 순서로(사용자 항목 자리는 그대로)
+  const slots = [], seedEntries = [];
+  kept.forEach((e, i) => { if (e && e.id && seedIndex.has(e.id)){ slots.push(i); seedEntries.push(e); } });
+  const sorted = seedEntries.slice().sort((a, b) => seedIndex.get(a.id) - seedIndex.get(b.id));
+  let reordered = 0;
+  sorted.forEach((e, k) => { if (kept[slots[k]] !== e) reordered++; kept[slots[k]] = e; });
+  // 상태에 남은 옛 id
+  let remapped = 0;
+  const mapId = id => (id && SEED_ID_RENAMES[id] && seedIndex.has(SEED_ID_RENAMES[id]) && !seedIndex.has(id)) ? SEED_ID_RENAMES[id] : null;
+  const n1 = mapId(state.singleTargetId); if (n1){ state.singleTargetId = n1; remapped++; }
+  const n2 = mapId(state.baseId); if (n2){ state.baseId = n2; remapped++; }
+  (state.compares || []).forEach(s => { const n = s && mapId(s.id); if (n){ s.id = n; remapped++; } });
+  try {
+    const raw = localStorage.getItem(typeof RECENT_STORE_KEY !== 'undefined' ? RECENT_STORE_KEY : 'benchmarkCalc_recentSingle_v1');
+    if (raw){ const list = JSON.parse(raw); if (Array.isArray(list) && list.some(x => x && mapId(x.id))){
+      const seen = new Set(); const next = [];
+      list.forEach(x => { if (!x) return; const id = mapId(x.id) || x.id; if (seen.has(id)) return; seen.add(id); next.push(Object.assign({}, x, { id })); });
+      localStorage.setItem(typeof RECENT_STORE_KEY !== 'undefined' ? RECENT_STORE_KEY : 'benchmarkCalc_recentSingle_v1', JSON.stringify(next)); remapped++; } }
+  } catch (e) { /* 저장소를 못 쓰는 환경 */ }
+  if (!removed && !reordered && !remapped) return 0;
+  state.library = kept;
+  if (typeof _virtualBenchmarkCache !== 'undefined') _virtualBenchmarkCache = {};
+  saveState();
+  return removed + reordered + remapped;
+}
 // 묶음 F4: 예전에 저장된 이름(기준단지·비교단지·단일진단 선택·쌍둥이 즐겨찾기)이 바뀐 이름을 가리키도록 옮긴다.
 // 옛 이름은 앱이 예전에 찾던 대로 "그 이름의 첫 항목"으로 옮기되, 시세 원문(text)이 같이 저장된 자리(기준단지·
 // 비교단지)는 원문이 같은 항목으로 옮긴다. 옮긴 값이 있으면 다시 저장한다.
@@ -2610,6 +2745,7 @@ function loadState(){
       normalizeCompares();
       migrateLibraryIds();
       syncLibraryWithSeed();
+      migrateStaleSeedLibrary(); // 묶음 L18
       migrateSavedNames();
       return;
     } catch(e){}
@@ -5843,6 +5979,7 @@ function resumePendingPyeong(){
 }
 function setSlotData(target, v){
   if (target === 'single'){
+    if (typeof recentRecordPending !== 'undefined') recentRecordPending = true;   // 묶음 L16: 단일 진단 평형 칩 전환도 연 것으로 기록
     state.singleTargetName = v.name; state.singleTargetId = v.id || '';
   } else if (target === 'base'){
     state.baseText = v.text; state.baseName = v.name; state.baseId = v.id; state.basePyeong = v.pyeong; state.basePending25 = !!v.pending25;
@@ -7346,14 +7483,48 @@ function conclusionDetailItem(text, isHtml){
   if (!text) return '';
   return '<div class="concl-detail-item">'+(isHtml ? text : esc(text))+'</div>';
 }
+// 묶음 L15(18단계, 2026-10-04): 결론 박스 배지 옆에 "현재 X억 / 적정 Y억". 두 값은 결론 문장과 같은 값(r.curSalePrice·r.fairSale)에서
+// 나오고, 문장에 금액이 있으면 화면에 보이는 두 값의 차이가 문장 금액과 같아지게 자릿수를 정한다(계산·문장은 그대로).
+//  - 문장에 금액이 없음(적정, 두 값이 같음, 주의·확인 필요의 1% 미만): 둘 다 소수 첫째 자리 억.
+//  - 금액이 억 단위: F1이 화면 표시값(소수 첫째 자리)끼리 빼서 금액을 내므로 둘 다 소수 첫째 자리 그대로. F1이 꺼져 있어
+//    어긋나면 현재가를 기준으로 적정 = 현재 ± 문장 금액.
+//  - 금액이 만원 단위(1억 미만, 100만원 단위): 둘 다 소수 둘째 자리 억(100만원 단위). 현재가(100만원 반올림)를 기준으로
+//    적정 = 현재 ± 문장 금액(적정가는 반올림 값과 최대 100만원 다를 수 있음 — 현재가가 문장 계산값과 같아야 한다는 규칙이 우선).
+//  - 적정가가 없음(이력 부족·데이터 부족): 현재가만. 현재가도 없으면 줄을 그리지 않는다.
+function conclusionPriceLine(r, label){
+  if (!r || r.curSalePrice == null || !r.curSalePrice) return null;
+  const cur1 = (r.curSalePrice/10000).toFixed(1)+'억';
+  const n = conclusionNumbers(r);
+  if (!n) return { cur: cur1, fair: '' };
+  const p = buildConclusionParts(r, label);
+  if (p.mainHtml.indexOf('class="concl-amt"') < 0) return { cur: cur1, fair: n.fairText };
+  const sign = n.up ? 1 : -1;
+  if (/억$/.test(n.amtText)){
+    const c = parseFloat((r.curSalePrice/10000).toFixed(1)), f = parseFloat((r.fairSale/10000).toFixed(1));
+    if (Math.abs(f - c).toFixed(1)+'억' === n.amtText) return { cur: cur1, fair: n.fairText };
+    return { cur: cur1, fair: (c + sign*parseFloat(n.amtText)).toFixed(1)+'억' };
+  }
+  const amtEok = Math.round(Math.abs(n.amt)/100)*100/10000;   // fmtConclusionAmount와 같은 100만원 반올림
+  const r2 = v => Math.round(v/100)/100;
+  const c2 = r2(r.curSalePrice);
+  return { cur: c2.toFixed(2)+'억', fair: (c2 + sign*amtEok).toFixed(2)+'억' };
+}
+function conclusionPriceLineHtml(r, label){
+  const pl = conclusionPriceLine(r, label);
+  if (!pl) return '';
+  return '<span class="concl-prices"><span class="concl-cur">현재 <b>'+esc(pl.cur)+'</b></span>'+
+    (pl.fair ? '<span class="concl-sep">/</span><span class="concl-fairv">적정 <b>'+esc(pl.fair)+'</b></span>' : '')+'</span>';
+}
 // 결론 박스. opts: { label, showBadge, detailHtml }
 function buildConclusionBox(r, opts){
   opts = opts || {};
   const p = buildConclusionParts(r, opts.label);
+  const badgeHtml = opts.showBadge ? '<span class="badge '+p.tone+' concl-badge">'+esc(p.badge)+'</span>' : '';
+  const priceHtml = BUNDLES.L15 ? conclusionPriceLineHtml(r, opts.label) : '';
   return '<div class="concl-box tone-'+p.tone+'">'+
-    (opts.showBadge ? '<span class="badge '+p.tone+' concl-badge">'+esc(p.badge)+'</span>' : '')+
+    (BUNDLES.L15 ? ((badgeHtml || priceHtml) ? '<div class="concl-top">'+badgeHtml+priceHtml+'</div>' : '') : badgeHtml)+
     '<div class="concl-main">'+p.mainHtml+'</div>'+
-    (p.fairText ? '<div class="concl-fair">'+esc(p.fairText)+'</div>' : '')+
+    (p.fairText && !BUNDLES.L15 ? '<div class="concl-fair">'+esc(p.fairText)+'</div>' : '')+
     (p.evidence ? '<div class="concl-evidence">'+esc(p.evidence)+'</div>' : '')+
     wrapConclusionDetail(opts.detailHtml || '')+
   '</div>';
@@ -7766,6 +7937,99 @@ function findSingleTarget(name){
   t._pyeong = 25;
   return t;
 }
+// ---- 묶음 L16(18단계, 2026-10-04): 최근 본 단지 ----
+// 사용자가 단일 진단에서 단지를 열 때(검색·자동완성 — 둘 다 #singleLibSelect change, 최근 목록 클릭, 평형 칩) [{id, p:25|34, t:시각}]을
+// localStorage 한 키에 저장한다. 새로고침 복원·탭 전환·다시 그리기는 기록하지 않는다(지운 항목이 다시 생기지 않게). 주소(URL)는 지금
+// 여러 단지 비교만 열므로 단일 진단 기록 경로가 없다. 진입점이 recentRecordPending을 켜고, 그 단지가 실제로 그려질 때 한 번 기록한다. 같은 단지(id)는 맨 위로 옮기고 최대 RECENT_MAX개. 이름은 저장하지 않고 그릴 때 seed의 현재 이름을 쓴다(이름 규칙이 바뀌어도
+// 안 깨짐). seed에 없는 id는 건너뛰고, 저장소를 못 쓰는 환경이면 목록을 숨긴다. URL·기존 상태(STORE_KEY) 형식에는 넣지 않는다.
+const RECENT_STORE_KEY = 'benchmarkCalc_recentSingle_v1';
+const RECENT_MAX = 10;
+let recentStorageBlocked = false;
+let recentRecordPending = false;
+function loadRecentViews(){
+  let list = null;
+  try { const raw = localStorage.getItem(RECENT_STORE_KEY); list = raw ? JSON.parse(raw) : []; }
+  catch (e){ if (!(e && e.name === 'SyntaxError')) recentStorageBlocked = true; return []; }
+  if (!Array.isArray(list)) return [];
+  return list.filter(x => x && typeof x.id === 'string' && (x.p === 25 || x.p === 34)).slice(0, RECENT_MAX);
+}
+function saveRecentViews(list){
+  try { localStorage.setItem(RECENT_STORE_KEY, JSON.stringify(list)); return true; }
+  catch (e){ recentStorageBlocked = true; return false; }
+}
+// 지금 단일 진단 대상의 {id, p}. seed 단지가 아니면(직접 넣은 시세 등) null.
+function currentSingleRecentRef(){
+  const name = state.singleTargetName;
+  if (!name) return null;
+  const plain = stripPyeongSuffix(name);
+  if (isPyeong25Name(name)){ const ref = singleTargetRef(); return ref && ref.id && seedEntryById(ref.id) ? { id: ref.id, p: 25 } : null; }
+  const byId = state.singleTargetId ? seedEntryById(state.singleTargetId) : null;
+  const e = (byId && byId.name === plain) ? byId : seedEntryByName(plain);
+  return e && e.id ? { id: e.id, p: 34 } : null;
+}
+function recordRecentView(id, pyeong){
+  if (!BUNDLES.L16 || !id || !seedEntryById(id) || recentStorageBlocked) return;
+  const p = pyeong === 25 ? 25 : 34;
+  const old = loadRecentViews();
+  if (old.length && old[0].id === id && old[0].p === p){ renderRecentViews(); return; }   // 이미 맨 위(다시 그리기만 한 경우) — 쓰지 않는다
+  const list = old.filter(x => x.id !== id);
+  list.unshift({ id, p, t: Date.now() });
+  if (list.length > RECENT_MAX) list.length = RECENT_MAX;
+  saveRecentViews(list);
+  renderRecentViews();
+}
+function recentRegionText(e){
+  if (e.district) return String(e.district).replace(/구$/, '');
+  return e.regionCity ? String(e.regionCity) : '';
+}
+function renderRecentViews(){
+  let rail, chips, wrap;
+  try { rail = document.getElementById('recentRail'); chips = document.getElementById('recentChips'); wrap = document.getElementById('singleDiagSection'); } catch (e){ return; }
+  if (!rail || !chips || !wrap || !wrap.classList) return;
+  const items = (BUNDLES.L16 && !recentStorageBlocked)
+    ? loadRecentViews().map(x => { const e = seedEntryById(x.id); return e ? { id: x.id, p: x.p, name: e.name, region: recentRegionText(e) } : null; }).filter(Boolean)
+    : [];
+  const show = items.length > 0 && !recentStorageBlocked;
+  wrap.classList.toggle('has-recent', show);
+  if (!show){ rail.innerHTML = ''; chips.innerHTML = ''; return; }
+  const item = (x, cls) => '<div class="'+cls+'">'+
+    '<button type="button" class="recent-open" data-recent-open="'+esc(x.id)+'" data-recent-p="'+x.p+'" title="'+esc(x.name+' '+x.p+'평'+(x.region ? ' · '+x.region : ''))+'">'+
+      '<span class="recent-name"><span class="recent-nm">'+esc(x.name)+'</span><span class="recent-py">'+x.p+'평</span></span>'+
+      (cls === 'recent-item' && x.region ? '<span class="recent-region">'+esc(x.region)+'</span>' : '')+
+    '</button><button type="button" class="recent-x" data-recent-del="'+esc(x.id)+'" aria-label="'+esc(x.name)+' 기록 지우기">×</button></div>';
+  rail.innerHTML = '<div class="recent-head"><span>최근 본 단지</span><button type="button" class="recent-clear" data-recent-clear="1">모두 지우기</button></div>'+
+    items.map(x => item(x, 'recent-item')).join('');
+  chips.innerHTML = '<span class="recent-chips-label">최근 본 단지</span>'+items.map(x => item(x, 'recent-chip')).join('')+
+    '<button type="button" class="recent-clear" data-recent-clear="1">모두 지우기</button>';
+}
+function openRecentView(id, p){
+  const e = seedEntryById(id);
+  if (!e){ renderRecentViews(); return; }
+  state.singleTargetName = p === 25 ? e.name + PYEONG25_SUFFIX : e.name;
+  state.singleTargetId = id;
+  recentRecordPending = true;
+  saveState();
+  if (state.topMode !== 'single') setTopMode('single');   // setTopMode가 대상 단지를 그린다
+  else renderSingleDiag(state.singleTargetName);
+  try { window.scrollTo({ top: 0, behavior: 'smooth' }); } catch (err) {}
+}
+// 처음 켤 때: 기록 키가 아예 없으면 지금 저장된 단일 진단 대상(마지막으로 본 단지, 기존 상태에 이미 있음)으로 시작한다.
+function initRecentViews(){
+  if (!BUNDLES.L16) return;
+  let raw = null;
+  try { raw = localStorage.getItem(RECENT_STORE_KEY); } catch (e){ recentStorageBlocked = true; }
+  if (raw == null && !recentStorageBlocked){ const ref = currentSingleRecentRef(); if (ref) saveRecentViews([{ id: ref.id, p: ref.p, t: Date.now() }]); }
+  renderRecentViews();
+}
+try {
+  document.addEventListener('click', (ev)=>{
+    const t = ev.target && ev.target.closest && ev.target.closest('[data-recent-open],[data-recent-del],[data-recent-clear]');
+    if (!t || !BUNDLES.L16) return;
+    if (t.dataset.recentClear){ saveRecentViews([]); renderRecentViews(); return; }
+    if (t.dataset.recentDel){ saveRecentViews(loadRecentViews().filter(x => x.id !== t.dataset.recentDel)); renderRecentViews(); return; }
+    openRecentView(t.dataset.recentOpen, Number(t.dataset.recentP));
+  });
+} catch (e) { /* DOM이 없는 환경(테스트 하네스) */ }
 function renderSingleDiag(name){
   const headEl = document.getElementById('singleDiagHead');
   const resultEl = document.getElementById('singleDiagResult');
@@ -7817,6 +8081,7 @@ function renderSingleDiag(name){
     if (chartSectionEl) chartSectionEl.style.display = 'none';
     return;
   }
+  if (BUNDLES.L16 && recentRecordPending && name === state.singleTargetName){ recentRecordPending = false; const ref = currentSingleRecentRef(); if (ref) recordRecentView(ref.id, ref.p); }
   const sync = computeSyncRate(bench, target);
   const estimate = !sync ? findSyncRateEstimate(target) : null;
   const hedge = computeInflationHedge(target);
@@ -8038,6 +8303,29 @@ function updateSingleAxisSplitToggle(){
 }
 // L9 버튼 줄: [적정가] [선도단지 표시] (ⓘ 선도단지) [모양 겹쳐보기] (ⓘ) — 버튼과 ⓘ를 줄바꿈되지 않는 한 묶음(.btn-tip-pair)으로.
 // L9를 끄면 예전 순서 [선도단지 표시] [축 분리] (ⓘ)로 되돌린다. 화면 배치만 바꾸고 계산은 건드리지 않는다.
+// 묶음 L17: 그래프 버튼 옆 ⓘ 네 개(선도단지 ×2, 상승률 보기, 모양 겹쳐보기)에 통일 클래스를 붙이고 뗀다.
+const L17_TIP_SELECTOR = '.info-icon-lead, #growthViewInfo, #singleAxisSplitInfo';
+function applyL17Tips(){
+  try {
+    document.querySelectorAll(L17_TIP_SELECTOR).forEach(el => { el.classList.toggle('tip-unified', !!BUNDLES.L17); if (!BUNDLES.L17) el.classList.remove('tip-open'); });
+  } catch (e) { /* DOM이 없는 환경(테스트 하네스) */ }
+}
+try {
+  document.addEventListener('click', (ev)=>{
+    if (!BUNDLES.L17) return;
+    const icon = ev.target && ev.target.closest && ev.target.closest('.info-icon.tip-unified');
+    document.querySelectorAll('.info-icon.tip-unified.tip-open').forEach(el => { if (el !== icon) el.classList.remove('tip-open'); });
+    if (!icon) return;
+    const open = !icon.classList.contains('tip-open');
+    icon.classList.toggle('tip-open', open);
+    icon.classList.toggle('tip-suppress', !open);   // 눌러서 닫음 — 터치의 남은 :hover로 다시 보이지 않게(포인터가 떠나면 풀림)
+    if (open) positionInfoTip(icon); else if (icon.blur) icon.blur();
+  });
+  document.addEventListener('pointerout', (ev)=>{
+    const icon = ev.target && ev.target.closest && ev.target.closest('.info-icon.tip-suppress');
+    if (icon && !(ev.relatedTarget && icon.contains(ev.relatedTarget))) icon.classList.remove('tip-suppress');
+  });
+} catch (e) { /* DOM이 없는 환경 */ }
 function applyL9Toolbar(){
   try {
     const bench = document.getElementById('singleBenchmarkOverlayToggle'), split = document.getElementById('singleAxisSplitToggle');
@@ -8054,6 +8342,7 @@ function applyL9Toolbar(){
         tip = document.createElement('span'); tip.className = 'info-icon'; tip.id = 'singleAxisSplitInfo'; tip.tabIndex = 0;
         tip.setAttribute('data-tip', AXIS_SPLIT_TIP); tip.setAttribute('aria-label', AXIS_SPLIT_TIP); tip.textContent = 'ⓘ';
       }
+      if (BUNDLES.L17) tip.classList.add('tip-unified');
       group.insertBefore(p1, bench); p1.appendChild(bench); if (leadInfo) p1.appendChild(leadInfo);
       p1.parentNode.insertBefore(p2, p1.nextSibling); p2.appendChild(split); p2.appendChild(tip);
     } else {
@@ -8110,6 +8399,13 @@ function updateSingleRatioTroughToggle(){
 // 묶음 L6: 묶음 B가 켜져 있으면(모든 단지를 서울 선도단지 기준으로 계산) 그래프 위 선도단지 드롭박스는 고를 것이 없어 숨긴다.
 // B를 끄면 예전처럼 보인다. "선도단지 표시" 버튼과 디커플링 판정용 multiBenchmarkGroup은 그대로다.
 function benchmarkSelectHidden(){ return !!(BUNDLES.L6 && BUNDLES.B); }
+// 묶음 L17(18단계): 그래프 위 "서울 선도단지(일반)" 드롭박스는 선택지가 하나뿐이라(정적 마크업, 코드가 선택지를 더하지 않음) 고를 것이 없다.
+// 지금 값이 그 하나와 같을 때만 숨긴다 — 2026-09-19~21 라이브에는 "재건축" 선택지가 있어 그때 저장된 상태(benchmarkOverlayGroup='rebuild')가
+// 남아 있을 수 있고, 그 경우엔 드롭박스가 유일한 되돌리기 수단이라 보여 둔다. 값·저장 상태는 건드리지 않는다(B·L6과 무관).
+function benchmarkSelectRedundant(sel, value){
+  if (!BUNDLES.L17 || !sel || !sel.options) return false;
+  return sel.options.length === 1 && sel.options[0].value === value;
+}
 function updateSingleBenchmarkOverlayToggle(){
   const btn = document.getElementById('singleBenchmarkOverlayToggle');
   const sel = document.getElementById('singleBenchmarkOverlaySelect');
@@ -8117,7 +8413,7 @@ function updateSingleBenchmarkOverlayToggle(){
   const show = state.singleActiveChart==='sale' || state.singleActiveChart==='jeonse';
   btn.style.display = show ? '' : 'none';
   const on = BUNDLES.L12 ? singleBenchLineVisible() : state.singleBenchmarkOverlayOn;
-  sel.style.display = (show && on && !benchmarkSelectHidden()) ? '' : 'none';
+  sel.style.display = (show && on && !benchmarkSelectHidden() && !benchmarkSelectRedundant(sel, state.singleBenchmarkOverlayGroup)) ? '' : 'none';
   if (!show) return;
   btn.classList.toggle('active', on);
   btn.textContent = on ? '🏙️ 선도단지 표시 중 (끄기)' : '🏙️ 선도단지 표시';
@@ -8706,7 +9002,7 @@ function findClippingAncestor(el, axis){
 // 컨테이너 가장자리 clipping을 막는 로직(아래 가로 shift)은 이 문제와
 // 별개다 — 그건 "화면 밖으로 안 나가게"이고, 이건 "형제 셀을 안 가리게"라
 // 처리 대상이 다르다). 테이블 헤더 안에서는 폭을 좁혀 겹침을 줄인다.
-const TIP_WIDTH_NORMAL = 236, TIP_WIDTH_NARROW = 170;
+const TIP_WIDTH_NORMAL = 236, TIP_WIDTH_NARROW = 170, TIP_WIDTH_UNIFIED = 260;   // UNIFIED: 묶음 L17 통일 팝업(border-box)
 // 항목 1(2026-09-19 세션) — data-tip(순수 텍스트)이나 .info-tip-html(굵게
 // 강조가 필요한 HTML 버전) 둘 중 뭘 쓰든 같은 방식으로 글자수를 잰다.
 function getTipText(icon){
@@ -8745,7 +9041,8 @@ function positionInfoTip(icon){
   const rect = icon.getBoundingClientRect();
   const isInTableHeader = !!icon.closest('th');
   icon.classList.toggle('tip-narrow', isInTableHeader);
-  const tipWidth = isInTableHeader ? TIP_WIDTH_NARROW : TIP_WIDTH_NORMAL;
+  const unified = typeof BUNDLES !== 'undefined' && BUNDLES.L17 && icon.classList.contains('tip-unified');
+  const tipWidth = isInTableHeader ? TIP_WIDTH_NARROW : (unified ? TIP_WIDTH_UNIFIED : TIP_WIDTH_NORMAL);
   const approxTipHeight = estimateTipHeight(icon, tipWidth);
   const vAncestor = findClippingAncestor(icon, 'y');
   const viewportHeight = window.innerHeight || Infinity;
@@ -8813,7 +9110,7 @@ function positionInfoTip(icon){
     const rightBoundary = hAncestorRect ? Math.min(viewportWidth, hAncestorRect.right) : viewportWidth;
     const iconCenter = rect.left + rect.width/2;
     // 묶음 L9: data-tip 툴팁(::after)은 box-sizing이 content-box라 실제 폭이 width + 좌우 여백·테두리(26px)다 — 오른쪽 끝 ⓘ에서 7px 넘친 실측.
-    const boxW = (typeof BUNDLES !== 'undefined' && BUNDLES.L9 && !icon.querySelector(':scope > .info-tip-html')) ? tipWidth + 26 : tipWidth;
+    const boxW = (!unified && typeof BUNDLES !== 'undefined' && BUNDLES.L9 && !icon.querySelector(':scope > .info-tip-html')) ? tipWidth + 26 : tipWidth;   // L17 통일 팝업은 border-box라 폭 그대로
     const idealLeft = iconCenter - boxW/2;
     const idealRight = iconCenter + boxW/2;
     let shift = 0;
@@ -9015,7 +9312,7 @@ function updateBenchmarkOverlayToggle(){
   if (!btn || !sel) return;
   const show = state.activeChart==='sale' || state.activeChart==='jeonse';
   btn.style.display = show ? '' : 'none';
-  sel.style.display = (show && state.benchmarkOverlayOn && !benchmarkSelectHidden()) ? '' : 'none';
+  sel.style.display = (show && state.benchmarkOverlayOn && !benchmarkSelectHidden() && !benchmarkSelectRedundant(sel, state.benchmarkOverlayGroup)) ? '' : 'none';
   if (!show) return;
   btn.classList.toggle('active', state.benchmarkOverlayOn);
   btn.textContent = state.benchmarkOverlayOn ? '🏙️ 선도단지 표시 중 (끄기)' : '🏙️ 선도단지 표시';
@@ -10468,6 +10765,7 @@ function wireStaticEvents(){
   });
   document.getElementById('singleLibSelect').addEventListener('change', (e)=>{
     state.singleTargetName = e.target.value;
+    recentRecordPending = true;   // 묶음 L16: 검색·자동완성으로 연 단지는 최근 본 단지에 기록
     state.singleTargetId = '';
     applyDefaultPyeong('single'); // 검색해서 고를 때만 기본 평형(25·34평 타입 세대수 합이 큰 쪽, 동률 34평)을 쓴다
     saveState();
@@ -10656,6 +10954,7 @@ loadState();
 const urlApplied = applyUrlParams();
 resumePendingPyeong(); // 저장·URL로 들어온 25평 슬롯이 있으면 25평 시세를 불러와 채운다
 wireStaticEvents();
+initRecentViews(); // 묶음 L16
 setTopMode(urlApplied ? 'multi' : (state.topMode || 'single'));
 // 항목 1(2026-09-21 세션, 다크모드 토글 작업 중 발견) — 여기서 항상
 // render()(다중비교 전용, renderActiveChart 안에서 그 시점에 등록된 모든
