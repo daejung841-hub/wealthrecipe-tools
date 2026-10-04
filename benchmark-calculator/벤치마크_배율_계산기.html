@@ -1995,6 +1995,8 @@ function seoulHistoricalAvg(){
 //   (18단계, 2026-10-04) L15 결론 박스 배지 옆 "현재 X억 / 적정 Y억"(적정가 줄 대신), L16 단일 진단 "최근 본 단지"(localStorage 한 키),
 //   L17 ⓘ 툴팁 디자인 통일(선도단지·상승률 보기·모양 겹쳐보기)·고를 것이 하나뿐인 "서울 선도단지(일반)" 드롭박스 숨김. 셋 다 계산은 그대로.
 //   (22단계, 2026-10-04) L18 옛 저장 목록 정리 — 예전 seed id로 저장된 라이브러리 항목을 지금 id로 옮기고 지운다(새 브라우저와 같은 값).
+//   (24단계, 2026-10-04) L19 단일 진단 "모양 겹쳐보기" 눈금 — 두 선이 함께 있는 기간만 보이고, 그 기간의 최저·최고를 같은 높이에 맞춘다(화면만).
+//   (25단계, 2026-10-04) L19B "모양 겹쳐보기"를 같은 눈금 지수로 — 두 선이 함께 있는 첫 달 = 100, 선이 겹치면 상승률이 같다(끄면 L19 방식).
 // K(2026-10-02): K1 고평가 최소 격차 문턱(5%), K2 차트 적정가 설명·선도단지 상태 칩 문구, K4 표시 이름(seedDisplayNames.js).
 //   K4는 F4처럼 seed를 읽을 때 이름을 바꾸므로 주소 플래그로만 끌 수 있다(런타임 setBundles로는 안 됨).
 // 주소에서는 ?bundles=A,B,C,D(D1~D4 모두) 또는 ?bundles=A,B,C,D1,D4처럼 쓴다(E·F·H·L·K도 같은 방식).
@@ -2003,9 +2005,9 @@ function seoulHistoricalAvg(){
 // 라이브는 주소 플래그를 읽지 않으므로 이 기본값이 그대로 동작한다.
 const BUNDLES = { A:false, B:false, C:false, D1:false, D2:false, D3:false, D4:false, E1:true, E2:false, E3:true, F1:true, F2:true, F3:true, F4:false,
   H1:false, H2:true, H3:true, H4:true, H5:true, H6:true, H7:true,
-  L1:true, L2:true, L3:true, L4:true, L5:true, L6:false, L7:true, L8:true, L9:true, L10:true, L11:true, L12:true, L13:true, L14:true, L15:true, L16:true, L17:true, L18:true, K1:false, K2:true, K4:false };
+  L1:true, L2:true, L3:true, L4:true, L5:true, L6:false, L7:true, L8:true, L9:true, L10:true, L11:true, L12:true, L13:true, L14:true, L15:true, L16:true, L17:true, L18:true, L19:true, L19B:true, K1:false, K2:true, K4:false };
 const BUNDLE_GROUPS = { D:['D1','D2','D3','D4'], E:['E1','E2','E3'], F:['F1','F2','F3','F4'], H:['H1','H2','H3','H4','H5','H6','H7'],
-  L:['L1','L2','L3','L4','L5','L6','L7','L8','L9','L10','L11','L12','L13','L14','L15','L16','L17','L18'], K:['K1','K2','K4'] };
+  L:['L1','L2','L3','L4','L5','L6','L7','L8','L9','L10','L11','L12','L13','L14','L15','L16','L17','L18','L19','L19B'], K:['K1','K2','K4'] };
 function setBundles(next){
   next = Object.assign({}, next||{});
   // D·E 하나로 D1~D4·E1~E3을 한꺼번에 끄고 켤 수 있다(개별 키가 있으면 그쪽이 우선).
@@ -8229,9 +8231,110 @@ function computeAxisSplitRange(leftMin, leftMax, compMin, benchFirst, benchMin, 
   const min = benchFirst - p * s;
   return { min, max: min + s, aligned: true, reason: null, p };
 }
+// ---- 묶음 L19(24단계, 2026-10-04): "모양 겹쳐보기" 눈금을 두 선이 함께 있는 기간 기준으로 ----
+// 문제: 위 방식은 오른쪽 눈금을 선도단지 선의 "첫 값"(2004년)에 맞춰, 시세가 늦게 시작한 단지(예: 마곡엠밸리8단지 2016.12~)는 두 선이
+// 함께 있는 기간 내내 선도단지 선이 단지 선보다 한참 위에 떠 있었다(모양 상관 0.967인데 화면 평균 높이 차 0.138, 선 자체의 정규화 차 0.049).
+// 방식(방안 A): 가로축을 두 선이 함께 있는 달(단지 선·선도단지 선이 모두 있는 첫 달~끝 달)로 자르고, 왼쪽 눈금은 그 기간의 왼쪽 선들(단지·적정가)
+// 최저~최고(±6%), 오른쪽 눈금은 선도단지 선의 그 기간 최저·최고가 단지 선의 그 기간 최저·최고와 같은 높이에 오게 한다 → 두 선을 각자 최저0~최고1로
+// 정규화한 것과 같은 모양 비교가 된다. 함께 있는 기간 밖(선도단지만 있는 해)은 잘라 보이지 않는다 — 눈금 밖으로 나간 선이 그래프 아래로 빠져
+// "떨어지는" 것처럼 보이는 것보다, 비교할 수 있는 기간만 보이는 쪽이 읽기 쉽다. 그 기간이 36개월 미만이면 아래 안내 줄에 쉬운 말 한 줄을 더한다.
+// 계산(적정가·배지·문장)은 바꾸지 않는다(차트 눈금·가로 범위만).
+const AXIS_SPLIT_L19_MIN_MONTHS = 36;
+function computeAxisSplitOverlapL19(labels, compData, benchData, leftSeries){
+  const ok = v => v != null && isFinite(v);
+  const idx = labels.map((_, i) => i).filter(i => ok(compData[i]) && ok(benchData[i]));
+  if (idx.length < 2) return null;
+  const i0 = idx[0], i1 = idx[idx.length - 1];
+  const leftVals = [].concat(...leftSeries.map(d => d.slice(i0, i1 + 1).filter(ok)));
+  const lMin = Math.min(...leftVals), lMax = Math.max(...leftVals);
+  const pad = lMax > lMin ? (lMax - lMin) * 0.06 : Math.max(Math.abs(lMax) * 0.05, 1);
+  const L0 = Math.max(0, lMin - pad), L1 = lMax + pad;
+  const c = idx.map(i => compData[i]), b = idx.map(i => benchData[i]);
+  const cMin = Math.min(...c), cMax = Math.max(...c), bMin = Math.min(...b), bMax = Math.max(...b);
+  const h0 = (cMin - L0) / (L1 - L0), h1 = (cMax - L0) / (L1 - L0);
+  let R0, R1, aligned = true;
+  if (bMax > bMin && h1 > h0){ const span = (bMax - bMin) / (h1 - h0); R0 = bMin - h0 * span; R1 = R0 + span; }
+  else { const sp = Math.max(bMax - bMin, Math.abs(bMax) * 0.05, 1); R0 = bMin - sp * 0.06; R1 = bMax + sp * 0.06; aligned = false; }
+  return { i0, i1, months: idx.length, start: labels[i0], end: labels[i1], left: [L0, L1], right: [R0, R1], aligned, short: idx.length < AXIS_SPLIT_L19_MIN_MONTHS };
+}
+function applySingleAxisSplitRangeL19(chart){
+  const labels = chart.data.labels;
+  const comp = chart.data.datasets.find(d => d._kind === 'comp' && !d.yAxisID);
+  const baseDs = chart.data.datasets.find(d => d.yAxisID === 'y2' && d._kind === 'base');
+  if (!comp || !baseDs) return null;
+  const leftSeries = chart.data.datasets.filter(d => !d.yAxisID || d.yAxisID === 'y').map(d => d.data);
+  const r = computeAxisSplitOverlapL19(labels, comp.data, baseDs.data, leftSeries);
+  if (!r) return null;
+  chart.options.scales.x = Object.assign({}, chart.options.scales.x || {}, { min: labels[r.i0], max: labels[r.i1] });
+  chart.options.scales.y.min = r.left[0]; chart.options.scales.y.max = r.left[1];
+  chart.options.scales.y2.min = r.right[0]; chart.options.scales.y2.max = r.right[1];
+  chart.$axisSplit = Object.assign({ l19: true, reason: r.aligned ? null : 'flat' }, r);
+  chart.update('none');
+  return chart.$axisSplit;
+}
+const AXIS_SPLIT_TEXT_L19 = {
+  note: r => '↔️ 두 선이 함께 있는 '+r.start+'~'+r.end+'만 보여 주고, 그 기간의 가장 낮은·높은 값을 같은 높이에 맞췄어요. 눈금이 달라 높이(금액)를 그대로 비교하면 안 돼요.',
+  short: r => ' 시세가 '+r.months+'개월뿐이라 모양 비교가 어려워요.',
+  tipExtra: ' 두 선이 함께 있는 기간만 보여 주고, 그 기간의 가장 낮은·높은 값을 같은 높이에 맞춰 그려요.'
+};
+function axisSplitTipText(){
+  if (typeof BUNDLES !== 'undefined' && BUNDLES.L19B) return AXIS_SPLIT_TEXT_L19B.tip;
+  return (typeof BUNDLES !== 'undefined' && BUNDLES.L19) ? AXIS_SPLIT_TIP + AXIS_SPLIT_TEXT_L19.tipExtra : AXIS_SPLIT_TIP;
+}
+// ---- 묶음 L19B(25단계, 2026-10-04, 대표님 의도): "두 선이 겹치면 상승률이 같고, 다르면 벌어져야 한다" ----
+// L19(방안 A)는 두 선의 최저·최고를 같은 높이에 맞춰 상승 폭이 달라도 겹쳐 보였다(마곡엠밸리8단지 2016.12~ 선도단지 +187.5%, 단지 +133.8%).
+// L19B: 두 선이 함께 있는 첫 달을 100으로 놓은 지수(값 ÷ 그 달 값 × 100)로 바꿔 같은 눈금 하나에 그린다 → 어느 달이든 두 선의 높이 비 =
+// (1+선도단지 상승률) : (1+단지 상승률). 선도단지만 있는 앞 기간은 잘라 보이지 않는다. 적정가 점선은 L19B_FAIR_MODE: 'index'면 단지 첫 달 값을
+// 100으로 한 같은 지수로(단지 선과의 간격 = 적정가와 현재가의 차이 비율), 'hide'면 뺀다. 선택 구간 박스·마우스 값은 원래 금액(_raw)으로 계산해
+// 금액·상승률이 예전과 같고, 상승률은 선 높이와 같은 "시작가 대비" 계산이다. 계산(적정가·배지·문장)은 바꾸지 않는다(차트 데이터만).
+const L19B_FAIR_MODE = 'index';   // 27단계(대표님 결정): 점선 유지 — 값 = 그 달 적정가 ÷ 단지 첫 달 가격 × 100, 적정가 버튼이 켜져 있을 때만 그린다(25단계엔 'hide')
+const AXIS_SPLIT_TEXT_L19B = {
+  tip: '이 단지와 선도단지가 함께 있는 첫 달을 100으로 놓고 같은 눈금으로 그려요. 두 선이 겹치면 그 뒤 상승률이 같고, 벌어진 만큼이 상승률 차이예요. 여러 단지를 함께, 시작 시점을 골라 비교하려면 “여러 단지 비교”의 “상승률 보기”를 쓰세요.',
+  note: r => '↔️ '+r.start+' = 100으로 놓고 같은 눈금으로 그렸어요. '+r.start+' 이후 선도단지 '+fmtSignedPct(r.benchGrowth)+', 이 단지 '+fmtSignedPct(r.compGrowth)+'.',
+  fairNote: ' 점선은 평소 가격 비율일 때 이 단지가 있을 자리예요. 실선이 점선보다 아래면 평소보다 덜 올랐다는 뜻이에요.',
+  axis: r => '지수('+r.start+' = 100)'
+};
+function fmtSignedPct(v){ return (v >= 0 ? '+' : '')+v.toFixed(1)+'%'; }
+// 차트 설정(cfg)을 같은 눈금 지수로 바꾼다. 반환: { i0, i1, months, start, end, benchGrowth, compGrowth, short } 또는 null(함께 있는 달이 2개 미만)
+function applyAxisIndexL19B(cfg, fairMode){
+  const labels = cfg.data.labels, ds = cfg.data.datasets;
+  const comp = ds.find(d => d._kind === 'comp'), base = ds.find(d => d._kind === 'base');
+  if (!comp || !base) return null;
+  const ok = v => v != null && isFinite(v) && v > 0;
+  const idx = labels.map((_, i) => i).filter(i => ok(comp.data[i]) && ok(base.data[i]));
+  if (idx.length < 2) return null;
+  const i0 = idx[0], i1 = idx[idx.length - 1];
+  const c0 = comp.data[i0], b0 = base.data[i0];
+  const toIdx = (d, v0) => { d._raw = d.data.slice(); d._index0 = v0; d.data = d.data.map((v, i) => (i < i0 || i > i1 || v == null) ? null : v / v0 * 100); };
+  toIdx(base, b0); toIdx(comp, c0);
+  const mode = fairMode || L19B_FAIR_MODE;
+  const fairs = ds.filter(d => d._kind === 'benchFair' || d._kind === 'fair');
+  if (mode === 'index') fairs.forEach(d => toIdx(d, c0));
+  else cfg.data.datasets = ds.filter(d => fairs.indexOf(d) < 0);
+  const hasFair = mode === 'index' && fairs.length > 0;
+  ds.forEach(d => { if (d.yAxisID) delete d.yAxisID; });
+  const o = cfg.options; o.scales = o.scales || {};
+  delete o.scales.y2;
+  o.scales.x = Object.assign({}, o.scales.x || {}, { min: labels[i0], max: labels[i1] });
+  const r = { i0, i1, months: idx.length, start: labels[i0], end: labels[i1],
+    benchGrowth: (base._raw[i1] / b0 - 1) * 100, compGrowth: (comp._raw[i1] / c0 - 1) * 100, short: idx.length < AXIS_SPLIT_L19_MIN_MONTHS, hasFair };
+  const fontColor = (typeof chartFontColor === 'function') ? chartFontColor() : undefined;
+  o.scales.y = Object.assign({}, o.scales.y || {}, { min: undefined, max: undefined,
+    ticks: Object.assign({}, (o.scales.y || {}).ticks || {}, { callback: v => Math.round(v) }),
+    title: { display: true, text: AXIS_SPLIT_TEXT_L19B.axis(r), color: fontColor, font: { size: 11 } } });
+  o.plugins = o.plugins || {}; o.plugins.tooltip = o.plugins.tooltip || {};
+  o.plugins.tooltip.callbacks = Object.assign({}, o.plugins.tooltip.callbacks || {}, { label: (c) => {
+    const d = c.dataset, raw = d._raw ? d._raw[c.dataIndex] : null;
+    if (c.parsed.y == null) return d.label+': —';
+    return d.label+': '+c.parsed.y.toFixed(1)+' ('+fmtSignedPct(c.parsed.y - 100)+(raw != null ? ', '+fmtEok(raw) : '')+')';
+  } });
+  cfg.$axisIndexL19B = r;
+  return r;
+}
 // 그려진 단일 진단 가격 차트(선도단지선이 y2)의 오른쪽 축 범위를 정한다. 왼쪽 축은 자동 범위를 그대로 고정해 p 계산과 어긋나지 않게 한다.
 function applySingleAxisSplitRange(chart){
   if (!chart || !chart.scales || !chart.scales.y2) return null;
+  if (typeof BUNDLES !== 'undefined' && BUNDLES.L19){ const r19 = applySingleAxisSplitRangeL19(chart); if (r19) return r19; }
   const vals = (d) => d.data.filter(v => v != null && isFinite(v));
   const comp = chart.data.datasets.find(d => d._kind === 'comp' && !d.yAxisID);
   const baseDs = chart.data.datasets.find(d => d.yAxisID === 'y2' && d._kind === 'base');
@@ -8251,6 +8354,8 @@ function applySingleAxisSplitRange(chart){
 // L9를 끄면 예전 문구('↔️ 축 분리' 등)로 돌아간다 — 급지표 소유 테스트(test_axis_split.js)가 예전 문구를 고정 검사하므로
 // 예전 문구는 그대로 두고 새 문구만 별도 상수로 둔다(L5의 FAIR_BASIS_LABELS_L5와 같은 방식).
 const AXIS_SPLIT_LABEL = { off:'모양 겹쳐보기', on:'모양 겹쳐보기 중 (끄기)' };
+// 27단계(대표님 결정): L19B(같은 눈금·같은 출발점)에서는 이름이 "📈 상승률 겹쳐보기" / "상승률 겹쳐보기 중 (끄기)". L19B를 끄면 위 이름.
+const AXIS_SPLIT_LABEL_L19B = { off:'상승률 겹쳐보기', on:'상승률 겹쳐보기 중 (끄기)', icon:'📈' };
 const AXIS_SPLIT_TIP = '이 단지와 선도단지를 서로 다른 눈금(왼쪽·오른쪽)으로 그려서, 오르내리는 모양과 시기를 겹쳐 볼 수 있어요. 눈금이 달라서 위아래 높이를 그대로 비교하면 안 돼요.';
 const AXIS_SPLIT_TEXT_L9 = {
   note: '↔️ 선도단지는 오른쪽 눈금이라 위아래 높이 비교는 참고용입니다.',
@@ -8287,7 +8392,8 @@ function updateSingleAxisSplitToggle(){
   const l12 = typeof BUNDLES !== 'undefined' && BUNDLES.L12;   // 플래그가 없는 환경(함수만 꺼내 쓰는 테스트)은 예전 동작
   const drawable = typeof singleFairDrawable === 'undefined' || singleFairDrawable;
   const fairOn = state.singleFairLineOverride === null ? !!(l12 && drawable) : !!(state.singleFairLineOverride && (!l12 || drawable));
-  btn.style.display = (isPriceChart && fairOn) ? '' : 'none'; // 적정가를 켠 가격 그래프에서만 의미가 있다
+  const l19b = typeof BUNDLES !== 'undefined' && BUNDLES.L19B;   // 27단계: 상승률 겹쳐보기는 적정가를 꺼도 쓸 수 있다(점선만 빠짐)
+  btn.style.display = (isPriceChart && (fairOn || l19b)) ? '' : 'none'; // 적정가를 켠 가격 그래프에서만 의미가 있다(L19B는 가격 그래프면 항상)
   // 묶음 L12: 선도단지 선을 끄면 모양 겹쳐보기도 꺼지고 비활성(선도단지 선이 있어야 쓸 수 있다)
   const benchOff = l12 && state.singleBenchLineOn === false;
   if (benchOff) singleAxisSplit = false;
@@ -8295,7 +8401,8 @@ function updateSingleAxisSplitToggle(){
   if (benchOff) btn.setAttribute('aria-disabled', 'true'); else if (btn.removeAttribute) btn.removeAttribute('aria-disabled');
   btn.classList.toggle('active', singleAxisSplit);
   const l9 = typeof BUNDLES !== 'undefined' && BUNDLES.L9;   // 플래그가 없는 환경(함수만 꺼내 쓰는 테스트)은 예전 문구
-  btn.textContent = l9 ? '↔️ '+(singleAxisSplit ? AXIS_SPLIT_LABEL.on : AXIS_SPLIT_LABEL.off) : (singleAxisSplit ? '↔️ 축 분리 중 (끄기)' : '↔️ 축 분리');
+  const nm = (typeof BUNDLES !== 'undefined' && BUNDLES.L19B) ? AXIS_SPLIT_LABEL_L19B : null;   // 27단계: 상승률 겹쳐보기
+  btn.textContent = l9 ? (nm ? nm.icon+' '+(singleAxisSplit ? nm.on : nm.off) : '↔️ '+(singleAxisSplit ? AXIS_SPLIT_LABEL.on : AXIS_SPLIT_LABEL.off)) : (singleAxisSplit ? '↔️ 축 분리 중 (끄기)' : '↔️ 축 분리');
   if (benchOff) btn.title = SINGLE_L12_TEXT.splitNeedsBench;
   else if (l9) btn.removeAttribute('title'); else btn.title = '선도단지 선을 오른쪽 축에 따로 그려 단지 선·적정가 선을 크게 봅니다';
   const tip = document.getElementById('singleAxisSplitInfo');   // L9의 새 ⓘ — 버튼과 같이 보이고 숨는다
@@ -8340,7 +8447,7 @@ function applyL9Toolbar(){
       p2 = document.createElement('span'); p2.className = 'btn-tip-pair'; p2.id = 'singleAxisSplitPair';
       if (!tip){
         tip = document.createElement('span'); tip.className = 'info-icon'; tip.id = 'singleAxisSplitInfo'; tip.tabIndex = 0;
-        tip.setAttribute('data-tip', AXIS_SPLIT_TIP); tip.setAttribute('aria-label', AXIS_SPLIT_TIP); tip.textContent = 'ⓘ';
+        tip.setAttribute('data-tip', axisSplitTipText()); tip.setAttribute('aria-label', axisSplitTipText()); tip.textContent = 'ⓘ';
       }
       if (BUNDLES.L17) tip.classList.add('tip-unified');
       group.insertBefore(p1, bench); p1.appendChild(bench); if (leadInfo) p1.appendChild(leadInfo);
@@ -8462,17 +8569,24 @@ function renderSingleActiveChart(bench, target){
     const overlayOn = BUNDLES.L12 ? benchLine : state.singleBenchmarkOverlayOn;
     const benchmarkOverlay = overlayOn ? getVirtualBenchmarkComplex(state.singleBenchmarkOverlayGroup) : null;
     const benchmarkUsable = benchmarkOverlay && !(base.isVirtualBenchmark && base.groupKey===benchmarkOverlay.groupKey);
-    const split = singleAxisSplit && showFair && benchLine; // 축 분리는 적정가를 켠 상태에서만 — 그 밖에는 예전과 같은 한 축 그래프
-    const cfg = split
+    const split = singleAxisSplit && benchLine && (showFair || BUNDLES.L19B); // 축 분리는 적정가를 켠 상태에서만(L19B는 적정가 없이도 — 점선만 빠짐)
+    const indexMode = split && BUNDLES.L19B;   // 묶음 L19B: 같은 눈금 지수
+    const cfg = (split && !indexMode)
       ? priceChartConfig(base, comps, field, ratioField, showFair, benchmarkOverlay, { benchOnRightAxis: true })
       : priceChartConfig(base, comps, field, ratioField, showFair, benchmarkOverlay);
     // 묶음 L12: 선도단지 선을 끄면 진단 기준선(선도단지)과 겹쳐 그린 선도단지 선을 그래프·범례에서 뺀다(적정가 선은 그대로)
     if (!benchLine) cfg.data.datasets = cfg.data.datasets.filter(ds => !(ds._kind === 'base' || (benchmarkOverlay && ds.label === benchmarkOverlay.name)));
+    const idx19 = indexMode ? applyAxisIndexL19B(cfg) : null;
     charts.singleMainCanvas = new Chart(document.getElementById('singleMainCanvas'), cfg);
-    if (split){
+    if (indexMode && idx19){
+      charts.singleMainCanvas.$axisIndexL19B = idx19;
+      const noteText = AXIS_SPLIT_TEXT_L19B.note(idx19) + (idx19.hasFair ? AXIS_SPLIT_TEXT_L19B.fairNote : '') + (idx19.short ? AXIS_SPLIT_TEXT_L19.short(idx19) : '');
+      area.insertAdjacentHTML('afterbegin', '<div class="common-range axis-split-note" id="singleAxisSplitNote">'+esc(noteText)+'</div>');
+    } else if (split){
       const r = applySingleAxisSplitRange(charts.singleMainCanvas);
-      const T = axisSplitText(), why = r && !r.aligned ? T.noteWhy : '';
-      area.insertAdjacentHTML('afterbegin', '<div class="common-range axis-split-note" id="singleAxisSplitNote">'+T.note+why+'</div>');
+      const T = axisSplitText(), why = r && !r.aligned && !r.l19 ? T.noteWhy : '';
+      const noteText = (r && r.l19) ? AXIS_SPLIT_TEXT_L19.note(r) + (r.short ? AXIS_SPLIT_TEXT_L19.short(r) : '') : T.note+why;   // 묶음 L19
+      area.insertAdjacentHTML('afterbegin', '<div class="common-range axis-split-note" id="singleAxisSplitNote">'+esc(noteText)+'</div>');
     }
     // 적정가 문구는 화면 최상단 독립 카드(buildFairPriceSummaryCard)로
     // 이미 항상 보이므로, 여기(차트 하단, "적정가 표시" 토글 뒤에 숨어있던
@@ -10374,8 +10488,9 @@ function renderDragResult(chart, lo, hi, resultEl, opts){
   const priceRows = [], ratioRows = [];
   chart.data.datasets.forEach(ds=>{
     if (ds._kind!=='base' && ds._kind!=='comp' && ds._kind!=='ratio') return;
-    const startVal = nearestValue(ds.data, lo, lo, hi, 1);
-    const endVal = nearestValue(ds.data, hi, lo, hi, -1);
+    const src = ds._raw || ds.data;   // 묶음 L19B: 지수로 그린 선은 원래 금액으로(상승률은 지수와 같음)
+    const startVal = nearestValue(src, lo, lo, hi, 1);
+    const endVal = nearestValue(src, hi, lo, hi, -1);
     if (startVal==null || endVal==null) return;
     if (ds._kind==='ratio'){
       ratioRows.push({ label: ds.label, color: ds._color, isRatio:true, startVal, endVal, sortVal: endVal-startVal });
