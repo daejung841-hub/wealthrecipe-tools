@@ -895,6 +895,8 @@
     });
     // 외부 사이트 링크: 인터넷이 없으면 이동하지 않고 안내
     document.body.addEventListener('click', (e) => { const a = e.target.closest('a[data-ext]'); if (a && !PWA.online()) { e.preventDefault(); needInternet('외부 사이트는'); } });
+    // 의견 보내기: 사이트 공용 위젯(../feedback-widget.js)을 연다. 오프라인이거나 못 불러왔으면 안내만 한다.
+    $('btnFeedback').addEventListener('click', () => { const fab = document.getElementById('fwFabBtn'); if (!PWA.online() || !fab) { needInternet('의견 보내기는'); return; } fab.click(); });
     $('btnExport').addEventListener('click', openExport);
     $('btnImport').addEventListener('click', () => $('fileImport').click());
     $('fileImport').addEventListener('change', (e) => { const f = e.target.files && e.target.files[0]; e.target.value = ''; if (f) handleImportFile(f); });

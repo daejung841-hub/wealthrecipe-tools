@@ -22,6 +22,8 @@
 <script src="../config.js"></script>
 <script src="../gate.js"></script>
 <script src="auth.js"></script>
+<!-- 의견 보내기 위젯(사이트 공용). defer: 앱 로딩을 막지 않고, 오프라인에서 못 불러와도 앱은 그대로 동작한다. 떠 있는 버튼은 숨기고(styles.css) 설정 화면의 버튼으로 연다 -->
+<script src="../feedback-widget.js" data-calculator="imjang" defer></script>
 <script src="pwa.js"></script>
 <link rel="stylesheet" href="styles.css">
 </head>
@@ -100,7 +102,10 @@
       <div class="card"><div style="font-weight:700">이 폰의 저장 공간</div>
         <div class="sub" style="margin-top:6px;line-height:1.7" id="storageInfo">확인 중…</div>
         <div class="sub" style="margin-top:8px">입력한 내용은 쓰는 대로 자동으로 저장돼요. 저장 버튼은 없어요.</div>
-        <div class="sub" style="margin-top:8px;font-weight:700">기록은 이 폰에만 저장돼요. 서버로 보내지 않아요.</div></div>
+        <div class="sub" style="margin-top:8px;font-weight:700">기록은 이 폰에만 저장돼요. 서버로 보내지 않아요 (의견 보내기는 제외).</div></div>
+      <div class="card" id="feedbackCard" style="margin-top:14px"><div style="font-weight:700">의견 보내기</div>
+        <div class="sub" style="margin:6px 0 10px">불편한 점이나 바라는 기능을 알려 주세요. 적은 의견만 개발자에게 전달되고, 임장 기록은 함께 보내지지 않아요. 인터넷이 필요해요.</div>
+        <button class="btn ghost" id="btnFeedback">💬 의견 보내기</button></div>
     </div>
   </section>
 

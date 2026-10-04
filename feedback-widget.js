@@ -23,6 +23,7 @@
     { key: 'price-correction', label: '시세보정 계산기' },
     { key: 'benchmark-calculator', label: '저평가 단지 계산기' },
     { key: 'rate-simulator', label: '추가분담금 · 비례율 계산기' },
+    { key: 'imjang', label: '임장 체크리스트' },
   ];
 
   // document.currentScript는 DOMContentLoaded 이후(비동기 init 경로)에는 항상 null이라

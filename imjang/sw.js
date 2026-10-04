@@ -9,7 +9,7 @@
  *  - 그 밖의 요청(다른 도구, 계산기, 외부 주소)은 가로채지 않는다(캐시 안 함).
  *  - 주소 끝에 ?resetsw=1 을 붙여 열면 이 서비스워커를 해제하고 imjang 캐시를 모두 지운 뒤 새로 불러온다(사용자 기록은 건드리지 않음).
  */
-const CACHE_VERSION = 'imjang-v1';                 // ← 배포할 때마다 올리는 곳(이 한 곳)
+const CACHE_VERSION = 'imjang-v2';                 // ← 배포할 때마다 올리는 곳(이 한 곳)
 const CACHE_PREFIX = 'imjang-';
 const GATE_CACHE = CACHE_PREFIX + 'gate';          // 버전과 무관하게 유지(오프라인 입장용 config.js·gate.js 저장본)
 const GATE_FILES = ['../config.js', '../gate.js'];

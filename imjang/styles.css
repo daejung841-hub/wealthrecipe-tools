@@ -177,3 +177,6 @@ textarea{min-height:76px;resize:vertical;margin-top:8px}
 .updatebar{background:var(--gold);color:var(--on-gold);font-size:14px;font-weight:700;padding:10px var(--pad);display:flex;align-items:center;justify-content:space-between;gap:var(--gap)}
 .updatebar .banner-btn{border-color:var(--on-gold);color:var(--on-gold);align-self:auto}
 .badge-conv{display:inline-block;background:var(--paper);color:var(--ink);border:1px solid var(--mute);font-size:10px;font-weight:700;padding:1px 6px;border-radius:8px;margin-left:6px;vertical-align:middle}
+
+/* M6: 사이트 공용 의견 위젯의 떠 있는 버튼은 입력 화면을 가리므로 숨기고, 설정 화면의 버튼으로 연다 */
+.fw-fab{display:none!important}
