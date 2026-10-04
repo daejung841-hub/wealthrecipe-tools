@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>재개발 임장 체크리스트</title>
+<meta name="theme-color" content="#0E1B3D">
+<meta name="application-name" content="임장 체크리스트">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="임장 체크리스트">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+<!--
+  입장: 사이트 공용 게이트(config.js · gate.js)를 그대로 쓴다. 다른 도구들은 배포 스크립트가 이 두 줄과
+  requireSiteAuth 줄을 끼워 넣지만, 임장 앱은 자체 입장 화면(auth.js)이 같은 SITE_PASSWORD로 확인하고
+  "이 기기에서 기억하기"를 더한다. 로컬 개발 주소에서는 게이트 없이 열린다(확인하려면 ?gate=on).
+  경로는 전부 상대경로 — /wealthrecipe-tools/imjang/ 아래에서도 그대로 동작한다.
+-->
+<script src="../config.js"></script>
+<script src="../gate.js"></script>
+<script src="auth.js"></script>
+<script src="pwa.js"></script>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div id="app">
+  <div class="banner" id="banner" role="alert" hidden></div>
+  <div class="updatebar" id="updateBar" role="status" hidden><span>새 버전이 있어요.</span><button id="btnUpdate" class="banner-btn">새로고침</button></div>
+
+  <section class="screen lock" id="s-lock">
+    <div class="logo">🧭</div>
+    <h1>재개발 임장 체크리스트</h1>
+    <div class="sub">수강생 비밀번호를 입력해 주세요.</div>
+    <form id="lockForm" autocomplete="off">
+      <input type="password" id="lockPw" placeholder="비밀번호" autocomplete="off">
+      <div class="err" id="lockErr" role="alert"></div>
+      <button type="submit" class="btn gold">들어가기</button>
+    </form>
+    <div class="small">한 번 입력하면 이 폰에서는 다시 묻지 않아요.</div>
+  </section>
+
+  <section class="screen" id="s-home">
+    <div class="top"><h1>내 임장 구역</h1><div class="sub">구역을 고르고 항목을 하나씩 채워 보세요</div></div>
+    <div class="body" id="homeList"></div>
+    <div style="padding:0 var(--pad) 12px"><button class="btn gold" id="btnNew">＋ 새 임장 시작</button></div>
+  </section>
+
+  <section class="screen" id="s-pick">
+    <div class="top"><div class="row"><button class="back" data-go="s-home" aria-label="뒤로">‹</button><h2>어느 구역으로 갈까요?</h2></div></div>
+    <div class="body">
+      <input type="search" id="pickQ" placeholder="구역 이름 · 구 검색 (예: 도림, 영등포)">
+      <div class="chips" id="pickFilters" style="margin:10px 0 4px"></div>
+      <div class="sub" style="margin:8px 2px 12px">부의 레시피 재개발 목록표에서 불러옵니다. 목록에 없으면 아래에서 직접 입력하세요.</div>
+      <div id="pickList"></div>
+      <div class="card" style="margin-top:6px"><div style="font-weight:700;margin-bottom:8px">목록에 없는 구역</div>
+        <input type="text" id="customName" placeholder="구역명 직접 입력">
+        <button class="btn navy" style="margin-top:10px" id="btnCustom">이 이름으로 시작</button></div>
+    </div>
+  </section>
+
+  <section class="screen" id="s-zone">
+    <div class="top">
+      <div class="row"><button class="back" data-go="s-home" aria-label="뒤로">‹</button><div style="flex:1"><h2 id="zName"></h2><div class="sub" id="zCount"></div></div></div>
+      <div class="bar"><i id="zBar"></i></div>
+      <div class="seg"><button id="segH">🖥 손품</button><button id="segF">🚶 현장 임장</button></div>
+      <div class="seg-hint" id="segHint"></div>
+    </div>
+    <div class="tabs" id="tabs"></div>
+    <div class="body" id="zBody"></div>
+    <div class="pager" id="pager"></div>
+  </section>
+
+  <section class="screen" id="s-sites">
+    <div class="top"><h1>유용한 사이트</h1><div class="sub">서울 기준 · 단계별로 필요한 것만</div></div>
+    <div class="body"><div class="hint">모바일에서는 세움터가 불편해서, 건축물대장은 부동산 플래닛·디스코 같은 앱을 먼저 안내해요. 아직 주소를 확인하지 못한 곳은 "주소 미확인"으로 표시돼요.</div><div id="siteList"></div></div>
+  </section>
+
+  <section class="screen" id="s-set">
+    <div class="top"><h1>저장 · 설정</h1><div class="sub">기록은 이 폰에만 저장돼요</div></div>
+    <div class="body">
+      <div class="card" style="margin-bottom:14px">
+        <div style="font-weight:700;font-size:17px">내 임장 기록 보관하기</div>
+        <div class="sub" style="margin:6px 0 4px">폰을 바꾸거나 인터넷 기록을 지우면 기록이 사라질 수 있어요. 이어서 쓰고 싶다면 임장 후 꼭 저장해 두세요.</div>
+        <div class="sub" id="backupLast" style="font-weight:700;margin-bottom:8px"></div>
+        <div id="backupNotice"></div>
+        <button class="btn gold" id="btnExport" style="margin-top:10px">① 내 임장 기록 저장하기</button>
+        <button class="btn ghost" id="btnImport" style="margin-top:10px">② 저장한 기록 불러오기</button>
+        <input type="file" id="fileImport" accept=".json,application/json,text/plain" hidden>
+      </div>
+      <div class="card" style="margin-bottom:14px"><div style="font-weight:700">이렇게 쓰세요 (전체 기록 백업)</div>
+        <div class="sub" style="margin-top:6px;line-height:1.7">① 임장 후 저장 → 카톡 "나에게 보내기"<br>② 새 폰에서 이 화면 열기<br>③ ②번 버튼(불러오기)으로 그 파일 선택 → 복원 완료<br>사진 포함 파일은 커서 카톡으로 보내기 어려울 수 있어요. 기본은 "글만"이에요.</div>
+      </div>
+      <div class="card" style="margin-bottom:14px"><div style="font-weight:700">결론만 보내고 싶다면</div>
+        <div class="sub" style="margin-top:6px">구역의 <b>정리 탭</b>에서 "결론만 카톡으로 보내기"를 누르세요. 요약 글·전체 내용 글·이미지 한 장 중에 골라 보낼 수 있고, 받은 사람은 이 앱에 들어오지 않아도 볼 수 있어요.</div></div>
+      <div class="card" id="installCard" style="margin-bottom:14px" hidden></div>
+      <div class="card" id="shareTest" style="margin-bottom:14px" hidden></div>
+      <div class="card"><div style="font-weight:700">이 폰의 저장 공간</div>
+        <div class="sub" style="margin-top:6px;line-height:1.7" id="storageInfo">확인 중…</div>
+        <div class="sub" style="margin-top:8px">입력한 내용은 쓰는 대로 자동으로 저장돼요. 저장 버튼은 없어요.</div>
+        <div class="sub" style="margin-top:8px;font-weight:700">기록은 이 폰에만 저장돼요. 서버로 보내지 않아요.</div></div>
+    </div>
+  </section>
+
+  <div class="nav" id="nav" hidden>
+    <button data-go="s-home" class="on"><b>📍</b>내 구역</button>
+    <button data-go="s-sites"><b>🔗</b>사이트</button>
+    <button data-go="s-set"><b>💾</b>저장·설정</button>
+  </div>
+
+  <div class="modal" id="modal"><div class="sheet" id="sheet"></div></div>
+  <div class="toast" id="toast" role="status"></div>
+</div>
+
+<script src="rules.js"></script>
+<script src="store.js"></script>
+<script src="photo.js"></script>
+<script src="share.js"></script>
+<script src="send.js"></script>
+<script src="backup.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

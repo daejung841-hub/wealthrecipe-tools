@@ -1,0 +1,87 @@
+{
+ "_note": "기준 수치는 여기에서만 고친다. 문구에서는 {치환토큰}으로 불러 쓴다(토큰 목록은 rules.js의 buildTokens).",
+ "asOf": "2026-10",
+ "constructionCost": {
+  "unit": "만원/평",
+  "basis": "계약면적",
+  "regions": [
+   {
+    "id": "seoul",
+    "label": "서울",
+    "range": [
+     800,
+     900
+    ]
+   },
+   {
+    "id": "gyeonggi_incheon",
+    "label": "경기·인천",
+    "range": [
+     600,
+     680
+    ]
+   }
+  ]
+ },
+ "premium": {
+  "basis": "공동주택가격",
+  "appraisalRatioOfPublicPrice": [
+   1.4,
+   1.7
+  ]
+ },
+ "opposition": {
+  "danger": 10,
+  "critical": 25
+ },
+ "legal": {
+  "unionConsentRatio": "3/4"
+ },
+ "rental": {
+  "insuredRatioPct": 126
+ },
+ "retail": {
+  "activeHouseholdsRange": [
+   3000,
+   5000
+  ]
+ },
+ "calculator": {
+  "url": "../benchmark-calculator/벤치마크_배율_계산기.html",
+  "label": "저평가 단지 계산기",
+  "confirmTitle": "저평가 단지 계산기로 이동할까요?",
+  "confirmBody": "임장 앱을 나가 저평가 단지 계산기 화면으로 이동해요. 지금까지의 기록은 이 앱에 그대로 남아 있어요.",
+  "confirmYes": "이동하기",
+  "confirmNo": "취소"
+ },
+ "photos": {
+  "maxPerItem": 5,
+  "maxEdge": 1280,
+  "jpegQuality": 0.7
+ },
+ "share": {
+  "splitChars": 3000,
+  "maxPhotos": 5,
+  "card": {
+   "width": 1080,
+   "maxRisks": 5
+  }
+ },
+ "_shareNote": "splitChars: 카톡 한 번에 붙일 수 있는 글자 수는 정확히 알 수 없어 추정값(기본 3000자)이다. 실기기에서 가장 긴 글로 확인해 이 값을 조정한다.",
+ "appVersion": "0.4.0",
+ "backup": {
+  "maxExportMB": 30,
+  "maxImportMB": 60,
+  "reminderDays": 7,
+  "limits": {
+   "zones": 200,
+   "itemsPerZone": 200,
+   "fieldsPerItem": 40,
+   "listItems": 100,
+   "str": 5000,
+   "shortStr": 200,
+   "photosPerZone": 150,
+   "photoMB": 5
+  }
+ }
+}

@@ -1,0 +1,14 @@
+{
+ "_note": "url이 null이면 화면에 '주소 미확인'으로 표시한다. 확인되지 않은 주소는 추측해서 넣지 않는다(재개발 닷컴·부동산 플래닛·디스코는 주소를 받으면 넣는다).",
+ "sites": [
+  {"group": "임장 전", "title": "정비몽땅 (정비사업 정보몽땅)", "desc": "사업장 검색: 진행 단계, 협력업체, 고시/공고", "url": "https://cleanup.seoul.go.kr"},
+  {"group": "임장 전", "title": "부의 레시피 재개발 목록표", "desc": "구역 기본 정보 불러오기", "url": "../redevelopment-list/재개발_목록표.html"},
+  {"group": "임장 전", "title": "재개발 닷컴", "desc": "구역·신축 빌라 현황", "url": null},
+  {"group": "임장 전", "title": "부동산 플래닛 · 디스코", "desc": "건축물대장, 건물 정보 (모바일 편의)", "url": null},
+  {"group": "임장 전", "title": "토지이음", "desc": "토지이용계획, 지역·지구 확인", "url": "https://www.eum.go.kr"},
+  {"group": "임장 전", "title": "세움터", "desc": "건축물대장 원본 (모바일에서는 불편)", "url": "https://cloud.eais.go.kr"},
+  {"group": "시세 확인", "title": "국토부 실거래가 공개시스템", "desc": "매매·전월세·입주권 실거래", "url": "https://rt.molit.go.kr"},
+  {"group": "시세 확인", "title": "아실", "desc": "매물 증감, 단지 비교, 입주물량", "url": "https://asil.kr"},
+  {"group": "시세 확인", "title": "부동산 공시가격 알리미", "desc": "공동주택가격(공시가격) 확인", "url": "https://www.realtyprice.kr"}
+ ]
+}
