@@ -261,6 +261,15 @@
   .m-sheet .region-count{ font-size:13px; }
 </style>
 
+<style id="pcSearchStyle">
+  /* PC 필터 줄의 단지명 검색 — 새로 추가한 요소(.pc-search*)에만 적용된다 */
+  .filters .pc-search-group{ position:relative; gap:6px; }
+  .filters input.pc-search{ width:190px; padding:5px 26px 5px 8px; border:1px solid var(--border); border-radius:4px; font-size:12px; background:var(--card-bg); color:var(--text); }
+  .filters input.pc-search:focus{ outline:2px solid var(--base-color); outline-offset:-1px; }
+  .filters .pc-search-clear{ position:absolute; left:162px; top:50%; transform:translateY(-50%); padding:0 6px; border:none; background:none; color:var(--muted); cursor:pointer; font-size:12px; line-height:1; }
+  .filters .pc-search-clear:hover{ background:none; color:var(--text); }
+  .filters .pc-search-group .rental-count{ min-width:0; }
+</style>
 <div class="header">
   <h1>급지표</h1>
   <div class="criteria">분류 기준: 최신월 매매일반평균가</div>
@@ -828,9 +837,25 @@ function setPanelCollapsed(collapsed){
   if (btn) btn.textContent = collapsed ? '▸ 지역 패널 열기' : '◂ 지역 패널 접기';
 }
 
+// 단지명 검색(2026-10 세션) — PC와 모바일이 같은 상태(searchRaw/searchNorm)와 같은 판정 함수(searchKey/matchesSearch)를 쓴다.
+// 공백은 모두 무시하고(소문자화) 이름 전체에서 부분 일치로 찾는다: "래미안 원베일리"는 "래미안원베일리"로 본다. 표시 이름·원래 이름 어느 쪽이든 일치하면 남긴다.
+// 검색어는 URL에 넣지 않고, 선택(기준·비교) 상태와도 무관하다(가려져도 baseId/compareIds는 그대로).
+let searchRaw = '';  // 입력칸에 보이는 글자
+let searchNorm = ''; // 판정에 쓰는 정규화된 검색어(비어 있으면 검색 없음)
+function searchKey(s){ return String(s == null ? '' : s).toLowerCase().replace(/\s+/g, ''); }
+function matchesSearch(c, q){
+  if (!q) return true;
+  return searchKey(displayName(c)).indexOf(q) >= 0 || searchKey(c.name).indexOf(q) >= 0;
+}
+function commitSearch(raw){ searchRaw = String(raw == null ? '' : raw); searchNorm = searchKey(searchRaw); }
+function passesSearch(c){ return !searchNorm || matchesSearch(c, searchNorm); }
+
 function initFilterBar(){
   const el = document.getElementById('filterBar');
   el.innerHTML =
+    '<div class="filter-group pc-search-group"><input type="text" id="pcSearch" class="pc-search" placeholder="단지명 검색" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="단지명 검색">' +
+    '<button type="button" id="pcSearchClear" class="pc-search-clear" aria-label="검색어 지우기" hidden>✕</button>' +
+    '<span id="pcSearchCount" class="rental-count"></span></div>' +
     '<button id="panelToggle" class="panel-toggle" type="button"></button>' +
     '<div class="filter-group"><label>연식</label>' +
     '<select id="ageMode">' +
@@ -849,6 +874,35 @@ function initFilterBar(){
   const ageYearsEl = document.getElementById('ageYears');
   const unitsMinEl = document.getElementById('unitsMin');
   const rentalOnlyEl = document.getElementById('rentalOnly');
+  // 단지명 검색: 입력칸은 다시 그리지 않고(이 줄은 처음 한 번만 만든다) 입력이 멈춘 뒤(150ms) 표만 다시 그린다.
+  // 한글 조합 중(compositionstart~end)에는 Esc를 IME 취소로 보고 검색어를 지우지 않으며, 조합이 끝나면 바로 반영한다.
+  const pcSearchEl = document.getElementById('pcSearch');
+  const pcSearchClearEl = document.getElementById('pcSearchClear');
+  let pcSearchTimer = null, pcComposing = false;
+  const applyPcSearch = () => {
+    clearTimeout(pcSearchTimer);
+    pcSearchClearEl.hidden = !pcSearchEl.value;
+    if (pcSearchEl.value === searchRaw) return;
+    commitSearch(pcSearchEl.value);
+    renderBandContent(); // 결과 개수(#pcSearchCount)는 renderBandContent가 갱신한다
+    const wrap = document.querySelector('.all-grid-wrap'); // 검색 결과는 맨 위·맨 왼쪽부터 보여 준다(이전 스크롤 위치에는 카드가 없을 수 있다)
+    if (wrap){ wrap.scrollTop = 0; wrap.scrollLeft = 0; }
+  };
+  pcSearchEl.addEventListener('input', () => {
+    pcSearchClearEl.hidden = !pcSearchEl.value;
+    clearTimeout(pcSearchTimer);
+    pcSearchTimer = setTimeout(applyPcSearch, 150);
+  });
+  pcSearchEl.addEventListener('compositionstart', () => { pcComposing = true; });
+  pcSearchEl.addEventListener('compositionend', () => { pcComposing = false; applyPcSearch(); });
+  pcSearchEl.addEventListener('keydown', e => {
+    if (e.key === 'Escape' && !pcComposing && !e.isComposing && pcSearchEl.value){
+      e.preventDefault();
+      pcSearchEl.value = '';
+      applyPcSearch();
+    }
+  });
+  pcSearchClearEl.addEventListener('click', () => { pcSearchEl.value = ''; applyPcSearch(); pcSearchEl.focus(); });
   rentalOnlyEl.addEventListener('change', () => {
     rentalOnly = rentalOnlyEl.checked;
     renderBandContent(); // 남은 단지 수(#rentalCount)는 renderBandContent가 갱신한다
@@ -884,6 +938,10 @@ function initFilterBar(){
     rentalOnly = false;
     rentalOnlyEl.checked = false;
     hiddenCols.clear();
+    clearTimeout(pcSearchTimer); // 필터 초기화는 검색어도 지운다
+    pcSearchEl.value = '';
+    pcSearchClearEl.hidden = true;
+    commitSearch('');
     renderRegionPanel();
     renderBandContent();
   });
@@ -1158,7 +1216,7 @@ function renderPriceRowGrid(content, regionFilterFn, showRegionLabel){
     .filter(p => !hiddenCols.has(colKeyOfComplex(p.complex)));
 
   if (!priced.length){
-    const msg = hiddenCols.size ? '선택된 구/시(또는 연식·세대수 조건)에 해당하는 단지가 없습니다.' : '해당 지역에 단지가 없습니다.';
+    const msg = searchNorm ? '검색 결과가 없어요. 검색어나 필터를 바꿔 보세요.' : hiddenCols.size ? '선택된 구/시(또는 연식·세대수 조건)에 해당하는 단지가 없습니다.' : '해당 지역에 단지가 없습니다.';
     content.innerHTML = '<div class="district-section"><div style="color:var(--muted);font-size:13px;padding:16px 20px;">'+msg+'</div></div>';
     return;
   }
@@ -1245,13 +1303,15 @@ function renderBandContent(){
   content.innerHTML = '';
 
   const cfg = TAB_CONFIG[activeTab];
-  const combinedFilter = c => cfg.filter(c) && complexPassesFilters(c);
+  const combinedFilter = c => cfg.filter(c) && complexPassesFilters(c) && passesSearch(c);
   renderPriceRowGrid(content, combinedFilter, cfg.showRegionLabel);
   const newWrap = content.querySelector('.all-grid-wrap');
   if (newWrap) { newWrap.scrollLeft = savedScrollLeft; newWrap.scrollTop = savedScrollTop; }
   wireCardEvents(content);
   { const rc = document.getElementById('rentalCount'); // 임대 토글이 켜져 있을 때만 현재 모드의 남은 카드 수를 센다
     if (rc) rc.textContent = rentalOnly ? content.querySelectorAll('.complex-card').length + '개' : ''; }
+  { const sc = document.getElementById('pcSearchCount'); // 검색어가 있을 때만 현재 모드의 남은 카드 수
+    if (sc) sc.textContent = searchNorm ? content.querySelectorAll('.complex-card').length + '개 단지' : ''; }
   renderedSelection = currentSelectionIds(); // 전체 재렌더 시점의 선택 상태(refreshSelectionView의 기준)
   if (activeTab === 'all'){
     // 페이지 최초 로드 시 100vh 기반 max-height(.all-grid-wrap)가 첫 렌더
@@ -1360,11 +1420,7 @@ window.__geupInit = init;
     });
     return sections;
   }
-  function searchKey(s){ return String(s == null ? '' : s).toLowerCase().replace(/\s+/g, ''); }
-  function matchesSearch(c, q){
-    if (!q) return true;
-    return searchKey(displayName(c)).indexOf(q) >= 0 || searchKey(c.name).indexOf(q) >= 0;
-  }
+  // 검색 판정(searchKey/matchesSearch)과 검색 상태(searchRaw/searchNorm)는 PC와 같은 것을 쓴다 — 위쪽 메인 스크립트 참고
   // 행의 지역 태그: 서울=구, 경기=시(·구), 인천="인천 구"(서울 중구와 구분)
   function regionTagOf(c){
     const region = regionOfComplex(c), d = validDistrict(c);
@@ -1414,7 +1470,7 @@ window.__geupInit = init;
   const ROW_CACHE = new Map();
   const perf = { boot: null, lastRender: null, renders: 0 };
   let inMobile = false, desktopInited = false, mobileBuilt = false, sheetPushed = false;
-  let mSearchNorm = '', renderToken = 0, mRenderedSel = [], lastResult = null, filterTimer = null, searchTimer = null, slimTick = false;
+  let renderToken = 0, mRenderedSel = [], lastResult = null, filterTimer = null, searchTimer = null, slimTick = false;
 
   function staticOf(c, priceLabel, key){
     const sk = key + '|' + viewMode + '|' + (priceLabel != null ? priceLabel : '');
@@ -1451,7 +1507,7 @@ window.__geupInit = init;
     const cfg = TAB_CONFIG[activeTab];
     const inRegion = ALL.filter(c => cfg.filter(c) && complexPassesFilters(c));
     let items = buildModeItems(inRegion).filter(p => !hiddenCols.has(colKeyOfComplex(p.complex)));
-    if (mSearchNorm) items = items.filter(p => matchesSearch(p.complex, mSearchNorm));
+    if (searchNorm) items = items.filter(p => matchesSearch(p.complex, searchNorm));
     return { items: items, sections: buildMobileSections(items, binConfig()) };
   }
   function hiddenCountInTab(){
@@ -1471,7 +1527,7 @@ window.__geupInit = init;
     $('mActive').innerHTML = chips.map(c => '<button type="button" class="m-achip" data-clear="' + c.key + '"><span>' + esc(c.label) + ' ✕</span></button>').join('');
     document.querySelectorAll('#mRoot .m-badge').forEach(b => { b.textContent = chips.length ? String(chips.length) : ''; b.classList.toggle('on', chips.length > 0); });
     document.querySelectorAll('#mRoot .m-filter-btn').forEach(b => b.classList.toggle('on', chips.length > 0));
-    $('mSlimSearch').classList.toggle('on', !!mSearchNorm);
+    $('mSlimSearch').classList.toggle('on', !!searchNorm);
     const label = n.toLocaleString('ko-KR') + '개 단지 보기';
     $('mApply').textContent = label; $('mRegionApply').textContent = label;
   }
@@ -1613,7 +1669,7 @@ window.__geupInit = init;
     const v = $('mSearch').value;
     $('mSearchClear').hidden = !v;
     clearTimeout(searchTimer);
-    searchTimer = setTimeout(() => { const q = searchKey(v); if (q === mSearchNorm) return; mSearchNorm = q; mRender(); }, 150);
+    searchTimer = setTimeout(() => { if (v === searchRaw) return; commitSearch(v); mRender(); }, 150);
   }
   function wireMobile(){
     const root = $('mRoot');
@@ -1625,7 +1681,7 @@ window.__geupInit = init;
       if ((el = t.closest('[data-open]'))){ openSheet(el.dataset.open); return; }
       if (t.closest('[data-close]')){ closeSheets(); return; }
       if ((el = t.closest('[data-clear]'))){ clearOne(el.dataset.clear); return; }
-      if (t.closest('[data-reset-all]')){ $('mSearch').value = ''; $('mSearchClear').hidden = true; mSearchNorm = ''; resetAllFilters(); return; } // 빈 결과 화면의 버튼: 필터와 검색어를 모두 비운다
+      if (t.closest('[data-reset-all]')){ $('mSearch').value = ''; $('mSearchClear').hidden = true; commitSearch(''); resetAllFilters(); return; } // 빈 결과 화면의 버튼: 필터와 검색어를 모두 비운다
       if ((el = t.closest('[data-age-mode]'))){ ageFilterMode = el.dataset.ageMode; syncSheet(); mRender(); return; }
       if ((el = t.closest('[data-age-years]'))){ ageFilterYears = Number(el.dataset.ageYears); syncSheet(); mRender(); return; }
       if ((el = t.closest('[data-units]'))){ unitsFilterMin = el.dataset.units === '' ? null : Number(el.dataset.units); syncSheet(); mRender(); return; }
@@ -1638,7 +1694,7 @@ window.__geupInit = init;
         return;
       }
       if (t.closest('#mSlimSearch')){ window.scrollTo(0, 0); setTimeout(() => $('mSearch').focus(), 0); return; }
-      if (t.closest('#mSearchClear')){ $('mSearch').value = ''; $('mSearchClear').hidden = true; mSearchNorm = ''; mRender(); $('mSearch').focus(); return; }
+      if (t.closest('#mSearchClear')){ $('mSearch').value = ''; $('mSearchClear').hidden = true; commitSearch(''); mRender(); $('mSearch').focus(); return; }
       if ((el = t.closest('.m-row'))){ toggleCard(el.dataset.id); return; }
     });
     root.addEventListener('contextmenu', e => {
@@ -1687,6 +1743,7 @@ window.__geupInit = init;
     g('ageYears').disabled = ageFilterMode === 'none';
     g('unitsMin').value = unitsFilterMin == null ? '' : String(unitsFilterMin);
     g('rentalOnly').checked = rentalOnly;
+    if (g('pcSearch')){ g('pcSearch').value = searchRaw; g('pcSearchClear').hidden = !searchRaw; } // 모바일에서 넣은 검색어도 PC 입력칸에
   }
   function enterMobile(){
     const t0 = performance.now();
@@ -1697,6 +1754,7 @@ window.__geupInit = init;
     window.refreshSelectionView = mRefreshSelection;
     try {
       if (!mobileBuilt) buildMobile();
+      $('mSearch').value = searchRaw; $('mSearchClear').hidden = !searchRaw; // PC에서 넣은 검색어도 모바일 입력칸에
       const panel = $('regionPanel'), body = $('mRegionBody');
       if (panel && body && panel.parentNode !== body) body.appendChild(panel); // 기존 지역 패널을 시트 안으로(같은 선택 상태)
       if (!window.SharedLib || !ALL.length){
@@ -1742,7 +1800,7 @@ window.__geupInit = init;
   window.addEventListener('load', () => { if (!viewParam()) apply(); }); // 로딩 중에는 스크롤바 폭이 빠진 폭으로 계산될 수 있어(폭 701~715px 데스크톱 창) 로딩이 끝난 뒤 한 번 더 확인
   window.addEventListener('resize', () => { if (!viewParam()) apply(); }); // 일부 브라우저는 미디어쿼리 변경 이벤트가 늦어 resize도 함께 듣는다(apply는 같은 상태면 아무 것도 안 한다)
 
-  window.GeupMobile = { buildMobileSections, searchKey, matchesSearch, regionTagOf, splitCardInner, activeChipsOf, compute, updateSlim, apply, perf: perf, state: () => ({ inMobile, search: mSearchNorm, last: lastResult }) };
+  window.GeupMobile = { buildMobileSections, searchKey, matchesSearch, regionTagOf, splitCardInner, activeChipsOf, compute, updateSlim, apply, perf: perf, state: () => ({ inMobile, search: searchNorm, last: lastResult }) };
   apply();
 })();
 </script>
