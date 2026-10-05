@@ -195,6 +195,18 @@ button{cursor:pointer;}
 .modal-section:first-of-type{margin-top:0;}
 .modal-section h4{font-size:13.5px;font-weight:700;margin-bottom:6px;}
 .modal-section p{font-size:12px;color:var(--ink-muted);margin:0 0 10px;}
+/* 사진 숫자 인식(OCR, Task 62): 자동 인식된 칸은 주황 테두리로 "꼭 확인하세요"를 표시, 사용자가 직접 고치면 해제 */
+.ocr-box{display:flex;flex-wrap:wrap;align-items:center;gap:8px 10px;margin:0 0 12px;}
+.ocr-note{font-size:11px;color:var(--ink-faint);flex:1 1 220px;line-height:1.5;}
+.ocr-status{flex:1 1 100%;font-size:12px;line-height:1.6;}
+.ocr-status .ocr-warn{background:var(--warn-bg);color:var(--warn);border-radius:8px;padding:8px 10px;font-weight:700;margin-bottom:6px;}
+.ocr-status .ocr-busy{color:var(--ink-muted);}
+.ocr-status ul{margin:4px 0 0;padding-left:18px;}
+.ocr-status li{margin-bottom:3px;}
+.ocr-status .ocr-ok{color:var(--good);font-weight:700;}
+.ocr-status .ocr-fail{color:var(--bad);font-weight:700;}
+.ocr-status .ocr-meta{color:var(--ink-faint);font-size:11px;margin-top:4px;}
+.field input.ocr-filled{border:2px solid #F08C00;background:var(--warn-bg);}
 /* 사용법 안내 모달(Task 61) — 본문이 길어서 백업/복원 모달보다 넓게 */
 .guide-box{max-width:560px;}
 .guide-body{font-size:13px;line-height:1.7;color:var(--ink);}
@@ -242,6 +254,13 @@ button{cursor:pointer;}
         </div>
       </div>
       <div id="saveStatus" style="font-size:11px;color:var(--ink-faint);margin:-4px 0 10px;"></div>
+
+      <div class="ocr-box">
+        <button class="btn small" id="btnOcr" type="button">📷 사진으로 채우기</button>
+        <input type="file" id="ocrFileInput" accept="image/*" multiple hidden>
+        <span class="ocr-note">총회책자의 정비사업비 표 사진·캡처에서 종전자산가액, 공사비, 총지출, 총수입을 읽어 채웁니다(여러 장 선택 가능). 사진은 이 기기 안에서만 처리되고 서버로 보내지 않아요.</span>
+        <div id="ocrStatus" class="ocr-status" hidden></div>
+      </div>
 
       <div class="field-row">
         <div class="field"><label>종전자산가액(C, 만원)</label><input type="text" id="a_C" placeholder="예: 7179039"></div>
@@ -408,10 +427,20 @@ button{cursor:pointer;}
         <div class="field"><label>조합원수</label><input type="text" id="simple_memberCount" placeholder="예: 641"></div>
         <div class="field"><label>대표평형 현재 일반분양가(만원)</label><input type="text" id="simple_repPrice" placeholder="예: 48501"></div>
       </div>
+      <div class="field-row">
+        <div class="field"><label>기타사업비(만원) <span class="hint" style="font-size:11px;color:var(--ink-faint);">— 아래 기타사업비 변경을 비율(%)로 넣을 때 기준액</span></label><input type="text" id="simple_etc" placeholder="예: 13597200"></div>
+      </div>
       <h3 class="section-title">변경값</h3>
       <div class="field-row">
         <div class="field"><label>인상될 평당공사비(만원)</label><input type="text" id="simple_newPricePerPyeong" placeholder="예: 700"></div>
         <div class="field"><label>바뀔 대표평형 일반분양가(만원)</label><input type="text" id="simple_newRepPrice" placeholder="예: 53000"></div>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label>기타사업비 변경 <span class="seg" id="seg_simple_etc"><button data-mode="amt" class="active" type="button">정액</button><button data-mode="pct" type="button">비율(%)</button></span></label>
+          <input type="text" id="simple_etcInput" placeholder="예: 0">
+          <div class="hint" id="simpleEtcHint" style="font-size:11px;color:var(--ink-faint);margin-top:4px;"></div>
+        </div>
       </div>
       <div id="simpleResultBody" style="margin-top:14px;"></div>
     </div>
@@ -1442,7 +1471,41 @@ button{cursor:pointer;}
     document.getElementById('simple_repPrice').value = rep ? window.RateCalc.wonToManwon(rep.unitPrice) : '';
     document.getElementById('simple_newPricePerPyeong').value = document.getElementById('c_repNewPricePerPyeong').value;
     document.getElementById('simple_newRepPrice').value = document.getElementById('c_repNewPrice').value;
+    // 기타사업비: 기준액(=총지출−총공사비)과 변경값(정액/비율 모드 포함)을 그대로 가져온다.
+    document.getElementById('simple_etc').value = s.etc > 0 ? window.RateCalc.wonToManwon(s.etc) : '';
+    document.getElementById('simple_etcInput').value = document.getElementById('c_etcInput').value;
+    setSimpleEtcMode(etcMode);
   }
+
+  // 약식 계산의 기타사업비 변경 정액/비율 토글 — 고급 모드(setupEtcToggle)와 같은 규칙: 두 모드 모두 "변경액(델타)"이다.
+  let simpleEtcMode = 'amt';
+  function setSimpleEtcMode(mode){
+    simpleEtcMode = mode;
+    document.getElementById('seg_simple_etc').querySelectorAll('button').forEach(b => b.classList.toggle('active', b.dataset.mode === mode));
+  }
+  function readSimpleEtcDeltaWon(baseWon){
+    const raw = document.getElementById('simple_etcInput').value;
+    return simpleEtcMode === 'pct'
+      ? window.RateCalc.calcOtherExpenseChangeFromRate(baseWon, toNumber(raw))
+      : toWon(raw);
+  }
+  document.getElementById('seg_simple_etc').querySelectorAll('button').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const newMode = btn.dataset.mode;
+      if (newMode === simpleEtcMode) return;
+      const input = document.getElementById('simple_etcInput');
+      const base = readMoneyField('simple_etc');
+      const deltaWon = readSimpleEtcDeltaWon(base);
+      setSimpleEtcMode(newMode);
+      if (newMode === 'pct'){
+        const pct = window.RateCalc.amountToPct(base, base + deltaWon);
+        input.value = pct == null ? '' : (deltaWon ? Number(pct.toFixed(4)) : '');
+      } else {
+        input.value = deltaWon ? window.RateCalc.wonToManwon(deltaWon) : '';
+      }
+      renderSimpleResult();
+    });
+  });
 
   function migrateSimpleToAdvanced(){
     const newTotalCost = document.getElementById('simple_totalCost').value;
@@ -1453,6 +1516,10 @@ button{cursor:pointer;}
     if (newPricePerPyeong) markCostTriadEdited('price');
     document.getElementById('c_repNewPricePerPyeong').value = document.getElementById('simple_newPricePerPyeong').value;
     document.getElementById('c_repNewPrice').value = document.getElementById('simple_newRepPrice').value;
+    // 기타사업비 변경값은 모드(정액/비율)까지 함께 이관한다. 기준액은 고급 모드가 총지출−총공사비로 자체 계산한다.
+    document.getElementById('c_etcInput').value = document.getElementById('simple_etcInput').value;
+    etcMode = simpleEtcMode;
+    document.getElementById('seg_etc').querySelectorAll('button').forEach(b => b.classList.toggle('active', b.dataset.mode === etcMode));
     // 조합원분양수입/일반분양수입/조합원수/대표평형 현재가는 평형별 표 구조상 1:1 대응 필드가 없어 자동 이관되지 않는다.
   }
 
@@ -1468,6 +1535,9 @@ button{cursor:pointer;}
     updateFieldEokHint('simple_totalCost', totalCost);
     updateFieldEokHint('simple_memberIncome', readMoneyField('simple_memberIncome'));
     updateFieldEokHint('simple_generalIncome', generalIncome);
+    const etcBase = readMoneyField('simple_etc');
+    updateFieldEokHint('simple_etc', etcBase);
+    renderSimpleEtcHint(etcBase);
 
     if (!totalCost || !memberCount){
       el.innerHTML = '<div class="easy-summary">총공사비와 조합원수를 입력해주세요.</div>';
@@ -1485,11 +1555,28 @@ button{cursor:pointer;}
       incomeDelta = generalIncome * (ratePct / 100);
     }
 
-    const perMember = window.RateCalc.calcSimplifiedDelta(constructionCostDelta, incomeDelta, memberCount);
+    // 기타사업비 변경분도 총지출 증가분이므로 공사비 증가분과 합쳐서 같은 식으로 인당 증감액에 반영한다.
+    const etcDelta = readSimpleEtcDeltaWon(etcBase);
+    const perMember = window.RateCalc.calcSimplifiedDelta(constructionCostDelta + etcDelta, incomeDelta, memberCount);
     const label = perMember >= 0 ? '추가분담금' : '환급금';
     el.innerHTML =
       '<div class="easy-summary">인당 평균 약 ' + toManwon(Math.abs(perMember)) + eokHint(Math.abs(perMember)) + '의 ' + label + ' 발생 가능할 것으로 추정됩니다.</div>' +
+      (etcDelta ? '<div class="hint" style="font-size:11.5px;color:var(--ink-muted);margin-top:6px;">기타사업비 ' + (etcDelta >= 0 ? '증가' : '감소') + ' ' + toManwon(Math.abs(etcDelta)) + eokHint(Math.abs(etcDelta)) + '(인당 ' + toManwon(Math.abs(etcDelta / memberCount)) + ')이 위 금액에 반영돼 있습니다.</div>' : '') +
       '<div class="hint" style="font-size:11.5px;color:var(--ink-faint);margin-top:6px;">※ 이 결과는 간이 계산이며, 정밀한 비례율 기반 계산은 고급 모드를 이용하세요.</div>';
+  }
+
+  // 비율(%) 모드일 때만 해석 문구를 보여준다(고급 모드 renderEtcHint와 같은 규칙).
+  function renderSimpleEtcHint(base){
+    const hintEl = document.getElementById('simpleEtcHint');
+    if (simpleEtcMode !== 'pct'){ hintEl.textContent = ''; return; }
+    const pct = toNumber(document.getElementById('simple_etcInput').value);
+    if (!base){
+      hintEl.textContent = pct ? '비율(%)로 계산하려면 위 "기타사업비(만원)" 기준액을 입력해주세요.' : '';
+      return;
+    }
+    if (!pct){ hintEl.textContent = ''; return; }
+    const deltaWon = window.RateCalc.calcOtherExpenseChangeFromRate(base, pct);
+    hintEl.textContent = '기타사업비가 기존 ' + formatManwon(base) + eokHintText(base) + '에서 ' + (pct >= 0 ? '+' : '') + pct.toFixed(2) + '% ' + (pct >= 0 ? '증가' : '감소') + '하면 ' + formatManwon(Math.abs(deltaWon)) + eokHintText(deltaWon) + '만큼 ' + (deltaWon >= 0 ? '늘어납니다.' : '줄어듭니다.');
   }
 
   function setSimpleMode(on){
@@ -1512,7 +1599,7 @@ button{cursor:pointer;}
   document.getElementById('simpleModeToggle').addEventListener('click', () => setSimpleMode(!simpleMode));
   document.querySelectorAll(
     '#simple_totalCost, #simple_pricePerPyeong, #simple_memberIncome, #simple_generalIncome, ' +
-    '#simple_memberCount, #simple_repPrice, #simple_newPricePerPyeong, #simple_newRepPrice'
+    '#simple_memberCount, #simple_repPrice, #simple_newPricePerPyeong, #simple_newRepPrice, #simple_etc, #simple_etcInput'
   ).forEach(el => el.addEventListener('input', renderSimpleResult));
 
   // ---- 저장/불러오기(localStorage) + JSON 내보내기/불러오기 + 엑셀 내보내기 ----
@@ -1645,6 +1732,7 @@ button{cursor:pointer;}
     document.getElementById('seg_etc').querySelectorAll('button').forEach(b => b.classList.toggle('active', b.dataset.mode === etcMode));
     document.getElementById('c_etcInput').value = state.c_etcInput || '';
     document.getElementById('p_myAppraisal').value = state.p_myAppraisal || '';
+    clearOcrHighlights(); setOcrStatus('');
 
     recomputeAll();
     renderResult();
@@ -1658,7 +1746,10 @@ button{cursor:pointer;}
       'c_repNewPrice', 'c_repNewPricePerPyeong', 'c_ilbanInput', 'c_ilbanOldPrice', 'c_ilbanNewPrice', 'c_costInput', 'c_etcInput',
       'simple_totalCost', 'simple_pricePerPyeong', 'simple_memberIncome', 'simple_generalIncome',
       'simple_memberCount', 'simple_repPrice', 'simple_newPricePerPyeong', 'simple_newRepPrice',
+      'simple_etc', 'simple_etcInput',
     ].forEach(id => { document.getElementById(id).value = ''; });
+    setSimpleEtcMode('amt');
+    clearOcrHighlights(); setOcrStatus('');
 
     ['a_reserve', 'a_unsold', 'a_finance', 'a_burden'].forEach(prefix => {
       contingencyMode[prefix] = 'flat';
@@ -1725,6 +1816,234 @@ button{cursor:pointer;}
     if (!map[name]){ alert('"' + name + '" 저장 기록을 찾을 수 없습니다.'); return; }
     applyFullState(map[name]);
     document.getElementById('saveStatus').textContent = '"' + name + '" 불러오기 완료';
+  });
+
+  // ── 사진으로 채우기(OCR, Task 62) ─────────────────────────────────────────────
+  // Tesseract.js(무료, 브라우저 안에서만 동작)를 버튼을 처음 누를 때 CDN에서 불러온다(평소 페이지 로딩에는 영향 없음).
+  // 총회책자 표는 칸마다 테두리가 있어서 그대로 읽히면 숫자 행이 통째로 사라지므로 ① 흑백화+적응형 이진화 ② 표 테두리 제거
+  // ③ 희소 텍스트 모드(PSM 11)로 읽고 ④ 단어 좌표로 같은 줄을 다시 이어붙인 "행"을 파서(RateCalc.extractBookFields)에 넘긴다.
+  const OCR_SCRIPT_URL = 'https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.min.js';
+  const OCR_FIELD_MAP = [
+    { key: 'C', id: 'a_C', label: '종전자산가액(C)' },
+    { key: 'price', id: 'a_pricePerPyeong', label: '평당 공사비' },
+    { key: 'cost', id: 'a_totalCost', label: '총공사비' },
+    { key: 'expense', id: 'a_totalExpense', label: '총지출' },
+    { key: 'income', id: 'a_totalIncome', label: '총수입' },
+  ];
+  const OCR_HOW_TEXT = {
+    label: '라벨로 인식',
+    'label-max': '"공사비" 항목 중 가장 큰 값 — 본공사비만 쓰시려면 수정하세요',
+    checksum: '비례율 검산으로 확인',
+    formula: '"총수입−총지출÷C" 산식 위치로 인식',
+    pattern: '단가 표기에서 인식',
+  };
+  let ocrBusy = false;
+
+  function clearOcrHighlights(){
+    OCR_FIELD_MAP.forEach(f => document.getElementById(f.id).classList.remove('ocr-filled'));
+  }
+  // 사용자가 직접 고치면(실제 입력 이벤트만 isTrusted) "자동 인식" 표시를 해제한다. 프로그램이 채울 때 보내는 이벤트는 해당 없음.
+  OCR_FIELD_MAP.forEach(f => document.getElementById(f.id).addEventListener('input', (e) => {
+    if (e.isTrusted) e.target.classList.remove('ocr-filled');
+  }));
+
+  function loadScriptOnce(url){
+    return new Promise((resolve, reject) => {
+      if (window.Tesseract) return resolve();
+      const s = document.createElement('script');
+      s.src = url;
+      s.onload = () => resolve();
+      s.onerror = () => reject(new Error('OCR 라이브러리를 불러오지 못했습니다. 인터넷 연결을 확인하고 다시 시도해주세요.'));
+      document.head.appendChild(s);
+    });
+  }
+
+  function loadImageFromFile(file){
+    return new Promise((resolve, reject) => {
+      const url = URL.createObjectURL(file);
+      const img = new Image();
+      img.onload = () => { URL.revokeObjectURL(url); resolve(img); };
+      img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('이미지를 열 수 없습니다: ' + file.name)); };
+      img.src = url;
+    });
+  }
+
+  function ocrPreprocess(img){
+    const longSide = Math.max(img.naturalWidth, img.naturalHeight);
+    const scale = Math.min(2.5, Math.max(0.4, 2400 / longSide));
+    const w = Math.round(img.naturalWidth * scale), h = Math.round(img.naturalHeight * scale);
+    const canvas = document.createElement('canvas');
+    canvas.width = w; canvas.height = h;
+    const ctx = canvas.getContext('2d', { willReadFrequently: true });
+    ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, w, h);
+    ctx.drawImage(img, 0, 0, w, h);
+    const imageData = ctx.getImageData(0, 0, w, h);
+    const px = imageData.data;
+    const g = new Uint8Array(w * h);
+    for (let i = 0, j = 0; i < g.length; i++, j += 4) g[i] = (px[j] * 299 + px[j + 1] * 587 + px[j + 2] * 114) / 1000;
+
+    // 적응형 문턱값: 주변 평균(분리형 이동 평균)보다 충분히 어두운 픽셀만 글자로 본다(사진의 조명 얼룩에 강함).
+    const win = Math.max(15, Math.floor(w / 30) | 1), half = win >> 1;
+    const clampX = (x) => (x < 0 ? 0 : (x > w - 1 ? w - 1 : x));
+    const clampY = (y) => (y < 0 ? 0 : (y > h - 1 ? h - 1 : y));
+    const tmp = new Float32Array(w * h);
+    for (let y = 0; y < h; y++){
+      const off = y * w;
+      let sum = 0;
+      for (let x = -half; x <= half; x++) sum += g[off + clampX(x)];
+      for (let x = 0; x < w; x++){
+        tmp[off + x] = sum / win;
+        sum += g[off + clampX(x + half + 1)] - g[off + clampX(x - half)];
+      }
+    }
+    const mean = new Float32Array(w * h);
+    const colSum = new Float32Array(w);
+    for (let y = -half; y <= half; y++){
+      const off = clampY(y) * w;
+      for (let x = 0; x < w; x++) colSum[x] += tmp[off + x];
+    }
+    for (let y = 0; y < h; y++){
+      const row = y * w;
+      for (let x = 0; x < w; x++) mean[row + x] = colSum[x] / win;
+      const add = clampY(y + half + 1) * w, rem = clampY(y - half) * w;
+      for (let x = 0; x < w; x++) colSum[x] += tmp[add + x] - tmp[rem + x];
+    }
+    const ink = new Uint8Array(w * h);
+    for (let i = 0; i < ink.length; i++) ink[i] = (g[i] < mean[i] * 0.9 && g[i] < 200) ? 1 : 0;
+
+    // 표 테두리 제거: 가로/세로로 길게 이어진 검은 선(폭의 4% 이상)은 글자가 아니라 테두리다.
+    const minLen = Math.round(w * 0.04);
+    for (let y = 0; y < h; y++){
+      const row = y * w;
+      let x = 0;
+      while (x < w){
+        if (!ink[row + x]) { x++; continue; }
+        let e = x;
+        while (e < w && ink[row + e]) e++;
+        if (e - x >= minLen) for (let k = x; k < e; k++) ink[row + k] = 0;
+        x = e;
+      }
+    }
+    for (let x = 0; x < w; x++){
+      let y = 0;
+      while (y < h){
+        if (!ink[y * w + x]) { y++; continue; }
+        let e = y;
+        while (e < h && ink[e * w + x]) e++;
+        if (e - y >= minLen) for (let k = y; k < e; k++) ink[k * w + x] = 0;
+        y = e;
+      }
+    }
+    for (let i = 0, j = 0; i < ink.length; i++, j += 4){
+      const v = ink[i] ? 0 : 255;
+      px[j] = px[j + 1] = px[j + 2] = v; px[j + 3] = 255;
+    }
+    ctx.putImageData(imageData, 0, 0);
+    return canvas;
+  }
+
+  // 단어 좌표로 같은 줄(세로 중심이 비슷한 단어들)을 모아 좌→우로 이어붙인 "행" 문자열 배열을 만든다.
+  function groupOcrRows(words){
+    const ws = (words || []).filter(w => w.text && w.text.trim()).map(w => {
+      const cy = (w.bbox.y0 + w.bbox.y1) / 2;
+      return { t: w.text, x0: w.bbox.x0, cy: cy, h: w.bbox.y1 - w.bbox.y0 };
+    });
+    ws.sort((a, b) => a.cy - b.cy);
+    const rows = [];
+    ws.forEach(w => {
+      const last = rows[rows.length - 1];
+      if (last && Math.abs(w.cy - last.cy) < Math.max(last.h, w.h) * 0.6){
+        last.words.push(w);
+        last.cy = (last.cy * (last.words.length - 1) + w.cy) / last.words.length;
+        last.h = Math.max(last.h, w.h);
+      } else {
+        rows.push({ words: [w], cy: w.cy, h: w.h });
+      }
+    });
+    return rows.map(r => r.words.sort((a, b) => a.x0 - b.x0).map(w => w.t).join(' '));
+  }
+
+  function setOcrStatus(html){
+    const el = document.getElementById('ocrStatus');
+    el.hidden = !html;
+    el.innerHTML = html || '';
+  }
+
+  function escapeHtml(s){
+    return String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  }
+
+  function applyOcrResult(result, imageCount){
+    clearOcrHighlights();
+    const items = [];
+    OCR_FIELD_MAP.forEach(f => {
+      const hit = result.fields[f.key];
+      if (!hit){
+        items.push('<li><span class="ocr-fail">✗ ' + f.label + '</span> — 인식 실패 - 직접 입력해주세요</li>');
+        return;
+      }
+      const el = document.getElementById(f.id);
+      el.value = hit.manwon.toLocaleString('ko-KR');
+      el.dispatchEvent(new Event('input', { bubbles: true }));
+      el.classList.add('ocr-filled');
+      const how = hit.verified ? '비례율 검산 일치 ✓' : (OCR_HOW_TEXT[hit.how] || '');
+      items.push('<li><span class="ocr-ok">✓ ' + f.label + '</span>: ' + hit.manwon.toLocaleString('ko-KR') + '만원 <span style="color:var(--ink-faint);">(원문 ' + escapeHtml(hit.raw) + (f.key === 'price' ? '원/평' : result.unit) + ' · ' + how + ')</span></li>');
+    });
+    const found = OCR_FIELD_MAP.filter(f => result.fields[f.key]).length;
+    const unitNote = result.unit
+      ? '인식한 단위: ' + result.unit + (result.unit === '만원' ? '' : ' → 만원으로 환산') + (result.unitGuessed ? ' (표에 단위 표기를 못 찾아 숫자 자릿수로 추정했어요 — 단위가 맞는지 꼭 확인하세요)' : '')
+      : '';
+    setOcrStatus(
+      '<div class="ocr-warn">⚠ 사진 인식은 완벽하지 않습니다. 반드시 실제 숫자와 비교해서 확인·수정해주세요' + (found ? ' (주황색 테두리 칸이 자동 인식된 값입니다)' : '') + '</div>' +
+      '<div>사진 ' + imageCount + '장에서 ' + OCR_FIELD_MAP.length + '개 중 ' + found + '개를 읽었어요.</div>' +
+      '<ul>' + items.join('') + '</ul>' +
+      (unitNote ? '<div class="ocr-meta">' + unitNote + '</div>' : '') +
+      (found === 0 ? '<div class="ocr-meta">표가 가로로 반듯하고 글씨가 또렷하게 나오도록 다시 찍거나, 정비사업비 추산액 표(총수입·총지출·총평가액이 있는 쪽)를 포함해 주세요.</div>' : '')
+    );
+  }
+
+  async function runOcr(files){
+    if (ocrBusy || !files.length) return;
+    ocrBusy = true;
+    const btn = document.getElementById('btnOcr');
+    btn.disabled = true;
+    let worker = null;
+    try {
+      setOcrStatus('<div class="ocr-busy">📷 인식 준비 중… (처음 한 번은 글자 인식 데이터를 내려받느라 20~60초 걸릴 수 있어요)</div>');
+      await loadScriptOnce(OCR_SCRIPT_URL);
+      let stage = '';
+      worker = await Tesseract.createWorker('kor+eng', 1, {
+        logger: (m) => {
+          if (m.status === 'recognizing text') {
+            setOcrStatus('<div class="ocr-busy">📷 ' + stage + ' 글자 읽는 중… ' + Math.round((m.progress || 0) * 100) + '%</div>');
+          }
+        },
+      });
+      await worker.setParameters({ tessedit_pageseg_mode: '11' });
+      let allRows = [];
+      for (let i = 0; i < files.length; i++){
+        stage = '(' + (i + 1) + '/' + files.length + '번째 사진)';
+        setOcrStatus('<div class="ocr-busy">📷 ' + stage + ' 사진 정리 중…</div>');
+        const img = await loadImageFromFile(files[i]);
+        const canvas = ocrPreprocess(img);
+        const { data } = await worker.recognize(canvas);
+        allRows = allRows.concat(groupOcrRows(data.words));
+      }
+      applyOcrResult(window.RateCalc.extractBookFields(allRows), files.length);
+    } catch (err) {
+      setOcrStatus('<div class="ocr-warn">사진 인식에 실패했어요: ' + escapeHtml(err.message || err) + '</div><div class="ocr-meta">직접 입력해주세요.</div>');
+    } finally {
+      if (worker) { try { await worker.terminate(); } catch (e) {} }
+      ocrBusy = false;
+      btn.disabled = false;
+    }
+  }
+
+  document.getElementById('btnOcr').addEventListener('click', () => document.getElementById('ocrFileInput').click());
+  document.getElementById('ocrFileInput').addEventListener('change', (e) => {
+    const files = Array.from(e.target.files || []);
+    e.target.value = ''; // 같은 사진을 다시 골라도 change가 발생하도록
+    runOcr(files);
   });
 
   // ── 사용법 안내 모달(Task 61): 첫 방문 때 자동으로 뜨고, "다시 보지 않기"를 체크하고 닫으면
@@ -2402,7 +2721,7 @@ button{cursor:pointer;}
     '#c_ilbanInput', '#c_ilbanOldPrice', '#c_ilbanNewPrice', '#c_costInput', '#c_etcInput',
     '#p_myAppraisal',
     '#simple_totalCost', '#simple_pricePerPyeong', '#simple_memberIncome', '#simple_generalIncome',
-    '#simple_repPrice', '#simple_newPricePerPyeong', '#simple_newRepPrice',
+    '#simple_repPrice', '#simple_newPricePerPyeong', '#simple_newRepPrice', '#simple_etc', '#simple_etcInput',
   ].join(','));
 
   refreshProjectLibSelect();

@@ -554,3 +554,99 @@ run('calcRepresentativeOrAverageUnitPrice: 세대수가 모두 0이거나 빈 �
   assert.strictEqual(window.RateCalc.calcRepresentativeOrAverageUnitPrice([], 0.65), null);
   assert.strictEqual(window.RateCalc.calcRepresentativeOrAverageUnitPrice([{ label: '59', count: 0, oldPrice: 400 }], 0.65), null);
 });
+
+// --- Task 62: 사진(OCR) 숫자 인식 — 실제 Tesseract(kor+eng, PSM 11, 표 테두리 제거 전처리) 결과를 그대로 저장한
+// fixtures로 파서를 검증한다(이상적인 문자열이 아니라 실제로 깨진 라벨/구분자 오인식 포함).
+const fs = require('fs');
+const path = require('path');
+const fx = (n) => JSON.parse(fs.readFileSync(path.join(__dirname, 'fixtures', 'ocr_rows_' + n + '.json'), 'utf8'));
+
+run('extractBookFields: 십정4 p200(라벨이 깨진 총수입/총지출)도 비례율 검산으로 식별한다', () => {
+  const r = window.RateCalc.extractBookFields(fx('sj4_p200'));
+  assert.strictEqual(r.unit, '원');
+  assert.strictEqual(r.fields.C.manwon, 7179039);
+  assert.strictEqual(r.fields.income.manwon, 44638678);
+  assert.strictEqual(r.fields.expense.manwon, 37809973);
+  assert.strictEqual(r.fields.income.how, 'checksum');
+});
+
+run('extractBookFields: 브라우저 전처리로 읽은 p200(비례율 라벨 "diag", 총평가액이 "홍 평가액"으로 깨짐)도 세 값을 찾는다', () => {
+  const r = window.RateCalc.extractBookFields(fx('sj4_p200_browser'));
+  assert.strictEqual(r.fields.C.manwon, 7179039);
+  assert.strictEqual(r.fields.income.manwon, 44638678);
+  assert.strictEqual(r.fields.expense.manwon, 37809973);
+  assert.strictEqual(r.rate, 95.12);
+});
+
+run('extractBookFields: 십정4 p199+p200를 합치면 총공사비·평당공사비도 읽는다', () => {
+  const r = window.RateCalc.extractBookFields(fx('sj4_p199').concat(fx('sj4_p200')));
+  assert.strictEqual(r.fields.cost.manwon, 25249955); // 공사비(소계) 252,499,551,870원
+  assert.strictEqual(r.fields.price.manwon, 583);     // 공사비(3.3058㎡ × 5,830,000원)
+  assert.strictEqual(r.fields.C.manwon, 7179039);
+});
+
+run('extractBookFields: 갈산1 p13(지출이 "계"로만 표기)은 검산으로 총수입/총지출을 찾는다', () => {
+  const r = window.RateCalc.extractBookFields(fx('gs1_p13'));
+  assert.strictEqual(r.fields.C.manwon, 6825225);
+  assert.strictEqual(r.fields.income.manwon, 46016749);
+  assert.strictEqual(r.fields.expense.manwon, 38571082);
+});
+
+run('extractBookFields: 갈산1 p3(A - B / C 산식 레이아웃)에서 세 값을 읽는다', () => {
+  const r = window.RateCalc.extractBookFields(fx('gs1_p3'));
+  assert.strictEqual(r.fields.income.how, 'formula');
+  assert.strictEqual(r.fields.income.manwon, 46016749);
+  assert.strictEqual(r.fields.expense.manwon, 38571082);
+  assert.strictEqual(r.fields.C.manwon, 6825225);
+});
+
+run('extractBookFields: 갈산1 p12+p13 — 총공사비는 읽고, 평당공사비는 OCR이 8을 6으로 읽은 값 그대로 나온다(실측 오인식 사례)', () => {
+  const r = window.RateCalc.extractBookFields(fx('gs1_p12').concat(fx('gs1_p13')));
+  assert.strictEqual(r.fields.cost.manwon, 28852048);
+  // 원문은 4,688,000원/3.3㎡ 인데 OCR이 4,600,000으로 읽었다 -> 그래서 화면에서 반드시 사용자가 확인하도록 경고한다.
+  assert.strictEqual(r.fields.price.manwon, 460);
+});
+
+run('extractBookFields: 숫자를 못 찾으면 빈 결과를 돌려주고 예외를 던지지 않는다', () => {
+  const r = window.RateCalc.extractBookFields(['안녕하세요', '합계 12', '|']);
+  assert.deepStrictEqual(r.fields, {});
+  assert.deepStrictEqual(window.RateCalc.extractBookFields([]).fields, {});
+});
+
+run('extractBookFields: 비례율이 숫자와 안 맞으면(검산 불일치) 총수입/총지출을 지어내지 않는다', () => {
+  const rows = fx('sj4_p200').map(row => row.replace('95.12', '70.00'));
+  const r = window.RateCalc.extractBookFields(rows);
+  assert.strictEqual(r.fields.C.manwon, 7179039);
+  assert.strictEqual(r.fields.expense, undefined); // 총지출은 라벨이 깨져 있어 검산으로만 찾을 수 있는데, 검산이 안 맞으니 비운다
+  assert.ok(!r.fields.income || r.fields.income.how !== 'checksum');
+});
+
+run('extractBookFields: 천원/백만원 단위 표기를 읽어 만원으로 환산한다', () => {
+  const r1 = window.RateCalc.extractBookFields(['단위 : 천원', '분양대상대지 총평가액 71,790,393']);
+  assert.strictEqual(r1.unit, '천원');
+  assert.strictEqual(r1.fields.C.manwon, 7179039);
+  const r2 = window.RateCalc.extractBookFields(['(단위: 백만원)', '종전자산 총평가액 71,790']);
+  assert.strictEqual(r2.unit, '백만원');
+  assert.strictEqual(r2.fields.C.manwon, 7179000);
+});
+
+// --- Task 62: 약식 계산에 기타사업비 변경(정액/비율%) 추가 — 고급 모드와 같은 인당 증감액이 나와야 한다 ---
+[
+  { name: '십정4', C: SIPJEONG4.C, A0: SIPJEONG4.A0, B0: SIPJEONG4.B0, n: SIPJEONG4.memberCount, etcBase: 135972000000 },
+  { name: '갈산1', C: GALSAN1.C, A0: GALSAN1.A0, B0: GALSAN1.B0, n: GALSAN1.memberCount, etcBase: GALSAN1.B0 - 288520476063 },
+].forEach(b => {
+  run(b.name + ': 약식(공사비+기타사업비 비율 변경분 합산)이 고급 모드 perMember와 정확히 같다', () => {
+    const costDelta = 20000000000, incomeDelta = 5000000000;
+    [10, -10, 0].forEach(pct => {
+      const etcDelta = window.RateCalc.calcOtherExpenseChangeFromRate(b.etcBase, pct);
+      const simple = window.RateCalc.calcSimplifiedDelta(costDelta + etcDelta, incomeDelta, b.n);
+      const adv = calcScenario({ C: b.C, A0: b.A0, B0: b.B0, A1: b.A0 + incomeDelta, B1: b.B0 + costDelta + etcDelta, memberCount: b.n }).perMember;
+      assert.ok(Math.abs(simple - adv) < 1e-3, `${pct}%: simple=${simple}, adv=${adv}`);
+    });
+  });
+  run(b.name + ': 약식 기타사업비 정액 변경도 인당 증감액에 (정액÷조합원수)만큼 더해진다', () => {
+    const etcDelta = 3000000000;
+    const withEtc = window.RateCalc.calcSimplifiedDelta(0 + etcDelta, 0, b.n);
+    assert.ok(Math.abs(withEtc - etcDelta / b.n) < 1e-6);
+  });
+});
