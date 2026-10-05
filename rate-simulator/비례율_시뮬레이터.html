@@ -195,6 +195,15 @@ button{cursor:pointer;}
 .modal-section:first-of-type{margin-top:0;}
 .modal-section h4{font-size:13.5px;font-weight:700;margin-bottom:6px;}
 .modal-section p{font-size:12px;color:var(--ink-muted);margin:0 0 10px;}
+/* 사용법 안내 모달(Task 61) — 본문이 길어서 백업/복원 모달보다 넓게 */
+.guide-box{max-width:560px;}
+.guide-body{font-size:13px;line-height:1.7;color:var(--ink);}
+.guide-body p{margin:0 0 10px;}
+.guide-body h4{font-size:13.5px;font-weight:700;margin:16px 0 6px;color:var(--accent);}
+.guide-body ol,.guide-body ul{margin:0 0 6px;padding-left:20px;}
+.guide-body li{margin-bottom:6px;}
+.guide-footer{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;border-top:1px solid var(--border);margin-top:16px;padding-top:14px;}
+.guide-footer label{display:flex;align-items:center;gap:6px;font-size:12.5px;color:var(--ink-muted);cursor:pointer;}
 </style>
 </head>
 <body>
@@ -205,6 +214,7 @@ button{cursor:pointer;}
       <div class="sub">공사비·분양가가 바뀌면 비례율과 추가분담금이 어떻게 달라지는지 계산합니다 · 모든 금액은 만원 단위로 입력합니다</div>
     </div>
     <div class="project-io-row">
+      <button class="btn small" id="btnShowGuide" type="button">❓ 사용법 다시 보기</button>
       <button class="btn small" id="simpleModeToggle" type="button">약식 계산</button>
       <button class="btn small" id="themeToggle" type="button">다크모드</button>
     </div>
@@ -443,6 +453,46 @@ button{cursor:pointer;}
   </defs>
   <path id="mappingArrowPath" d="" style="stroke:var(--accent);stroke-width:2.5;fill:none;transition:opacity .12s;" marker-end="url(#arrowHead)" opacity="0"></path>
 </svg>
+
+<div id="guideModalOverlay" class="modal-overlay" hidden>
+  <div class="modal-box guide-box" role="dialog" aria-modal="true" aria-labelledby="guideTitle">
+    <div class="modal-header">
+      <h3 id="guideTitle">📍 추가분담금 / 비례율 계산기 (PC·폰 겸용)</h3>
+      <button class="modal-close" id="guideModalClose" type="button" aria-label="닫기">&times;</button>
+    </div>
+    <div class="guide-body">
+      <p>공사비·분양가가 바뀌면 비례율과 추가분담금이 얼마나 달라지는지 계산해주는 도구예요.<br>우리 구역 숫자만 넣으면, 조합원 한 명당 평균 얼마를 더 내야(또는 돌려받아야) 하는지까지 바로 나와요.</p>
+
+      <h4>■ 이렇게 쓰세요</h4>
+      <ol>
+        <li><strong>1단계:</strong> 우리 구역의 기본 정보(종전자산가액, 공사비, 평형별 세대수·분양가 등)를 입력하세요. 조합 총회책자에 있는 숫자 그대로 넣으면 돼요.</li>
+        <li><strong>2단계:</strong> "앞으로 이렇게 바뀔 것 같다"는 시나리오(예상 분양가, 예상 공사비 등)를 입력하세요. 대표 평형 기준으로 하나만 넣으면 전체에 비율대로 반영돼요.</li>
+        <li><strong>결과:</strong> 비례율이 몇 %로 바뀌는지, 조합원 한 명당 평균 추가분담금(또는 환급금)이 얼마인지 바로 나와요.</li>
+        <li>내 매물 감정가를 넣으면, 내가 실제로 낼 분담금까지 평형별로 비교해서 보여줘요.</li>
+        <li>시뮬레이션 탭에서는 "조합원분양가를 얼마 올리면 비례율 100%를 맞출 수 있는지" 같은 질문도 바로 확인할 수 있어요.</li>
+      </ol>
+
+      <h4>■ 알아두면 좋은 기능</h4>
+      <ul>
+        <li>여러 구역을 비교하고 싶다면, 구역명을 바꿔가며 [저장하기]로 따로따로 저장해두고 [불러오기]로 꺼내 보세요.</li>
+        <li>[엑셀로 내보내기]를 누르면, 숫자를 바꾸면 자동으로 재계산되는 엑셀 파일로 다운받을 수 있어요.</li>
+      </ul>
+
+      <h4>■ 꼭 알아 두세요</h4>
+      <ul>
+        <li>기록은 이 폰(또는 이 PC 브라우저)에만 저장돼요. 서버로 보내지 않아요.</li>
+        <li>폰을 바꾸거나 인터넷 기록을 지우면 기록이 사라질 수 있어요. 계산이 끝나면 [백업/복원] → "내보내기"로 파일로 저장해 두세요. 새 폰이나 PC에서는 "불러오기"로 되살릴 수 있어요.</li>
+        <li>이 계산기는 참고용 도구이고, 실제 조합 발표 수치와 다를 수 있어요. 투자 판단과 그 결과에 대한 책임은 본인에게 있어요.</li>
+      </ul>
+
+      <p style="margin-top:14px;">불편한 점이나 바라는 기능은 화면의 [💬 의견 보내기]로 남겨 주세요 🙏</p>
+    </div>
+    <div class="guide-footer">
+      <label><input type="checkbox" id="guideHideCheck"> 다시 보지 않기</label>
+      <button class="btn" id="guideCloseBtn" type="button">닫기</button>
+    </div>
+  </div>
+</div>
 
 <div id="backupModalOverlay" class="modal-overlay" hidden>
   <div class="modal-box">
@@ -1676,6 +1726,37 @@ button{cursor:pointer;}
     applyFullState(map[name]);
     document.getElementById('saveStatus').textContent = '"' + name + '" 불러오기 완료';
   });
+
+  // ── 사용법 안내 모달(Task 61): 첫 방문 때 자동으로 뜨고, "다시 보지 않기"를 체크하고 닫으면
+  // localStorage에 플래그를 남겨 다음 방문부터는 자동으로 안 뜬다. 상단 버튼으로는 언제든 다시 열 수 있다.
+  // localStorage가 막힌 환경(시크릿/data: URL 등)에서도 예외 없이 동작하도록 전부 try/catch로 감싼다.
+  const GUIDE_HIDE_KEY = 'hideGuideModal';
+  const guideModalOverlay = document.getElementById('guideModalOverlay');
+  const guideHideCheck = document.getElementById('guideHideCheck');
+  function isGuideHidden(){
+    try { return localStorage.getItem(GUIDE_HIDE_KEY) === '1'; } catch (e) { return false; }
+  }
+  function openGuideModal(){
+    guideHideCheck.checked = isGuideHidden();
+    guideModalOverlay.hidden = false;
+  }
+  function closeGuideModal(){
+    try {
+      if (guideHideCheck.checked) localStorage.setItem(GUIDE_HIDE_KEY, '1');
+      else localStorage.removeItem(GUIDE_HIDE_KEY);
+    } catch (e) {}
+    guideModalOverlay.hidden = true;
+  }
+  document.getElementById('btnShowGuide').addEventListener('click', openGuideModal);
+  document.getElementById('guideCloseBtn').addEventListener('click', closeGuideModal);
+  document.getElementById('guideModalClose').addEventListener('click', closeGuideModal);
+  guideModalOverlay.addEventListener('click', (e) => {
+    if (e.target === guideModalOverlay) closeGuideModal();
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && !guideModalOverlay.hidden) closeGuideModal();
+  });
+  if (!isGuideHidden()) openGuideModal();
 
   const backupModalOverlay = document.getElementById('backupModalOverlay');
   function openBackupModal(){ backupModalOverlay.hidden = false; }
