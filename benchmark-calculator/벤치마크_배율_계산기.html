@@ -739,6 +739,7 @@ body.l17 .btn-tip-pair .info-icon.tip-unified.tip-open::before{left:50%;right:au
 .tier-range{display:flex;gap:2px;margin:6px 0;}
 .tier-seg{flex:1;text-align:center;font-size:9.5px;line-height:1.4;padding:3px 2px;border-radius:5px;background:var(--neutral-bg);color:var(--ink-faint);}
 .tier-seg.current{background:var(--ink);color:var(--surface);font-weight:700;}
+.tier-bench-note{font-size:11px;color:var(--ink-faint);line-height:1.45;margin:-2px 0 6px;}
 .sync-detail{font-size:11.5px;color:var(--ink-faint);font-family:var(--font-mono);font-variant-numeric:tabular-nums;}
 .sync-msg{font-size:12px;color:var(--ink-muted);line-height:1.5;}
 .hedge-block{margin-top:8px;}
@@ -2000,6 +2001,8 @@ function seoulHistoricalAvg(){
 //   (22단계, 2026-10-04) L18 옛 저장 목록 정리 — 예전 seed id로 저장된 라이브러리 항목을 지금 id로 옮기고 지운다(새 브라우저와 같은 값).
 //   (24단계, 2026-10-04) L19 단일 진단 "모양 겹쳐보기" 눈금 — 두 선이 함께 있는 기간만 보이고, 그 기간의 최저·최고를 같은 높이에 맞춘다(화면만).
 //   (25단계, 2026-10-04) L19B "모양 겹쳐보기"를 같은 눈금 지수로 — 두 선이 함께 있는 첫 달 = 100, 선이 겹치면 상승률이 같다(끄면 L19 방식).
+//   (29단계, 2026-10-04) L20 동조율 구간표 문구 정정 — 보통·아주나쁨 쉬운 말을 실제 비율(7~9할·6할 미만)로, ⓘ의 "기준단지" → "선도단지",
+//   구간표 아래 선도단지 자신의 위치 한 줄(숫자는 화면의 선도단지 상승률에서). 문구만 — 등급 경계·계산은 그대로.
 // K(2026-10-02): K1 고평가 최소 격차 문턱(5%), K2 차트 적정가 설명·선도단지 상태 칩 문구, K4 표시 이름(seedDisplayNames.js).
 //   K4는 F4처럼 seed를 읽을 때 이름을 바꾸므로 주소 플래그로만 끌 수 있다(런타임 setBundles로는 안 됨).
 // 주소에서는 ?bundles=A,B,C,D(D1~D4 모두) 또는 ?bundles=A,B,C,D1,D4처럼 쓴다(E·F·H·L·K도 같은 방식).
@@ -2008,9 +2011,9 @@ function seoulHistoricalAvg(){
 // 라이브는 주소 플래그를 읽지 않으므로 이 기본값이 그대로 동작한다.
 const BUNDLES = { A:false, B:false, C:false, D1:false, D2:false, D3:false, D4:false, E1:true, E2:false, E3:true, F1:true, F2:true, F3:true, F4:false,
   H1:false, H2:true, H3:true, H4:true, H5:true, H6:true, H7:true,
-  L1:true, L2:true, L3:true, L4:true, L5:true, L6:false, L7:true, L8:true, L9:true, L10:true, L11:true, L12:true, L13:true, L14:true, L15:true, L16:true, L17:true, L18:true, L19:true, L19B:true, K1:false, K2:true, K4:false };
+  L1:true, L2:true, L3:true, L4:true, L5:true, L6:false, L7:true, L8:true, L9:true, L10:true, L11:true, L12:true, L13:true, L14:true, L15:true, L16:true, L17:true, L18:true, L19:true, L19B:true, L20:true, K1:false, K2:true, K4:false };
 const BUNDLE_GROUPS = { D:['D1','D2','D3','D4'], E:['E1','E2','E3'], F:['F1','F2','F3','F4'], H:['H1','H2','H3','H4','H5','H6','H7'],
-  L:['L1','L2','L3','L4','L5','L6','L7','L8','L9','L10','L11','L12','L13','L14','L15','L16','L17','L18','L19','L19B'], K:['K1','K2','K4'] };
+  L:['L1','L2','L3','L4','L5','L6','L7','L8','L9','L10','L11','L12','L13','L14','L15','L16','L17','L18','L19','L19B','L20'], K:['K1','K2','K4'] };
 function setBundles(next){
   next = Object.assign({}, next||{});
   // D·E 하나로 D1~D4·E1~E3을 한꺼번에 끄고 켤 수 있다(개별 키가 있으면 그쪽이 우선).
@@ -3065,6 +3068,9 @@ function computeSlot(base, comp){
 const SYNC_LOW_RANGE = [201201, 201412];
 const SYNC_HIGH_RANGE = [202001, 202212];
 const SYNC_TOOLTIP = '동조율은 과거 저점~고점 구간에서 이 단지가 기준단지 상승폭을 얼마나 따라왔는지를 보여줍니다. 동조율이 높으면 현재 저평가 상태일 때 갭을 빠르게 메울 가능성이 크고, 낮으면 원래 상승 여력이 상대적으로 약해 갭 메우기가 더딜 수 있습니다.';
+// 묶음 L20(29단계): 동조율 칸 등급은 선도단지 대비 값이라 "기준단지" 대신 "선도단지"로 쓴다(나머지 문장은 같음).
+const SYNC_TOOLTIP_L20 = SYNC_TOOLTIP.replace('기준단지 상승폭', '선도단지 상승폭');
+function syncTooltipText(){ return (typeof BUNDLES !== 'undefined' && BUNDLES.L20) ? SYNC_TOOLTIP_L20 : SYNC_TOOLTIP; }
 // 탐색범위 안에서 찾은 저점/고점 시점 하나만으로 계산하면 그 한 달의 우연한
 // 편차(단일 이상치)가 그대로 최종 상승률에 반영되는 문제가 있어, 저점/고점을
 // 중심으로 한 3개월 평균값을 사용한다(실측 검증: 6개월도 시도했으나 3개월 대비
@@ -3251,6 +3257,16 @@ const SYNC_EASY_SUMMARY = {
   high: '선도단지랑 거의 비슷한 폭으로 올랐어요.',
   veryHigh: '선도단지보다 오히려 더 많이 올랐어요.'
 };
+// 묶음 L20(29단계): 경계 108·120·153%를 선도단지 상승률(25곳 174.4%, 35곳 176.9%)로 나누면 61~62%·68~69%·87~88%라
+// 보통은 "7~9할", 아주나쁨은 "6할에 못 미침"이 맞다(예전 "8~9할"·"절반도 안"은 실제와 달랐음).
+const SYNC_EASY_SUMMARY_L20 = {
+  veryLow: '선도단지 오름폭의 6할에도 못 미쳤어요.',
+  mid: '선도단지 오름폭의 7~9할 정도는 따라왔어요.'
+};
+function syncEasySummary(tier){
+  if (typeof BUNDLES !== 'undefined' && BUNDLES.L20 && SYNC_EASY_SUMMARY_L20[tier]) return SYNC_EASY_SUMMARY_L20[tier];
+  return SYNC_EASY_SUMMARY[tier] || '';
+}
 // (참고: veryHigh/high/mid/low/veryLow 5단계는 서울 선도단지 기준(실측+추정
 // 공통)에서만 쓰인다 — high/mid/low만 쓰는 옛 3단계는 일반 단지 기준 비교의
 // 고정 임계값(syncTier, 85/75)에서 계속 쓰인다.)
@@ -3286,7 +3302,19 @@ function benchmarkSyncTier(rawRise, groupKey){
 // 있는지 하이라이트한다. rawRise가 null이거나 서울 선도단지 기준이 아니면
 // (재건축은 등급화 자체를 보류하므로) 아무것도 렌더링하지 않는다.
 // hideCurrent: 묶음 B의 재건축 표시 대상은 등급을 숨기므로 구간표는 보여주되 "현재" 강조를 뺀다.
-function syncTierRangeHtml(rawRise, groupKey, hideCurrent){
+// 묶음 L20(29단계): 구간표 아래 한 줄 — 선도단지 자신이 어느 칸에 있는지(benchRise = 결론 줄의 선도단지 상승률, 구성이 25곳이든 35곳이든 그 값).
+// 좋음·아주좋음 경계(176%)에서 SYNC_BENCH_EDGE_PP(5%p) 안이면 "'좋음' 맨 위"/"'아주좋음' 맨 아래", 그 밖은 칸 이름만("'보통'이에요").
+const SYNC_BENCH_EDGE_PP = 5;
+function syncBenchPositionNote(benchRise){
+  if (benchRise == null || !isFinite(benchRise)) return '';
+  const b = SYNC_TIER_BOUNDS, tier = benchmarkSyncTier(benchRise, 'seoul');
+  const name = { veryLow:'아주나쁨', low:'나쁨', mid:'보통', high:'좋음', veryHigh:'아주좋음' }[tier];
+  if (!name) return '';
+  const pos = (tier === 'high' && benchRise >= b.high - SYNC_BENCH_EDGE_PP) ? ' 맨 위'
+    : (tier === 'veryHigh' && benchRise < b.high + SYNC_BENCH_EDGE_PP) ? ' 맨 아래' : '';
+  return "선도단지 자신은 "+benchRise.toFixed(1)+"%로 '"+name+"'"+(pos ? pos+"예요" : "이에요")+". 좋음·아주좋음은 선도단지만큼 이상 올랐다는 뜻이고 적정가 목표는 같아요.";
+}
+function syncTierRangeHtml(rawRise, groupKey, hideCurrent, benchRise){
   if (rawRise == null || groupKey !== 'seoul') return '';
   const b = SYNC_TIER_BOUNDS;
   const segs = [
@@ -3299,7 +3327,8 @@ function syncTierRangeHtml(rawRise, groupKey, hideCurrent){
   const current = hideCurrent ? null : benchmarkSyncTier(rawRise, 'seoul');
   return '<div class="tier-range">'+segs.map(s =>
     '<span class="tier-seg tier-'+s.key+(s.key===current?' current':'')+'">'+s.label+'<br>'+s.range+'</span>'
-  ).join('')+'</div>';
+  ).join('')+'</div>'+
+    ((BUNDLES.L20 && benchRise != null) ? '<div class="tier-bench-note">'+esc(syncBenchPositionNote(benchRise))+'</div>' : '');
 }
 function computeSyncRate(base, comp){
   const baseCycle = computeCycleRise(base.rowMap);
@@ -6793,7 +6822,7 @@ function buildDiagCardBody(i, comp, r, sync, wide, estimate, benchStatusHtml, ke
     syncHtml =
       '<div class="sync-block">'+
         '<div class="sync-head">'+
-          '<span class="k">동조율 <span class="info-icon" tabindex="0" data-tip="'+esc(SYNC_TOOLTIP)+'">ⓘ</span></span>'+
+          '<span class="k">동조율 <span class="info-icon" tabindex="0" data-tip="'+esc(syncTooltipText())+'">ⓘ</span></span>'+
           '<span class="sync-est-tag">추정 상승률 '+(estimate.avgRawRise!=null?estimate.avgRawRise.toFixed(1)+'%':'—')+'</span>'+
           '<span class="sync-badge estimated tier-'+estimate.tier+'">'+(estimate.tier?SYNC_TIER_LABEL[estimate.tier]:estimate.rate.toFixed(1)+'%')+'</span>'+
         '</div>'+
@@ -6803,13 +6832,13 @@ function buildDiagCardBody(i, comp, r, sync, wide, estimate, benchStatusHtml, ke
           ? '<div class="easy-summary sync-concl">'+esc(syncConclusionLine(estBenchCycle ? estBenchCycle.low.ym : null, estBenchCycle ? estBenchCycle.high.ym : null, estimate.benchRawRise, estimate.avgRawRise))+'</div>'+
             (BUNDLES.L2 ? '<div class="sync-outlook">'+esc(syncOutlookSentence(estimate.benchRawRise, estimate.avgRawRise, estimate.tier, true))+'</div>' : '')+
             (BUNDLES.L3 ? syncEstimateExplainHtml(comp, estimate) : '<div class="sync-est-note">비슷하게 움직인 단지로 추정한 값이에요.</div>')+
-            (BUNDLES.L1 ? syncTierRangeHtml(estimate.avgRawRise, 'seoul') : '')+
-            wrapConclusionDetail((BUNDLES.L1 ? '' : syncTierRangeHtml(estimate.avgRawRise, 'seoul'))+
+            (BUNDLES.L1 ? syncTierRangeHtml(estimate.avgRawRise, 'seoul', false, estimate.benchRawRise) : '')+
+            wrapConclusionDetail((BUNDLES.L1 ? '' : syncTierRangeHtml(estimate.avgRawRise, 'seoul', false, estimate.benchRawRise))+
               (estInterpText ? conclusionDetailItem(estInterpText) : '')+confWarnHtml+conclusionDetailItem(estDetailHtml, true)+
               conclusionDetailItem('준거단지는 동조율 추정에 쓴 단지예요(지난 상승장 실측값이 있는 단지 중에서 골라요). 가격 흐름이 닮은 단지는 "쌍둥이 단지"에서 따로 볼 수 있어요.')+
               (BUNDLES.L2 ? conclusionDetailItem(SYNC_OUTLOOK_DETAIL_NOTE) : '')+
               conclusionDetailItem(SYNC_PLAIN_NOTE))
-          : syncTierRangeHtml(estimate.avgRawRise, 'seoul')+
+          : syncTierRangeHtml(estimate.avgRawRise, 'seoul', false, estimate.benchRawRise)+
             (estInterpText ? '<div class="easy-summary">'+esc(estInterpText)+'</div>' : '')+
             confWarnHtml+
             wrapDetail(estDetailHtml)+
@@ -6832,7 +6861,7 @@ function buildDiagCardBody(i, comp, r, sync, wide, estimate, benchStatusHtml, ke
     syncHtml =
       '<div class="sync-block">'+
         '<div class="sync-head">'+
-          '<span class="k">동조율 <span class="info-icon" tabindex="0" data-tip="'+esc(SYNC_TOOLTIP)+'">ⓘ</span></span>'+
+          '<span class="k">동조율 <span class="info-icon" tabindex="0" data-tip="'+esc(syncTooltipText())+'">ⓘ</span></span>'+
           '<span class="sync-badge tier-none">'+sync.rate.toFixed(1)+'% (참고용)</span>'+
         '</div>'+
         syncTierRangeHtml(sync.compCycle.rise, 'seoul', !!sync.rebuildDisplay)+
@@ -6859,7 +6888,7 @@ function buildDiagCardBody(i, comp, r, sync, wide, estimate, benchStatusHtml, ke
     syncHtml =
       '<div class="sync-block">'+
         '<div class="sync-head">'+
-          '<span class="k">동조율 <span class="info-icon" tabindex="0" data-tip="'+esc(SYNC_TOOLTIP)+'">ⓘ</span></span>'+
+          '<span class="k">동조율 <span class="info-icon" tabindex="0" data-tip="'+esc(syncTooltipText())+'">ⓘ</span></span>'+
           '<span class="sync-actual-tag">실측 상승률 '+sync.compCycle.rise.toFixed(1)+'%</span>'+
           '<span class="sync-badge tier-'+sync.tier+'">'+SYNC_TIER_LABEL[sync.tier]+'</span>'+
         '</div>'+
@@ -6868,13 +6897,13 @@ function buildDiagCardBody(i, comp, r, sync, wide, estimate, benchStatusHtml, ke
           // L1·L2: 결론 한 줄 → 해석 한마디(L2) → 5단계 구간표(L1) → 상세보기(설명).
           ? '<div class="easy-summary sync-concl">'+esc(syncConclusionLine(sync.compCycle.low.ym, sync.compCycle.high.ym, sync.baseCycle.rise, sync.compCycle.rise))+'</div>'+
             (BUNDLES.L2 ? '<div class="sync-outlook">'+esc(syncOutlookSentence(sync.baseCycle.rise, sync.compCycle.rise, sync.tier, false))+'</div>' : '')+
-            (BUNDLES.L1 ? syncTierRangeHtml(sync.compCycle.rise, sync.benchmarkGroupKey) : '')+
-            wrapConclusionDetail((BUNDLES.L1 ? '' : syncTierRangeHtml(sync.compCycle.rise, sync.benchmarkGroupKey))+
-              conclusionDetailItem(realSyncInterpText || SYNC_EASY_SUMMARY[sync.tier] || '')+
+            (BUNDLES.L1 ? syncTierRangeHtml(sync.compCycle.rise, sync.benchmarkGroupKey, false, sync.baseCycle.rise) : '')+
+            wrapConclusionDetail((BUNDLES.L1 ? '' : syncTierRangeHtml(sync.compCycle.rise, sync.benchmarkGroupKey, false, sync.baseCycle.rise))+
+              conclusionDetailItem(realSyncInterpText || syncEasySummary(sync.tier))+
               (ratioDetailText ? conclusionDetailItem(ratioDetailText) : '')+(interp ? conclusionDetailItem(interp) : '')+
               (h1Note ? conclusionDetailItem(h1Note) : '')+(BUNDLES.L2 ? conclusionDetailItem(SYNC_OUTLOOK_DETAIL_NOTE) : '')+conclusionDetailItem(SYNC_PLAIN_NOTE))
-          : syncTierRangeHtml(sync.compCycle.rise, sync.benchmarkGroupKey)+
-            '<div class="easy-summary">'+esc(realSyncInterpText || SYNC_EASY_SUMMARY[sync.tier] || '')+'</div>'+
+          : syncTierRangeHtml(sync.compCycle.rise, sync.benchmarkGroupKey, false, sync.baseCycle.rise)+
+            '<div class="easy-summary">'+esc(realSyncInterpText || syncEasySummary(sync.tier))+'</div>'+
             wrapDetail(fmtYm(sync.compCycle.low.ym)+'(저점) → '+fmtYm(sync.compCycle.high.ym)+'(고점), '+(sync.compCycle.rise>=0?'+':'')+sync.compCycle.rise.toFixed(1)+'% · 동조율 '+sync.rate.toFixed(1)+'%(참고)'+(ratioDetailText?'<br>'+esc(ratioDetailText):'')+(interp?' '+esc(interp):'')+(h1Note?'<br>'+esc(h1Note):'')))+        (baseCompareHtml||'')+
         // 항목(2026-09-21 세션, "실측 케이스 칸1/2 미리보기") — 준거단지
         // 개념이 없는 실측 동조율 카드는 이 자리에 쌍둥이 단지 "현재괴리
@@ -6887,7 +6916,7 @@ function buildDiagCardBody(i, comp, r, sync, wide, estimate, benchStatusHtml, ke
     syncHtml =
       '<div class="sync-block">'+
         '<div class="sync-head">'+
-          '<span class="k">동조율 <span class="info-icon" tabindex="0" data-tip="'+esc(SYNC_TOOLTIP)+'">ⓘ</span></span>'+
+          '<span class="k">동조율 <span class="info-icon" tabindex="0" data-tip="'+esc(syncTooltipText())+'">ⓘ</span></span>'+
           '<span class="sync-badge tier-none">전저점~전고점 데이터 부족</span>'+
         '</div>'+
         '<div class="easy-summary">비교할 옛날 시세 데이터가 없어요.</div>'+
