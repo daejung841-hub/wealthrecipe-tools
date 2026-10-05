@@ -1868,8 +1868,9 @@ function readBundleUrlParam(){
   if (!loc || !isLocalFlagHost(loc)) return null;
   return new URLSearchParams(loc.search || '').get('bundles');
 }
-// 배포 후보: seed를 읽을 때 적용되는 F4·K4는 주소 플래그가 없으면 꺼진다(라이브와 같은 이름·저장 상태 유지).
-const SEED_NAME_BUNDLE_DEFAULTS = { F4:false, K4:false };
+// 배포 후보: seed를 읽을 때 적용되는 묶음 중 K4는 주소 플래그가 없으면 꺼진다(라이브와 같은 이름 유지).
+// F4(같은 이름 단지 구분)·F5(주공 이름 정리)·F6(지명 없는 이름에 동 이름)은 39단계 후보에서 켠다 — 로컬 주소의 ?bundles=…에서 F4·F5·F6을 빼면 예전(라이브 613cc25a)과 같다.
+const SEED_NAME_BUNDLE_DEFAULTS = { F4:true, F5:true, F6:true, K4:false };
 function bundleUrlEnabled(key){
   try {
     const raw = readBundleUrlParam();
@@ -1911,6 +1912,117 @@ function disambiguateRemainingDuplicateNames(seeds){
   seeds.forEach(e => { if (e && e.legacyName){ if (!legacy.has(e.legacyName)) legacy.set(e.legacyName, []); legacy.get(e.legacyName).push(e); } });
   return legacy;
 }
+// 묶음 F5(37단계, 2026-10-05 대표님 요청): KB 이름이 "주공"·"주공(1단지)"·"주공4단지"(끝 마침표 포함)뿐인 단지는
+// "하안주공1단지(광명)"·"창동주공1단지(도봉)"처럼 동 이름 + 주공 + 단지 + (구, 구가 없으면 시)로 부른다(K4 표의 주공 이름과 같은 규칙).
+// 동 이름이 두 글자("창동")면 "동"을 떼지 않는다. "주공그린빌(1단지)"처럼 다른 말이 붙은 이름은 아래 JUGONG_HOLD_NAMES(41단계)로 정한다.
+// 묶음 F5 보충(41단계, 2026-10-05 대표님 결정 2안): "주공"으로 시작하지만 다른 말이 붙어 규칙으로 못 바꾸던 16개는
+// 같은 형식(동 이름 + 주공 + 나머지 + (구/시))으로 단지마다 정한 이름을 쓴다(id 기준 고정 표).
+const JUGONG_HOLD_NAMES = {
+  '세종주공6단지': '산본주공6단지세종(군포)',
+  '십정주공뜨란채': '십정주공뜨란채(부평)',
+  '주공-군자15단지-안산시-단원구-선부동': '선부주공군자15단지(단원)',
+  '주공-독산주공14단지': '독산주공14단지(금천)',
+  '주공-상계19단지': '창동주공상계19단지(도봉)',
+  '주공-신곡4차-_24-59-47': '신곡주공4차(의정부)',
+  '주공2단지-2-1-_17-44-06': '금정주공2단지2-1(군포)',
+  '주공3단지-다산': '금정주공3단지다산(군포)',
+  '주공4단지한라-2차-_26-59-99': '산본주공4단지한라2차(군포)',
+  '주공개나리-13단지-_24-59-98': '산본주공개나리13단지(군포)',
+  '주공그린빌-1단지': '매탄주공그린빌1단지(영통)',
+  '주공그린빌-2단지': '매탄주공그린빌2단지(영통)',
+  '주공그린빌-3단지': '매탄주공그린빌3단지(영통)',
+  '주공그린빌-5단지': '매탄주공그린빌5단지(영통)',
+  '주공뉴타운2단지': '조원주공뉴타운2단지(장안)',
+  '주공뜨란채': '안양주공뜨란채(만안)'
+};
+function jugongDongName(e){
+  const m = /^주공(?:\(?(\d+단지)\)?)?\.?$/.exec((e && e.kbName) || '');
+  if (!m || !e.dong) return null;
+  const stem = (e.dong.length > 2 && /동$/.test(e.dong)) ? e.dong.slice(0, -1) : e.dong;
+  const region = String(e.district || e.regionCity || '').replace(/[구시]$/, '');
+  return stem + '주공' + (m[1] || '') + (region ? '(' + region + ')' : '');
+}
+// 묶음 F4 이름 규칙 개정(37단계, 2026-10-05 대표님 요청): 이름이 그대로 겹치는 그룹은 "동이름 단지명(구)"로 부른다
+// — 예) "신곡동 건영(의정부)", "호원동 건영(의정부)", "문정동 건영(송파)". 이름에 이미 그 지역 괄호가 있으면 또 붙이지 않는다
+// ("사당동 대림(동작)"). 그룹 안에 동 이름이 없거나 같은 동 이름이 있으면 그 그룹은 예전 규칙(시·세대수, 위 함수)을 쓴다.
+// F5(주공)가 먼저 돌아 주공 그룹은 이미 갈라진다. 옛 이름 표(window.SEED_NAME_LEGACY)에는 라이브 이름(옛 이름의 첫 항목 규칙)과
+// 33단계 후보 이름(예전 F4 규칙, 예: "건영(의정부 832세대)" — 항목 하나)을 함께 넣어 저장된 상태를 옮긴다.
+// 각 항목의 e.nameAliases(옛 이름 목록)는 검색에 쓴다(searchAliasesOf).
+// 묶음 F6(39단계, 2026-10-05 대표님 결정): 이름만으로 위치를 알 수 없는 단지(예: 라이브 "신동아(1단지)" — 방학동)에도 동 이름을 붙인다
+// → "방학동 신동아(1단지)". 대상 = 핵심어(괄호·숫자·단지·차를 뺀 앞부분)가 서로 다른 구/시 2곳 이상에 쓰이는 이름(현대·신동아·우성처럼
+// 여러 곳에 있는 브랜드)이면서, 이름(끝의 자기 지역 괄호를 뺀 것)에 지명이 없는 단지. 지명 = seed 전체의 동(동·읍·면·N가를 뗀 2글자 이상)·구·시
+// 이름. 핵심어 자체가 지명과 같으면(대림·삼성·청구·설악) 브랜드로 본다. "주공"으로 시작하는 이름(보류 16개)과 F4·F5로 바뀐 단지는 제외.
+// 동 이름은 그대로 쓴다("방학동", "금호동3가", "창동"). 동을 뺀 이름("방학 신동아(1단지)")은 검색 별칭으로만 둔다(shortDongName).
+function placelessNameCore(name){
+  return String(name || '').replace(/\([^)]*\)/g, '').replace(/\.$/, '').replace(/\d+(-\d+)?(단지|차|블록|BL)?/g, '').replace(/(단지|차)$/, '').trim();
+}
+function shortDongName(d){
+  d = String(d || '');
+  const m = /^(.+)동(\d+가)$/.exec(d);
+  if (m) return m[1] + m[2];
+  return (d.length > 2 && /[동읍면]$/.test(d)) ? d.slice(0, -1) : d;
+}
+function findPlacelessSeedNames(seeds){
+  const stem = v => String(v || '').replace(/\d+가$/, '').replace(/[동읍면구시군]$/, '');
+  const places = new Set();
+  seeds.forEach(e => { if (e) [stem(e.dong), stem(e.district), stem(e.regionCity)].forEach(p => { if (p.length >= 2) places.add(p); }); });
+  const regionsOf = new Map();
+  seeds.forEach(e => { if (!e || !e.name) return; const k = placelessNameCore(e.name); if (!regionsOf.has(k)) regionsOf.set(k, new Set()); regionsOf.get(k).add(e.district || e.regionCity || ''); });
+  const out = new Set();
+  seeds.forEach(e => {
+    if (!e || !e.name || !e.dong || e.legacyName) return;
+    const core = placelessNameCore(e.name);
+    if (!core || /^주공/.test(core) || (regionsOf.get(core) || new Set()).size < 2) return;
+    const region = String(e.district || e.regionCity || '').replace(/[구시]$/, '');
+    const body = (region && e.name.endsWith('(' + region + ')')) ? e.name.slice(0, -(region.length + 2)) : e.name;
+    for (const p of places){ if (p !== core && body.indexOf(p) >= 0) return; }
+    out.add(e);
+  });
+  return out;
+}
+function renameDuplicateSeedNames(seeds, f4, f5, f6){
+  const v1 = new Map();
+  if (f4){
+    const copy = seeds.map(e => e && Object.assign({}, e));
+    disambiguateRemainingDuplicateNames(copy);
+    copy.forEach(c => { if (c && c.legacyName) v1.set(c.id, c.name); });
+  }
+  const rename = (e, next) => { if (!next || next === e.name) return; if (!e.legacyName) e.legacyName = e.name; e.name = next; };
+  if (f5) seeds.forEach(e => { if (e) rename(e, jugongDongName(e) || JUGONG_HOLD_NAMES[e.id]); });
+  if (f4){
+    const m = new Map();
+    seeds.forEach(e => { if (e && e.name){ if (!m.has(e.name)) m.set(e.name, []); m.get(e.name).push(e); } });
+    m.forEach((group, base) => {
+      if (group.length < 2) return;
+      const dongs = group.map(e => e.dong || '');
+      if (!dongs.every(Boolean) || new Set(dongs).size !== dongs.length) return;
+      group.forEach(e => {
+        const region = String(e.district || e.regionCity || '').replace(/[구시]$/, '');
+        rename(e, e.dong + ' ' + base + ((region && base.indexOf('(' + region + ')') < 0) ? '(' + region + ')' : ''));
+      });
+    });
+    disambiguateRemainingDuplicateNames(seeds);
+  }
+  if (f6){
+    const taken = new Set(seeds.map(e => e && e.name));
+    findPlacelessSeedNames(seeds).forEach(e => {
+      const next = e.dong + ' ' + e.name.replace(/\.$/, '');
+      if (taken.has(next)) return;
+      taken.add(next); rename(e, next);
+    });
+  }
+  const legacy = new Map();
+  const add = (old, e) => { if (!old || old === e.name) return; if (!legacy.has(old)) legacy.set(old, []); if (legacy.get(old).indexOf(e) < 0) legacy.get(old).push(e); };
+  seeds.forEach(e => { if (e && e.legacyName) add(e.legacyName, e); });
+  seeds.forEach(e => { if (e && v1.has(e.id)) add(v1.get(e.id), e); });
+  seeds.forEach(e => {
+    if (!e || !e.legacyName) return;
+    // "방학동 신동아(1단지)" → 별칭 "방학 신동아(1단지)"(동 이름을 앞에 붙인 이름만)
+    const shortName = (e.dong && e.name.startsWith(e.dong + ' ')) ? shortDongName(e.dong) + e.name.slice(e.dong.length) : null;
+    e.nameAliases = [...new Set([e.kbName, e.legacyName, v1.get(e.id), shortName].filter(Boolean).flatMap(n => [n, n.replace(/\.$/, '')]))].filter(n => n !== e.name);
+  });
+  return legacy;
+}
 (function disambiguateCommonComplexNames(){
   const seeds = window.SEED_COMPLEXES;
   if (!Array.isArray(seeds)) return;
@@ -1931,7 +2043,8 @@ function disambiguateRemainingDuplicateNames(seeds){
       e.name = e.name + '(' + e.district.replace(/구$/, '') + ')';
     });
   });
-  window.SEED_NAME_LEGACY = bundleUrlEnabled('F4') ? disambiguateRemainingDuplicateNames(seeds) : new Map();
+  const f4 = bundleUrlEnabled('F4'), f5 = bundleUrlEnabled('F5'), f6 = bundleUrlEnabled('F6');
+  window.SEED_NAME_LEGACY = (f4 || f5 || f6) ? renameDuplicateSeedNames(seeds, f4, f5, f6) : new Map();
 })();
 
 let _seedRatioIndex = null;
@@ -1986,6 +2099,8 @@ function seoulHistoricalAvg(){
 // F(2026-09-30): 문구·성능·이름 정리 — F1 결론 문장 보정(고평가 %는 적정가 기준, 표시값 뺄셈), F2 문구 모순 정리
 //   ("범위 안" 판정에 상대 % 문장을 쓰지 않음), F3 시세 읽기 결과 공유 캐시, F4 이름이 같은 seed 항목 구분.
 //   F4는 seed를 읽는 순간(이름 붙이기)에 적용되므로 주소 플래그(?bundles=...)로만 끌 수 있다(런타임 setBundles로는 안 됨).
+//   F4 이름은 37단계부터 "동이름 단지명(구)"(예: "신곡동 건영(의정부)"). F5(37단계): "주공(1단지)"류 이름을 "하안주공1단지(광명)"처럼 — 역시 주소 플래그로만 끈다.
+//   F6(39단계): 지명 없는 브랜드·번호 이름에 동 이름을 붙인다("방학동 신동아(1단지)") — 역시 주소 플래그로만 끈다.
 // H(2026-10-01): 화면 문장 정리 — H1 재건축 신호 켜진 1993년 이후 준공 단지의 등급 해설(상세보기 한 줄), H2 고평가 상세 %를
 //   적정가 기준으로, H3 주소 플래그를 로컬(localhost·127.0.0.1·file:)에서만 읽기, H4 모바일 여러 단지 비교 폭 CSS,
 //   H5 동조율 칸 결론 한 줄 + 남은 %p 표현 정리, H6 저평가 결론 "저평가 중이라" 삭제, H7 상세보기 쉬운 말 + 카드 안 % 통일.
@@ -2007,12 +2122,12 @@ function seoulHistoricalAvg(){
 //   K4는 F4처럼 seed를 읽을 때 이름을 바꾸므로 주소 플래그로만 끌 수 있다(런타임 setBundles로는 안 됨).
 // 주소에서는 ?bundles=A,B,C,D(D1~D4 모두) 또는 ?bundles=A,B,C,D1,D4처럼 쓴다(E·F·H·L·K도 같은 방식).
 // 배포 후보 조합 ①(화면 묶음만, 2026-10-03 대표님 결정): 계산을 바꾸는 묶음(A·B·C·D1~D4·E2·K1)과 효과가 B에 묶인 H1·L6,
-// 이름을 바꾸는 F4·K4는 끈다. E3(범위 숨김)는 켜되 A 로직 검증 문장은 A가 켜졌을 때만 보인다(대안 (가), 16단계 결정).
+// 이름 142개를 바꾸는 K4는 끈다. F4(같은 이름 단지를 "동이름 단지명(구)"로 구분)·F5(주공 이름 정리)·F6(지명 없는 이름에 동 이름)은 39단계 후보에서 켠다. E3(범위 숨김)는 켜되 A 로직 검증 문장은 A가 켜졌을 때만 보인다(대안 (가), 16단계 결정).
 // 라이브는 주소 플래그를 읽지 않으므로 이 기본값이 그대로 동작한다.
-const BUNDLES = { A:false, B:false, C:false, D1:false, D2:false, D3:false, D4:false, E1:true, E2:false, E3:true, F1:true, F2:true, F3:true, F4:false,
+const BUNDLES = { A:false, B:false, C:false, D1:false, D2:false, D3:false, D4:false, E1:true, E2:false, E3:true, F1:true, F2:true, F3:true, F4:true, F5:true, F6:true,
   H1:false, H2:true, H3:true, H4:true, H5:true, H6:true, H7:true,
   L1:true, L2:true, L3:true, L4:true, L5:true, L6:false, L7:true, L8:true, L9:true, L10:true, L11:true, L12:true, L13:true, L14:true, L15:true, L16:true, L17:true, L18:true, L19:true, L19B:true, L20:true, K1:false, K2:true, K4:false };
-const BUNDLE_GROUPS = { D:['D1','D2','D3','D4'], E:['E1','E2','E3'], F:['F1','F2','F3','F4'], H:['H1','H2','H3','H4','H5','H6','H7'],
+const BUNDLE_GROUPS = { D:['D1','D2','D3','D4'], E:['E1','E2','E3'], F:['F1','F2','F3','F4','F5','F6'], H:['H1','H2','H3','H4','H5','H6','H7'],
   L:['L1','L2','L3','L4','L5','L6','L7','L8','L9','L10','L11','L12','L13','L14','L15','L16','L17','L18','L19','L19B','L20'], K:['K1','K2','K4'] };
 function setBundles(next){
   next = Object.assign({}, next||{});
@@ -2080,6 +2195,15 @@ const BENCHMARK_GROUPS = {
   }
 };
 if (LIVE_COMMON_COMPAT) BENCHMARK_GROUPS.seoul.members = LIVE_SEOUL_MEMBERS_25.slice();
+
+// 묶음 F6(39단계): 선도단지 명단은 이름으로 단지를 찾으므로, F4·F5·F6으로 이름이 바뀐 구성원(예: 재건축 대표 "현대(1,2차)" →
+// "압구정동 현대(1,2차)")을 같은 단지의 새 이름으로 바꿔 둔다. 옛 이름이 단지 하나만 가리킬 때만 바꾼다(구성 단지는 그대로).
+(function remapBenchmarkMembersToRenamedSeeds(){
+  const legacy = window.SEED_NAME_LEGACY;
+  if (!legacy || !legacy.size) return;
+  const current = new Set((window.SEED_COMPLEXES || []).map(e => e && e.name));
+  Object.values(BENCHMARK_GROUPS).forEach(g => { g.members = g.members.map(n => (!current.has(n) && legacy.has(n) && legacy.get(n).length === 1) ? legacy.get(n)[0].name : n); });
+})();
 
 // ---- 묶음 K4: 표시 이름(seedDisplayNames.js, id → 화면 이름) ----
 // 표시 이름 체계는 (나)안(빌더가 displayName 하나를 만들고 두 도구가 읽음)으로 확정됐고, 빌더·seed는 급지표 채널 소유라
@@ -2412,7 +2536,7 @@ function regionSuffix(name){
   // 지역을 붙여놔서, 그대로 또 붙이면 "주공뜨란채(부평)(부평)"이 된다.
   if (!region || String(name).includes('('+region+')')) return '';
   // 묶음 F4: "이름(의정부 832세대)"처럼 지역이 이미 이름 안에 들어 있는 경우도 또 붙이지 않는다.
-  if (BUNDLES.F4 || BUNDLES.K4){
+  if (BUNDLES.F4 || BUNDLES.F5 || BUNDLES.F6 || BUNDLES.K4){
     const short = region.replace(/[구시]$/, '');
     if (String(name).includes('('+short+')') || String(name).includes('('+short+' ')) return '';
   }
@@ -2708,7 +2832,7 @@ function migrateStaleSeedLibrary(){
 function migrateSavedNames(){
   // F4 옛 이름 표와 K4 옛 이름 표(SEED_DISPLAY_LEGACY)를 합쳐 쓴다(같은 옛 이름이면 F4 표가 먼저 — 두 표의 항목은 같은 seed 객체라
   // 이름은 둘 다 지금 화면 이름이다).
-  const legacy = new Map(BUNDLES.F4 && window.SEED_NAME_LEGACY ? window.SEED_NAME_LEGACY : []);
+  const legacy = new Map((BUNDLES.F4 || BUNDLES.F5 || BUNDLES.F6) && window.SEED_NAME_LEGACY ? window.SEED_NAME_LEGACY : []);
   if (window.SEED_DISPLAY_LEGACY) window.SEED_DISPLAY_LEGACY.forEach((v, k) => { if (!legacy.has(k)) legacy.set(k, v); });
   if (!legacy.size) return 0;
   let changed = 0;
@@ -6419,6 +6543,14 @@ function libraryMatchRank(name, filter){
 function libraryNameMatches(name, filter){
   return libraryMatchRank(name, filter) != null;
 }
+// 검색 별칭: K4 표 별칭(K4가 켜졌을 때) + F4·F5로 이름이 바뀐 seed 항목의 옛 이름(라이브 이름·KB 이름·33단계 후보 이름).
+function searchAliasesOf(id){
+  if (!id) return [];
+  const k4 = (BUNDLES.K4 && window.SEED_NAME_ALIASES) ? (window.SEED_NAME_ALIASES.get(id) || []) : [];
+  const s = seedEntryById(id);
+  const own = (s && s.nameAliases) || [];
+  return own.length ? k4.concat(own.filter(a => k4.indexOf(a) < 0)) : k4;
+}
 function searchLibraryEntries(list, filter){
   // 이름 자체가 "주공"·"푸르지오"·"한신"인 단지는 부분일치 수십 개에 묻혀
   // 20위 밖으로 밀렸다 — 검색어와 이름(괄호 앞)이 똑같으면 맨 앞에 둔다.
@@ -6427,10 +6559,12 @@ function searchLibraryEntries(list, filter){
   list.forEach((e, i) => {
     let rank = libraryMatchRank(e.name, filter);
     // 묶음 K4: 이름이 바뀐 단지는 옛 이름(KB 원래 이름·F4 이름·끝 마침표 있는 이름)으로도 찾는다.
-    const aliases = (BUNDLES.K4 && e.id && window.SEED_NAME_ALIASES) ? (window.SEED_NAME_ALIASES.get(e.id) || []) : [];
+    const aliases = searchAliasesOf(e.id);
     aliases.forEach(a => { const ra = libraryMatchRank(a, filter); if (ra != null && (rank == null || ra < rank)) rank = ra; });
     if (rank == null) return;
-    if (q && (e.name === q || e.name.split('(')[0] === q || aliases.some(a => a === q || a.split('(')[0] === q))) rank = 0;
+    // 37단계: "신곡동 건영(의정부)"처럼 띄어쓰기가 든 이름도 붙여 쓴 검색어와 똑같으면 맨 앞에 둔다.
+    const nameNs = e.name.replace(/\s+/g, '');
+    if (q && (nameNs === q || nameNs.split('(')[0] === q || aliases.some(a => a === q || a.split('(')[0] === q))) rank = 0;
     ranked.push({ e, rank, i });
   });
   ranked.sort((a, b) => a.rank - b.rank || a.i - b.i);
