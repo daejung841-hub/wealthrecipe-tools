@@ -100,6 +100,7 @@
     '.hub-btn.pri{background:var(--hi-btn,var(--accent));color:var(--hi-btn-ink,var(--accent-ink));flex:1 1 180px;}' +
     '.hub-btn.sec{background:transparent;color:var(--hi-ink,var(--ink));border-color:currentColor;font-weight:500;}' +
     '.hub-btn:focus-visible,.hub-link:focus-visible{outline:3px solid var(--accent);outline-offset:2px;}' +
+    '.hub-ic .hi-other{display:block;margin:6px 0 0;min-height:48px;padding:0;color:var(--hi-ink);}' +
     '.hub-warn{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;margin:0 0 16px;padding:12px 14px;border:2px solid var(--hi-bd);border-radius:12px;background:var(--hi-bg);color:var(--hi-ink);font-size:15px;line-height:1.5;font-weight:700;}' +
     '.hub-warn .hw-text{flex:1 1 200px;min-width:0;}' +
     '.hub-warn .hub-btn{min-height:44px;padding:0 14px;font-size:15px;}' +
@@ -114,6 +115,11 @@
     '.hub-sheet p{margin:0 0 12px;font-size:17px;line-height:1.65;}' +
     '.hub-sheet ol{margin:0 0 14px;padding:0 0 0 24px;font-size:18px;line-height:1.9;}' +
     '.hub-sheet li{padding-left:4px;margin-bottom:4px;}' +
+    '.hub-sheet h3{margin:18px 0 6px;font-size:18px;line-height:1.4;}' +
+    '.hub-sheet .hs-sec .hub-btn{width:100%;margin:2px 0 8px;}' +
+    '.hub-sheet .hs-after{margin:6px 0 2px;}' +
+    '.hub-sheet a.hs-ext{display:inline-flex;align-items:center;min-height:48px;color:var(--accent);font-size:17px;font-weight:700;text-decoration:underline;}' +
+    '.hub-sheet .hub-link{display:block;text-align:left;min-height:48px;padding:0;font-size:16px;}' +
     '.hub-sheet .hs-note{font-size:15px;color:var(--ink-muted);}' +
     '.hub-sheet .hs-status{min-height:24px;font-size:15px;color:var(--ink);font-weight:700;}' +
     '.hub-sheet .hs-addr{display:block;width:100%;margin:0 0 12px;padding:12px;border:1px solid var(--border-strong);border-radius:8px;background:var(--surface-alt);color:var(--ink);font-size:15px;font-family:var(--font-mono);}' +
@@ -173,7 +179,7 @@
     if (!sheet) return;
     if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); closeSheet(); return; }
     if (e.key !== 'Tab') return;
-    var f = sheet.querySelectorAll('button:not([hidden]),input:not([hidden]),[tabindex="-1"]');
+    var f = sheet.querySelectorAll('button:not([hidden]),input:not([hidden]),a[href],[tabindex="-1"]');
     var list = Array.prototype.filter.call(f, function (x) { return x.offsetParent !== null; });
     if (!list.length) return;
     var first = list[0], last = list[list.length - 1];
@@ -181,7 +187,7 @@
     else if (e.shiftKey && (document.activeElement === first || document.activeElement.tagName === 'H2')) { e.preventDefault(); last.focus(); }
     else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
   }
-  function sheetBody() {                                  // 환경별 { title, kids[], chrome, kakao, copy, prompt }
+  function sheetBody(status) {                                  // 환경별 { title, kids[], chrome, kakao, copy, prompt }
     var env = info.env, kids = [], title = '홈 화면에 추가하는 방법', o = { chrome: false, kakao: false, copy: false, prompt: false };
     var steps = function () { var ol = el('ol'); for (var i = 0; i < arguments.length; i++) ol.appendChild(el.apply(null, ['li', null].concat(arguments[i]))); return ol; };
     if (env === 'inapp') {
@@ -195,17 +201,31 @@
       kids.push(el('p', { class: 'hs-note', text: '크롬·네이버·카카오톡 등에서 열었다면 사파리로 열어 주세요.' }));
       o.copy = true;
     } else if (env === 'samsung') {
-      kids.push(el('p', { text: '삼성 인터넷 메뉴에서 "홈 화면에 추가"(또는 주소창 옆 설치 아이콘)를 찾아 주세요. 메뉴 이름은 버전에 따라 다를 수 있어요.' }));
-      kids.push(el('p', { class: 'hs-note', text: '잘 안 되면 크롬으로 열어 주세요.' }));
-      o.chrome = true; o.copy = true;
+      title = '삼성 인터넷에서 쓰는 방법';
+      var sec = function (head) { var d = el('div', { class: 'hs-sec' }, el('h3', { text: head })); for (var i = 1; i < arguments.length; i++) d.appendChild(arguments[i]); return d; };
+      var chromeBtn = el('button', { type: 'button', class: 'hub-btn pri', text: '크롬으로 열기' }); chromeBtn.addEventListener('click', function () { openInChrome(false); });
+      var play = el('a', { class: 'hs-ext', href: 'https://play.google.com/store/apps/details?id=com.android.chrome', target: '_blank', rel: 'noopener noreferrer', text: 'Play 스토어에서 Chrome 받기' });
+      var tryBtn = el('button', { type: 'button', class: 'hub-link', text: '그래도 삼성 인터넷으로 설치 시도 (막힐 수 있어요)' });
+      tryBtn.addEventListener('click', function () {
+        if (deferred) { closeSheet(); doPrompt(); } else status.textContent = '메뉴의 "홈 화면에 추가"를 찾아 보세요. 이름은 버전에 따라 달라요.';
+      });
+      kids.push(sec('① 크롬으로 설치 (추천)',
+        el('p', { text: '삼성 인터넷에서는 설치가 막힐 수 있어요. 크롬으로 열어 설치해 보세요.' }), chromeBtn,
+        el('p', { class: 'hs-after', text: '크롬이 없다면' }), play,
+        el('p', { class: 'hs-note', text: '대부분의 갤럭시에는 크롬이 이미 들어 있어요(구글 폴더 안에 있기도 해요).' })));
+      kids.push(sec('② 설치 없이 쓰기',
+        el('p', { text: '설치하지 않아도 삼성 인터넷에서 그대로 쓸 수 있어요. 즐겨찾기(★)에 추가하거나 메뉴에서 홈 화면 바로가기를 만들어 두면 한 번에 열려요(메뉴 이름은 버전에 따라 달라요).' }),
+        el('p', { text: '기록은 쓰는 브라우저에 저장되니 앞으로도 같은 브라우저로 열어 주세요. 브라우저를 바꿀 때는 백업 후 불러오기를 쓰세요.' })));
+      kids.push(sec('③ 그래도 이 브라우저로 설치해 보려면', tryBtn));
+      o.copy = true;
     } else if (env === 'chromium') {
       kids.push(steps(['오른쪽 위 ', icon('menu'), ' 메뉴를 누르세요.'], ['"앱 설치" 또는 "홈 화면에 추가"를 누르세요.'], ['"설치" 또는 "추가"를 누르세요.']));
       kids.push(el('p', { class: 'hs-note', text: '메뉴 이름은 버전에 따라 다를 수 있어요.' }));
       o.prompt = !!deferred;
     } else if (env === 'desktop') {
-      kids.push(el('p', null, '주소창 오른쪽의 설치 아이콘(', icon('plus'), ')을 눌러 주세요.'));
-      kids.push(el('p', { class: 'hs-note', text: '아이콘이 안 보이면 브라우저 메뉴(⋮)에서 "앱 설치" 또는 "저장 및 공유"를 찾아 보세요.' }));
-      o.prompt = !!deferred;
+      title = '프로그램으로 설치하는 방법';
+      kids.push(el('p', null, '주소창 오른쪽의 설치 아이콘(', icon('plus'), ')을 눌러 주세요. 파이어폭스·사파리 등 설치 아이콘이 없는 브라우저는 크롬이나 엣지로 열어 주세요.'));
+      o.prompt = !!deferred; o.copy = true;
     } else {
       kids.push(el('p', { text: '브라우저 메뉴에서 "홈 화면에 추가" 또는 "앱 설치"를 찾아 주세요. 안 보이면 크롬(아이폰은 사파리)으로 열어 주세요.' }));
       o.copy = true;
@@ -215,13 +235,13 @@
   function openSheet(opener) {
     if (sheet) return;
     lastFocus = opener || document.activeElement;
-    var b = sheetBody(), o = b.o;
-    var h2 = el('h2', { id: 'hubSheetTitle', tabindex: '-1', text: b.title });
     var status = el('p', { class: 'hs-status', role: 'status', 'aria-live': 'polite' });
+    var b = sheetBody(status), o = b.o, env0 = info.env;
+    var h2 = el('h2', { id: 'hubSheetTitle', tabindex: '-1', text: b.title });
     var addr = el('input', { class: 'hs-addr', type: 'text', readonly: 'readonly', 'aria-label': '이 페이지 주소' }); addr.hidden = true;
     var row = el('div', { class: 'hi-row' });
     var btn = function (label, cls, fn) { var x = el('button', { type: 'button', class: 'hub-btn ' + cls, text: label }); x.addEventListener('click', fn); row.appendChild(x); return x; };
-    if (o.prompt) btn('홈 화면에 추가', 'pri', function () { closeSheet(); doPrompt(); });
+    if (o.prompt) btn(env0 === 'desktop' ? '프로그램으로 설치' : '홈 화면에 추가', 'pri', function () { closeSheet(); doPrompt(); });
     if (o.chrome) btn('크롬으로 열기', 'pri', function () { openInChrome(false); });
     if (o.kakao) btn('다른 브라우저로 열기', 'pri', function () { openInChrome(true); });
     if (o.copy) btn('주소 복사', o.chrome || o.kakao ? 'sec' : 'pri', function () { copyAddress(status, addr); });
@@ -265,6 +285,19 @@
     var later = el('button', { type: 'button', class: 'hub-btn sec', text: '나중에' });
     later.addEventListener('click', function () { lsSet(LATER_KEY, String(Date.now())); render(); });
     row.appendChild(add); row.appendChild(later); card.appendChild(row);
+    if (info.env === 'desktop') {                           // PC: 폰 용어("홈 화면") 대신 프로그램 용어. 동작(prompt() 또는 안내 시트)은 그대로
+      card.querySelector('.hi-title').textContent = '💻 프로그램처럼 설치하면 더 편해요';
+      card.querySelector('.hi-desc').textContent = '별도 창으로 바로 열려요. 작업 표시줄에 고정해 두고 쓸 수 있어요.';
+      add.textContent = '프로그램으로 설치';
+    }
+    if (info.env === 'samsung') {                           // 삼성 인터넷: 설치가 막힐 수 있어 크롬 우선 + 다른 방법. prompt()는 이 카드에서 부르지 않는다
+      card.querySelector('.hi-title').textContent = '삼성 인터넷에서는 설치가 막힐 수 있어요.';
+      card.querySelector('.hi-desc').textContent = '크롬으로 열어 설치해 보세요.';
+      add.textContent = '크롬으로 열기';
+      add.removeEventListener('click', onInstallClick); add.addEventListener('click', function () { openInChrome(false); });
+      var other = el('button', { type: 'button', class: 'hub-link hi-other', text: '다른 방법 보기' }); other.addEventListener('click', function (e) { openSheet(e.currentTarget); });
+      card.appendChild(other);
+    }
     var anchor = main.querySelector('.sec-title');
     if (anchor) main.insertBefore(card, anchor); else main.insertBefore(card, main.firstChild);
 
@@ -276,7 +309,7 @@
     main.insertBefore(warn, main.firstChild);
 
     linkWrap = el('div', { class: 'hub-link-wrap' });
-    var link = el('button', { type: 'button', class: 'hub-link', text: '앱 설치 방법' }); link.addEventListener('click', function (e) { openSheet(e.currentTarget); });
+    var link = el('button', { type: 'button', class: 'hub-link', text: info.env === 'desktop' ? '프로그램 설치 방법' : '앱 설치 방법' }); link.addEventListener('click', function (e) { openSheet(e.currentTarget); });
     linkWrap.appendChild(link);
     var forgetWrap = main.querySelector('.hub-forget-wrap');
     if (forgetWrap) main.insertBefore(linkWrap, forgetWrap); else main.appendChild(linkWrap);
@@ -303,6 +336,7 @@
       'standalone: ' + (nav.standalone === true || mqStandalone() ? '예' : '아니오'),
       'beforeinstallprompt: ' + (promptSeen ? '발생' : '없음'),
       'crypto.subtle: ' + (cryptoOk ? '사용 가능' : '불가') + ' / localStorage: ' + (lsOk ? '사용 가능' : '불가'),
+      '삼성 인터넷 버전: ' + ((ua.match(/SamsungBrowser\/([\d.]+)/) || [])[1] || '해당 없음'),
       'UA: ' + ua.slice(0, 120)
     ];
     debugBox.textContent = '';
