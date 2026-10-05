@@ -139,6 +139,127 @@
   .complex-card.role-base.kind-25{ border-color:var(--base-color); }
   .complex-card.role-compare.kind-25{ border-color:var(--compare-color); }
 </style>
+<style id="mobileStyle">
+  /* ===== 모바일 전용 화면(폭 700px 이하 또는 ?view=mobile) =====
+     body.m-on 일 때만 적용된다. 위의 PC 규칙은 한 줄도 바꾸지 않았고, 아래 규칙은 모두 .m-* 클래스나
+     body.m-on 아래에만 있어 PC 화면(폭 701px 이상, ?view=desktop)에는 영향이 없다. */
+  #mRoot{ display:none; }
+  body.m-on{ padding-bottom:92px; font-size:14px; -webkit-tap-highlight-color:transparent; }
+  body.m-on.m-lock{ overflow:hidden; }
+  body.m-on #mRoot{ display:block; max-width:700px; margin:0 auto; overflow-x:clip; } /* 폰 Chrome은 가로로 넘치는 내용이 있으면 페이지 전체를 줄여 그린다(예전 PC 표가 그랬다) — 넘침을 잘라 막는다. clip은 sticky 헤더를 깨지 않는다 */
+  body.m-on .header, body.m-on .layout{ display:none !important; }
+  #mRoot [hidden]{ display:none !important; }
+  #mRoot *{ box-sizing:border-box; }
+  :where(#mRoot) button{ font-family:inherit; color:inherit; }
+  /* 의견 보내기 버튼(공유 위젯)이 상단 슬림 바를 가리지 않게 우측 하단 원형 버튼으로 옮긴다(이 페이지에서만). */
+  body.m-on .fw-fab{ top:auto !important; bottom:76px !important; right:10px !important; width:44px; height:44px; padding:0 !important; box-sizing:border-box; justify-content:center; font-size:0 !important; opacity:.9; }
+  body.m-on .fw-fab::before{ content:'💬'; font-size:20px; line-height:1; }
+  /* 기존 하단 고정 선택 바(기준·비교 칩 + 시세비교 버튼)를 한 줄 가로 스크롤로 */
+  body.m-on .bottom-bar{ flex-wrap:nowrap; overflow-x:auto; gap:8px; padding:8px 12px; z-index:50; }
+  body.m-on .bottom-bar .chip{ flex:none; font-size:13px; padding:7px 12px; border-radius:16px; }
+  body.m-on .bottom-bar .empty{ font-size:13px; flex:1; }
+  body.m-on .bottom-bar button{ flex:none; min-height:44px; min-width:96px; padding:0 18px; font-size:15px; margin-left:auto; }
+  body.m-on .ctx-menu button{ min-height:44px; font-size:15px; padding:0 20px; white-space:nowrap; }
+
+  .m-intro{ padding:12px 16px 0; }
+  .m-title-row{ display:flex; align-items:center; justify-content:space-between; }
+  .m-title-row h1{ margin:0; font-size:22px; }
+  .m-info{ width:44px; height:44px; border:none; background:none; font-size:22px; color:var(--base-color); cursor:pointer; }
+  .m-info-text{ font-size:14px; color:var(--muted); line-height:1.6; background:var(--card-bg); border:1px solid var(--border); border-radius:10px; padding:10px 14px; margin:0 0 8px; }
+  .m-controls{ padding:4px 12px 4px; }
+  .m-seg{ display:flex; border:1px solid var(--border); border-radius:10px; overflow:hidden; background:var(--card-bg); }
+  .m-seg button{ flex:1; min-height:44px; border:none; border-right:1px solid var(--border); background:none; font-size:15px; cursor:pointer; padding:0 4px; }
+  .m-seg button:last-child{ border-right:none; }
+  .m-seg button.active{ background:var(--base-color); color:#fff; font-weight:700; }
+  .m-seg button:disabled{ opacity:.6; cursor:wait; }
+  .m-status{ font-size:13px; color:var(--muted); min-height:0; }
+  .m-status:not(:empty){ padding:6px 2px 0; }
+  .m-status.err{ color:#c0392b; }
+  .m-region-row{ display:flex; gap:6px; margin:10px 0 8px; }
+  .m-chip{ flex:1 1 auto; min-height:44px; border:1px solid var(--border); border-radius:22px; background:var(--card-bg); font-size:14px; padding:0 8px; cursor:pointer; white-space:nowrap; }
+  .m-chip.active{ background:var(--base-color); color:#fff; border-color:var(--base-color); font-weight:700; }
+  .m-chip.m-regionbtn{ flex:0 0 auto; padding:0 12px; font-weight:700; }
+  .m-search{ position:relative; margin-bottom:6px; }
+  .m-search svg{ position:absolute; left:13px; top:50%; margin-top:-9px; width:18px; height:18px; color:var(--muted); pointer-events:none; }
+  .m-search input{ width:100%; height:44px; border:1px solid var(--border); border-radius:10px; background:var(--card-bg); padding:0 46px 0 38px; font-size:16px; font-family:inherit; color:var(--text); -webkit-appearance:none; appearance:none; }
+  .m-search input:focus{ outline:2px solid var(--base-color); outline-offset:-1px; }
+  .m-search .m-clear{ position:absolute; right:0; top:0; width:44px; height:44px; border:none; background:none; font-size:16px; color:var(--muted); cursor:pointer; }
+  .m-filter-row{ display:flex; flex-wrap:wrap; align-items:center; gap:0 8px; }
+  .m-filter-btn{ min-height:44px; padding:0 14px; border:1px solid var(--border); border-radius:22px; background:var(--card-bg); font-size:15px; font-weight:700; cursor:pointer; display:inline-flex; align-items:center; gap:6px; white-space:nowrap; }
+  .m-filter-btn.on{ border-color:var(--base-color); color:var(--base-color); }
+  .m-badge{ display:none; min-width:20px; height:20px; padding:0 6px; border-radius:10px; background:var(--base-color); color:#fff; font-size:12px; line-height:20px; text-align:center; }
+  .m-badge.on{ display:inline-block; }
+  .m-count{ margin-left:auto; font-size:14px; color:var(--muted); }
+  .m-active{ display:flex; flex-wrap:wrap; width:100%; }
+  .m-achip{ min-height:44px; border:none; background:none; padding:0 3px 0 0; cursor:pointer; display:inline-flex; align-items:center; }
+  .m-achip span{ display:inline-flex; align-items:center; gap:6px; background:var(--badge-bg); color:var(--badge-text); border-radius:16px; padding:6px 12px; font-size:13px; }
+  .m-slim{ position:fixed; top:0; left:0; right:0; max-width:700px; margin:0 auto; height:52px; padding:4px 8px; display:flex; align-items:center; gap:8px; background:var(--card-bg); border-bottom:1px solid var(--border); z-index:60; visibility:hidden; }
+  body.m-slimon .m-slim{ visibility:visible; }
+  .m-slim .m-seg{ flex:1; min-width:0; }
+  .m-slim .m-seg button{ font-size:14px; }
+  .m-ic{ width:44px; height:44px; flex:none; border:1px solid var(--border); border-radius:22px; background:var(--card-bg); display:grid; place-items:center; cursor:pointer; position:relative; color:var(--text); }
+  .m-ic svg{ width:20px; height:20px; }
+  .m-ic.on{ border-color:var(--base-color); color:var(--base-color); }
+  .m-ic.on::after{ content:''; position:absolute; top:8px; right:8px; width:8px; height:8px; border-radius:50%; background:var(--base-color); }
+  .m-slim .m-filter-btn{ flex:none; padding:0 12px; }
+  #mList{ margin-top:8px; }
+  .m-sec{ margin:0; }
+  .m-sec-h{ position:sticky; top:52px; z-index:40; margin:0; min-height:36px; display:flex; align-items:center; padding:0 16px; font-size:15px; font-weight:700; background:var(--bg); border-top:1px solid var(--border); border-bottom:1px solid var(--border); }
+  .m-sec-h.high{ color:var(--base-color); }
+  .m-row{ display:grid; grid-template-columns:minmax(0,1fr) auto; align-items:center; gap:2px 10px; min-height:56px; padding:8px 12px 8px 14px; background:var(--card-bg); border-bottom:1px solid var(--border); cursor:pointer; user-select:none; -webkit-user-select:none; -webkit-touch-callout:none; }
+  .m-row:active{ background:#f1f1ee; }
+  .m-row.kind-25{ background:#fff7e6; }
+  .m-row.role-base{ background:#eef4ff; box-shadow:inset 4px 0 0 var(--base-color); }
+  .m-row.role-compare{ background:#fff3e8; box-shadow:inset 4px 0 0 var(--compare-color); }
+  .m-l1{ display:flex; flex-wrap:wrap; align-items:baseline; gap:2px 6px; line-height:1.3; }
+  .m-name{ font-size:16px; font-weight:700; word-break:keep-all; overflow-wrap:anywhere; }
+  .m-tag{ font-size:12px; font-weight:700; color:var(--base-color); white-space:nowrap; }
+  .m-l2{ display:flex; flex-wrap:wrap; gap:4px; margin-top:4px; }
+  .m-row .badge{ font-size:13px; padding:2px 8px; border-radius:10px; line-height:1.35; }
+  .m-row .badge.badge-rental{ margin-left:0; vertical-align:baseline; }
+  .m-side{ display:flex; flex-direction:column; align-items:flex-end; gap:4px; }
+  .m-role-badge{ grid-column:1 / -1; display:none; font-size:12px; font-weight:700; }
+  .m-row.role-base .m-role-badge{ display:block; color:var(--base-color); }
+  .m-row.role-compare .m-role-badge{ display:block; color:var(--compare-color); }
+  .m-empty{ padding:36px 20px; text-align:center; color:var(--muted); font-size:15px; line-height:1.7; }
+  .m-empty button{ margin-top:10px; min-height:44px; padding:0 20px; border:1px solid var(--border); border-radius:22px; background:var(--card-bg); font-size:15px; cursor:pointer; }
+  .m-sheet{ position:fixed; inset:0; z-index:10001; }
+  .m-sheet-back{ position:absolute; inset:0; background:rgba(0,0,0,.45); }
+  .m-sheet-panel{ position:absolute; left:0; right:0; bottom:0; max-width:700px; margin:0 auto; max-height:88vh; max-height:88dvh; background:var(--card-bg); border-radius:16px 16px 0 0; display:flex; flex-direction:column; animation:mUp .18s ease-out; }
+  @keyframes mUp{ from{ transform:translateY(40px); opacity:.6; } to{ transform:none; opacity:1; } }
+  .m-sheet-head{ display:flex; align-items:center; gap:4px; padding:4px 4px 4px 16px; border-bottom:1px solid var(--border); }
+  .m-sheet-head b{ flex:1; font-size:17px; }
+  .m-sheet-head button{ min-width:44px; min-height:44px; border:none; background:none; font-size:15px; cursor:pointer; padding:0 10px; }
+  .m-sheet-head .m-reset{ color:var(--base-color); font-weight:700; }
+  .m-sheet-body{ flex:1; overflow-y:auto; overscroll-behavior:contain; padding:4px 16px 14px; }
+  .m-sheet-body h3{ margin:16px 0 6px; font-size:15px; }
+  .m-pills{ display:flex; flex-wrap:wrap; gap:6px; }
+  .m-pill{ min-height:44px; padding:0 16px; border:1px solid var(--border); border-radius:22px; background:var(--card-bg); font-size:15px; cursor:pointer; }
+  .m-pill.active{ background:var(--base-color); border-color:var(--base-color); color:#fff; font-weight:700; }
+  .m-pills.off .m-pill{ opacity:.45; pointer-events:none; }
+  .m-inline{ display:flex; align-items:center; gap:8px; margin-top:8px; font-size:14px; color:var(--muted); }
+  .m-inline input{ width:110px; height:44px; border:1px solid var(--border); border-radius:10px; padding:0 10px; font-size:16px; font-family:inherit; text-align:right; background:var(--card-bg); color:var(--text); }
+  .m-inline input:disabled{ background:var(--bg); }
+  .m-switch-row{ display:flex; align-items:center; justify-content:space-between; gap:12px; width:100%; min-height:56px; border:1px solid var(--border); border-radius:12px; background:var(--card-bg); padding:0 14px; font-size:15px; cursor:pointer; text-align:left; }
+  .m-switch{ flex:none; width:50px; height:30px; border-radius:15px; background:#cfcfcb; position:relative; transition:background .15s; }
+  .m-switch::after{ content:''; position:absolute; top:3px; left:3px; width:24px; height:24px; border-radius:50%; background:#fff; transition:transform .15s; box-shadow:0 1px 3px rgba(0,0,0,.3); }
+  .m-switch-row[aria-checked="true"] .m-switch{ background:var(--base-color); }
+  .m-switch-row[aria-checked="true"] .m-switch::after{ transform:translateX(20px); }
+  .m-help{ font-size:13px; color:var(--muted); line-height:1.5; margin:6px 2px 0; }
+  .m-sheet-foot{ padding:10px 12px; border-top:1px solid var(--border); }
+  .m-apply{ width:100%; min-height:48px; border:none; border-radius:12px; background:var(--base-color); color:#fff; font-size:16px; font-weight:700; cursor:pointer; }
+  /* 지역(구·시) 시트 안에서는 기존 지역 패널(#regionPanel)을 그대로 쓰되 손가락 크기로 키운다 */
+  .m-sheet .region-panel{ width:auto; position:static; max-height:none; overflow:visible; border:none; padding:0; font-size:15px; background:none; }
+  .m-sheet .region-panel .panel-actions{ gap:8px; margin:6px 0; }
+  .m-sheet .region-panel .panel-actions button{ min-height:44px; padding:0 16px; font-size:14px; border-radius:22px; }
+  .m-sheet .region-group-head{ gap:0; padding:0; }
+  .m-sheet .region-group-head .caret{ width:44px; height:44px; font-size:16px; }
+  .m-sheet .region-group-head label{ min-height:44px; font-size:15px; }
+  .m-sheet .region-children{ margin-left:44px; }
+  .m-sheet .region-children label{ min-height:44px; padding:0 4px; font-size:15px; gap:10px; }
+  .m-sheet .region-panel input[type=checkbox]{ width:22px; height:22px; flex:none; }
+  .m-sheet .region-count{ font-size:13px; }
+</style>
 
 <div class="header">
   <h1>급지표</h1>
@@ -155,6 +276,66 @@
   </div>
 </div>
 <div class="bottom-bar" id="bottomBar"></div>
+<!-- 모바일 전용 화면(body.m-on일 때만 보임). PC 화면에서는 display:none이라 아무 영향이 없다. 동작은 아래 모바일 스크립트. -->
+<div id="mRoot" aria-label="급지표 모바일 화면">
+  <div class="m-slim" id="mSlim">
+    <div class="m-seg" id="mModeSlim"></div>
+    <button type="button" class="m-ic" id="mSlimSearch" aria-label="단지명 검색"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg></button>
+    <button type="button" class="m-filter-btn" data-open="filter">필터<span class="m-badge"></span></button>
+  </div>
+  <header class="m-intro">
+    <div class="m-title-row"><h1>급지표</h1><button type="button" class="m-info" id="mInfoBtn" aria-expanded="false" aria-controls="mInfo" aria-label="분류 기준 보기">ⓘ</button></div>
+    <div class="m-info-text" id="mInfo" hidden></div>
+  </header>
+  <div class="m-controls" id="mControls">
+    <div class="m-seg" id="mModeFull"></div>
+    <div class="m-status" id="mStatus"></div>
+    <div class="m-region-row" id="mRegionRow"></div>
+    <div class="m-search">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+      <input id="mSearch" type="text" inputmode="search" enterkeyhint="search" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="단지명 검색" aria-label="단지명 검색">
+      <button type="button" class="m-clear" id="mSearchClear" aria-label="검색어 지우기" hidden>✕</button>
+    </div>
+    <div class="m-filter-row">
+      <button type="button" class="m-filter-btn" data-open="filter">필터<span class="m-badge"></span></button>
+      <span class="m-count" id="mCount"></span>
+      <div class="m-active" id="mActive"></div>
+    </div>
+  </div>
+  <div id="mSentinel"></div>
+  <main id="mList"></main>
+  <div class="m-sheet" id="mFilterSheet" role="dialog" aria-modal="true" aria-label="필터" hidden>
+    <div class="m-sheet-back" data-close></div>
+    <div class="m-sheet-panel">
+      <div class="m-sheet-head"><b>필터</b><button type="button" class="m-reset" id="mReset">초기화</button><button type="button" data-close aria-label="닫기">✕</button></div>
+      <div class="m-sheet-body">
+        <h3>연식</h3>
+        <div class="m-pills" id="mAgeMode">
+          <button type="button" class="m-pill" data-age-mode="none">전체</button>
+          <button type="button" class="m-pill" data-age-mode="within">이내(신축 위주)</button>
+          <button type="button" class="m-pill" data-age-mode="over">이상(구축 위주)</button>
+        </div>
+        <div class="m-pills" id="mAgeYears" style="margin-top:6px"></div>
+        <div class="m-inline"><label for="mAgeInput">직접 입력</label><input id="mAgeInput" type="text" inputmode="numeric" pattern="[0-9]*" aria-label="연식 년수"><span>년</span></div>
+        <h3>세대수</h3>
+        <div class="m-pills" id="mUnitsPills"></div>
+        <div class="m-inline"><label for="mUnitsInput">직접 입력</label><input id="mUnitsInput" type="text" inputmode="numeric" pattern="[0-9]*" placeholder="예: 500" aria-label="세대수 이상"><span>세대 이상</span></div>
+        <h3>임대</h3>
+        <button type="button" class="m-switch-row" id="mRental" role="switch" aria-checked="false"><span id="mRentalLabel"></span><span class="m-switch"></span></button>
+        <div class="m-help" id="mRentalHelp"></div>
+      </div>
+      <div class="m-sheet-foot"><button type="button" class="m-apply" id="mApply" data-close>단지 보기</button></div>
+    </div>
+  </div>
+  <div class="m-sheet" id="mRegionSheet" role="dialog" aria-modal="true" aria-label="구·시 선택" hidden>
+    <div class="m-sheet-back" data-close></div>
+    <div class="m-sheet-panel">
+      <div class="m-sheet-head"><b>구·시 선택</b><button type="button" data-close aria-label="닫기">✕</button></div>
+      <div class="m-sheet-body" id="mRegionBody"></div>
+      <div class="m-sheet-foot"><button type="button" class="m-apply" data-close id="mRegionApply">단지 보기</button></div>
+    </div>
+  </div>
+</div>
 
 <script src="shared.js"></script>
 <script src="seedComplexes.js"></script>
@@ -1146,5 +1327,422 @@ function init(){
     showFatalError('화면을 불러오는 중 오류가 발생했습니다: ' + (err && err.message ? err.message : err) + ' (개발자 도구 콘솔(F12)에서 자세한 내용을 확인해 알려주세요)');
   }
 }
-init();
+// PC 화면 시작 함수 — 바로 부르지 않고 아래 모바일 스크립트가 화면 폭에 따라 부른다(PC 코드 자체는 그대로).
+window.__geupInit = init;
+</script>
+<script id="mobileScript">
+// ───────── 모바일 전용 화면(폭 700px 이하 또는 ?view=mobile, ?view=desktop이면 항상 PC) ─────────
+// PC용 렌더링 코드는 건드리지 않는다. 모바일일 때만 renderBandContent / renderModeBar / refreshSelectionView를
+// 이 파일 아래의 모바일 함수로 바꿔 끼우고(PC로 돌아가면 원래 함수로 복원), 필터링·가격 구간·카드 칩 HTML은 PC와 같은
+// 함수(buildModeItems, complexPassesFilters, binLowFor, cardStatic …)를 그대로 재사용한다.
+// 선택 상태(baseId/compareIds)·toggleCard·renderBottomBar·goToCalculator(계산기 이동 주소)도 PC와 같은 함수를 그대로 쓴다.
+(function(){
+  'use strict';
+  const MQ = window.matchMedia('(max-width:700px)');
+  function viewParam(){ try { return new URLSearchParams(window.location.search).get('view'); } catch (e) { return null; } }
+  function wantMobile(){ const v = viewParam(); if (v === 'mobile') return true; if (v === 'desktop') return false; return MQ.matches; }
+
+  // ───── 순수 함수(tests/test_mobile_list.js에서 이 파일의 소스를 그대로 꺼내 시험) ─────
+  // 필터링이 끝난 [{complex, price}]를 PC와 같은 구간 규칙(40억·30억 통합행 포함)으로 묶는다. 단지가 없는 구간은 만들지 않는다.
+  function buildMobileSections(items, bcfg){
+    const high = items.filter(p => p.price >= bcfg.highThreshold).sort(sortByPriceDesc);
+    const normal = items.filter(p => p.price < bcfg.highThreshold);
+    const binMap = new Map();
+    normal.forEach(p => {
+      const low = binLowFor(p.price, bcfg);
+      if (!binMap.has(low)) binMap.set(low, []);
+      binMap.get(low).push(p);
+    });
+    const sections = [];
+    if (high.length) sections.push({ key: 'high', title: bcfg.highThreshold + '억 이상', high: true, rows: high });
+    [...binMap.keys()].sort((a, b) => b - a).forEach(low => {
+      sections.push({ key: String(low), title: fmtBin(low, binHighFor(low, bcfg)), high: false, rows: binMap.get(low).sort(sortByPriceDesc) });
+    });
+    return sections;
+  }
+  function searchKey(s){ return String(s == null ? '' : s).toLowerCase().replace(/\s+/g, ''); }
+  function matchesSearch(c, q){
+    if (!q) return true;
+    return searchKey(displayName(c)).indexOf(q) >= 0 || searchKey(c.name).indexOf(q) >= 0;
+  }
+  // 행의 지역 태그: 서울=구, 경기=시(·구), 인천="인천 구"(서울 중구와 구분)
+  function regionTagOf(c){
+    const region = regionOfComplex(c), d = validDistrict(c);
+    if (region === 'seoul') return d || '서울';
+    if (region === 'incheon') return d ? '인천 ' + districtDisplayName(d) : '인천';
+    if (region === 'gyeonggi') return d ? c.regionCity + '·' + districtDisplayName(d) : c.regionCity;
+    return '미분류';
+  }
+  // cardStatic()이 만든 카드 안쪽 HTML(이름 줄 + 칩 줄)을 모바일 행 조각으로 나눈다 — 칩 내용·표시 조건은 PC와 같다.
+  function splitCardInner(inner){
+    const m = /^<div class="name">([\s\S]*?)<\/div><div class="badges">([\s\S]*)<\/div>$/.exec(inner);
+    if (!m) return null;
+    let nameHtml = m[1], rental = '';
+    const ri = nameHtml.indexOf('<span class="badge badge-rental');
+    if (ri >= 0){ rental = nameHtml.slice(ri); nameHtml = nameHtml.slice(0, ri); }
+    const kind = [], meta = [], gap = [], price = [];
+    const re = /<span class="([^"]*)"[^>]*>[\s\S]*?<\/span>/g;
+    let s;
+    while ((s = re.exec(m[2])) !== null){
+      const cls = s[1];
+      if (cls.indexOf('badge-kind') >= 0) kind.push(s[0]);
+      else if (cls.indexOf('badge-gap') >= 0) gap.push(s[0]);
+      else if (cls.indexOf('badge-price') >= 0) price.push(s[0]);
+      else meta.push(s[0]);
+    }
+    if (rental) meta.splice(Math.min(2, meta.length), 0, rental); // 연식·세대수 다음에 임대 배지
+    return { name: nameHtml, kind: kind.join(''), meta: meta.join(''), gap: gap.join(''), price: price.join('') };
+  }
+  // 적용 중인 필터 칩(누르면 해제). st = { ageMode, ageYears, unitsMin, rentalOnly, rentalLabel, hiddenCount }
+  function activeChipsOf(st){
+    const out = [];
+    if (st.ageMode === 'within') out.push({ key: 'age', label: '연식 ' + st.ageYears + '년 이내' });
+    else if (st.ageMode === 'over') out.push({ key: 'age', label: '연식 ' + st.ageYears + '년 이상' });
+    if (st.unitsMin != null) out.push({ key: 'units', label: '세대수 ' + Number(st.unitsMin).toLocaleString('ko-KR') + ' 이상' });
+    if (st.rentalOnly) out.push({ key: 'rental', label: st.rentalLabel });
+    if (st.hiddenCount > 0) out.push({ key: 'region', label: '구·시 ' + st.hiddenCount + '곳 제외' });
+    return out;
+  }
+
+  // ───── 화면 상태·그리기 ─────
+  const $ = id => document.getElementById(id);
+  const MODE_LABEL_M = { '34': '34평', '25': '25평', 'both': '전체' };
+  const AGE_YEAR_PRESETS = [5, 10, 15, 20, 25, 30];
+  const UNITS_PRESETS = [null, 500, 1000, 2000];
+  const CHUNK = 20;
+  const PC = { renderBandContent: window.renderBandContent, renderModeBar: window.renderModeBar, refreshSelectionView: window.refreshSelectionView };
+  const ROW_CACHE = new Map();
+  const perf = { boot: null, lastRender: null, renders: 0 };
+  let inMobile = false, desktopInited = false, mobileBuilt = false, sheetPushed = false;
+  let mSearchNorm = '', renderToken = 0, mRenderedSel = [], lastResult = null, filterTimer = null, searchTimer = null, slimTick = false;
+
+  function staticOf(c, priceLabel, key){
+    const sk = key + '|' + viewMode + '|' + (priceLabel != null ? priceLabel : '');
+    let st = CARD_STATIC.get(sk);
+    if (!st){ st = cardStatic(c, priceLabel, key); CARD_STATIC.set(sk, st); }
+    return st;
+  }
+  function rowParts(c, priceLabel, key){
+    const sk = key + '|' + viewMode + '|' + (priceLabel != null ? priceLabel : '');
+    let r = ROW_CACHE.get(sk);
+    if (!r){
+      const st = staticOf(c, priceLabel, key);
+      r = { cls: st.cls, title: st.title, inner: st.inner, p: splitCardInner(st.inner), tag: regionTagOf(c) };
+      ROW_CACHE.set(sk, r);
+    }
+    return r;
+  }
+  function roleText(role){ return role === 'base' ? '기준단지' : role === 'compare' ? '비교단지' : ''; }
+  function rowHtml(p, high){
+    const c = p.complex, key = cardKey(c);
+    const r = rowParts(c, high ? p.price : null, key);
+    const role = roleOf(key);
+    const cls = 'm-row' + (role ? ' role-' + role : '') + (r.cls.indexOf('kind-25') >= 0 ? ' kind-25' : '');
+    const q = r.p;
+    const l1 = q ? q.kind + '<span class="m-name">' + q.name + '</span><span class="m-tag">' + esc(r.tag) + '</span>' : '<span class="m-name">' + esc(displayName(c)) + '</span>';
+    return '<div class="' + cls + '" data-id="' + esc(key) + '"' + r.title + '>' +
+      '<div class="m-main"><div class="m-l1">' + l1 + '</div><div class="m-l2">' + (q ? q.meta : '') + '</div></div>' +
+      '<div class="m-side">' + (q ? q.price + q.gap : '') + '</div>' +
+      '<div class="m-role-badge">' + roleText(role) + '</div></div>';
+  }
+
+  // 지금 화면 조건(지역 탭·연식·세대수·임대·구/시 체크·검색)에 맞는 항목과 구간 묶음. PC와 같은 필터 함수를 쓴다.
+  function compute(){
+    const cfg = TAB_CONFIG[activeTab];
+    const inRegion = ALL.filter(c => cfg.filter(c) && complexPassesFilters(c));
+    let items = buildModeItems(inRegion).filter(p => !hiddenCols.has(colKeyOfComplex(p.complex)));
+    if (mSearchNorm) items = items.filter(p => matchesSearch(p.complex, mSearchNorm));
+    return { items: items, sections: buildMobileSections(items, binConfig()) };
+  }
+  function hiddenCountInTab(){
+    if (!hiddenCols.size) return 0;
+    let n = 0;
+    regionTreeData().forEach(g => g.cols.forEach(c => { if (hiddenCols.has(c.key)) n++; }));
+    return n;
+  }
+  function filterState(){
+    return { ageMode: ageFilterMode, ageYears: ageFilterYears, unitsMin: unitsFilterMin, rentalOnly: rentalOnly, rentalLabel: RENTAL_FILTER_LABEL, hiddenCount: hiddenCountInTab() };
+  }
+
+  function updateChrome(res){
+    const n = res.items.length;
+    $('mCount').textContent = '총 ' + n.toLocaleString('ko-KR') + '개';
+    const chips = activeChipsOf(filterState());
+    $('mActive').innerHTML = chips.map(c => '<button type="button" class="m-achip" data-clear="' + c.key + '"><span>' + esc(c.label) + ' ✕</span></button>').join('');
+    document.querySelectorAll('#mRoot .m-badge').forEach(b => { b.textContent = chips.length ? String(chips.length) : ''; b.classList.toggle('on', chips.length > 0); });
+    document.querySelectorAll('#mRoot .m-filter-btn').forEach(b => b.classList.toggle('on', chips.length > 0));
+    $('mSlimSearch').classList.toggle('on', !!mSearchNorm);
+    const label = n.toLocaleString('ko-KR') + '개 단지 보기';
+    $('mApply').textContent = label; $('mRegionApply').textContent = label;
+  }
+
+  function renderList(res){
+    const my = ++renderToken, list = $('mList'), secs = res.sections, t0 = performance.now();
+    perf.renders++;
+    if (!secs.length){
+      list.innerHTML = '<div class="m-empty">조건에 맞는 단지가 없습니다.<br><button type="button" data-reset-all>필터·검색 초기화</button></div>';
+      perf.lastRender = { rows: 0, firstMs: performance.now() - t0, allMs: performance.now() - t0, sections: 0 };
+      mRenderedSel = currentSelectionIds();
+      return;
+    }
+    list.innerHTML = secs.map((s, i) => '<section class="m-sec"><h2 class="m-sec-h' + (s.high ? ' high' : '') + '">' + esc(s.title) + ' · ' + s.rows.length + '개</h2><div class="m-sec-b" data-i="' + i + '"></div></section>').join('');
+    const bodies = list.querySelectorAll('.m-sec-b');
+    const queue = [];
+    secs.forEach((s, i) => { for (let a = 0; a < s.rows.length; a += CHUNK) queue.push([i, a]); });
+    let qi = 0, rendered = 0;
+    const total = res.items.length;
+    function fill(){
+      const job = queue[qi++], s = secs[job[0]];
+      bodies[job[0]].insertAdjacentHTML('beforeend', s.rows.slice(job[1], job[1] + CHUNK).map(p => rowHtml(p, s.high)).join(''));
+      rendered += Math.min(CHUNK, s.rows.length - job[1]);
+    }
+    function step(budget, minRows){
+      const t = performance.now();
+      while (qi < queue.length && (rendered < minRows || performance.now() - t < budget)) fill();
+    }
+    step(0, 40); // 첫 화면: 최소 40행은 바로 그린다
+    perf.lastRender = { rows: total, firstMs: performance.now() - t0, allMs: null, sections: secs.length, done: false };
+    function finish(){ perf.lastRender.allMs = performance.now() - t0; perf.lastRender.done = true; }
+    function tick(){
+      if (my !== renderToken) return;
+      step(10, 0); // 나머지는 10ms씩 끊어 그린다(구간 안에서 20행 단위)
+      if (qi < queue.length) setTimeout(tick, 0); else finish();
+    }
+    if (qi < queue.length) setTimeout(tick, 0); else finish();
+    mRenderedSel = currentSelectionIds();
+  }
+
+  function mRender(){
+    const res = compute();
+    lastResult = res;
+    updateChrome(res);
+    renderList(res);
+  }
+  function mRenderModeBar(statusText, isError){
+    const busy = seed25State === 'loading';
+    const html = ['34', '25', 'both'].map(m => '<button type="button" data-mode="' + m + '" class="' + (viewMode === m ? 'active' : '') + '"' + (busy ? ' disabled' : '') + '>' + MODE_LABEL_M[m] + '</button>').join('');
+    $('mModeFull').innerHTML = html; $('mModeSlim').innerHTML = html;
+    const st = $('mStatus'); st.textContent = statusText || ''; st.classList.toggle('err', !!isError);
+  }
+  function mRefreshSelection(){
+    const list = $('mList'), ids = new Set(mRenderedSel.concat(currentSelectionIds()));
+    ids.forEach(id => {
+      const row = list.querySelector('.m-row[data-id="' + CSS.escape(id) + '"]');
+      if (!row) return;
+      const role = roleOf(id);
+      row.classList.toggle('role-base', role === 'base');
+      row.classList.toggle('role-compare', role === 'compare');
+      const rb = row.querySelector('.m-role-badge');
+      if (rb) rb.textContent = roleText(role);
+    });
+    mRenderedSel = currentSelectionIds();
+  }
+  function renderRegionRow(){
+    $('mRegionRow').innerHTML = TAB_KEYS.map(k => '<button type="button" class="m-chip' + (activeTab === k ? ' active' : '') + '" data-tab="' + k + '">' + esc(TAB_CONFIG[k].label) + '</button>').join('') +
+      '<button type="button" class="m-chip m-regionbtn" data-open="region">구·시 ▾</button>';
+  }
+
+  // ───── 필터 시트 ─────
+  function buildSheetStatic(){
+    $('mAgeYears').innerHTML = AGE_YEAR_PRESETS.map(y => '<button type="button" class="m-pill" data-age-years="' + y + '">' + y + '년</button>').join('');
+    $('mUnitsPills').innerHTML = UNITS_PRESETS.map(u => '<button type="button" class="m-pill" data-units="' + (u == null ? '' : u) + '">' + (u == null ? '전체' : u.toLocaleString('ko-KR') + ' 이상') + '</button>').join('');
+    $('mRentalLabel').textContent = RENTAL_FILTER_LABEL;
+    $('mRentalHelp').textContent = RENTAL_FILTER_TIP;
+  }
+  function syncSheet(){
+    document.querySelectorAll('#mAgeMode .m-pill').forEach(b => b.classList.toggle('active', b.dataset.ageMode === ageFilterMode));
+    const none = ageFilterMode === 'none';
+    $('mAgeYears').classList.toggle('off', none);
+    document.querySelectorAll('#mAgeYears .m-pill').forEach(b => b.classList.toggle('active', !none && Number(b.dataset.ageYears) === ageFilterYears));
+    const ai = $('mAgeInput'); ai.disabled = none;
+    if (document.activeElement !== ai) ai.value = String(ageFilterYears);
+    const preset = UNITS_PRESETS.indexOf(unitsFilterMin) >= 0;
+    document.querySelectorAll('#mUnitsPills .m-pill').forEach(b => b.classList.toggle('active', b.dataset.units === '' ? unitsFilterMin == null : Number(b.dataset.units) === unitsFilterMin));
+    const ui = $('mUnitsInput');
+    if (document.activeElement !== ui) ui.value = (unitsFilterMin != null && !preset) ? String(unitsFilterMin) : '';
+    $('mRental').setAttribute('aria-checked', rentalOnly ? 'true' : 'false');
+  }
+  function renderSoon(){ clearTimeout(filterTimer); filterTimer = setTimeout(mRender, 250); }
+  function resetAllFilters(){
+    ageFilterMode = 'none'; ageFilterYears = 20; unitsFilterMin = null; rentalOnly = false;
+    hiddenCols.clear();
+    renderRegionPanel(); syncSheet(); mRender();
+  }
+  function clearOne(key){
+    if (key === 'age') ageFilterMode = 'none';
+    else if (key === 'units') unitsFilterMin = null;
+    else if (key === 'rental') rentalOnly = false;
+    else if (key === 'region') regionTreeData().forEach(g => g.cols.forEach(c => hiddenCols.delete(c.key)));
+    renderRegionPanel(); syncSheet(); mRender();
+  }
+  function openSheet(name){
+    const el = $(name === 'filter' ? 'mFilterSheet' : 'mRegionSheet');
+    if (!el.hidden) return;
+    if (name === 'filter') syncSheet(); else renderRegionPanel();
+    el.hidden = false;
+    document.body.classList.add('m-lock');
+    try { history.pushState({ geupSheet: name }, ''); sheetPushed = true; } catch (e) { sheetPushed = false; }
+  }
+  function hideSheets(){
+    ['mFilterSheet', 'mRegionSheet'].forEach(id => { const el = $(id); if (el) el.hidden = true; });
+    document.body.classList.remove('m-lock');
+  }
+  function closeSheets(){
+    if (sheetPushed){ sheetPushed = false; try { history.back(); return; } catch (e) { /* 아래에서 그냥 닫는다 */ } }
+    hideSheets();
+  }
+
+  // ───── 이벤트(위임) ─────
+  function showMenuClamped(x, y, id){
+    showContextMenu(x, y, id);
+    const m = document.querySelector('.ctx-menu');
+    if (m){
+      m.style.left = '0px'; // 화면 오른쪽 끝에서 눌러도 메뉴 폭이 줄어들지 않게 먼저 왼쪽에 두고 크기를 잰다
+      const w = m.offsetWidth, h = m.offsetHeight;
+      m.style.left = Math.max(8, Math.min(x, window.innerWidth - w - 8)) + 'px';
+      m.style.top = Math.max(8, Math.min(y, window.innerHeight - h - 8)) + 'px';
+    }
+  }
+  function updateSlim(){
+    slimTick = false;
+    const s = $('mSentinel');
+    if (!s || !inMobile) return;
+    document.body.classList.toggle('m-slimon', s.getBoundingClientRect().top <= 52); // body 클래스 이름은 슬림 바 자체의 .m-slim과 달라야 한다
+  }
+  function onSearchInput(){
+    const v = $('mSearch').value;
+    $('mSearchClear').hidden = !v;
+    clearTimeout(searchTimer);
+    searchTimer = setTimeout(() => { const q = searchKey(v); if (q === mSearchNorm) return; mSearchNorm = q; mRender(); }, 150);
+  }
+  function wireMobile(){
+    const root = $('mRoot');
+    root.addEventListener('click', e => {
+      const t = e.target;
+      let el;
+      if ((el = t.closest('[data-mode]'))){ setMode(el.dataset.mode); return; }
+      if ((el = t.closest('[data-tab]'))){ activeTab = el.dataset.tab; renderRegionRow(); renderRegionPanel(); mRender(); return; }
+      if ((el = t.closest('[data-open]'))){ openSheet(el.dataset.open); return; }
+      if (t.closest('[data-close]')){ closeSheets(); return; }
+      if ((el = t.closest('[data-clear]'))){ clearOne(el.dataset.clear); return; }
+      if (t.closest('[data-reset-all]')){ $('mSearch').value = ''; $('mSearchClear').hidden = true; mSearchNorm = ''; resetAllFilters(); return; } // 빈 결과 화면의 버튼: 필터와 검색어를 모두 비운다
+      if ((el = t.closest('[data-age-mode]'))){ ageFilterMode = el.dataset.ageMode; syncSheet(); mRender(); return; }
+      if ((el = t.closest('[data-age-years]'))){ ageFilterYears = Number(el.dataset.ageYears); syncSheet(); mRender(); return; }
+      if ((el = t.closest('[data-units]'))){ unitsFilterMin = el.dataset.units === '' ? null : Number(el.dataset.units); syncSheet(); mRender(); return; }
+      if (t.closest('#mRental')){ rentalOnly = !rentalOnly; syncSheet(); mRender(); return; }
+      if (t.closest('#mReset')){ resetAllFilters(); return; }
+      if (t.closest('#mInfoBtn')){
+        const box = $('mInfo'), open = box.hidden;
+        if (open) box.innerHTML = [...document.querySelectorAll('.header .criteria')].map(x => '<div>' + esc(x.textContent) + '</div>').join('');
+        box.hidden = !open; $('mInfoBtn').setAttribute('aria-expanded', open ? 'true' : 'false');
+        return;
+      }
+      if (t.closest('#mSlimSearch')){ window.scrollTo(0, 0); setTimeout(() => $('mSearch').focus(), 0); return; }
+      if (t.closest('#mSearchClear')){ $('mSearch').value = ''; $('mSearchClear').hidden = true; mSearchNorm = ''; mRender(); $('mSearch').focus(); return; }
+      if ((el = t.closest('.m-row'))){ toggleCard(el.dataset.id); return; }
+    });
+    root.addEventListener('contextmenu', e => {
+      const row = e.target.closest('.m-row');
+      if (!row) return;
+      e.preventDefault();
+      showMenuClamped(e.clientX, e.clientY, row.dataset.id);
+    });
+    $('mSearch').addEventListener('input', onSearchInput);
+    $('mSearch').addEventListener('compositionend', onSearchInput);
+    $('mSearch').addEventListener('keydown', e => { if (e.key === 'Enter') $('mSearch').blur(); });
+    $('mAgeInput').addEventListener('input', () => {
+      const raw = $('mAgeInput').value.replace(/[^0-9]/g, '');
+      if (raw !== $('mAgeInput').value) $('mAgeInput').value = raw;
+      const v = parseInt(raw, 10);
+      ageFilterYears = Number.isFinite(v) ? v : 0;
+      syncSheetPills(); renderSoon();
+    });
+    $('mUnitsInput').addEventListener('input', () => {
+      const raw = $('mUnitsInput').value.replace(/[^0-9]/g, '');
+      if (raw !== $('mUnitsInput').value) $('mUnitsInput').value = raw;
+      const v = parseInt(raw, 10);
+      unitsFilterMin = (raw === '' || !Number.isFinite(v) || v <= 0) ? null : v;
+      syncSheetPills(); renderSoon();
+    });
+    window.addEventListener('scroll', () => { if (!inMobile || slimTick) return; slimTick = true; requestAnimationFrame(updateSlim); }, { passive: true });
+    window.addEventListener('popstate', () => { sheetPushed = false; hideSheets(); });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape' && inMobile) closeSheets(); });
+  }
+  function syncSheetPills(){ // 숫자 입력 중에는 입력칸을 건드리지 않고 칩 강조만 갱신
+    document.querySelectorAll('#mAgeYears .m-pill').forEach(b => b.classList.toggle('active', ageFilterMode !== 'none' && Number(b.dataset.ageYears) === ageFilterYears));
+    document.querySelectorAll('#mUnitsPills .m-pill').forEach(b => b.classList.toggle('active', b.dataset.units === '' ? unitsFilterMin == null : Number(b.dataset.units) === unitsFilterMin));
+  }
+  function buildMobile(){
+    buildSheetStatic();
+    wireMobile();
+    mobileBuilt = true;
+  }
+
+  // ───── PC ↔ 모바일 전환 ─────
+  function syncPcFilterInputs(){
+    const g = id => document.getElementById(id);
+    if (!g('ageMode')) return;
+    g('ageMode').value = ageFilterMode;
+    g('ageYears').value = String(ageFilterYears);
+    g('ageYears').disabled = ageFilterMode === 'none';
+    g('unitsMin').value = unitsFilterMin == null ? '' : String(unitsFilterMin);
+    g('rentalOnly').checked = rentalOnly;
+  }
+  function enterMobile(){
+    const t0 = performance.now();
+    inMobile = true;
+    document.body.classList.add('m-on');
+    window.renderBandContent = mRender;
+    window.renderModeBar = mRenderModeBar;
+    window.refreshSelectionView = mRefreshSelection;
+    try {
+      if (!mobileBuilt) buildMobile();
+      const panel = $('regionPanel'), body = $('mRegionBody');
+      if (panel && body && panel.parentNode !== body) body.appendChild(panel); // 기존 지역 패널을 시트 안으로(같은 선택 상태)
+      if (!window.SharedLib || !ALL.length){
+        $('mList').innerHTML = '<div class="m-empty">' + (!window.SharedLib ? 'shared.js를 불러오지 못했습니다.' : 'seedComplexes.js에서 단지 데이터를 불러오지 못했습니다.') + '<br>급지표.html과 같은 폴더에 파일이 있는지 확인하세요.</div>';
+        return;
+      }
+      renderDataMonth();
+      mRenderModeBar('', false);
+      renderRegionRow();
+      renderRegionPanel();
+      syncSheet();
+      mRender();
+      renderBottomBar();
+      updateSlim();
+      perf.boot = { enterMs: performance.now() - t0, atMs: performance.now() };
+    } catch (err) {
+      console.error('급지표 모바일 화면 초기화 중 오류:', err);
+      $('mList').innerHTML = '<div class="m-empty">화면을 불러오는 중 오류가 발생했습니다: ' + esc(err && err.message ? err.message : err) + '</div>';
+    }
+  }
+  function enterDesktop(){
+    inMobile = false;
+    renderToken++; // 진행 중인 모바일 청크 그리기 중단
+    if (mobileBuilt && $('mList')) $('mList').innerHTML = ''; // 숨긴 모바일 목록은 비운다(메모리)
+    document.body.classList.remove('m-on', 'm-slimon', 'm-lock');
+    hideSheets();
+    window.renderBandContent = PC.renderBandContent;
+    window.renderModeBar = PC.renderModeBar;
+    window.refreshSelectionView = PC.refreshSelectionView;
+    const panel = $('regionPanel'), layout = $('layout');
+    if (panel && layout && panel.parentNode !== layout) layout.insertBefore(panel, layout.firstChild);
+    if (!desktopInited){ desktopInited = true; window.__geupInit(); syncPcFilterInputs(); return; } // 모바일에서 먼저 켜진 필터가 있으면 PC 입력칸에도 맞춘다(처음부터 PC면 기본값 그대로)
+    syncPcFilterInputs();
+    PC.renderModeBar('', false);
+    renderTabs();
+    renderRegionPanel();
+    PC.renderBandContent();
+    renderBottomBar();
+  }
+  function apply(){ const m = wantMobile(); if (m === inMobile && (m || desktopInited)) return; if (m) enterMobile(); else enterDesktop(); }
+  if (MQ.addEventListener) MQ.addEventListener('change', () => { if (!viewParam()) apply(); });
+  else if (MQ.addListener) MQ.addListener(() => { if (!viewParam()) apply(); });
+  window.addEventListener('load', () => { if (!viewParam()) apply(); }); // 로딩 중에는 스크롤바 폭이 빠진 폭으로 계산될 수 있어(폭 701~715px 데스크톱 창) 로딩이 끝난 뒤 한 번 더 확인
+  window.addEventListener('resize', () => { if (!viewParam()) apply(); }); // 일부 브라우저는 미디어쿼리 변경 이벤트가 늦어 resize도 함께 듣는다(apply는 같은 상태면 아무 것도 안 한다)
+
+  window.GeupMobile = { buildMobileSections, searchKey, matchesSearch, regionTagOf, splitCardInner, activeChipsOf, compute, updateSlim, apply, perf: perf, state: () => ({ inMobile, search: mSearchNorm, last: lastResult }) };
+  apply();
+})();
 </script>
