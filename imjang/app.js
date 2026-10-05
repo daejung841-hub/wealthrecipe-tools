@@ -28,6 +28,7 @@
     return e;
   }
   const mount = (el, ...kids) => { el.replaceChildren(); kids.flat(Infinity).forEach((c) => c && el.append(c)); };
+  const svg = (tag, attrs, ...kids) => { const e = document.createElementNS('http://www.w3.org/2000/svg', tag); Object.entries(attrs || {}).forEach(([k, v]) => e.setAttribute(k, v)); kids.forEach((c) => e.append(c)); return e; };
 
   // ───────── 상태 ─────────
   const D = {};                        // 불러온 데이터: items, config, stages, sites, zonesSample
@@ -37,7 +38,12 @@
   const T = (s) => R.interp(s, tokens);                    // {토큰} → config 값
   const shortName = (n) => String(n).replace(/ \([^)]*\)/, '');   // 첫 괄호("(구 동)")만 뗀다 — 뒤의 "(복원)"은 남긴다
   const NONE = '정보 없음';
+  // 넓은 화면(PC): 1024px 이상. 배치는 CSS 가 정하고, 여기서는 화면에 따라 달라지는 동작(요약 패널 갱신·키보드·사진 버튼 이름)만 구분한다.
+  const DESK = '(min-width:1024px)';
+  const mq = (q) => (window.matchMedia ? window.matchMedia(q) : { matches: false });
+  const isDesk = () => mq(DESK).matches;
   const hasVal = (v) => v !== undefined && v !== null && String(v).trim() !== '';
+  const qText = (it) => T(it.q).replace(/\?$/, '');         // 질문 끝의 물음표를 뗀 짧은 이름(요약·정리 목록용)
 
   const visible = (it, z) => R.isVisible(it, z.ans, D.config);
   const stepItems = () => R.visibleInStep(D.items, S.step, zone().ans, D.config);
@@ -92,17 +98,21 @@
 
   // ───────── 공통 UI ─────────
   function toast(m) { const t = $('toast'); t.textContent = m; t.classList.add('on'); clearTimeout(t._h); t._h = setTimeout(() => t.classList.remove('on'), 2600); }
+  // 폰: 내 구역·사이트·설정 화면에서만 하단 탭. PC: 같은 메뉴가 왼쪽 사이드바가 되고, 구역 선택에서도 보인다(구역 작업 화면은 자체 왼쪽 목록을 쓴다)
+  const navShown = (id) => ['s-home', 's-sites', 's-set'].includes(id) || (isDesk() && id === 's-pick');
+  function setNav(show) { $('nav').hidden = !show; $('app').classList.toggle('has-nav', !!show); }
   function go(id) {
     if (id !== 's-zone') revokeUrls();
+    const was = $(id).classList.contains('on');
     document.querySelectorAll('.screen').forEach((s) => s.classList.remove('on'));
     $(id).classList.add('on');
-    const main = ['s-home', 's-sites', 's-set'].includes(id);
-    $('nav').hidden = !main;
-    $('nav').querySelectorAll('button').forEach((b) => b.classList.toggle('on', b.dataset.go === id));
+    setNav(navShown(id));
+    $('nav').querySelectorAll('button').forEach((b) => b.classList.toggle('on', b.dataset.go === (id === 's-pick' ? 's-home' : id)));   // PC 에서 구역 선택 중에도 사이드바의 "내 구역"을 강조
     if (id === 's-home') renderHome();
     if (id === 's-pick') renderPick();
     if (id === 's-sites') renderSites();
     if (id === 's-set') renderSet();
+    if (!was && id !== 's-zone') { const bd = $(id).querySelector('.body'); if (bd) bd.scrollTop = 0; }   // 다른 화면에 갔다 돌아오면 이전 스크롤 위치가 남아 맨 위 제목이 머리글에 가려지던 문제
   }
   function keepScroll(fn) { const b = $('zBody'), st = b.scrollTop; fn(); b.scrollTop = st; }
   const openModal = (...kids) => { mount($('sheet'), kids); $('modal').classList.add('on'); };
@@ -192,8 +202,8 @@
   function addCustom() { const z = blankZone($('customName').value.trim() || '직접 입력 구역', null); $('customName').value = ''; S.zones.push(z); persist(z); openZone(z.id); }
 
   function openZone(id) { S.cur = id; S.step = 'info'; S.idx = 0; S.mode = 'hand'; go('s-zone'); renderZone(); }
-  function setMode(m) { S.mode = m; S.step = D.items_meta.modes[m][0]; S.idx = 0; renderZone(); }
-  function setStep(s) { S.step = s; S.idx = 0; renderZone(); }
+  function setMode(m) { S.mode = m; S.step = D.items_meta.modes[m][0]; S.idx = 0; renderZone(); if (isDesk()) $('zBody').scrollTop = 0; }
+  function setStep(s) { S.step = s; S.idx = 0; renderZone(); if (isDesk()) $('zBody').scrollTop = 0; }
   function nextStep(d) {
     const ord = D.items_meta.order, i = ord.indexOf(S.step) + d;
     if (i < 0 || i >= ord.length) return;
@@ -207,7 +217,55 @@
     else { if (S.idx > 0) S.idx--; else { nextStep(-1); return; } }
     renderZone(); $('zBody').scrollTop = 0;
   }
-  function updTop() { const z = zone(), p = prog(z); $('zCount').textContent = p.done + ' / ' + p.total + ' 완료'; $('zBar').style.width = p.pct + '%'; }
+  const zoneMeta = (z) => {
+    const i = z.info; if (!i) return '직접 입력 구역';
+    const rs = R.resolveStage(i, D.stages), st = rs.idx !== null ? D.stages[rs.idx] : cleanStage(i.stage);
+    return [i.sheet, i.gu, hasVal(st) ? st : null].filter(hasVal).join(' · ');
+  };
+  function updTop() {
+    const z = zone(), p = prog(z);
+    $('zCount').textContent = p.done + ' / ' + p.total + (isDesk() ? ' 항목 완료' : ' 완료'); $('zBar').style.width = p.pct + '%';
+    if (isDesk()) { $('zMeta').textContent = zoneMeta(z); updTabs(); }
+    updPanel();
+  }
+  // 왼쪽 단계 목록의 "완료/전체" 숫자를 입력과 함께 고친다(PC. 버튼은 다시 만들지 않는다)
+  function updTabs() {
+    const z = S.cur && zone(); if (!z) return;
+    $('tabs').querySelectorAll('button[data-step]').forEach((b) => {
+      const its = R.visibleInStep(D.items, b.dataset.step, z.ans, D.config).filter(countable), sm = b.querySelector('small');
+      if (sm) sm.textContent = its.filter((i) => R.isDone(i, z)).length + '/' + its.length;
+    });
+  }
+
+  // ───────── 넓은 화면(PC) 오른쪽 실시간 요약 ─────────
+  // 정리 탭과 같은 계산 함수(flagsOf·prog·R.openItems·concNode)를 그대로 불러 쓴다. 한 번 만들어 두고 값만 고쳐서, 4개 숫자 입력칸의 포커스가 사라지지 않는다.
+  let PN = null;
+  const RING_C = 2 * Math.PI * 46;
+  function buildPanel(z) {
+    PN = { id: z.id, host: $('sumPanel'), pct: h('b'), count: h('div', { class: 'sp-count' }), redH: h('div', { class: 'sp-h' }), red: h('div', { class: 'sp-items' }), yelH: h('div', { class: 'sp-h' }), yel: h('div', { class: 'sp-items' }), conc: h('div', { class: 'hint solid sp-conc' }) };
+    PN.ringVal = svg('circle', { class: 'val', cx: 55, cy: 55, r: 46, fill: 'none', 'stroke-width': 10, 'stroke-linecap': 'round', 'stroke-dasharray': RING_C.toFixed(1), 'stroke-dashoffset': RING_C.toFixed(1) });
+    const ring = h('div', { class: 'ring' }, svg('svg', { width: 110, height: 110, viewBox: '0 0 110 110', 'aria-hidden': 'true' }, svg('circle', { class: 'trk', cx: 55, cy: 55, r: 46, fill: 'none', 'stroke-width': 10 }), PN.ringVal), PN.pct);
+    PN.inputs = [['y', '2033', '년에'], ['v', '15', '억짜리 아파트를'], ['p', '8', '억에 사온다'], ['i', '500', '만원 필요']].map(([k, ph, suf]) => concInput(k, ph, suf));
+    mount(PN.host, h('div', { class: 'sumtop' }, ring, h('div', null, h('div', { class: 'sp-kick' }, '실시간 요약'), h('div', { class: 'sp-big' }, '확인 완료'), PN.count)),
+      h('div', { class: 'sumbody' }, PN.redH, PN.red, PN.yelH, PN.yel,
+        h('div', { class: 'sp-h' }, '내 결론 · 4개 숫자'), PN.inputs, PN.conc,
+        h('div', { class: 'sp-actions' }, h('button', { class: 'btn gold', onclick: openShare }, '💬 결론만 카톡으로 보내기'), h('button', { class: 'btn ghost', onclick: openCalcConfirm }, '📊 ' + D.config.calculator.label + '에서 시세 확인')),
+        h('div', { class: 'disclaimer' }, DISCLAIMER)));
+  }
+  function updPanel() {
+    const host = $('sumPanel'), z = S.cur && zone();
+    if (!host || !z || !isDesk() || S.step === 'wrap') return;
+    if (!PN || PN.id !== z.id || PN.host !== host || !host.contains(PN.pct)) buildPanel(z);
+    const fl = flagsOf(z), p = prog(z), open = R.openItems(D.items, z, D.config), red = fl.filter((x) => x.f.lv === 2), yel = fl.filter((x) => x.f.lv !== 2);
+    const list = (arr) => (arr.length ? arr.map((x) => h('button', { class: 'sp-item ' + (x.f.lv === 2 ? 'r' : 'y'), onclick: () => jumpTo(x.it.id) }, qText(x.it))) : h('div', { class: 'sub' }, '아직 없어요'));
+    PN.pct.textContent = p.pct + '%'; PN.ringVal.setAttribute('stroke-dashoffset', (RING_C * (1 - p.pct / 100)).toFixed(1));
+    PN.count.textContent = p.done + ' / ' + p.total + ' 항목 · 못 확인 ' + open.length + '건';
+    PN.redH.textContent = '🚩 위험 ' + red.length + '건'; mount(PN.red, list(red));
+    PN.yelH.textContent = '⚠ 주의 ' + yel.length + '건'; mount(PN.yel, list(yel));
+    PN.inputs.forEach((w) => { const i = w.querySelector('input'); if (document.activeElement !== i) { const v = (z.n || {})[i.dataset.nk]; i.value = v === undefined || v === null ? '' : v; } });
+    updPanelConc();
+  }
+  function updPanelConc() { if (PN && PN.conc && S.cur && zone()) mount(PN.conc, concNode(zone())); }
 
   // ───────── 입력 처리 ─────────
   function ensure(id) { const z = zone(); z.ans[id] = z.ans[id] || {}; return z.ans[id]; }
@@ -215,15 +273,17 @@
     const a = ensure(id);
     if (multi) { a[k] = a[k] || []; const i = a[k].indexOf(o); i >= 0 ? a[k].splice(i, 1) : a[k].push(o); }
     else a[k] = a[k] === o ? '' : o;
-    persist(zone()); keepScroll(renderZone);
+    persist(zone()); redraw(id);
   }
   function addOther(id, k, input) {
     const v = (input.value || '').trim(); if (!v) return;
     const a = ensure(id); a[k + 'X'] = a[k + 'X'] || []; if (!a[k + 'X'].includes(v)) a[k + 'X'].push(v);
-    persist(zone()); keepScroll(renderZone);
+    persist(zone()); redraw(id);
   }
-  function delOther(id, k, i) { (ensure(id)[k + 'X'] || []).splice(i, 1); persist(zone()); keepScroll(renderZone); }
-  function typ(id, k, v) { ensure(id)[k] = v; persist(zone(), 300); updTop(); updFlag(id); }
+  function delOther(id, k, i) { (ensure(id)[k + 'X'] || []).splice(i, 1); persist(zone()); redraw(id); }
+  function typ(id, k, v) { ensure(id)[k] = v; persist(zone(), 300); updTop(); if (pcStep()) syncPC(); else updFlag(id); }
+  // 입력으로 화면이 바뀌어야 할 때: 폰은 현재 카드를 다시 그리고(스크롤 유지), PC 는 한 단계 목록 중 바뀐 카드만 고친다(입력 위치·포커스 유지)
+  function redraw(id) { if (pcStep()) { updTop(); syncPC(id); } else keepScroll(renderZone); }
 
   // ───────── 사진 ─────────
   // 사진 본체(Blob)는 photos 스토어에, 구역 기록의 ans[항목].ph 에는 사진 id 목록만 둔다.
@@ -250,14 +310,14 @@
       }
     }
     if (added) toast('사진 ' + added + '장을 담았어요');
-    if (zone() && zone().id === z.id && S.step) keepScroll(renderZone);
+    if (zone() && zone().id === z.id && S.step) redraw(itemId);
   }
   async function removePhoto(itemId, photoId) {
     const z = zone(), a = ensure(itemId);
     a.ph = (a.ph || []).filter((x) => x !== photoId);
     persist(z); // 기록에서 먼저 빼고(글은 안전), 그다음 사진 본체를 지운다
     try { await store.deletePhoto(photoId); } catch (e) { console.error(e); }
-    keepScroll(renderZone);
+    redraw(itemId);
   }
   async function openViewer(itemId, photoId) {
     const p = await store.getPhoto(photoId);
@@ -286,7 +346,7 @@
     return h('div', { class: 'photos' }, h('div', { class: 'flab', style: 'margin-top:12px' }, '사진 ' + ids.length + '/' + max),
       ids.length ? strip : null,
       h('div', { class: 'tools' },
-        h('button', { disabled: full, onclick: () => cam.click() }, '📷 사진 찍기'),
+        h('button', { disabled: full, onclick: () => cam.click() }, mq('(pointer: fine)').matches ? '📷 사진 추가' : '📷 사진 찍기'),
         h('button', { disabled: full, onclick: () => alb.click() }, '🖼 앨범에서')), cam, alb);
   }
 
@@ -305,11 +365,11 @@
       out.push(h('div', { class: 'chips' },
         opts.map((o) => {
           const on = multi ? (val || []).includes(o) : val === o, bad = on && f.bad && f.bad.includes(o);
-          return h('button', { class: 'chip' + (f.sm ? ' sm' : '') + (on ? ' on' : '') + (bad ? ' bad' : ''), onclick: () => pick(it.id, f.k, o, multi) }, T(o));
+          return h('button', { class: 'chip' + (f.sm ? ' sm' : '') + (on ? ' on' : '') + (bad ? ' bad' : ''), 'data-fk': it.id + '|' + f.k + '|' + o, onclick: () => pick(it.id, f.k, o, multi) }, T(o));
         }),
         (a[f.k + 'X'] || []).map((o, i) => h('button', { class: 'chip' + (f.sm ? ' sm' : '') + ' on', onclick: () => delOther(it.id, f.k, i) }, o + ' ✕'))));
       if (f.other) {
-        const inp = h('input', { type: 'text', placeholder: '기타 직접 추가 (브랜드·업종 이름)' });
+        const inp = h('input', { type: 'text', placeholder: '기타 직접 추가 (브랜드·업종 이름)', 'data-fk': it.id + '|' + f.k + '|__other' });
         out.push(h('div', { class: 'numf' }, inp, h('button', { class: 'btn navy xbtn', onclick: () => addOther(it.id, f.k, inp) }, '추가')));
       }
     } else if (f.t === 'num') {
@@ -349,9 +409,10 @@
     const om = i.sheet === '재건축단독' && typeof i.generalText === 'string' ? i.generalText.match(/\(([\d.]+)%\)/) : null, origPct = om ? om[1] : null;   // 재건축단독 원문 % (전체세대 대비)
     const ratioLabel = () => h('span', null, '일반분양비율', h('small', { class: 'notes' }, '일반분양 ÷ 조합원수'));
     const subline = [i.sheet, i.gu, i.dong].filter(hasVal).join(' · ') || NONE;
-    mount(body, h('div', { class: 'card' },
-      h('div', { style: 'font-weight:700;font-size:18px' }, shortName(z.name)), h('div', { class: 'sub' }, subline),
-      h('div', { class: 'flab', style: 'margin-top:16px' }, '진행 단계'), stageBlock(i),
+    mount(body, h('div', { class: 'card infocard' },
+      h('div', { class: 'info-head' }, h('div', { style: 'font-weight:700;font-size:18px' }, shortName(z.name)), h('div', { class: 'sub' }, subline)),
+      h('div', { class: 'info-l' }, h('div', { class: 'flab', style: 'margin-top:16px' }, '진행 단계'), stageBlock(i)),
+      h('div', { class: 'info-r' },
       h('div', { class: 'flab', style: 'margin-top:16px' }, '핵심 수치'),
       h('div', { class: 'kv' },
         infoCell('전체세대수', i.households, i.householdsText, { fmt: nf, est: has('households') }),
@@ -365,8 +426,59 @@
       h('div', { class: 'flab', style: 'margin-top:16px' }, '기본 정보'),
       h('div', { class: 'kv' },
         infoCell('구역면적', i.area, i.areaText, { fmt: fmtArea }),
-        infoCell('평균 대지지분', i.landShare, i.landShareText, { fmt: (v) => v + '평' })),
+        infoCell('평균 대지지분', i.landShare, i.landShareText, { fmt: (v) => v + '평' }))),
       h('div', { class: 'sub', style: 'margin-top:12px' }, '부의 레시피 재개발 목록표 ' + (z.infoAsOf || '') + ' 기준 값을 복사해 둔 기록이에요. 이후 목록표가 바뀌어도 이 기록은 그대로예요.')));
+  }
+
+  // PC: 히어로 카드 + 핵심 수치 카드 8개 + 진행 단계 격자. 값·추정/환산 표시·단계 매핑 규칙은 위(renderInfo·infoCell·stageBlock)와 같고 그리는 모양만 다르다.
+  const gradeClass = (g) => (g === '매우좋음' ? 'g-best' : g === '좋음' || g === '양호' ? 'g-good' : g === '보통' ? 'g-mid' : g === '나쁨' || g === '주의' ? 'g-bad' : g === '매우 나쁨' ? 'g-worst' : 'g-na');
+  const convBadge = () => h('span', { class: 'badge-conv', title: '분양세대수 − 소유자수로 환산한 값이에요' }, '환산');
+  function kpiCard(cls, label, value, text, o) {
+    o = o || {}; const has = value !== null && value !== undefined && value !== '', val = has ? o.fmt(value) : hasVal(text) ? text : null;
+    return h('div', { class: 'kpi ' + cls },
+      h('div', { class: 'l' }, label),
+      h('div', { class: 'v' + (has || val ? '' : ' none') }, o.node && has ? o.node(value) : (val || NONE), has && o.est ? estBadge() : null, has && o.conv ? convBadge() : null),
+      o.sub ? h('div', { class: 's' }, o.sub) : null, o.note ? h('div', { class: 's' }, o.note) : null, o.extra || null);
+  }
+  function stageGridPC(i) {
+    const rs = R.resolveStage(i, D.stages), cur = rs.idx, dates = rs.dates;
+    if (cur === null) return h('div', { class: 'st-un' }, stageBlock(i));                       // 앱 단계에 맞추지 않은 구역(모아타운·재건축단독): 목록표 원문 단계와 이력 그대로
+    return h('div', { class: 'stg' }, D.stages.map((nm, n) => h('div', { class: 'st ' + (n < cur ? 'done' : n === cur ? 'cur' : 'fut') },
+      n === cur ? h('span', { class: 'now' }, '현재') : null, h('div', { class: 'c' }, n < cur ? '✓' : String(n + 1)), h('div', { class: 'n' }, nm), hasVal(dates[n]) ? h('div', { class: 'd' }, dates[n]) : null)));
+  }
+  function renderInfoPC(z) {
+    const i = z.info, body = $('zBody'), go1 = h('div', { class: 'pc-nav' }, h('button', { class: 'btn gold big', onclick: () => nextStep(1) }, '손품 체크 시작 →'));
+    if (!i) {
+      mount(body, h('section', { class: 'hero' }, h('div', null, h('div', { class: 'kick' }, '구역 정보'), h('h1', null, shortName(z.name)), h('div', { class: 'tags' }, h('span', { class: 'tag' }, '직접 입력한 구역')))),
+        h('div', { class: 'empty' }, '재개발 목록표에 없는 구역이라 기본 정보를 불러오지 못했어요. 손품 체크에서 사업 단계부터 직접 적어 주세요.'), go1);
+      return;
+    }
+    const est = i.est || [], has = (k) => est.includes(k), rs = R.resolveStage(i, D.stages), cur = rs.idx;
+    const conv = i.sheet === '모아타운' && has('general');
+    const om = i.sheet === '재건축단독' && typeof i.generalText === 'string' ? i.generalText.match(/\(([\d.]+)%\)/) : null, origPct = om ? om[1] : null;
+    const curName = cur !== null ? D.stages[cur] : cleanStage(i.stage), curDate = cur !== null && hasVal(rs.dates[cur]) ? rs.dates[cur] : null;
+    const where = [i.gu, i.dong].filter(hasVal).join(' ');
+    const ratio = i.suspect ? kpiCard('k4', '일반분양비율', null, null, { sub: '일반분양 ÷ 조합원수' }) : kpiCard('k4', '일반분양비율', i.generalRatio, null, { fmt: (v) => v + '%', est: has('ratio'), conv, sub: '일반분양 ÷ 조합원수', extra: origPct != null ? h('div', { class: 'orig' }, '원문 표기 ' + origPct + '% ', h('small', null, '(전체세대 대비)')) : null });
+    if (i.suspect) ratio.querySelector('.v').replaceChildren('확인 중');
+    mount(body,
+      h('section', { class: 'hero' },
+        h('div', null, h('div', { class: 'kick' }, '구역 정보'), h('h1', null, shortName(z.name)),
+          h('div', { class: 'tags' }, hasVal(i.sheet) ? h('span', { class: 'tag' }, i.sheet) : null, where ? h('span', { class: 'tag' }, where) : null,
+            hasVal(curName) ? h('span', { class: 'tag gold' }, '현재: ' + curName + (curDate ? ' · ' + curDate : '')) : null)),
+        h('div', { class: 'asof' }, '부의 레시피 재개발 목록표', h('br'), (z.infoAsOf || '') + ' 기준')),
+      h('div', { class: 'sec' }, '핵심 수치'),
+      h('div', { class: 'kpis' },
+        kpiCard('k1', '전체세대수', i.households, i.householdsText, { fmt: nf, est: has('households') }),
+        kpiCard('k2', '조합원수', i.members, null, { fmt: nf, est: has('members') }),
+        kpiCard('k3', '일반분양수', i.generalUnits, null, { fmt: nf, est: has('general') && !conv, conv }),
+        ratio,
+        kpiCard('k5', '최저초투', i.minInitial, i.minInitialText, { fmt: (v) => v + '억', note: i.minInitialNote }),
+        kpiCard('k6', '사업성등급', i.grade, null, { fmt: (v) => v, est: !!i.gradeEst, node: (v) => h('span', { class: 'gbadge ' + gradeClass(v) }, v) }),
+        kpiCard('k7', '구역면적', i.area, i.areaText, { fmt: fmtArea }),
+        kpiCard('k8', '평균 대지지분', i.landShare, i.landShareText, { fmt: (v) => v + '평' })),
+      h('div', { class: 'sec' }, '진행 단계'), stageGridPC(i),
+      h('div', { class: 'note' }, '부의 레시피 재개발 목록표 ' + (z.infoAsOf || '') + ' 기준 값을 복사해 둔 기록이에요. 이후 목록표가 바뀌어도 이 기록은 그대로예요.'),
+      go1);
   }
 
   // ───────── 비교단지 ─────────
@@ -382,21 +494,36 @@
       '👍 우위: ' + (g.up.join(', ') || '-'), h('br'), '➖ 비슷: ' + (g.eq.join(', ') || '-'), h('br'), '👎 열위: ' + (g.dn.join(', ') || '-'),
       h('div', { class: 'sub', style: 'margin-top:6px' }, '가격 환산은 시세 보정 기능이 나오면 연동할 예정이에요.'));
   }
-  function renderCmpPick(it, z) {
+  function cmpPickKids(z) {
     const inp = h('input', { type: 'text', placeholder: '비교단지 이름 (예: 옆 동네 대단지)', value: z.cmp || '', oninput: (e) => { z.cmp = e.target.value; persist(z, 300); updTop(); } });
-    return h('div', { class: 'card' }, h('div', { class: 'q' }, T(it.q)), h('div', { class: 'why' }, T(it.why)), inp,
+    return [inp,
       h('button', { class: 'btn navy', style: 'margin-top:10px', onclick: openCalcConfirm }, '📊 ' + D.config.calculator.label + '에서 시세 보기'),
-      h('div', { class: 'sub', style: 'margin-top:8px' }, '단지 검색과 시세는 계산기에서 확인해요. 이름은 여기에 적어 두세요.'));
+      h('div', { class: 'sub', style: 'margin-top:8px' }, '단지 검색과 시세는 계산기에서 확인해요. 이름은 여기에 적어 두세요.')];
   }
-  function renderCmpGrid(it, z) {
+  function cmpGridKids(z) {
     const C = D.items_meta.comparison, r = z.cmpRows || {};
-    return h('div', { class: 'card' }, h('div', { class: 'q' }, T(it.q)), h('div', { class: 'why' }, T(it.why)),
-      C.rows.map((n) => h('div', { class: 'cmprow' }, h('div', { style: 'font-weight:700' }, n),
+    return [C.rows.map((n) => h('div', { class: 'cmprow' }, h('div', { style: 'font-weight:700' }, n),
         h('div', { class: 'chips', style: 'margin:6px 0 0' }, C.grades.map((o) => h('button', { class: 'chip xs' + (r[n] === o ? ' on' : '') + (r[n] === o && (o === '나쁨' || o === '매우 나쁨') ? ' bad' : ''), onclick: () => cmpSet(n, o) }, o))))),
       cmpSummaryNode(z),
-      h('textarea', { placeholder: '종합 한 줄: 완공 후 비교단지와 어느 정도 대접받을까?', value: z.cmpNote || '', oninput: (e) => { z.cmpNote = e.target.value; persist(z, 300); } }));
+      h('textarea', { placeholder: '종합 한 줄: 완공 후 비교단지와 어느 정도 대접받을까?', value: z.cmpNote || '', oninput: (e) => { z.cmpNote = e.target.value; persist(z, 300); } })];
   }
-  function cmpSet(n, o) { const z = zone(); z.cmpRows = z.cmpRows || {}; if (z.cmpRows[n] === o) delete z.cmpRows[n]; else z.cmpRows[n] = o; persist(z); keepScroll(renderZone); }
+  function renderCmpPick(it, z) { return h('div', { class: 'card' }, h('div', { class: 'q' }, T(it.q)), h('div', { class: 'why' }, T(it.why)), cmpPickKids(z)); }
+  function renderCmpGrid(it, z) { return h('div', { class: 'card' }, h('div', { class: 'q' }, T(it.q)), h('div', { class: 'why' }, T(it.why)), cmpGridKids(z)); }
+  function cmpSet(n, o) { const z = zone(); z.cmpRows = z.cmpRows || {}; if (z.cmpRows[n] === o) delete z.cmpRows[n]; else z.cmpRows[n] = o; persist(z); redraw('#cmpGrid'); }
+
+  // ───────── 사이트 링크 (이름·주소는 data/sites.json 한 곳에서만 읽는다) ─────────
+  // 주소는 sites.json 의 url 그대로 — 임장 기록·입력값을 주소에 붙이지 않는다. 외부(https) 주소는 새 탭 + noopener noreferrer, 이 사이트의 다른 도구(상대경로)는 계산기 이동처럼 같은 탭.
+  // 오프라인이면 data-ext 때문에 이동하지 않고 "인터넷이 필요해요"만 보인다(wire() 의 클릭 처리).
+  function siteLink(s, text) {
+    const ext = window.ImjangSites.linkKind(s.url) === 'ext';
+    return h('a', Object.assign({ href: s.url, class: 'xlink', 'data-ext': '1' }, ext ? { target: '_blank', rel: 'noopener noreferrer' } : {}), text);
+  }
+  function whereKids(it) {
+    const kids = [];
+    window.ImjangSites.parseWhere(T(it.where), D.sites).forEach((g, i) => { if (i) kids.push(window.ImjangSites.SEP); kids.push(g.site ? siteLink(g.site, g.text) : g.text); });
+    return kids;
+  }
+  function whereNode(it) { return h('div', { class: 'where' }, '🔎 확인할 수 있는 곳: ', h('b', null, whereKids(it))); }
 
   // ───────── 항목 카드 ─────────
   function itemCard(it, z, its) {
@@ -407,25 +534,110 @@
     return h('div', { class: 'card' }, h('div', { class: 'sub' }, (S.idx + 1) + ' / ' + its.length),
       h('div', { class: 'q' }, T(it.q), it.badge ? h('span', { class: 'badge' }, it.badge) : null),
       h('div', { class: 'why' }, T(it.why || '')),
-      it.where ? h('div', { class: 'where' }, '🔎 확인할 수 있는 곳: ', h('b', null, T(it.where))) : null,
+      it.where ? whereNode(it) : null,
       it.fields.map((f) => fieldNode(it, f, a)),
       h('div', { id: 'flagbox' }, flagNode(it, z)),
       it.photo ? photoBlock(it, a) : null,
       it.guide || it.script ? h('details', null, h('summary', null, '어떻게 확인하나요?'), it.guide ? h('p', null, T(it.guide)) : null, it.script ? h('p', { class: 'script' }, T(it.script)) : null) : null);
   }
 
+  // ───────── 넓은 화면(PC): 한 단계의 보이는 항목을 모두 펼친 목록 ─────────
+  // 폰의 카드 한 장 방식(itemCard)은 그대로 두고, PC 는 같은 필드 그리기 함수(fieldNode·photoBlock·flagNode·cmp*Kids·whereKids)를 다시 써서 목록으로 보여 준다.
+  // 판정·진행률·노출 조건은 rules.js(R.evalFlag·R.visibleInStep·R.isDone)를 그대로 부른다. 새 계산은 없다.
+  const pcStep = () => !!(S.pc && S.pc.step === S.step && isDesk() && $('s-zone').classList.contains('on'));
+  const lvClass = (f, done) => (f && f.lv === 2 ? ' lv2' : f && f.lv === 1 ? ' lv1' : done ? ' ok' : '');
+  function flash(el) { el.classList.remove('flash'); void el.offsetWidth; el.classList.add('flash'); setTimeout(() => el.classList.remove('flash'), 1800); }
+  function pcCard(it, z) {
+    const a = z.ans[it.id] || {}, boxes = [], f = R.evalFlag(it, z.ans, D.config);
+    if (it.where) boxes.push(h('div', { class: 'pc-box' }, h('div', { class: 'pc-bt' }, '🔎 확인할 수 있는 곳'), h('div', null, whereKids(it))));
+    if (it.guide || it.script) boxes.push(h('div', { class: 'pc-box' }, h('div', { class: 'pc-bt' }, '어떻게 확인하나요?'), it.guide ? h('p', null, T(it.guide)) : null, it.script ? h('p', { class: 'script' }, T(it.script)) : null));
+    const photo = it.photo ? photoBlock(it, a) : null, side = boxes.length ? h('aside', { class: 'pc-side' }, boxes, photo) : null;
+    const body = it.custom === 'cmpPick' ? cmpPickKids(z) : it.custom === 'cmpGrid' ? cmpGridKids(z) : it.fields.map((fd) => fieldNode(it, fd, a));
+    return h('article', { class: 'pcard' + (side ? ' has-side' : '') + lvClass(f, R.isDone(it, z)), 'data-id': it.id },
+      h('div', { class: 'pc-main' },
+        h('div', { class: 'pc-qrow' }, h('span', { class: 'pc-no' }), h('div', { class: 'pc-qtext' }, h('div', { class: 'q' }, T(it.q), it.badge ? h('span', { class: 'badge' }, it.badge) : null), it.why ? h('div', { class: 'why' }, T(it.why)) : null)),
+        body, h('div', { class: 'flagbox' }, flagNode(it, z)), side ? null : photo),
+      side);
+  }
+  // 목록을 지금의 답에 맞춘다: 사라진 항목은 빼고, 새로 생긴 항목은 제자리에 끼우고(잠깐 강조), dirty 로 지정한 카드는 다시 만든다. 나머지 카드는 그대로 둬서 입력 중인 칸이 유지된다.
+  function syncPC(dirty, initial) {
+    const pc = S.pc; if (!pc || pc.step !== S.step) return;
+    const z = zone(), body = $('zBody'), want = stepItems().filter((it) => it.type !== 'tip');
+    const dset = new Set(dirty === '#cmpGrid' ? want.filter((i) => i.custom === 'cmpGrid').map((i) => i.id) : dirty ? [dirty] : []);
+    // 화면 위치와 포커스를 기억해 두었다가 되돌린다
+    const br = body.getBoundingClientRect(), ae = document.activeElement, fk = ae && ae.dataset ? ae.dataset.fk : null;
+    let an = ae && ae.closest ? ae.closest('.pcard') : null;
+    if (!an || !body.contains(an)) an = [...pc.cards.values()].find((c) => c.getBoundingClientRect().bottom > br.top + 8) || null;
+    const anchor = an ? { id: an.dataset.id, top: an.getBoundingClientRect().top - br.top } : null;
+    [...pc.cards.keys()].forEach((id) => { if (!want.some((i) => i.id === id)) { pc.cards.get(id).remove(); pc.cards.delete(id); } });
+    let prev = null;
+    want.forEach((it) => {
+      let el = pc.cards.get(it.id), fresh = false;
+      if (!el || dset.has(it.id)) { const n = pcCard(it, z); if (el) el.replaceWith(n); else fresh = true; el = n; pc.cards.set(it.id, el); }
+      const should = prev ? prev.nextElementSibling : pc.list.firstElementChild;
+      if (el !== should) pc.list.insertBefore(el, should);
+      if (fresh && !initial) flash(el);
+      prev = el;
+    });
+    want.forEach((it, i) => {
+      const el = pc.cards.get(it.id); el.querySelector('.pc-no').textContent = i + 1;
+      const f = R.evalFlag(it, z.ans, D.config);                              // 판정이 바뀐 카드의 선·안내 상자만 고친다
+      el.classList.toggle('lv2', !!f && f.lv === 2); el.classList.toggle('lv1', !!f && f.lv === 1); el.classList.toggle('ok', !(f && f.lv > 0) && R.isDone(it, z));
+      if (!dset.has(it.id)) mount(el.querySelector('.flagbox'), flagNode(it, z));
+    });
+    const done = want.filter((it) => R.isDone(it, z)).length;
+    pc.count.textContent = '항목 ' + want.length + '개' + (want.length ? ' · 답한 항목 ' + done + '개' : '');
+    pc.empty.hidden = want.length > 0;
+    if (anchor) { const el = pc.cards.get(anchor.id); if (el) body.scrollTop += (el.getBoundingClientRect().top - body.getBoundingClientRect().top) - anchor.top; }
+    if (fk && (!document.activeElement || document.activeElement === document.body)) {
+      const t = [...pc.list.querySelectorAll('[data-fk]')].find((e) => e.dataset.fk === fk); if (t) t.focus({ preventScroll: true });
+    }
+  }
+  const STEP_ICON = { info: 'ℹ️', pre: '🖥', walk: '🚶', ppl: '🤝', mkt: '💹', cmp: '🏢', wrap: '📝' };
+  function renderStepPC(z) {
+    const meta = D.items_meta, tips = stepItems().filter((i) => i.type === 'tip');
+    const list = h('div', { class: 'pc-list' }), count = h('div', { class: 'sub pc-count' }), empty = h('div', { class: 'empty' }, '이 단계에는 지금 보여 줄 항목이 없어요.');
+    S.pc = { step: S.step, list, count, empty, cards: new Map() };
+    mount($('zBody'), h('div', { class: 'pc-head' }, h('div', { class: 'bd', 'aria-hidden': 'true' }, STEP_ICON[S.step] || '📋'), h('div', null, h('h1', null, meta.steps[S.step]), count)),
+      tips.map((t) => h('div', { class: 'pc-tip' }, h('div', { class: 'pc-bt' }, '💡 질문 요령'), h('div', { class: 'q' }, T(t.q)), t.lines.map((l) => h('p', null, T(l))))),
+      empty, list, pcNav());
+    mount($('pager'));
+    syncPC(undefined, true);
+  }
+  // 한 단계 목록 맨 아래의 이동 버튼 (손품의 마지막 단계에서는 "현장 임장으로")
+  function pcNav() {
+    const m = D.items_meta, i = m.order.indexOf(S.step), prev = m.order[i - 1], next = m.order[i + 1];
+    const toField = next && m.modes.hand.includes(S.step) && !m.modes.hand.includes(next);
+    return h('div', { class: 'pc-nav' }, prev ? h('button', { class: 'btn ghost', onclick: () => nextStep(-1) }, '← 이전 단계') : null,
+      next ? h('button', { class: 'btn gold', onclick: () => nextStep(1) }, toField ? '현장 임장으로 →' : '다음 단계: ' + m.steps[next] + ' →') : null);
+  }
+  // 요약 패널의 위험·주의 항목을 누르면 그 단계의 카드로 이동해서 잠깐 강조한다
+  function jumpTo(id) {
+    const it = D.items.find((x) => x.id === id); if (!it) return;
+    if (S.step !== it.step) { S.step = it.step; S.mode = D.items_meta.modes.hand.includes(it.step) ? 'hand' : 'field'; renderZone(); }
+    const el = S.pc && S.pc.cards.get(id); if (!el) return;
+    S.idx = Math.max(0, stepItems().findIndex((x) => x.id === id));
+    el.scrollIntoView({ block: 'center', behavior: 'smooth' }); flash(el);
+  }
+
   function renderZone() {
     const z = zone(), meta = D.items_meta;
     revokeUrls();
     $('zName').textContent = shortName(z.name); updTop();
+    $('s-zone').classList.toggle('nopanel', S.step === 'wrap');   // PC: 정리 단계에서는 오른쪽 요약 패널을 숨긴다(내용이 겹침)
+    S.pc = null;
     $('segH').classList.toggle('on', S.mode === 'hand'); $('segF').classList.toggle('on', S.mode === 'field');
     $('segHint').textContent = S.mode === 'hand' ? '손품을 이미 끝냈다면 "현장 임장"으로 바로 가셔도 돼요' : '손품이 아직이라면 "손품"으로 돌아가 먼저 채워 보세요';
     mount($('tabs'), meta.modes[S.mode].map((s) => {
       const its = R.visibleInStep(D.items, s, z.ans, D.config).filter(countable), dn = its.filter((i) => R.isDone(i, z)).length;
-      return h('button', { class: s === S.step ? 'on' : '', onclick: () => setStep(s) }, meta.steps[s], its.length ? h('small', null, dn + '/' + its.length) : null);
+      return h('button', { class: s === S.step ? 'on' : '', 'data-step': s, onclick: () => setStep(s) }, h('span', { class: 'ic' }, String(meta.modes[S.mode].indexOf(s) + 1)), h('span', { class: 'nm' }, meta.steps[s]), its.length ? h('small', null, dn + '/' + its.length) : null);
     }));
-    if (S.step === 'info') { renderInfo(z); mount($('pager'), h('button', { class: 'btn gold', onclick: () => nextStep(1) }, '손품 체크 시작')); return; }
-    if (S.step === 'wrap') { renderWrap(); return; }
+    if (S.step === 'info') {
+      if (isDesk()) { renderInfoPC(z); mount($('pager')); return; }
+      renderInfo(z); mount($('pager'), h('button', { class: 'btn gold', onclick: () => nextStep(1) }, '손품 체크 시작')); return;
+    }
+    if (S.step === 'wrap') { renderWrap(); if (isDesk()) $('zBody').append(pcNav()); return; }
+    if (isDesk()) { renderStepPC(z); return; }
     const its = stepItems();
     if (!its.length) { mount($('zBody'), h('div', { class: 'empty' }, '이 단계에는 지금 보여 줄 항목이 없어요.')); mount($('pager'), h('button', { class: 'btn ghost', style: 'flex:1', onclick: () => mv(-1) }, '이전'), h('button', { class: 'btn gold', style: 'flex:2', onclick: () => nextStep(1) }, '다음 단계')); return; }
     if (S.idx >= its.length) S.idx = its.length - 1;
@@ -440,31 +652,37 @@
     if (c.margin !== null) kids.push(c.margin >= 0 ? h('div', { style: 'margin-top:8px', class: 'good' }, '안전마진 ' + R.fmt(c.margin) + '억') : h('div', { style: 'margin-top:8px', class: 'badtxt' }, '⚠ 사오는 가격이 아파트 가치보다 비싸요'));
     return kids;
   }
+  const DISCLAIMER = '이 앱은 판단을 돕는 참고용 도구예요. 투자 결정과 결과에 대한 책임은 본인에게 있어요.';
   function updConc() { const e = $('concPrev'); if (e) mount(e, concNode(zone())); }
-  function setN(k, v) { const z = zone(); z.n = z.n || {}; z.n[k] = v; persist(z, 300); updConc(); }
+  function setN(k, v) { const z = zone(); z.n = z.n || {}; z.n[k] = v; persist(z, 300); updConc(); updPanelConc(); }
+  const concInput = (k, ph, suf) => { const n = (zone() && zone().n) || {}; return h('div', { style: 'display:flex;align-items:center;gap:8px;margin-bottom:8px' },
+    h('input', { type: 'number', inputmode: 'decimal', step: 'any', placeholder: ph, value: n[k] === undefined ? '' : n[k], 'data-nk': k, oninput: (e) => setN(k, e.target.value), style: 'flex:1' }), h('span', { style: 'white-space:nowrap;font-weight:700' }, suf)); };
   function renderWrap() {
     const z = zone(), fl = flagsOf(z), p = prog(z), open = R.openItems(D.items, z, D.config), n = z.n || {};
-    const inp = (k, ph, suf) => h('div', { style: 'display:flex;align-items:center;gap:8px;margin-bottom:8px' },
-      h('input', { type: 'number', inputmode: 'decimal', step: 'any', placeholder: ph, value: n[k] === undefined ? '' : n[k], oninput: (e) => setN(k, e.target.value), style: 'flex:1' }), h('span', { style: 'white-space:nowrap;font-weight:700' }, suf));
-    const cs = cmpSummaryNode(z), qText = (it) => T(it.q).replace(/\?$/, '');
+    const inp = concInput;
+    const cs = cmpSummaryNode(z);
     mount($('zBody'), h('div', { class: 'sum' },
-      h('div', { class: 'sumcard' }, h('div', { class: 'dim' }, z.name), h('div', { class: 'big' }, p.pct + '% 확인 완료'),
+      h('div', { class: 'sum-l' }, h('div', { class: 'sumcard' }, h('div', { class: 'dim' }, z.name), h('div', { class: 'big' }, p.pct + '% 확인 완료'),
         h('h3', null, '위험·주의 신호 ' + fl.length + '건'), h('ul', null, fl.length ? fl.map((x) => h('li', null, (x.f.lv === 2 ? '🚩' : '⚠') + ' ' + qText(x.it))) : h('li', null, '아직 없어요')),
         h('h3', null, '아직 못 확인한 것 ' + open.length + '건'), h('ul', null, open.slice(0, 4).map((it) => h('li', null, qText(it))), open.length > 4 ? h('li', null, '외 ' + (open.length - 4) + '건') : null)),
-      cs ? [h('h3', null, '비교단지 대비 입지'), cs] : null,
+      cs ? [h('h3', null, '비교단지 대비 입지'), cs] : null),
+      h('div', { class: 'sum-r' },
       h('h3', null, '내 결론 · 4개 숫자'),
       h('div', { class: 'card' }, inp('y', '2033', '년에'), inp('v', '15', '억짜리 아파트를'), inp('p', '8', '억에 사온다'), inp('i', '500', '만원 필요'),
         h('div', { id: 'concPrev', class: 'hint solid', style: 'margin:6px 0 0;font-size:16px' })),
       h('div', { class: 'card', style: 'margin-top:12px' }, h('div', { style: 'font-weight:700' }, '몇 억짜리가 될지 모르겠다면?'), h('div', { class: 'sub', style: 'margin:4px 0 10px' }, '비교 대상 아파트 시세부터 확인해 보세요.'),
         h('button', { class: 'btn navy', onclick: openCalcConfirm }, '📊 비교대상 아파트 ' + D.config.calculator.label, h('small', null, '계산기에서 단지 이름 검색하기')),
         h('button', { class: 'btn ghost', style: 'margin-top:10px;opacity:.6', onclick: () => toast('시세 보정 기능은 준비 중이에요') }, '🛠 시세 보정하기 ', h('span', { class: 'flagtag mute' }, '준비 중'))),
+      ),
+      h('div', { class: 'sum-b' },
       h('h3', null, '이 구역, 내 판단은?'),
       h('div', { class: 'chips' }, ['매수 검토', '보류', '패스'].map((o) => h('button', { class: 'chip' + (z.concl === o ? ' on' : ''), onclick: () => { z.concl = z.concl === o ? '' : o; persist(z); keepScroll(renderZone); } }, o))),
       h('textarea', { placeholder: '근거 3줄 + 다음에 다시 가서 확인할 것', value: z.note || '', oninput: (e) => { z.note = e.target.value; persist(z, 300); } }),
       h('button', { class: 'btn gold', style: 'margin-top:14px', onclick: openShare }, '💬 결론만 카톡으로 보내기'),
       h('div', { class: 'sub', style: 'margin:6px 2px 0' }, '결론 한 장을 글이나 이미지로 보내요. 받은 사람은 이 앱에 들어오지 않아도 볼 수 있어요.'),
       backupNoticeNode(true),
-      h('button', { class: 'btn ghost', style: 'margin-top:12px', onclick: () => go('s-set') }, '💾 전체 기록 백업 (이어서 쓸 때만)')));
+      h('button', { class: 'btn ghost', style: 'margin-top:12px', onclick: () => go('s-set') }, '💾 전체 기록 백업 (이어서 쓸 때만)')),
+      h('div', { class: 'disclaimer' }, DISCLAIMER)));
     updConc();
     mount($('pager'), h('button', { class: 'btn ghost', onclick: () => mv(-1) }, '이전 단계로'));
   }
@@ -821,17 +1039,48 @@
 
   // ───────── 사이트 모음 ─────────
   function renderSites() {
-    const groups = [...new Set(D.sites.map((s) => s.group))];
-    mount($('siteList'), groups.map((g) => [h('h3', { style: 'margin:14px 0 8px' }, g), D.sites.filter((s) => s.group === g).map((s) =>
-      h('div', { class: 'card site' }, h('span', { class: 'tag' }, g), h('div', null,
-        h('div', { style: 'font-weight:700' }, s.url ? h('a', { href: s.url, 'data-ext': '1' }, s.title) : s.title),
-        h('div', { class: 'sub' }, s.desc), s.url ? null : h('div', { class: 'sub badtxt' }, '주소 미확인'))))]));
+    const groups = [...new Set(D.sites.map((s) => s.group))], notes = D.siteNotes || {};
+    mount($('siteList'), groups.map((g) => {
+      const grid = h('div', { class: 'sgrid' }, h('div', { class: 'scol' }), h('div', { class: 'scol' }));
+      D.sites.forEach((s, i) => { if (s.group === g) grid.firstChild.append(siteCard(s, i)); });   // 카드는 한 번만 만들고, 열 배치는 layoutSiteCols 가 한다
+      return [h('h3', null, g), notes[g] ? h('div', { class: 'sgroup-note' }, notes[g]) : null, grid];
+    }));
+    layoutSiteCols();
+  }
+  // 사이트 카드: 이름(링크) · 한 줄 소개 · [상세: 주요 기능 · 이럴 때 써요 · 참고] · "상세 보기 ▾" 버튼. 글은 모두 textContent 로 넣는다. 펼친 상태는 저장하지 않는다(다시 열면 접힘).
+  function siteCard(s, n) {
+    const ok = window.ImjangSites.linkKind(s.url), feats = Array.isArray(s.features) ? s.features : [], id = 'sd-' + n;
+    const more = feats.length || s.useFor || s.note;
+    const det = more ? h('div', { class: 'st-more', id, hidden: true },
+      feats.length ? h('ul', { class: 'st-feat' }, feats.map((f) => h('li', null, f))) : null,
+      s.useFor ? h('div', { class: 'st-use' }, h('b', null, '이럴 때 써요'), ' · ', s.useFor) : null,
+      s.note ? h('div', { class: 'st-note' }, h('b', null, '참고'), ' · ', s.note) : null) : null;
+    const lab = h('span', { class: 'tg-t' }, '상세 보기');
+    const tog = more ? h('button', { type: 'button', class: 'st-tog', 'aria-expanded': 'false', 'aria-controls': id }, lab, h('span', { class: 'tg-a', 'aria-hidden': 'true' }, '▾')) : null;
+    if (tog) tog.addEventListener('click', () => { const open = tog.getAttribute('aria-expanded') !== 'true'; tog.setAttribute('aria-expanded', String(open)); det.hidden = !open; lab.textContent = open ? '접기' : '상세 보기'; });
+    return h('div', { class: 'card site', 'data-i': n },
+      h('div', { class: 'st-name' }, ok ? siteLink(s, s.title) : s.title),
+      s.summary ? h('div', { class: 'st-sum' }, s.summary) : null, det, tog,
+      ok ? null : h('div', { class: 'sub badtxt' }, '주소 미확인'));
+  }
+  // 사이트 모음 열 배치: 넓은 화면(SITE2)에서는 한 그룹의 카드를 왼쪽·오른쪽 열에 번갈아(1·3·5… / 2·4·6…) 쌓는다. 각 열은 독립이라 한쪽이 길어도 옆 열에 빈 세로 공간이 생기지 않고,
+  // 카드를 펼쳐도 그 열만 밀린다. 좁은 화면에서는 한 열에 원래 순서대로. 열 수가 바뀔 때는 기존 카드 요소를 옮기기만 해서 펼침 상태가 유지되고, 포커스는 되돌려 준다.
+  const SITE2 = '(min-width:1180px)';
+  function layoutSiteCols() {
+    const two = mq(SITE2).matches, act = document.activeElement;
+    document.querySelectorAll('#siteList .sgrid').forEach((g) => {
+      if (g.dataset.cols === (two ? '2' : '1')) return;
+      const cols = [...g.children], cards = [...g.querySelectorAll('.site')].sort((a, b) => a.dataset.i - b.dataset.i);
+      cards.forEach((c, k) => cols[two ? k % 2 : 0].append(c));
+      g.dataset.cols = two ? '2' : '1';
+    });
+    if (act && act !== document.activeElement && act.isConnected && act.closest('#siteList')) act.focus({ preventScroll: true });
   }
 
   // ───────── 입장 화면 ─────────
   function showLock(msg, disabled) {
     document.querySelectorAll('.screen').forEach((s) => s.classList.remove('on'));
-    $('s-lock').classList.add('on'); $('nav').hidden = true; $('lockErr').textContent = msg || '';
+    $('s-lock').classList.add('on'); setNav(false); $('lockErr').textContent = msg || '';
     $('lockPw').disabled = !!disabled; $('lockForm').querySelector('button').disabled = !!disabled;
     if (!disabled) $('lockPw').focus();
   }
@@ -840,7 +1089,7 @@
   async function loadData() {
     const get = (f) => fetch('data/' + f, { cache: 'no-cache' }).then((r) => { if (!r.ok) throw new Error(f + ' ' + r.status); return r.json(); });
     const [items, config, stages, sites] = await Promise.all([get('items.json'), get('config.json'), get('stages.json'), get('sites.json')]);
-    D.items = items.items; D.items_meta = items; D.config = config; D.stages = stages.stages; D.stagesFile = stages; D.sites = sites.sites;
+    D.items = items.items; D.items_meta = items; D.config = config; D.stages = stages.stages; D.stagesFile = stages; D.sites = sites.sites; D.siteNotes = sites.groupNotes || {};
     tokens = R.buildTokens(config);
     const errs = R.validate(items, config, D.stages);
     if (errs.length) console.warn('항목 데이터 점검 경고', errs);
@@ -883,7 +1132,7 @@
       go('s-home');
     } catch (e) {
       console.error(e);
-      document.querySelectorAll('.screen').forEach((s) => s.classList.remove('on')); $('s-home').classList.add('on'); $('nav').hidden = true;
+      document.querySelectorAll('.screen').forEach((s) => s.classList.remove('on')); $('s-home').classList.add('on'); setNav(false);
       mount($('homeList'), h('div', { class: 'empty' }, h('b', null, '데이터를 불러오지 못했어요'), h('br'), '인터넷 연결을 확인하고 새로고침해 주세요.'));
     }
   }
@@ -906,6 +1155,26 @@
     $('segH').addEventListener('click', () => setMode('hand'));
     $('segF').addEventListener('click', () => setMode('field'));
     $('modal').addEventListener('click', (e) => { if (e.target === $('modal')) closeModal(); });
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && !e.defaultPrevented && $('modal').classList.contains('on')) closeModal();    // 팝업: ESC 로 닫기 (바깥 클릭은 위에서)
+    });
+    // PC 목록에서 입력칸·카드에 들어가면 지금 보는 항목 번호를 기억한다(창 폭이 바뀌어 폰 카드 방식으로 돌아가도 같은 항목을 보여 주려고)
+    $('zBody').addEventListener('focusin', (e) => {
+      if (!pcStep()) return; const c = e.target.closest && e.target.closest('.pcard'); if (!c) return;
+      const i = stepItems().findIndex((x) => x.id === c.dataset.id); if (i >= 0) S.idx = i;
+    });
+    const dm = mq(DESK);
+    const onDesk = () => {
+      const on = document.querySelector('.screen.on'); if (!on || on.id === 's-lock') return;
+      setNav(navShown(on.id));
+      if (on.id === 's-zone' && S.cur) {                                   // 폭이 1024px 을 넘나들면 같은 단계·같은 항목으로 다시 그린다(값은 이미 기록에 있다)
+        renderZone();
+        if (isDesk() && S.pc) { const it = stepItems()[S.idx], el = it && S.pc.cards.get(it.id); if (el && S.idx > 0) el.scrollIntoView({ block: 'start' }); }
+      }
+    };
+    if (dm.addEventListener) dm.addEventListener('change', onDesk); else if (dm.addListener) dm.addListener(onDesk);
+    const sm = mq(SITE2), onSite = () => { if (document.querySelector('#siteList .sgrid')) layoutSiteCols(); };   // 사이트 모음: 폭이 열 수가 바뀌는 선을 넘나들면 카드 자리만 옮긴다
+    if (sm.addEventListener) sm.addEventListener('change', onSite); else if (sm.addListener) sm.addListener(onSite);
     // 화면이 가려지거나 앱이 닫힐 때 아직 저장 안 된 글을 바로 저장
     document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') flushAll(); });
     window.addEventListener('pagehide', flushAll);

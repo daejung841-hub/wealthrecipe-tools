@@ -9,19 +9,23 @@
  *  - 그 밖의 요청(다른 도구, 계산기, 외부 주소)은 가로채지 않는다(캐시 안 함).
  *  - 주소 끝에 ?resetsw=1 을 붙여 열면 이 서비스워커를 해제하고 imjang 캐시를 모두 지운 뒤 새로 불러온다(사용자 기록은 건드리지 않음).
  */
-const CACHE_VERSION = 'imjang-v2';                 // ← 배포할 때마다 올리는 곳(이 한 곳)
+const CACHE_VERSION = 'imjang-v3';                 // ← 배포할 때마다 올리는 곳(이 한 곳)
 const CACHE_PREFIX = 'imjang-';
 const GATE_CACHE = CACHE_PREFIX + 'gate';          // 버전과 무관하게 유지(오프라인 입장용 config.js·gate.js 저장본)
 const GATE_FILES = ['../config.js', '../gate.js'];
 const PRECACHE = [
   './', 'index.html', 'styles.css', 'manifest.webmanifest',
-  'app.js', 'auth.js', 'backup.js', 'photo.js', 'pwa.js', 'rules.js', 'send.js', 'share.js', 'store.js',
+  'app.js', 'auth.js', 'backup.js', 'photo.js', 'pwa.js', 'rules.js', 'send.js', 'share.js', 'sites.js', 'store.js',
   'data/config.json', 'data/items.json', 'data/redev.json', 'data/sites.json', 'data/stages.json',
   'icons/icon-192.png', 'icons/icon-512.png', 'icons/icon-maskable-512.png', 'icons/apple-touch-icon.png',
 ];
 const abs = (p) => new URL(p, self.registration.scope).href;
+// 로컬 개발 주소(localhost 등)에서 ?dev=1 없이 등록된 서비스워커 = 예전에 저장된 옛 화면. 새 서비스워커로 바뀌는 순간 스스로 해제하고 imjang- 캐시를 지운 뒤 열려 있는 화면을 다시 불러온다.
+// (?sw=on 으로 등록한 시험용은 sw.js?dev=1 이라 해당 없음. 운영 주소는 해당 없음. 사용자 기록·localStorage 는 건드리지 않는다.)
+const KILL = ['localhost', '127.0.0.1', '[::1]'].includes(self.location.hostname) && new URL(self.location.href).searchParams.get('dev') !== '1';
 
 self.addEventListener('install', (e) => {
+  if (KILL) { e.waitUntil(self.skipWaiting()); return; }
   e.waitUntil((async () => {
     const cache = await caches.open(CACHE_VERSION);
     // HTTP 캐시를 거치지 않고 서버의 최신 파일을 받는다
@@ -33,6 +37,14 @@ self.addEventListener('install', (e) => {
 });
 
 self.addEventListener('activate', (e) => {
+  if (KILL) {
+    e.waitUntil((async () => {
+      await Promise.all((await caches.keys()).filter((k) => k.startsWith(CACHE_PREFIX)).map((k) => caches.delete(k)));
+      await self.registration.unregister();
+      for (const c of await self.clients.matchAll({ type: 'window' })) { try { c.navigate(c.url); } catch (x) { /* 무시 */ } }
+    })());
+    return;
+  }
   e.waitUntil((async () => {
     const keep = new Set([CACHE_VERSION, GATE_CACHE]);
     await Promise.all((await caches.keys()).filter((k) => k.startsWith(CACHE_PREFIX) && !keep.has(k)).map((k) => caches.delete(k)));
@@ -41,6 +53,7 @@ self.addEventListener('activate', (e) => {
 });
 
 self.addEventListener('message', (e) => {
+  if (KILL) return;
   const d = e.data || {};
   if (d.type === 'SKIP_WAITING') self.skipWaiting();
   if (d.type === 'GET_VERSION' && e.source) e.source.postMessage({ type: 'VERSION', version: CACHE_VERSION });
@@ -55,6 +68,7 @@ function resetPage(target) {
 }
 
 self.addEventListener('fetch', (e) => {
+  if (KILL) return;
   const req = e.request;
   if (req.method !== 'GET') return;
   const url = new URL(req.url);
