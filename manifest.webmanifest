@@ -1,0 +1,16 @@
+{
+ "name": "부의 레시피 LAB",
+ "short_name": "레시피 LAB",
+ "description": "재개발·아파트 저평가 단지를 숫자로 찾고, 급지와 사업성까지 한 곳에서 확인하는 도구 모음",
+ "start_url": "./",
+ "scope": "./",
+ "display": "standalone",
+ "lang": "ko",
+ "theme_color": "#0E5C6B",
+ "background_color": "#0E5C6B",
+ "icons": [
+  {"src": "icons/hub-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any"},
+  {"src": "icons/hub-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any"},
+  {"src": "icons/hub-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable"}
+ ]
+}
