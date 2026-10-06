@@ -116,6 +116,10 @@
     '.hub-sheet ol{margin:0 0 14px;padding:0 0 0 24px;font-size:18px;line-height:1.9;}' +
     '.hub-sheet li{padding-left:4px;margin-bottom:4px;}' +
     '.hub-sheet h3{margin:18px 0 6px;font-size:18px;line-height:1.4;}' +
+    '.hub-sheet .hs-badge{display:inline-block;margin-left:4px;padding:2px 10px;border-radius:999px;background:var(--accent);color:var(--accent-ink);font-size:15px;font-weight:700;vertical-align:middle;}' +
+    '.hub-sheet .hs-small{margin:18px 0 2px;font-size:15px;font-weight:700;color:var(--ink-muted);}' +
+    '.hub-sheet .hs-sam button.hub-btn{width:100%;margin:2px 0 8px;}' +
+    '.hub-ic,.hub-warn,.hub-install,.hub-sheet{word-break:keep-all;overflow-wrap:anywhere;}' +
     '.hub-sheet .hs-sec .hub-btn{width:100%;margin:2px 0 8px;}' +
     '.hub-sheet .hs-after{margin:6px 0 2px;}' +
     '.hub-sheet a.hs-ext{display:inline-flex;align-items:center;min-height:48px;color:var(--accent);font-size:17px;font-weight:700;text-decoration:underline;}' +
@@ -201,23 +205,25 @@
       kids.push(el('p', { class: 'hs-note', text: '크롬·네이버·카카오톡 등에서 열었다면 사파리로 열어 주세요.' }));
       o.copy = true;
     } else if (env === 'samsung') {
-      title = '삼성 인터넷에서 쓰는 방법';
-      var sec = function (head) { var d = el('div', { class: 'hs-sec' }, el('h3', { text: head })); for (var i = 1; i < arguments.length; i++) d.appendChild(arguments[i]); return d; };
-      var chromeBtn = el('button', { type: 'button', class: 'hub-btn pri', text: '크롬으로 열기' }); chromeBtn.addEventListener('click', function () { openInChrome(false); });
+      title = '어디에서 설치할까요?';
+      var sStatus = el('p', { class: 'hs-status', role: 'status', 'aria-live': 'polite' });
+      var sAddr = el('input', { class: 'hs-addr', type: 'text', readonly: 'readonly', 'aria-label': '이 페이지 주소' }); sAddr.hidden = true;
+      var chromeBtn = el('button', { type: 'button', class: 'hub-btn pri', text: '크롬에서 설치하기' }); chromeBtn.addEventListener('click', function () { openInChrome(false); });
+      var copyBtn = el('button', { type: 'button', class: 'hub-btn sec', text: '주소 복사' }); copyBtn.addEventListener('click', function () { copyAddress(sStatus, sAddr); });
       var play = el('a', { class: 'hs-ext', href: 'https://play.google.com/store/apps/details?id=com.android.chrome', target: '_blank', rel: 'noopener noreferrer', text: 'Play 스토어에서 Chrome 받기' });
-      var tryBtn = el('button', { type: 'button', class: 'hub-link', text: '그래도 삼성 인터넷으로 설치 시도 (막힐 수 있어요)' });
-      tryBtn.addEventListener('click', function () {
-        if (deferred) { closeSheet(); doPrompt(); } else status.textContent = '메뉴의 "홈 화면에 추가"를 찾아 보세요. 이름은 버전에 따라 달라요.';
-      });
-      kids.push(sec('① 크롬으로 설치 (추천)',
-        el('p', { text: '삼성 인터넷에서는 설치가 막힐 수 있어요. 크롬으로 열어 설치해 보세요.' }), chromeBtn,
-        el('p', { class: 'hs-after', text: '크롬이 없다면' }), play,
-        el('p', { class: 'hs-note', text: '대부분의 갤럭시에는 크롬이 이미 들어 있어요(구글 폴더 안에 있기도 해요).' })));
-      kids.push(sec('② 설치 없이 쓰기',
-        el('p', { text: '설치하지 않아도 삼성 인터넷에서 그대로 쓸 수 있어요. 즐겨찾기(★)에 추가하거나 메뉴에서 홈 화면 바로가기를 만들어 두면 한 번에 열려요(메뉴 이름은 버전에 따라 달라요).' }),
-        el('p', { text: '기록은 쓰는 브라우저에 저장되니 앞으로도 같은 브라우저로 열어 주세요. 브라우저를 바꿀 때는 백업 후 불러오기를 쓰세요.' })));
-      kids.push(sec('③ 그래도 이 브라우저로 설치해 보려면', tryBtn));
-      o.copy = true;
+      var tryNote = el('p', { class: 'hs-note', role: 'status', 'aria-live': 'polite', text: '주소창 오른쪽에 설치 아이콘이 보이면 눌러 보세요. 없다면 메뉴의 "홈 화면에 추가"(이름은 버전에 따라 달라요)를 찾아 보세요.' }); tryNote.hidden = true;
+      var samBtn = el('button', { type: 'button', class: 'hub-btn sec', text: '삼성 인터넷에서 설치하기' });
+      samBtn.addEventListener('click', function () { if (deferred) { closeSheet(); doPrompt(); } else tryNote.hidden = false; });
+      var sam = el('div', { class: 'hs-sam' });
+      [el('h3', null, '① 크롬에서 설치하기 ', el('span', { class: 'hs-badge', text: '추천' })),
+        el('p', { text: '크롬에서는 설치가 잘 돼요' }), chromeBtn,
+        el('p', { class: 'hs-after', text: '크롬이 열리지 않거나 없다면' }), copyBtn, sStatus, sAddr, play,
+        el('p', { class: 'hs-note', text: '대부분의 갤럭시에는 크롬이 이미 들어 있어요(구글 폴더 안에 있기도 해요).' }),
+        el('h3', { text: '② 삼성 인터넷에서 설치하기' }),
+        el('p', { text: '"안전하지 않은 앱 차단됨" 같은 안내가 뜨며 막힐 수 있어요' }), samBtn, tryNote,
+        el('p', { class: 'hs-small', text: '설치 없이 쓰기' }),
+        el('p', { class: 'hs-note', text: '설치하지 않아도 삼성 인터넷에서 그대로 쓸 수 있어요. 즐겨찾기(★)에 추가하거나 메뉴에서 홈 화면 바로가기를 만들어 두면 한 번에 열려요(메뉴 이름은 버전에 따라 달라요). 기록은 쓰는 브라우저에 저장되니 앞으로도 같은 브라우저로 열어 주세요.' })].forEach(function (k) { sam.appendChild(k); });
+      kids.push(sam);
     } else if (env === 'chromium') {
       kids.push(steps(['오른쪽 위 ', icon('menu'), ' 메뉴를 누르세요.'], ['"앱 설치" 또는 "홈 화면에 추가"를 누르세요.'], ['"설치" 또는 "추가"를 누르세요.']));
       kids.push(el('p', { class: 'hs-note', text: '메뉴 이름은 버전에 따라 다를 수 있어요.' }));
@@ -290,13 +296,11 @@
       card.querySelector('.hi-desc').textContent = '별도 창으로 바로 열려요. 작업 표시줄에 고정해 두고 쓸 수 있어요.';
       add.textContent = '프로그램으로 설치';
     }
-    if (info.env === 'samsung') {                           // 삼성 인터넷: 설치가 막힐 수 있어 크롬 우선 + 다른 방법. prompt()는 이 카드에서 부르지 않는다
-      card.querySelector('.hi-title').textContent = '삼성 인터넷에서는 설치가 막힐 수 있어요.';
-      card.querySelector('.hi-desc').textContent = '크롬으로 열어 설치해 보세요.';
-      add.textContent = '크롬으로 열기';
-      add.removeEventListener('click', onInstallClick); add.addEventListener('click', function () { openInChrome(false); });
-      var other = el('button', { type: 'button', class: 'hub-link hi-other', text: '다른 방법 보기' }); other.addEventListener('click', function (e) { openSheet(e.currentTarget); });
-      card.appendChild(other);
+    if (info.env === 'samsung') {                           // 삼성 인터넷: 카드에는 [설치하기](크롬·삼성 인터넷 선택 팝업)만. 이벤트가 와도 카드는 prompt()를 부르지 않는다
+      card.querySelector('.hi-title').textContent = '앱으로 설치하기';
+      card.querySelector('.hi-desc').textContent = '삼성 인터넷에서는 설치가 안 될 수 있어요. 크롬에서 설치하는 게 안전해요.';
+      add.textContent = '설치하기';
+      add.removeEventListener('click', onInstallClick); add.addEventListener('click', function (e) { openSheet(e.currentTarget); });
     }
     var anchor = main.querySelector('.sec-title');
     if (anchor) main.insertBefore(card, anchor); else main.insertBefore(card, main.firstChild);
