@@ -31,6 +31,7 @@
 <div id="app">
   <div class="banner" id="banner" role="alert" hidden></div>
   <div class="updatebar" id="updateBar" role="status" hidden><span>새 버전이 있어요.</span><button id="btnUpdate" class="banner-btn">새로고침</button></div>
+  <div class="inapp-warn" id="inappWarn" role="alert" hidden></div>
 
   <section class="screen lock" id="s-lock">
     <div class="logo">🧭</div>
@@ -45,7 +46,7 @@
   </section>
 
   <section class="screen" id="s-home">
-    <div class="top"><h1>내 임장 구역</h1><div class="sub">구역을 고르고 항목을 하나씩 채워 보세요</div></div>
+    <div class="top"><h1>내 임장 구역</h1><div class="sub">구역을 고르고 항목을 하나씩 채워 보세요</div><button type="button" class="helpbtn" data-help="1" aria-label="사용법 보기"><span aria-hidden="true">❓</span><span class="hb-t">사용법</span></button></div>
     <div class="body" id="homeList"></div>
     <div class="homefoot"><button class="btn gold" id="btnNew">＋ 새 임장 시작</button></div>
   </section>
@@ -73,17 +74,18 @@
     <div class="tabs" id="tabs"></div>
     <div class="body" id="zBody"></div>
     <div class="pager" id="pager"></div>
+    <button type="button" class="zhelp" data-help="1">❓ 사용법</button>
     <!-- 넓은 화면(PC)에서만 보이는 실시간 요약. 폰에서는 CSS 로 숨긴다 -->
     <aside class="sidepanel" id="sumPanel" aria-label="실시간 요약"></aside>
   </section>
 
   <section class="screen" id="s-sites">
-    <div class="top"><h1>유용한 사이트</h1><div class="sub">서울 기준 · 단계별로 필요한 것만</div></div>
+    <div class="top"><h1>유용한 사이트</h1><div class="sub">서울 기준 · 단계별로 필요한 것만</div><button type="button" class="helpbtn" data-help="1" aria-label="사용법 보기"><span aria-hidden="true">❓</span><span class="hb-t">사용법</span></button></div>
     <div class="body"><div class="hint">이름을 누르면 새 탭에서 열려요. 인터넷이 필요해요.</div><div id="siteList"></div></div>
   </section>
 
   <section class="screen" id="s-set">
-    <div class="top"><h1>저장 · 설정</h1><div class="sub">기록은 이 폰에만 저장돼요</div></div>
+    <div class="top"><h1>저장 · 설정</h1><div class="sub">기록은 이 폰에만 저장돼요</div><button type="button" class="helpbtn" data-help="1" aria-label="사용법 보기"><span aria-hidden="true">❓</span><span class="hb-t">사용법</span></button></div>
     <div class="body">
       <div class="cols"><div class="col">
       <div class="card" style="margin-bottom:14px">
@@ -100,6 +102,9 @@
       </div>
       <div class="card" style="margin-bottom:14px"><div style="font-weight:700">결론만 보내고 싶다면</div>
         <div class="sub" style="margin-top:6px">구역의 <b>정리 탭</b>에서 "결론만 카톡으로 보내기"를 누르세요. 요약 글·전체 내용 글·이미지 한 장 중에 골라 보낼 수 있고, 받은 사람은 이 앱에 들어오지 않아도 볼 수 있어요.</div></div>
+      <div class="card" id="helpCard" style="margin-bottom:14px"><div style="font-weight:700">사용법</div>
+        <div class="sub" style="margin:6px 0 10px">처음 들어갈 때 보여 드린 사용법을 언제든 다시 볼 수 있어요.</div>
+        <button type="button" class="btn ghost" data-help="1">❓ 사용법 다시 보기</button></div>
       </div><div class="col">
       <div class="card" id="installCard" style="margin-bottom:14px" hidden></div>
       <div class="card" id="shareTest" style="margin-bottom:14px" hidden></div>
@@ -119,10 +124,30 @@
     <button data-go="s-home" class="on"><b>📍</b>내 구역</button>
     <button data-go="s-sites"><b>🔗</b>사이트</button>
     <button data-go="s-set"><b>💾</b>저장·설정</button>
+    <button type="button" class="nav-install" id="navInstall" data-install="1" hidden><b>📲</b>앱 설치 방법</button>
+    <button type="button" class="nav-help" data-help="1"><b>❓</b>사용법</button>
   </div>
 
   <div class="modal" id="modal"><div class="sheet" id="sheet"></div></div>
   <div class="toast" id="toast" role="status"></div>
+</div>
+
+<!-- 사용법 팝업: 앱 화면(#app)을 다시 그려도 지워지지 않도록 #app 밖에 둔다. 열려 있는 동안 #app 은 inert(뒤 화면은 눌리지 않고 읽히지 않음) -->
+<div class="hmodal" id="helpModal" hidden>
+  <div class="hsheet" id="helpSheet" role="dialog" aria-modal="true" aria-labelledby="helpTitle">
+    <div class="hhead"><h2 id="helpTitle" tabindex="-1"></h2><button type="button" class="hx" id="helpX" aria-label="닫기">✕</button></div>
+    <div class="hbody" id="helpBody" tabindex="0"></div>
+    <div class="hfoot"><label class="hchk" for="helpNever"><input type="checkbox" id="helpNever"><span>다시 보지 않기</span></label><button type="button" class="btn gold" id="helpClose">닫기</button></div>
+  </div>
+</div>
+
+<!-- 앱 설치 안내 시트(브라우저별 방법 · 앱 안 브라우저 안내): #app 밖, 열려 있는 동안 #app 은 inert -->
+<div class="hmodal" id="instModal" hidden>
+  <div class="hsheet instsheet" id="instSheet" role="dialog" aria-modal="true" aria-labelledby="instTitle">
+    <div class="hhead"><h2 id="instTitle" tabindex="-1"></h2><button type="button" class="hx" id="instX" aria-label="닫기">✕</button></div>
+    <div class="hbody insbody" id="instBody" tabindex="0"></div>
+    <div class="hfoot instfoot" id="instFoot"></div>
+  </div>
 </div>
 
 <script src="rules.js"></script>
@@ -131,6 +156,8 @@
 <script src="share.js"></script>
 <script src="send.js"></script>
 <script src="sites.js"></script>
+<script src="help.js"></script>
+<script src="install.js"></script>
 <script src="backup.js"></script>
 <script src="app.js"></script>
 </body>

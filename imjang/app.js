@@ -138,7 +138,7 @@
   // ───────── 내 구역 / 구역 선택 ─────────
   function renderHome() {
     const el = $('homeList');
-    const hint = installHintNode();
+    const hint = installCardNode();
     if (!S.zones.length) { mount(el, hint, h('div', { class: 'empty' }, h('div', { style: 'font-size:40px' }, '🗺️'), h('b', null, '아직 임장 기록이 없어요'), h('br'), '아래 "새 임장 시작"을 눌러 첫 구역을 골라 보세요.')); return; }
     mount(el, hint, S.zones.map((z) => {
       const f = flagsOf(z).filter((x) => x.f.lv === 2).length, p = prog(z);
@@ -1008,30 +1008,10 @@
   const PWA = window.ImjangPWA;
   // 인터넷이 필요한 동작(계산기 이동, 외부 사이트 링크)을 오프라인에서 눌렀을 때의 안내
   const needInternet = (subject) => infoSheet('인터넷이 필요해요', [(subject || '이 기능은') + ' 인터넷에 연결되어 있을 때만 열 수 있어요.', '임장 기록·사진·결론 만들기는 인터넷이 없어도 계속 쓸 수 있어요.'], 'y');
-  const HINT_KEY = 'imjang_pwa_hint_v1';
-  const installPlatform = () => (PWA.isStandalone() ? null : PWA.canPrompt() ? 'prompt' : PWA.isIOS() ? 'ios' : PWA.isAndroid() ? 'android' : null);
-  function installCardNodes() {
-    const p = installPlatform(); if (!p) return null;
-    const title = h('div', { style: 'font-weight:700' }, '홈 화면에 추가하기');
-    if (p === 'prompt') return [title, h('div', { class: 'sub', style: 'margin:6px 0 10px' }, '앱처럼 바로 열리고, 인터넷이 없는 현장에서도 쓸 수 있어요.'), h('button', { class: 'btn gold', onclick: async () => { const r = await PWA.promptInstall(); if (r === 'accepted') toast('홈 화면에 추가했어요'); renderInstallCard(); } }, '홈 화면에 추가')];
-    if (p === 'ios') return [title, h('div', { class: 'sub', style: 'margin-top:6px;line-height:1.7' }, 'Safari 아래의 공유 버튼(□에 ↑) → "홈 화면에 추가"를 누르세요. 홈 화면의 아이콘으로 열면 주소창 없이 앱처럼 열려요.'), h('div', { class: 'sub', style: 'margin-top:6px;line-height:1.7;font-weight:700' }, '홈 화면에 추가한 뒤에는 그 아이콘으로만 쓰세요. 브라우저와 기록이 따로 저장될 수 있어요.')];
-    return [title, h('div', { class: 'sub', style: 'margin-top:6px;line-height:1.7' }, 'Chrome 메뉴(⋮) → "홈 화면에 추가" 또는 "앱 설치"를 누르세요.')];
-  }
-  function renderInstallCard() {
-    const host = $('installCard'); if (!host) return;
-    const n = installCardNodes(); host.hidden = !n; mount(host, n);
-  }
-  // 첫 방문 때 한 번만 가볍게(홈 맨 위): 한 번 보여 주면 다음부터는 설정 화면에서만 안내한다
-  function installHintNode() {
-    if (!installPlatform()) return null;
-    try { if (localStorage.getItem(HINT_KEY)) return null; localStorage.setItem(HINT_KEY, '1'); } catch (e) { return null; }
-    const box = h('div', { class: 'hint', style: 'margin-bottom:12px' }, '💡 홈 화면에 추가하면 앱처럼 바로 열리고 인터넷이 없어도 쓸 수 있어요. ',
-      h('button', { class: 'linkbtn', onclick: () => go('s-set') }, '방법 보기'), ' · ', h('button', { class: 'linkbtn', onclick: () => box.remove() }, '닫기'));
-    return box;
-  }
   function initPwa() {
     PWA.onUpdate(() => { $('updateBar').hidden = false; });
-    PWA.onInstallChange(() => { renderInstallCard(); });
+    PWA.onInstallChange(() => { renderInstallUI(); if ($('s-home').classList.contains('on')) renderHome(); });
+    window.addEventListener('appinstalled', () => { insS.installed = true; renderInstallUI(); if ($('s-home').classList.contains('on')) renderHome(); });   // 브라우저가 설치를 마쳤다고 알리면(메뉴로 설치한 경우 포함) 안내를 걷어 낸다
     $('btnUpdate').addEventListener('click', async () => { $('btnUpdate').disabled = true; toast('저장을 마치고 새 버전으로 바꿀게요'); const ok = await PWA.applyUpdate(() => flushAll()); if (!ok) $('btnUpdate').disabled = false; });
     PWA.register();
     window.addEventListener('offline', () => toast('인터넷이 끊겼어요. 기록은 계속 쓸 수 있어요'));
@@ -1077,6 +1057,193 @@
     if (act && act !== document.activeElement && act.isConnected && act.closest('#siteList')) act.focus({ preventScroll: true });
   }
 
+  // ───────── 사용법 팝업 (내용: data/help.json, 자동 표시 규칙: help.js) ─────────
+  // 입장 후 첫 화면(내 구역)이 뜬 직후, 이 기기에서 처음이면(또는 help.json 의 version 이 올라가면) 자동으로 연다. #app 밖(#helpModal)에 두고, 열려 있는 동안 #app 은 inert.
+  // 닫을 때 "다시 보지 않기" 체크 → localStorage(imjang_help_seen_v1)에 영구 저장 / 체크 없이 닫기(✕·ESC·바깥·[닫기]) → 이번 세션(sessionStorage)만 자동으로 열지 않음.
+  const HELP = window.ImjangHelp, helpS = { open: false, from: null };
+  const store1 = (k) => { try { return window[k]; } catch (e) { return null; } };   // 저장소 접근 자체가 막힌 환경 대비
+  function renderHelpBody() {
+    const H = D.help;
+    $('helpTitle').textContent = H.title;
+    mount($('helpBody'), H.sections.map((sec) => [h('h3', { class: 'hh' }, sec.heading), (sec.blocks || []).map((b) =>
+      b.type === 'ol' ? h('ol', { class: 'hl' }, b.items.map((t) => h('li', null, t))) : b.type === 'ul' ? h('ul', { class: 'hl' }, b.items.map((t) => h('li', null, t)))
+      : b.type === 'note' ? h('p', { class: 'hnote' }, b.text) : h('p', { class: 'hp' }, b.text))]), H.closing ? h('p', { class: 'hclose' }, H.closing) : null);
+  }
+  function openHelp() {
+    if (helpS.open || insS.open) return;
+    if (!D.help) { toast('사용법을 불러오지 못했어요'); return; }
+    renderHelpBody();
+    $('helpNever').checked = HELP.isSeen(store1('localStorage'), D.help.version);   // 이미 저장했다면 체크된 채로 열린다
+    helpS.from = document.activeElement; helpS.open = true;
+    $('helpModal').hidden = false; $('app').setAttribute('inert', ''); document.body.classList.add('help-open');
+    $('helpBody').scrollTop = 0; $('helpTitle').focus({ preventScroll: true });
+  }
+  function closeHelp() {
+    if (!helpS.open) return;
+    HELP.closeWith(store1('localStorage'), store1('sessionStorage'), D.help.version, $('helpNever').checked);
+    helpS.open = false; $('helpModal').hidden = true; $('app').removeAttribute('inert'); document.body.classList.remove('help-open');
+    const f = helpS.from; helpS.from = null; if (f && f.isConnected && f !== document.body && f.focus) f.focus({ preventScroll: true });   // 열기 전에 있던 자리로 포커스 복귀
+  }
+  function maybeAutoHelp() { if (D.help && HELP.shouldAutoOpen(store1('localStorage'), store1('sessionStorage'), D.help.version)) openHelp(); }
+  // 팝업 키 처리(사용법 · 설치 안내 시트 공용): ESC 로 닫기, Tab 이 팝업 안에서만 돈다(✕ → 본문 → … → 닫기 → 처음으로)
+  function modalKeys(e) {
+    const isHelp = helpS.open, root = isHelp ? $('helpSheet') : insS.open ? $('instSheet') : null;
+    if (!root) return;
+    if (e.key === 'Escape') { e.preventDefault(); if (isHelp) closeHelp(); else closeInst(); return; }
+    if (e.key !== 'Tab') return;
+    const f = [...root.querySelectorAll('button,input,[tabindex="0"]')].filter((x) => !x.disabled && !x.hidden && x.offsetParent !== null), i = f.indexOf(document.activeElement);
+    if (!f.length) return;
+    if (e.shiftKey && i <= 0) { e.preventDefault(); f[f.length - 1].focus(); } else if (!e.shiftKey && i === f.length - 1) { e.preventDefault(); f[0].focus(); }
+  }
+
+  // ───────── 앱 설치 안내 (환경 판별·"나중에" 규칙: install.js / 화면: 여기) ─────────
+  // 큰 설치 카드(내 구역 맨 위, 설치 전 방문할 때마다) · 앱 안 브라우저 경고 줄 · 브라우저별 안내 시트 · 설정 카드/PC 사이드바의 "앱 설치 방법" · ?installdebug=1 진단 상자.
+  // 설치 자체는 브라우저 기능이라 "큰 버튼 + 안내"까지만 한다. 모든 글은 DOM 요소(textContent)로 만들고, 주소는 서버로 보내지 않는다.
+  const INS = window.ImjangInstall, insS = { open: false, from: null, installed: false, promptSeen: false };
+  const lsGet = (k) => { const s = store1('localStorage'); try { return s ? s.getItem(k) : null; } catch (e) { return null; } };
+  const lsSet = (k, v) => { const s = store1('localStorage'); try { if (s) s.setItem(k, v); } catch (e) { /* 저장 불가: 이번 화면에서만 */ } };
+  const ssGet = (k) => { const s = store1('sessionStorage'); try { return s ? s.getItem(k) : null; } catch (e) { return null; } };
+  const ssSet = (k, v) => { const s = store1('sessionStorage'); try { if (s) s.setItem(k, v); } catch (e) { /* */ } };
+  function insEnv() {
+    if (PWA.canPrompt()) insS.promptSeen = true;
+    const n = window.navigator;
+    return INS.detectInstallEnv(n.userAgent, { standalone: insS.installed || PWA.isStandalone(), platform: n.platform, maxTouchPoints: n.maxTouchPoints, hasPrompt: insS.promptSeen });
+  }
+  const insIcon = (kind) => {   // 글자와 함께 그리는 작은 아이콘(⋮ 메뉴, □↑ 공유, ⊕ 설치) — 인라인 SVG
+    const s = svg('svg', { viewBox: '0 0 24 24', width: '22', height: '22', fill: 'none', stroke: 'currentColor', 'stroke-width': kind === 'menu' ? '3.2' : '2', 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'aria-hidden': 'true' });
+    const add = (tag, a) => s.append(svg(tag, a));
+    if (kind === 'menu') add('path', { d: 'M12 5h.01M12 12h.01M12 19h.01' });
+    else if (kind === 'share') { add('path', { d: 'M12 15V4' }); add('path', { d: 'M8 8l4-4 4 4' }); add('path', { d: 'M6 11H5v9h14v-9h-1' }); }
+    else { add('circle', { cx: '12', cy: '12', r: '9' }); add('path', { d: 'M12 8v8M8 12h8' }); }
+    return h('span', { class: 'inschip', 'aria-hidden': 'true' }, s);
+  };
+  async function doPrompt() {
+    const r = await PWA.promptInstall();
+    if (r === 'accepted') { insS.installed = true; toast('홈 화면에 추가했어요'); }
+    renderInstallUI(); if ($('s-home').classList.contains('on')) renderHome();   // 설치 직후 큰 카드를 걷어 낸다
+  }
+  const onInstallClick = (opener) => { if (PWA.canPrompt()) doPrompt(); else openInst(opener); };
+  // 큰 설치 카드: 설치 전(installed·앱 안 브라우저 아님)이고 "나중에"(7일)를 누르지 않았으면 내 구역 맨 위에 보인다.
+  // 삼성 인터넷은 설치가 안 될 수 있어 카드에는 [설치하기](크롬·삼성 인터넷 선택 팝업)만 두고(이벤트가 와도 prompt() 를 부르지 않는다), PC 는 "프로그램" 문구를 쓴다.
+  function installCardNode() {
+    const e = insEnv().env;
+    if (e === 'installed' || e === 'inapp' || INS.laterActive(lsGet(INS.LATER_KEY), Date.now())) return null;
+    const sam = e === 'samsung', pc = e === 'desktop';
+    const add = h('button', { type: 'button', class: 'insbtn go', onclick: () => (sam ? openInst(add) : onInstallClick(add)) }, sam ? '설치하기' : pc ? '프로그램으로 설치' : '홈 화면에 추가');
+    const later = h('button', { type: 'button', class: 'insbtn no', onclick: () => { lsSet(INS.LATER_KEY, String(Date.now())); box.remove(); } }, '나중에');
+    const box = h('section', { class: 'inscard', 'data-hint': 'install', 'aria-label': sam ? '앱 설치 안내(삼성 인터넷)' : pc ? '프로그램 설치 안내' : '앱 설치 안내' },
+      h('div', { class: 'it' }, sam ? '앱으로 설치하기' : pc ? '💻 프로그램처럼 설치하면 더 편해요' : '📲 이 앱을 홈 화면에 추가하세요'),
+      h('div', { class: 'id' }, sam ? '삼성 인터넷에서는 설치가 안 될 수 있어요. 크롬에서 설치하는 게 안전해요.' : pc ? '별도 창으로 바로 열려요. 작업 표시줄에 고정해 두고 쓸 수 있어요.' : '주소창 없이 바로 열려요, 현장에서 더 빨라요.'),
+      h('div', { class: 'insrow' }, add, later));
+    return box;
+  }
+  // 설정 화면 카드: 설치 여부와 무관하게 "앱 설치 방법"(설치된 앱에서는 숨김). 설치 이벤트가 있으면 [홈 화면에 추가] 버튼도.
+  function renderInstallCard() {
+    const host = $('installCard'); if (!host) return;
+    const e = insEnv().env; host.hidden = e === 'installed'; if (host.hidden) { mount(host); return; }
+    const pc = e === 'desktop', prompt = PWA.canPrompt() && e !== 'samsung';   // 삼성 인터넷은 설치 이벤트가 와도 시트의 "시도" 링크로만 부른다
+    mount(host, h('div', { style: 'font-weight:700' }, pc ? '프로그램으로 설치하기' : '앱으로 설치하기'),
+      h('div', { class: 'sub', style: 'margin:6px 0 10px' }, e === 'inapp' ? '지금은 앱 안 브라우저예요. 크롬으로 열어야 설치할 수 있어요.' : e === 'samsung' ? '삼성 인터넷에서는 설치가 안 될 수 있어요. 크롬에서 설치하는 게 안전해요.' : pc ? '별도 창으로 바로 열려요. 작업 표시줄에 고정해 두고 쓸 수 있어요.' : '앱처럼 바로 열리고, 인터넷이 없는 현장에서도 쓸 수 있어요.'),
+      prompt ? h('button', { type: 'button', class: 'btn gold', onclick: doPrompt }, pc ? '프로그램으로 설치' : '홈 화면에 추가') : null,
+      h('button', { type: 'button', class: 'btn ghost', style: prompt ? 'margin-top:10px' : null, onclick: (ev) => openInst(ev.currentTarget) }, pc ? '💻 프로그램 설치 방법' : '📲 앱 설치 방법'));
+  }
+  // 화면 위 경고 줄(앱 안 브라우저) · PC 사이드바 "앱 설치 방법" · 설정 카드 · 진단 상자를 현재 환경에 맞춘다(입장 화면에서는 경고를 띄우지 않는다)
+  function renderInstallUI() {
+    const env = insEnv(), box = $('inappWarn'), locked = $('s-lock').classList.contains('on');
+    const show = env.env === 'inapp' && !ssGet(INS.WARN_KEY) && !locked;
+    box.hidden = !show;
+    if (show && !box.firstChild) mount(box, h('span', { class: 'iw-t' }, env.ios ? '앱 안 브라우저예요. 사파리로 열어 주세요.' : '앱 안 브라우저예요. 크롬으로 열어 주세요.'),
+      h('button', { type: 'button', class: 'insbtn go', onclick: (e) => openInst(e.currentTarget) }, '방법 보기'),
+      h('button', { type: 'button', class: 'insbtn no', onclick: () => { ssSet(INS.WARN_KEY, '1'); renderInstallUI(); } }, '닫기'));
+    const nv = $('navInstall'); nv.hidden = env.env === 'installed'; nv.querySelector('b').textContent = env.env === 'desktop' ? '💻' : '📲'; nv.lastChild.textContent = env.env === 'desktop' ? '프로그램 설치 방법' : '앱 설치 방법';
+    renderInstallCard(); renderInstallDebug();
+  }
+  function renderInstallDebug() {
+    if (!/[?&]installdebug=1\b/.test(window.location.search)) return;
+    let box = $('insDebug'); if (!box) { box = h('div', { id: 'insDebug', class: 'insdebug', role: 'status' }); document.body.append(box); }
+    const env = insEnv(), n = window.navigator;
+    let lsOk = false; try { window.localStorage.setItem('__imjang_probe__', '1'); window.localStorage.removeItem('__imjang_probe__'); lsOk = true; } catch (e) { /* 불가 */ }
+    const idbApi = (() => { try { return !!window.indexedDB; } catch (e) { return false; } })();
+    const ls = 'localStorage: ' + (lsOk ? '사용 가능' : '불가') + ' / IndexedDB: ';
+    mount(box, ['환경: ' + env.env + (env.app ? ' (' + env.app + ')' : ''), 'standalone: ' + (insS.installed || PWA.isStandalone() ? '예' : '아니오'), 'beforeinstallprompt: ' + (insS.promptSeen ? '발생' : '없음'),
+      ls + (idbApi ? '확인 중…' : '불가'), 'UA: ' + String(n.userAgent || '').slice(0, 120), '삼성 인터넷 버전: ' + (INS.samsungVersion(n.userAgent) || '해당 없음')].map((t) => h('div', null, t)));
+    if (!idbApi) return;
+    const line = box.children[3], set = (t) => { line.textContent = ls + t; };
+    try { const rq = window.indexedDB.open('__imjang_probe__'); rq.onsuccess = () => { rq.result.close(); try { window.indexedDB.deleteDatabase('__imjang_probe__'); } catch (e) { /* */ } set('사용 가능'); }; rq.onerror = () => set('불가'); } catch (e) { set('불가'); }
+  }
+  // 주소 복사(항상 제공) — clipboard 가 막히면 선택된 입력칸으로 대신한다 / 크롬으로 열기(실기기에서 먹는지는 미확인 — 실패해도 [주소 복사]로 해결)
+  function copyAddr(statusEl, addrEl) {
+    const url = INS.cleanUrl(window.location);
+    const fallback = () => { addrEl.value = url; addrEl.hidden = false; try { addrEl.focus(); addrEl.select(); addrEl.setSelectionRange(0, url.length); } catch (e) { /* */ } statusEl.textContent = '자동 복사가 안 돼요. 아래 주소를 길게 눌러 복사해 주세요.'; };
+    const done = () => { addrEl.hidden = true; statusEl.textContent = '주소를 복사했어요. 크롬(아이폰은 사파리) 주소창에 붙여 넣어 주세요.'; };
+    const legacy = () => { try { addrEl.value = url; addrEl.hidden = false; addrEl.focus(); addrEl.select(); addrEl.setSelectionRange(0, url.length); if (document.execCommand && document.execCommand('copy')) { done(); return; } } catch (e) { /* 아래 대체 */ } fallback(); };
+    try { if (window.navigator.clipboard && window.navigator.clipboard.writeText) { window.navigator.clipboard.writeText(url).then(done, legacy); return; } } catch (e) { /* 아래 */ }
+    legacy();
+  }
+  function openInChrome(kakao) {
+    const url = INS.cleanUrl(window.location), l = window.location;
+    if (kakao) { window.location.href = INS.kakaoExternal(url); setTimeout(() => { if (document.visibilityState === 'visible') window.location.href = INS.chromeIntent(l); }, 900); return; }
+    window.location.href = INS.chromeIntent(l);
+  }
+  function instContent(info) {
+    const env = info.env, kids = [], btns = [], steps = (...li) => h('ol', null, li.map((x) => h('li', null, x)));
+    let title = '홈 화면에 추가하는 방법', chrome = false, kakao = false, copy = false, prompt = false, inline = false;
+    if (env === 'inapp') {
+      title = '지금은 앱 안 브라우저예요';
+      kids.push(h('p', null, '여기서는 설치할 수 없고, 임장 기록이 따로 저장되거나 사라질 수 있어요. ', info.ios ? '사파리로 열어 주세요.' : '크롬으로 열어 주세요.'));
+      kids.push(h('p', { class: 'isnote' }, info.ios ? '아이폰: 화면 오른쪽 아래 ⋯ 를 누르고 "다른 브라우저로 열기"(또는 "Safari로 열기")를 눌러 주세요. 메뉴 이름은 앱마다 다를 수 있어요.' : '[크롬으로 열기]가 안 되면 [주소 복사]를 누른 뒤 크롬 주소창에 붙여 넣어 주세요.'));
+      chrome = info.android; kakao = info.app === 'kakao'; copy = true;
+    } else if (env === 'ios') {
+      kids.push(steps(['사파리 아래의 공유 버튼(', insIcon('share'), ')을 누르세요.'], ['"홈 화면에 추가"를 누르세요.'], ['오른쪽 위 "추가"를 누르세요.']));
+      kids.push(h('p', { class: 'isnote' }, '크롬·네이버·카카오톡 등에서 열었다면 사파리로 열어 주세요.')); copy = true;
+    } else if (env === 'samsung') {
+      title = '어디에서 설치할까요?'; inline = true;
+      const sStatus = h('p', { class: 'isstatus', role: 'status', 'aria-live': 'polite' });
+      const sAddr = h('input', { class: 'isaddr', type: 'text', readonly: true, hidden: true, 'aria-label': '이 페이지 주소' });
+      const tryNote = h('p', { class: 'isnote', role: 'status', 'aria-live': 'polite', hidden: true }, '주소창 오른쪽에 설치 아이콘이 보이면 눌러 보세요. 없다면 메뉴의 "홈 화면에 추가"(이름은 버전에 따라 달라요)를 찾아 보세요.');
+      kids.push(h('h3', { class: 'ish' }, '① 크롬에서 설치하기', h('span', { class: 'isbadge' }, '추천')),
+        h('p', null, '크롬에서는 설치가 잘 돼요'),
+        h('button', { type: 'button', class: 'btn gold', onclick: () => openInChrome(false) }, '크롬에서 설치하기'),
+        h('p', { class: 'isnote' }, '크롬이 열리지 않거나 없다면'),
+        h('button', { type: 'button', class: 'btn ghost', onclick: () => copyAddr(sStatus, sAddr) }, '주소 복사'), sStatus, sAddr,
+        h('a', { class: 'insbtn no isplay', href: INS.PLAY_CHROME_URL, target: '_blank', rel: 'noopener noreferrer' }, 'Play 스토어에서 Chrome 받기'),
+        h('p', { class: 'isnote' }, '대부분의 갤럭시에는 크롬이 이미 들어 있어요(구글 폴더 안에 있기도 해요).'),
+        h('h3', { class: 'ish' }, '② 삼성 인터넷에서 설치하기'),
+        h('p', null, '"안전하지 않은 앱 차단됨" 같은 안내가 뜨며 막힐 수 있어요'),
+        h('button', { type: 'button', class: 'btn ghost', onclick: () => { if (PWA.canPrompt()) { closeInst(); doPrompt(); } else tryNote.hidden = false; } }, '삼성 인터넷에서 설치하기'),
+        tryNote,
+        h('div', { class: 'isnote ishsm' }, '설치 없이 쓰기'),
+        h('p', { class: 'isnote' }, '설치하지 않아도 삼성 인터넷에서 그대로 쓸 수 있어요. 즐겨찾기(★)에 추가하거나 메뉴에서 홈 화면 바로가기를 만들어 두면 한 번에 열려요(메뉴 이름은 버전에 따라 달라요). 기록은 쓰는 브라우저에 저장되니 앞으로도 같은 브라우저로 열어 주세요. 브라우저를 바꿀 때는 [저장·설정]의 저장하기 → 불러오기를 쓰세요.'));
+    } else if (env === 'chromium') {
+      kids.push(steps(['오른쪽 위 ', insIcon('menu'), ' 메뉴를 누르세요.'], ['"앱 설치" 또는 "홈 화면에 추가"를 누르세요.'], ['"설치" 또는 "추가"를 누르세요.']));
+      kids.push(h('p', { class: 'isnote' }, '메뉴 이름은 버전에 따라 다를 수 있어요.')); prompt = PWA.canPrompt();
+    } else if (env === 'desktop') {
+      title = '프로그램으로 설치하는 방법'; copy = true; prompt = PWA.canPrompt();
+      kids.push(h('p', null, '주소창 오른쪽의 설치 아이콘(', insIcon('plus'), ')을 눌러 주세요. 파이어폭스·사파리 등 설치 아이콘이 없는 브라우저는 크롬이나 엣지로 열어 주세요.'));
+    } else {
+      kids.push(h('p', null, '브라우저 메뉴에서 "홈 화면에 추가" 또는 "앱 설치"를 찾아 주세요. 안 보이면 크롬(아이폰은 사파리)으로 열어 주세요.')); copy = true;
+    }
+    const status = h('p', { class: 'isstatus', role: 'status', 'aria-live': 'polite' });
+    const addr = h('input', { class: 'isaddr', type: 'text', readonly: true, hidden: true, 'aria-label': '이 페이지 주소' });
+    if (prompt) btns.push(h('button', { type: 'button', class: 'btn gold', onclick: () => { closeInst(); doPrompt(); } }, env === 'desktop' ? '프로그램으로 설치' : '홈 화면에 추가'));
+    if (chrome) btns.push(h('button', { type: 'button', class: 'btn gold', onclick: () => openInChrome(kakao) }, '크롬으로 열기'));
+    if (copy) btns.push(h('button', { type: 'button', class: 'btn ' + (chrome || prompt || env === 'samsung' ? 'ghost' : 'gold'), onclick: () => copyAddr(status, addr) }, '주소 복사'));
+    btns.push(h('button', { type: 'button', class: 'btn ghost', onclick: closeInst }, '닫기'));
+    return { title, kids: inline ? kids : kids.concat([status, addr]), btns };
+  }
+  function openInst(opener) {
+    if (insS.open || helpS.open) return;
+    const c = instContent(insEnv());
+    $('instTitle').textContent = c.title; mount($('instBody'), c.kids); mount($('instFoot'), c.btns);
+    insS.from = opener || document.activeElement; insS.open = true;
+    $('instModal').hidden = false; $('app').setAttribute('inert', ''); $('instBody').scrollTop = 0; $('instTitle').focus({ preventScroll: true });
+  }
+  function closeInst() {
+    if (!insS.open) return;
+    insS.open = false; $('instModal').hidden = true; $('app').removeAttribute('inert');
+    const f = insS.from; insS.from = null; if (f && f.isConnected && f !== document.body && f.focus) f.focus({ preventScroll: true });
+  }
+
   // ───────── 입장 화면 ─────────
   function showLock(msg, disabled) {
     document.querySelectorAll('.screen').forEach((s) => s.classList.remove('on'));
@@ -1090,6 +1257,7 @@
     const get = (f) => fetch('data/' + f, { cache: 'no-cache' }).then((r) => { if (!r.ok) throw new Error(f + ' ' + r.status); return r.json(); });
     const [items, config, stages, sites] = await Promise.all([get('items.json'), get('config.json'), get('stages.json'), get('sites.json')]);
     D.items = items.items; D.items_meta = items; D.config = config; D.stages = stages.stages; D.stagesFile = stages; D.sites = sites.sites; D.siteNotes = sites.groupNotes || {};
+    D.help = await get('help.json').then((j) => (j && typeof j.version === 'number' && j.title && Array.isArray(j.sections) ? j : null)).catch(() => null);   // 사용법 파일을 못 읽어도 앱은 그대로(버튼만 안내)
     tokens = R.buildTokens(config);
     const errs = R.validate(items, config, D.stages);
     if (errs.length) console.warn('항목 데이터 점검 경고', errs);
@@ -1130,6 +1298,8 @@
       store.persist().then((ok) => store.setMeta('persisted', ok)).catch(() => {});
       if (local) window.__imjang = { store, S, D, bannerState, flushAll };   // 로컬 확인용(실서비스 주소에서는 노출하지 않음)
       go('s-home');
+      maybeAutoHelp();
+      renderInstallUI();
     } catch (e) {
       console.error(e);
       document.querySelectorAll('.screen').forEach((s) => s.classList.remove('on')); $('s-home').classList.add('on'); setNav(false);
@@ -1155,6 +1325,13 @@
     $('segH').addEventListener('click', () => setMode('hand'));
     $('segF').addEventListener('click', () => setMode('field'));
     $('modal').addEventListener('click', (e) => { if (e.target === $('modal')) closeModal(); });
+    document.body.addEventListener('click', (e) => { if (e.target.closest('[data-help]')) openHelp(); });
+    $('helpClose').addEventListener('click', closeHelp); $('helpX').addEventListener('click', closeHelp);
+    $('helpModal').addEventListener('click', (e) => { if (e.target === $('helpModal')) closeHelp(); });
+    document.addEventListener('keydown', modalKeys);
+    document.body.addEventListener('click', (e) => { const b = e.target.closest('[data-install]'); if (b) openInst(b); });
+    $('instX').addEventListener('click', closeInst);
+    $('instModal').addEventListener('click', (e) => { if (e.target === $('instModal')) closeInst(); });
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape' && !e.defaultPrevented && $('modal').classList.contains('on')) closeModal();    // 팝업: ESC 로 닫기 (바깥 클릭은 위에서)
     });
