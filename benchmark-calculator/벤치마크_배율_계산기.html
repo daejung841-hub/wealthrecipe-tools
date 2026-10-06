@@ -1585,7 +1585,7 @@ function fmtYm(ym){ return Math.floor(ym/100)+'.'+String(ym%100).padStart(2,'0')
 // 배치"가 아니라고 보고 범위 계산에서 제외한다.
 function computeDataAsOfRange(){
   const counts = new Map();
-  (window.SEED_COMPLEXES||[]).forEach(e=>{
+  poolSeedComplexes().forEach(e=>{ // 묶음 L27
     if (!e.text) return;
     const m = e.text.match(/(\d{6}),/);
     if (!m) return;
@@ -1879,6 +1879,38 @@ function bundleUrlEnabled(key){
     return set.indexOf(key) >= 0 || set.indexOf(key.charAt(0)) >= 0;
   } catch (e) { return true; }
 }
+// 묶음 L27(44단계, 풀 제외): seed 항목에 excludeFromPool이 참이면 그 단지를 다른 단지 계산에 쓰는 모집단에서 뺀다 —
+// 준거단지 후보·쌍둥이 후보·서울 평균 전세가율·지역 평균 전세가율·재건축 신호 지역 중앙값·데이터 기준월 범위·이름 정리(같은 이름 구분).
+// 그 단지 자신의 적정가·배지·검색·단일 진단·비교·즐겨찾기·최근 기록은 그대로 된다. 필드가 없는 seed는 아무것도 바뀌지 않는다.
+// F4처럼 seed를 읽을 때 이름 정리에 쓰므로 주소 플래그(로컬 ?bundles=…에서 L27 빼기)로만 끈다 — 끄면 지금과 같다(모두 모집단에 들어감).
+window.POOL_EXCLUDE_ON = bundleUrlEnabled('L27');
+function isPoolExcludedSeed(e){ return !!(window.POOL_EXCLUDE_ON && e && e.excludeFromPool); }
+function poolSeedComplexes(){
+  const all = window.SEED_COMPLEXES || [];
+  return window.POOL_EXCLUDE_ON ? all.filter(e => !isPoolExcludedSeed(e)) : all;
+}
+// 풀에서 뺀 단지의 이름: 모집단 단지의 이름·옛 이름·별칭·K4 표 이름과 겹치지 않게 그대로 → "동 이름" → "동 이름(지역)" → "이름 #2…" 순으로 정한다.
+// 옛 이름 표·별칭은 만들지 않는다(기존 단지의 이름·저장 옮기기·선도단지 명단에 영향 없음).
+function nameExcludedSeeds(all){
+  const ex = all.filter(isPoolExcludedSeed);
+  if (!ex.length) return;
+  const taken = new Set();
+  const take = n => { if (n){ taken.add(n); taken.add(String(n).replace(/\.$/, '')); } };
+  all.forEach(e => { if (e && !isPoolExcludedSeed(e)) [e.name, e.kbName, e.legacyName].concat(e.nameAliases || []).forEach(take); });
+  if (window.SEED_NAME_LEGACY) window.SEED_NAME_LEGACY.forEach((v, k) => take(k));
+  Object.values(window.SEED_DISPLAY_NAMES || {}).forEach(take);
+  ex.forEach(e => {
+    const base = String(e.name || '').trim() || String(e.id);
+    const region = String(e.district || e.regionCity || '').replace(/[구시]$/, '');
+    const tries = [base];
+    if (e.dong) tries.push(e.dong + ' ' + base);
+    if (region) tries.push((e.dong ? e.dong + ' ' : '') + base + '(' + region + ')');
+    let next = tries.find(n => !taken.has(n) && !taken.has(n.replace(/\.$/, '')));
+    for (let k = 2; !next; k++) if (!taken.has(base + ' #' + k)) next = base + ' #' + k;
+    if (next !== e.name) e.poolExcludedPrevName = e.name;
+    e.name = next; take(next);
+  });
+}
 function disambiguateRemainingDuplicateNames(seeds){
   const legacy = new Map();
   const shortRegion = v => String(v||'').replace(/[구시]$/, '');
@@ -2024,10 +2056,11 @@ function renameDuplicateSeedNames(seeds, f4, f5, f6){
   return legacy;
 }
 (function disambiguateCommonComplexNames(){
-  const seeds = window.SEED_COMPLEXES;
-  if (!Array.isArray(seeds)) return;
+  const allSeeds = window.SEED_COMPLEXES;
+  if (!Array.isArray(allSeeds)) return;
   // 묶음 K4: 이름을 고치기 전의 KB 원래 이름을 남겨 둔다(검색·저장된 옛 이름 옮기기에 쓴다).
-  seeds.forEach(e => { if (e && e.kbName == null) e.kbName = e.name; });
+  allSeeds.forEach(e => { if (e && e.kbName == null) e.kbName = e.name; });
+  const seeds = window.POOL_EXCLUDE_ON ? allSeeds.filter(e => !isPoolExcludedSeed(e)) : allSeeds; // 묶음 L27
   const byName = new Map();
   seeds.forEach(e => {
     if (!e || !e.name) return;
@@ -2045,6 +2078,7 @@ function renameDuplicateSeedNames(seeds, f4, f5, f6){
   });
   const f4 = bundleUrlEnabled('F4'), f5 = bundleUrlEnabled('F5'), f6 = bundleUrlEnabled('F6');
   window.SEED_NAME_LEGACY = (f4 || f5 || f6) ? renameDuplicateSeedNames(seeds, f4, f5, f6) : new Map();
+  if (window.POOL_EXCLUDE_ON) nameExcludedSeeds(allSeeds); // 묶음 L27
 })();
 
 let _seedRatioIndex = null;
@@ -2052,7 +2086,7 @@ function seedRatioIndex(){
   if (_seedRatioIndex) return _seedRatioIndex;
   const seoulByYm = new Map();
   const seoulComplexIds = new Set();
-  (window.SEED_COMPLEXES || []).forEach(s=>{
+  poolSeedComplexes().forEach(s=>{ // 묶음 L27
     if (!s.district || !s.text || !SEOUL_GU.has(s.district)) return;
     const parsed = parsePastedTable(s.text);
     if (!parsed.rows.length) return;
@@ -2126,9 +2160,9 @@ function seoulHistoricalAvg(){
 // 라이브는 주소 플래그를 읽지 않으므로 이 기본값이 그대로 동작한다.
 const BUNDLES = { A:false, B:false, C:false, D1:false, D2:false, D3:false, D4:false, E1:true, E2:false, E3:true, F1:true, F2:true, F3:true, F4:true, F5:true, F6:true,
   H1:false, H2:true, H3:true, H4:true, H5:true, H6:true, H7:true,
-  L1:true, L2:true, L3:true, L4:true, L5:true, L6:false, L7:true, L8:true, L9:true, L10:true, L11:true, L12:true, L13:true, L14:true, L15:true, L16:true, L17:true, L18:true, L19:true, L19B:true, L20:true, K1:false, K2:true, K4:false };
+  L1:true, L2:true, L3:true, L4:true, L5:true, L6:false, L7:true, L8:true, L9:true, L10:true, L11:true, L12:true, L13:true, L14:true, L15:true, L16:true, L17:true, L18:true, L19:true, L19B:true, L20:true, L27:!!window.POOL_EXCLUDE_ON, K1:false, K2:true, K4:false };
 const BUNDLE_GROUPS = { D:['D1','D2','D3','D4'], E:['E1','E2','E3'], F:['F1','F2','F3','F4','F5','F6'], H:['H1','H2','H3','H4','H5','H6','H7'],
-  L:['L1','L2','L3','L4','L5','L6','L7','L8','L9','L10','L11','L12','L13','L14','L15','L16','L17','L18','L19','L19B','L20'], K:['K1','K2','K4'] };
+  L:['L1','L2','L3','L4','L5','L6','L7','L8','L9','L10','L11','L12','L13','L14','L15','L16','L17','L18','L19','L19B','L20','L27'], K:['K1','K2','K4'] };
 function setBundles(next){
   next = Object.assign({}, next||{});
   // D·E 하나로 D1~D4·E1~E3을 한꺼번에 끄고 켤 수 있다(개별 키가 있으면 그쪽이 우선).
@@ -2219,6 +2253,7 @@ window.SEED_NAME_ALIASES = new Map();
   if (!table || !Array.isArray(seeds) || !bundleUrlEnabled('K4')) return;
   const renamed = new Map(); // 바꾸기 직전 이름 → 새 이름
   seeds.forEach(e => {
+    if (isPoolExcludedSeed(e)) return; // 묶음 L27
     const next = e && table[e.id];
     if (!next || next === e.name) return;
     const prev = e.name;
@@ -3567,7 +3602,7 @@ function estimateReferenceCandidates(){
   const rebuildMembers = new Set(BENCHMARK_GROUPS.rebuild.members);
   const bench = getVirtualBenchmarkComplex('seoul');
   const out = [];
-  (window.SEED_COMPLEXES || []).forEach(e => {
+  poolSeedComplexes().forEach(e => { // 묶음 L27
     if (rebuildMembers.has(e.name)) return;
     const age = complexAge(e.builtYear);
     if (age != null && age >= REBUILD_AGE_THRESHOLD && !isRebuildAgeExempt(e.name)) return;
@@ -4214,7 +4249,7 @@ function findTwinCandidates(comp){
       const bench = getVirtualBenchmarkComplex('seoul');
       const compBenchDecoupling = computeFixedWindowGap(comp, bench, overlapYmsOf(comp.rowMap, bench.rowMap, compYms));
       const scored = [];
-      (window.SEED_COMPLEXES || []).forEach(e => {
+      poolSeedComplexes().forEach(e => { // 묶음 L27
         if (!e.text || e.name === comp.name || rebuildMembers.has(e.name)) return;
         // estimateReferenceCandidates()와 동일한 28년 재건축 연한 필터를 쌍둥이
         // 단지 후보 풀에도 적용한다 — 이 필터는 여태 여기엔 전혀 없었다.
@@ -7402,7 +7437,7 @@ function rebuildSignalIndex(){
       const b = bench ? bench.rowMap.get(r.ym) : null;
       if (r.saleMid && b && b.saleMid) sr.set(r.ym, r.saleMid/b.saleMid*100);
     });
-    jr.forEach((v, ym)=>{
+    if (!isPoolExcludedSeed(e)) jr.forEach((v, ym)=>{ // 묶음 L27: 풀에서 뺀 단지는 지역 중앙값·월별 표본 수에 넣지 않는다
       const kr = rkey+'|'+ym, kg = grp+'|'+ym;
       if (!byR.has(kr)) byR.set(kr, []); byR.get(kr).push(v);
       if (!byG.has(kg)) byG.set(kg, []); byG.get(kg).push(v);
@@ -7840,7 +7875,7 @@ let _regionJeonseRatioCache;
 function regionAvgJeonseRatio(){
   if (_regionJeonseRatioCache !== undefined) return _regionJeonseRatioCache;
   const vals = [];
-  (window.SEED_COMPLEXES||[]).forEach(e => {
+  poolSeedComplexes().forEach(e => { // 묶음 L27
     // 지역 전세가율 중앙값의 모집단은 묶음 B와 무관하게 예전 그룹 판정(재건축 그룹 제외)을
     // 그대로 쓴다 — 시장 통계라 묶음 스위치로 숫자가 바뀌지 않게 한다.
     if (!e.text || legacyBenchGroupForTarget(e.name).groupKey !== 'seoul') return;
