@@ -1076,6 +1076,72 @@ tr.diag-detail-row td{white-space:normal;background:var(--surface-alt);padding:1
 .common-range{font-size:11px;color:var(--ink-faint);margin-top:4px;}
 .fair-outlook-row{font-size:12.5px;color:var(--ink-muted);margin-top:4px;}
 footer{margin-top:36px;color:var(--ink-faint);font-size:12px;text-align:center;}
+/* 묶음 L24·L25(43단계): 단일 진단 엑셀 넣기 줄, 비교 검색창의 최근 본 단지 드롭다운(섹션 목록 — 32단계 즐겨찾기 줄을 같은 틀에 얹는다). */
+#singleUploadRow[hidden], #singleUploadNote[hidden]{display:none !important;}
+.single-upload-row{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;margin-top:8px;}
+.single-upload-note{font-size:12.5px;color:var(--ink-muted);line-height:1.5;flex:1 1 220px;min-width:0;}
+.picker-sec + .picker-sec{border-top:1px solid var(--border);}
+.picker-head{font-size:11.5px;font-weight:700;color:var(--ink-muted);padding:7px 12px 3px;}
+.lib-ac-item.picker-item{display:flex;align-items:baseline;gap:6px;min-height:36px;}
+.picker-item .picker-meta{color:var(--ink-faint);font-size:11.5px;white-space:nowrap;}
+.picker-item.active, .picker-more.active{background:var(--surface-alt);}
+.picker-more{display:block;width:100%;text-align:left;border:0;background:transparent;color:var(--accent);font-size:12.5px;padding:8px 12px;min-height:36px;cursor:pointer;}
+/* 묶음 L22(40단계): 사용법 팝업. 숨김은 [hidden]이 display보다 항상 이기게 !important(30단계 교훈 — .btn·flex 규칙이 hidden을 덮지 않게).
+   z-index는 의견 보내기 버튼(9998)·창(9999)보다 위. 열린 동안 body.guide-open으로 뒤 화면 스크롤을 잠근다. */
+#guideOpenBtn[hidden], .guide-overlay[hidden]{display:none !important;}
+body.l22 .topbar-actions{flex-wrap:wrap;justify-content:flex-end;}
+html.guide-open, body.guide-open{overflow:hidden;}
+.guide-overlay{position:fixed;inset:0;z-index:10000;background:rgba(15,20,25,.55);display:flex;align-items:center;justify-content:center;padding:16px;}
+.guide-dialog{background:var(--surface);color:var(--ink);border:1px solid var(--border-strong);border-radius:14px;box-shadow:var(--shadow);
+  width:min(640px,100%);max-height:min(88vh,860px);display:flex;flex-direction:column;outline:none;}
+.guide-head{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:14px 14px 10px 20px;border-bottom:1px solid var(--border);}
+.guide-head h2{margin:0;font-size:17px;font-family:var(--font-display);}
+.guide-x{min-width:44px;min-height:44px;border:0;background:transparent;color:var(--ink-muted);font-size:20px;border-radius:10px;cursor:pointer;}
+.guide-x:hover{background:var(--surface-alt);color:var(--ink);}
+.guide-body{overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;padding:14px 20px;font-size:14px;line-height:1.65;}
+.guide-body h3{font-size:14.5px;margin:14px 0 6px;}
+.guide-body h3:first-child{margin-top:0;}
+.guide-body ol, .guide-body ul{margin:4px 0 8px;padding-left:20px;}
+.guide-body li{margin:3px 0;}
+.guide-body .guide-lead{color:var(--ink-muted);margin:0 0 6px;}
+.guide-body details{border-top:1px solid var(--border);padding:8px 0;}
+.guide-body summary{cursor:pointer;font-weight:700;min-height:32px;display:flex;align-items:center;}
+.guide-body b.ui{white-space:nowrap;}
+.guide-foot{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;padding:10px 20px 14px;border-top:1px solid var(--border);}
+.guide-dont{display:inline-flex;align-items:center;gap:8px;font-size:13.5px;color:var(--ink-muted);min-height:44px;cursor:pointer;}
+.guide-dont input{width:20px;height:20px;}
+.guide-actions{display:flex;gap:8px;margin-left:auto;}
+.guide-actions .btn{min-height:44px;}
+.guide-actions .btn.guide-start{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);}
+/* 묶음 L32(50단계): 폴드 커버(344~390px) 등 좁은 폭. 600px 이하에서만(쌍둥이·심화분석 세로 쌓기는 820px 이하) — 넓은 화면은 그대로. */
+@media (max-width:820px){
+  body.l32 .single-diag-action-row{flex-direction:column;}
+  body.l32 .single-diag-action-row > .twin-section, body.l32 .single-diag-action-row > .more-section{flex:none;width:100%;}
+}
+@media (max-width:600px){
+  /* (a) 상단 버튼 줄: 한 줄 가로 밀기(글자 세로 쌓임 없음), 탭 3개는 한 줄·낱말 안 끊김 */
+  body.l32 .topbar{gap:8px;padding-bottom:10px;margin-bottom:10px;}
+  body.l32 .topbar .sub{font-size:12px;}
+  body.l32 .topbar-actions{flex-wrap:nowrap;justify-content:flex-start;overflow-x:auto;max-width:100%;width:100%;padding-bottom:2px;-webkit-overflow-scrolling:touch;}
+  body.l32 .topbar-actions > *{flex:none;white-space:nowrap;}
+  body.l32 .top-mode-tabs{gap:6px;margin:10px 0 12px;}
+  body.l32 .top-mode-btn{flex:1 1 0;min-width:0;padding:8px 4px;font-size:12.5px;min-height:44px;word-break:keep-all;overflow-wrap:normal;line-height:1.25;}
+  /* (b) 단지 헤더: 이름 한 덩어리(메타는 이름 아래 작은 글씨), 기준 표시·비교 추가는 줄바꿈 없이 */
+  body.l32 .single-target-head{flex-wrap:wrap;gap:6px 8px;}
+  body.l32 .single-target-head .name{flex:1 1 100%;font-size:16px;word-break:keep-all;}
+  body.l32 .single-target-head .name-meta{display:block;font-size:12px;font-weight:500;color:var(--ink-muted);margin-top:2px;}
+  body.l32 .single-target-head .bench-tag, body.l32 .single-add-compare-btn{white-space:nowrap;flex:none;}
+  body.l32 .single-add-compare-btn{margin-left:0;}
+  /* (c) 떠 있는 "의견 보내기"(공용 의견 위젯 스크립트가 넣는 .fw-fab)를 작은 동그라미로 모서리에 — 이 계산기 화면에서만 */
+  body.l32 .fw-fab{right:10px;bottom:10px;width:44px;height:44px;padding:0;justify-content:center;font-size:0;opacity:.88;}
+  body.l32 .fw-fab::before{content:'💬';font-size:20px;}
+  /* (d) 시세표: 첫 열(시세월) 고정, 칸 여백 줄임, 높이는 화면 비율로(2중 스크롤 함정 줄임) */
+  body.l32 .recent-box{height:auto;max-height:60vh;}
+  body.l32 .recent-box th, body.l32 .recent-box td{padding:6px 8px;}
+  body.l32 .recent-box th:first-child, body.l32 .recent-box td:first-child{position:sticky;left:0;z-index:2;background:var(--surface);}
+  /* 비교 요약표: 첫 칸(긴 단지명) 줄바꿈 허용 → 숫자가 첫 화면에 보이게 */
+  body.l32 #summaryTable th:first-child, body.l32 #summaryTable td:first-child{white-space:normal;min-width:110px;max-width:150px;}
+}
 </style>
 
 <div class="wrap">
@@ -1089,6 +1155,7 @@ footer{margin-top:36px;color:var(--ink-faint);font-size:12px;text-align:center;}
            상단에 별도 줄로 있던 걸 헤더 우측(🌙/초기화 버튼과 같은 자리)
            으로 옮김. gate.js 인증은 sessionStorage 기반이라 다른 도구로
            이동해도 비밀번호를 다시 묻지 않는다. 모든 탭에서 항상 보인다. -->
+      <button class="btn" id="guideOpenBtn" type="button" hidden>❓ 사용법</button>
       <a class="btn" href="급지표.html">📋 급지표</a>
       <a class="btn" href="../rate-simulator/비례율_시뮬레이터.html">🧮 비례율 계산기</a>
       <a class="btn" href="../index.html">🏠 초기화면</a>
@@ -1112,6 +1179,12 @@ footer{margin-top:36px;color:var(--ink-faint);font-size:12px;text-align:center;}
       </div>
       <select id="singleLibSelect" hidden><option value="">선택 안 함</option></select>
       <div class="recent-chips" id="recentChips" aria-label="최근 본 단지"></div>
+      <!-- 묶음 L24(43단계): 단일 진단에서도 엑셀 파일로 단지 넣기(여러 단지 비교와 같은 읽기 코드) -->
+      <div class="single-upload-row" id="singleUploadRow" hidden>
+        <button class="btn small upload-btn" id="singleUploadBtn" type="button">📂 엑셀 파일로 단지 넣기</button>
+        <input type="file" id="singleUploadInput" accept=".xlsx,.xls" hidden>
+        <span class="single-upload-note" id="singleUploadNote" role="status" hidden></span>
+      </div>
     </div>
     <div id="singleDiagHead"></div>
     <div id="singleChartSection" style="margin-top:20px;">
@@ -1371,6 +1444,24 @@ footer{margin-top:36px;color:var(--ink-faint);font-size:12px;text-align:center;}
   <div class="side-panel-body" id="sidePanelBody"></div>
 </aside>
 
+<!-- 묶음 L22(40단계): 사용법 팝업. 내용은 스크립트의 GUIDE_HTML 상수 한 곳에서 채운다. -->
+<div class="guide-overlay" id="guideOverlay" hidden>
+  <div class="guide-dialog" id="guideDialog" role="dialog" aria-modal="true" aria-labelledby="guideTitle" tabindex="-1">
+    <div class="guide-head">
+      <h2 id="guideTitle">📊 저평가 단지 계산기 사용법</h2>
+      <button class="guide-x" id="guideCloseX" type="button" aria-label="사용법 닫기">✕</button>
+    </div>
+    <div class="guide-body" id="guideBody"></div>
+    <div class="guide-foot">
+      <label class="guide-dont"><input type="checkbox" id="guideDontShow"> 다시 보지 않기</label>
+      <div class="guide-actions">
+        <button class="btn" id="guideCloseBtn" type="button">닫기</button>
+        <button class="btn guide-start" id="guideStartBtn" type="button">시작하기</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script>
 const SLOT_COLORS = ['--series-1','--series-2','--series-3','--series-4','--series-5','--series-6','--series-7','--series-8','--series-9','--series-10'];
 const MAX_SLOTS = 10;
@@ -1389,6 +1480,12 @@ function cssVar(name){ return getComputedStyle(document.documentElement).getProp
 // 배율 오버레이, 쌍둥이/준거단지 미니차트 등)에 자동 적용한다 —
 // 개별 차트 생성 코드는 손댈 필요 없다.
 const CHART_EXT_TOOLTIP_PLACEHOLDER = '그래프에 마우스를 올리면 값이 표시됩니다';
+// 묶음 L32: 마우스가 없는(터치) 화면에서는 "누르면"으로
+const CHART_EXT_TOOLTIP_PLACEHOLDER_TOUCH = '그래프를 누르면 값이 표시됩니다';
+function chartExtPlaceholderText(){
+  try { if (typeof BUNDLES !== 'undefined' && BUNDLES.L32 && window.matchMedia && window.matchMedia('(hover: none)').matches) return CHART_EXT_TOOLTIP_PLACEHOLDER_TOUCH; } catch (e) {}
+  return CHART_EXT_TOOLTIP_PLACEHOLDER;
+}
 // layout.padding.top(아래 Chart.defaults 설정)으로 예약해둔 만큼의 높이 —
 // 박스 CSS(max-height:84px)도 이 값과 맞춰서 캔버스 쪽으로 넘치지 않게
 // 한다. 76 -> 88로 올렸다(2026-09-19 세션, 폰트 확대에 맞춰 재조정) —
@@ -1451,7 +1548,7 @@ function ensureChartExtTooltipBox(chart){
     if (anchor.classList.contains('bench-chart-wrap')) box.classList.add('chart-ext-tooltip-compact');
     else if (anchor.classList.contains('twin-chart-wrap')) box.classList.add('chart-ext-tooltip-tiny');
     else box.classList.add('chart-ext-tooltip-main');
-    box.innerHTML = '<span class="chart-ext-placeholder">'+CHART_EXT_TOOLTIP_PLACEHOLDER+'</span>';
+    box.innerHTML = '<span class="chart-ext-placeholder">'+chartExtPlaceholderText()+'</span>';
     anchor.insertBefore(box, anchor.firstChild);
   }
   chart.$extTooltipBox = box;
@@ -1884,6 +1981,8 @@ function bundleUrlEnabled(key){
 // 그 단지 자신의 적정가·배지·검색·단일 진단·비교·즐겨찾기·최근 기록은 그대로 된다. 필드가 없는 seed는 아무것도 바뀌지 않는다.
 // F4처럼 seed를 읽을 때 이름 정리에 쓰므로 주소 플래그(로컬 ?bundles=…에서 L27 빼기)로만 끈다 — 끄면 지금과 같다(모두 모집단에 들어감).
 window.POOL_EXCLUDE_ON = bundleUrlEnabled('L27');
+// 묶음 L31(50단계): 풀에서 뺀 신규 단지 표시명 규칙(아래 nameExcludedSeeds). seed를 읽을 때 정해지므로 주소 플래그로만 끈다 — 끄면 L27 규칙 그대로.
+window.NEW_NAME_RULE_ON = bundleUrlEnabled('L31');
 function isPoolExcludedSeed(e){ return !!(window.POOL_EXCLUDE_ON && e && e.excludeFromPool); }
 function poolSeedComplexes(){
   const all = window.SEED_COMPLEXES || [];
@@ -1899,6 +1998,7 @@ function nameExcludedSeeds(all){
   all.forEach(e => { if (e && !isPoolExcludedSeed(e)) [e.name, e.kbName, e.legacyName].concat(e.nameAliases || []).forEach(take); });
   if (window.SEED_NAME_LEGACY) window.SEED_NAME_LEGACY.forEach((v, k) => take(k));
   Object.values(window.SEED_DISPLAY_NAMES || {}).forEach(take);
+  if (window.NEW_NAME_RULE_ON){ nameNewSeedsL31(all, ex, taken, take); return; }
   ex.forEach(e => {
     const base = String(e.name || '').trim() || String(e.id);
     const region = String(e.district || e.regionCity || '').replace(/[구시]$/, '');
@@ -1909,6 +2009,53 @@ function nameExcludedSeeds(all){
     for (let k = 2; !next; k++) if (!taken.has(base + ' #' + k)) next = base + ' #' + k;
     if (next !== e.name) e.poolExcludedPrevName = e.name;
     e.name = next; take(next);
+  });
+}
+// 묶음 L31(50단계): 풀에서 뺀 신규 단지 표시명. 기존 단지(풀에 남은 단지)는 건드리지 않는다.
+// 동 이름을 붙이는 경우 = ① 신규끼리 이름이 같다 ② 기존 단지의 이름·옛 이름·별칭과 같다 ③ 이름에 지명(seed 전체의 동·구·시)이 없고
+//   핵심어(placelessNameCore)가 서로 다른 구/시 2곳 이상에 쓰인다(F6과 같은 판정, 신규 포함 전체 기준). 예) 성원(도봉구 쌍문동) → "쌍문동 성원".
+// 형식: "동이름 단지명"(F6). 그 동 이름이 다른 구/시에도 있으면(중동·신사동 등) 끝에 "(구)"를 붙인다(F4 경계 규칙, 예 "중동 현대(1차)(마포)").
+// 동이 없으면 구/시 이름("도봉구 성원"), 그래도 겹치면 "(N세대)", 마지막으로 " #2". 구/시도 없으면 원래 이름(겹치면 #2).
+// 원래 이름과 "짧은 동 이름 단지명"(쌍문 성원)은 검색 별칭(nameAliases)으로만 둔다 — 옛 이름 표(SEED_NAME_LEGACY)에는 넣지 않는다(저장된 이름 옮기기 영향 없음).
+function nameNewSeedsL31(all, ex, taken, take){
+  const stem = v => String(v || '').replace(/\d+가$/, '').replace(/[동읍면구시군]$/, '');
+  const places = new Set();
+  all.forEach(e => { if (e) [stem(e.dong), stem(e.district), stem(e.regionCity)].forEach(p => { if (p.length >= 2) places.add(p); }); });
+  const baseOf = e => String(e.name || '').trim() || String(e.id);
+  const regionsOf = new Map();
+  all.forEach(e => { if (!e || !e.name) return; const k = placelessNameCore(e.kbName || e.name); if (!regionsOf.has(k)) regionsOf.set(k, new Set()); regionsOf.get(k).add(e.district || e.regionCity || ''); });
+  const dongRegions = new Map();
+  all.forEach(e => { if (!e || !e.dong) return; if (!dongRegions.has(e.dong)) dongRegions.set(e.dong, new Set()); dongRegions.get(e.dong).add(e.district || e.regionCity || ''); });
+  const sameNew = new Map();
+  ex.forEach(e => { const b = baseOf(e); sameNew.set(b, (sameNew.get(b) || 0) + 1); });
+  const placeless = e => { const b = baseOf(e); const core = placelessNameCore(b); if (!core || (regionsOf.get(core) || new Set()).size < 2) return false;
+    for (const pl of places){ if (pl !== core && b.indexOf(pl) >= 0) return false; } return true; };
+  const free = n => !taken.has(n) && !taken.has(String(n).replace(/\.$/, ''));
+  ex.forEach(e => {
+    const base = baseOf(e);
+    const regionFull = String(e.district || e.regionCity || '');
+    const region = regionFull.replace(/[구시]$/, '');
+    const need = sameNew.get(base) > 1 || !free(base) || placeless(e);
+    const tries = [];
+    if (!need) tries.push(base);
+    if (e.dong){
+      const ambiguous = (dongRegions.get(e.dong) || new Set()).size > 1;
+      const withRegion = e.dong + ' ' + base + ((region && base.indexOf('(' + region + ')') < 0) ? '(' + region + ')' : '');
+      tries.push(ambiguous ? withRegion : e.dong + ' ' + base);
+    } else if (regionFull){
+      tries.push(regionFull + ' ' + base);
+    }
+    if (e.units) tries.push((tries[tries.length - 1] || base) + '(' + Number(e.units).toLocaleString('ko-KR') + '세대)');
+    tries.push(base);
+    let next = tries.find(free);
+    for (let k = 2; !next; k++) if (free(base + ' #' + k)) next = base + ' #' + k;
+    if (next !== e.name) e.poolExcludedPrevName = e.name;
+    const prev = e.name;
+    e.name = next; take(next);
+    if (next !== prev){
+      const shortName = (e.dong && next.startsWith(e.dong + ' ')) ? shortDongName(e.dong) + next.slice(e.dong.length) : null;
+      e.nameAliases = [...new Set([prev, e.kbName, shortName].filter(Boolean).flatMap(n => [n, n.replace(/\.$/, '')]))].filter(n => n !== next);
+    }
   });
 }
 function disambiguateRemainingDuplicateNames(seeds){
@@ -2135,6 +2282,8 @@ function seoulHistoricalAvg(){
 //   F4는 seed를 읽는 순간(이름 붙이기)에 적용되므로 주소 플래그(?bundles=...)로만 끌 수 있다(런타임 setBundles로는 안 됨).
 //   F4 이름은 37단계부터 "동이름 단지명(구)"(예: "신곡동 건영(의정부)"). F5(37단계): "주공(1단지)"류 이름을 "하안주공1단지(광명)"처럼 — 역시 주소 플래그로만 끈다.
 //   F6(39단계): 지명 없는 브랜드·번호 이름에 동 이름을 붙인다("방학동 신동아(1단지)") — 역시 주소 플래그로만 끈다.
+// L22~L26(40·43단계): 화면 묶음 — L22 사용법 팝업, L23 팝업 접이식 기본 열림, L24 단일 진단 엑셀 넣기, L25 비교 검색창 최근 단지 드롭다운,
+//   L26 단일 진단 처음 화면의 선도단지 드롭박스 숨김. 계산(배지·적정가·범위·결론·동조율)은 바꾸지 않는다.
 // H(2026-10-01): 화면 문장 정리 — H1 재건축 신호 켜진 1993년 이후 준공 단지의 등급 해설(상세보기 한 줄), H2 고평가 상세 %를
 //   적정가 기준으로, H3 주소 플래그를 로컬(localhost·127.0.0.1·file:)에서만 읽기, H4 모바일 여러 단지 비교 폭 CSS,
 //   H5 동조율 칸 결론 한 줄 + 남은 %p 표현 정리, H6 저평가 결론 "저평가 중이라" 삭제, H7 상세보기 쉬운 말 + 카드 안 % 통일.
@@ -2157,12 +2306,14 @@ function seoulHistoricalAvg(){
 // 주소에서는 ?bundles=A,B,C,D(D1~D4 모두) 또는 ?bundles=A,B,C,D1,D4처럼 쓴다(E·F·H·L·K도 같은 방식).
 // 배포 후보 조합 ①(화면 묶음만, 2026-10-03 대표님 결정): 계산을 바꾸는 묶음(A·B·C·D1~D4·E2·K1)과 효과가 B에 묶인 H1·L6,
 // 이름 142개를 바꾸는 K4는 끈다. F4(같은 이름 단지를 "동이름 단지명(구)"로 구분)·F5(주공 이름 정리)·F6(지명 없는 이름에 동 이름)은 39단계 후보에서 켠다. E3(범위 숨김)는 켜되 A 로직 검증 문장은 A가 켜졌을 때만 보인다(대안 (가), 16단계 결정).
+// L22(사용법 팝업)는 40단계 후보에서 켠다(끄면 버튼·팝업 없이 지금과 같다).
+// L23~L26(팝업 접이식 열림·단일 진단 엑셀 넣기·비교 검색창 최근 단지·처음 화면 드롭박스 숨김)은 43단계 후보에서 켠다.
 // 라이브는 주소 플래그를 읽지 않으므로 이 기본값이 그대로 동작한다.
 const BUNDLES = { A:false, B:false, C:false, D1:false, D2:false, D3:false, D4:false, E1:true, E2:false, E3:true, F1:true, F2:true, F3:true, F4:true, F5:true, F6:true,
   H1:false, H2:true, H3:true, H4:true, H5:true, H6:true, H7:true,
-  L1:true, L2:true, L3:true, L4:true, L5:true, L6:false, L7:true, L8:true, L9:true, L10:true, L11:true, L12:true, L13:true, L14:true, L15:true, L16:true, L17:true, L18:true, L19:true, L19B:true, L20:true, L27:!!window.POOL_EXCLUDE_ON, K1:false, K2:true, K4:false };
+  L1:true, L2:true, L3:true, L4:true, L5:true, L6:false, L7:true, L8:true, L9:true, L10:true, L11:true, L12:true, L13:true, L14:true, L15:true, L16:true, L17:true, L18:true, L19:true, L19B:true, L20:true, L22:true, L23:true, L24:true, L25:true, L26:true, L27:!!window.POOL_EXCLUDE_ON, L31:!!window.NEW_NAME_RULE_ON, L32:true, L30:true, L29:true, L29R:false, K1:false, K2:true, K4:false };
 const BUNDLE_GROUPS = { D:['D1','D2','D3','D4'], E:['E1','E2','E3'], F:['F1','F2','F3','F4','F5','F6'], H:['H1','H2','H3','H4','H5','H6','H7'],
-  L:['L1','L2','L3','L4','L5','L6','L7','L8','L9','L10','L11','L12','L13','L14','L15','L16','L17','L18','L19','L19B','L20','L27'], K:['K1','K2','K4'] };
+  L:['L1','L2','L3','L4','L5','L6','L7','L8','L9','L10','L11','L12','L13','L14','L15','L16','L17','L18','L19','L19B','L20','L22','L23','L24','L25','L26','L27','L29','L30','L31','L32'], K:['K1','K2','K4'] };
 function setBundles(next){
   next = Object.assign({}, next||{});
   // D·E 하나로 D1~D4·E1~E3을 한꺼번에 끄고 켤 수 있다(개별 키가 있으면 그쪽이 우선).
@@ -2183,6 +2334,8 @@ function applyBundleBodyClasses(){
   try { if (document && document.body && document.body.classList) document.body.classList.toggle('no-h4', !BUNDLES.H4); } catch (e) {}
   try { if (document && document.body && document.body.classList) document.body.classList.toggle('l10', !!BUNDLES.L10); } catch (e) {}
   try { if (document && document.body && document.body.classList){ document.body.classList.toggle('l15', !!BUNDLES.L15); document.body.classList.toggle('l16', !!BUNDLES.L16); document.body.classList.toggle('l17', !!BUNDLES.L17); } } catch (e) {}
+  try { if (document && document.body && document.body.classList) document.body.classList.toggle('l22', !!BUNDLES.L22); } catch (e) {}
+  try { if (document && document.body && document.body.classList) document.body.classList.toggle('l32', !!BUNDLES.L32); } catch (e) {}   // 묶음 L32
   if (typeof applyL9Toolbar === 'function') applyL9Toolbar();
   if (typeof applyL17Tips === 'function') applyL17Tips();
 }
@@ -2864,6 +3017,18 @@ function migrateStaleSeedLibrary(){
 // 묶음 F4: 예전에 저장된 이름(기준단지·비교단지·단일진단 선택·쌍둥이 즐겨찾기)이 바뀐 이름을 가리키도록 옮긴다.
 // 옛 이름은 앱이 예전에 찾던 대로 "그 이름의 첫 항목"으로 옮기되, 시세 원문(text)이 같이 저장된 자리(기준단지·
 // 비교단지)는 원문이 같은 항목으로 옮긴다. 옮긴 값이 있으면 다시 저장한다.
+// 묶음 L29: 재건축 선도단지가 없어졌으므로 예전에 저장된 'rebuild' 값(그래프 위 선도단지 선택 — L17 되돌리기 수단이던 값, 디커플링 기준,
+// 기준단지 프리셋 'benchmark-rebuild')을 서울 선도단지(일반)로 옮긴다. 옮긴 값이 있으면 다시 저장한다. L29를 끄면 아무것도 하지 않는다.
+function migrateRebuildStateL29(){
+  if (!BUNDLES.L29) return 0;
+  let n = 0;
+  if (state.singleBenchmarkOverlayGroup === 'rebuild'){ state.singleBenchmarkOverlayGroup = 'seoul'; n++; }
+  if (state.benchmarkOverlayGroup === 'rebuild'){ state.benchmarkOverlayGroup = 'seoul'; n++; }
+  if (state.benchmarkChoice && state.benchmarkChoice.multi === 'rebuild'){ state.benchmarkChoice.multi = 'seoul'; n++; }
+  if (state.basePreset === 'benchmark-rebuild'){ state.basePreset = 'benchmark-seoul'; state.baseName = BENCHMARK_GROUPS.seoul.label; n++; }
+  if (n) saveState();
+  return n;
+}
 function migrateSavedNames(){
   // F4 옛 이름 표와 K4 옛 이름 표(SEED_DISPLAY_LEGACY)를 합쳐 쓴다(같은 옛 이름이면 F4 표가 먼저 — 두 표의 항목은 같은 seed 객체라
   // 이름은 둘 다 지금 화면 이름이다).
@@ -2914,6 +3079,7 @@ function loadState(){
       syncLibraryWithSeed();
       migrateStaleSeedLibrary(); // 묶음 L18
       migrateSavedNames();
+      migrateRebuildStateL29(); // 묶음 L29
       return;
     } catch(e){}
   }
@@ -3544,6 +3710,10 @@ function isRebuildSync(sync){
 function buildBaseCompareNote(baseName, syncVsBase){
   if (!syncVsBase) return '';
   const b = syncVsBase.baseCycle, c = syncVsBase.compCycle;
+  // 묶음 L29: 동조율 칸의 숫자는 서울 선도단지(일반) 한 기준만 — 기준단지 대비 비율은 빼고 기준단지 상승률만 참고로 적는다.
+  if (BUNDLES.L29) return '<div class="base-compare-note">'+
+    '<span class="k">참고: 기준단지</span> '+withParticle(baseName, '은', '는')+' '+fmtYm(b.low.ym)+'~'+fmtYm(b.high.ym)+' 동안 '+(b.rise>=0?'+':'')+b.rise.toFixed(1)+'% 올랐어요.'+
+  '</div>';
   return '<div class="base-compare-note">'+
     '<span class="k">기준단지('+esc(baseName)+') 대비</span> '+
     fmtYm(b.low.ym)+'~'+fmtYm(b.high.ym)+' 동안 '+withParticle(baseName, '은', '는')+' '+(b.rise>=0?'+':'')+b.rise.toFixed(1)+'%, 이 단지는 '+(c.rise>=0?'+':'')+c.rise.toFixed(1)+'% 상승했습니다(비율 '+syncVsBase.rate.toFixed(1)+'%).'+
@@ -5617,6 +5787,7 @@ function setupComparePair(baseName, compName){
 // 그 경우엔 handleViewMultiClick이 대신 openComparePairModal(팝업)로 보낸다.
 function viewComplexPairInMultiCompare(baseName, compName){
   if (!setupComparePair(baseName, compName)) return;
+  if (typeof BUNDLES !== 'undefined' && BUNDLES.L25){ [baseName, compName].forEach(n => { const e = state.library.find(x => x.name === n) || seedEntryByName(n); if (e) recordRecentPick(e, 34); }); }   // 묶음 L25: 비교로 열기
   setTopMode('multi');
   render();
 }
@@ -5909,7 +6080,7 @@ function syncInterpretation(badge, tier){
 
 function getBaseComplex(){
   if (state.basePreset==='benchmark-seoul') return getVirtualBenchmarkComplex('seoul');
-  if (state.basePreset==='benchmark-rebuild') return getVirtualBenchmarkComplex('rebuild');
+  if (state.basePreset==='benchmark-rebuild') return getVirtualBenchmarkComplex(BUNDLES.L29 ? 'seoul' : 'rebuild'); // L29: 옮기기 전 한 번 그려질 때도 서울
   const fallback = state.basePreset==='eunma' ? '은마아파트' : state.basePreset==='els' ? '잠실엘스' : '기준단지';
   const c = buildComplex(state.baseText, state.baseName, fallback);
   c._pyeong = pyeongOfSlot(baseSlot()); // 34 | 25 | null(직접 넣은 데이터) — 표기·25평 진단 분기에만 쓴다
@@ -6432,7 +6603,7 @@ function renderCompareTabs(base){
       '<div class="common-range" data-role="common"></div>';
     slotsEl.appendChild(panel);
     renderLibraryOptions(panel.querySelector('[data-role=lib]'));
-    wireLibrarySearch(panel.querySelector('[data-role=libSearch]'), panel.querySelector('[data-role=lib]'), null, panel.querySelector('[data-role=libAutocomplete]'));
+    wireLibrarySearch(panel.querySelector('[data-role=libSearch]'), panel.querySelector('[data-role=lib]'), null, panel.querySelector('[data-role=libAutocomplete]'), false, { recentTarget: i });
 
     if (base.rows.length && comp.rows.length){
       const common = commonYms(base.rowMap, comp.rowMap);
@@ -6469,7 +6640,8 @@ function renderCompareTabs(base){
       if (!entry) return;
       state.compares[i].text = entry.text; state.compares[i].name = entry.name; state.compares[i].visible = true;
       if (i===0) usingSeed = false;
-      applyDefaultPyeong(i); // 라이브러리에서 직접 골라 넣을 때만 기본 평형(세대수 많은 쪽, 동률 34평)을 쓴다
+      if (!(BUNDLES.L25 && _pickerPyeong)) applyDefaultPyeong(i); // 라이브러리에서 직접 골라 넣을 때만 기본 평형(세대수 많은 쪽, 동률 34평)을 쓴다
+      if (BUNDLES.L25) recordRecentPick(entry);   // 묶음 L25: 여러 단지 비교에서 직접 고른 단지도 최근 본 단지에
       // 슬롯을 채우면 다음 빈 슬롯으로 자동 이동한다(2026-09 세션) — 연속으로
       // 여러 단지를 고를 때마다 다음 슬롯 탭을 직접 클릭할 필요가 없게
       // 한다. i 이후로만 찾아, 사용자가 특정 슬롯을 직접 클릭해 수정하는
@@ -6626,13 +6798,18 @@ function renderLibraryOptions(selectEl, currentValue){
 }
 // showRentalChip: 기준단지 검색창에만 켠다(2026-09-28 세션) — 임대 비율이 문제가
 // 되는 건 그 단지를 기준단지로 고를 때라, 다른 검색창엔 넣지 않는다.
-function wireLibrarySearch(inputEl, selectEl, renderFn, autocompleteEl, showRentalChip){
+function wireLibrarySearch(inputEl, selectEl, renderFn, autocompleteEl, showRentalChip, opts){
   if (!inputEl || !selectEl) return;
+  const pickerTarget = (opts && opts.recentTarget != null) ? opts.recentTarget : null;   // 묶음 L25: 여러 단지 비교의 칸('base' 또는 슬롯 번호)
   const doRender = renderFn || (()=>renderLibraryOptions(selectEl));
   function updateAutocomplete(){
     if (!autocompleteEl) return;
     const filter = inputEl.value.trim();
-    if (!filter){ autocompleteEl.hidden = true; autocompleteEl.innerHTML = ''; return; }
+    autocompleteEl.dataset.mode = '';
+    if (!filter){
+      if (pickerTarget != null && BUNDLES.L25 && renderPickerSections(autocompleteEl, pickerSections(), autocompleteEl._pickerExpanded)) return;
+      autocompleteEl.hidden = true; autocompleteEl.innerHTML = ''; return;
+    }
     const matches = searchLibraryEntries(state.library, filter).slice(0, 20);
     if (!matches.length){
       // 검색해도 안 나오면 "KB부동산에서 직접 확인" 경로를 안내한다(2026-09
@@ -6656,11 +6833,38 @@ function wireLibrarySearch(inputEl, selectEl, renderFn, autocompleteEl, showRent
     updateAutocomplete();
   });
   inputEl.addEventListener('focus', updateAutocomplete);
+  if (pickerTarget != null && autocompleteEl){   // 묶음 L25: 위아래·Enter·Esc
+    inputEl.addEventListener('keydown', (e)=>{
+      if (!BUNDLES.L25 || autocompleteEl.hidden || autocompleteEl.dataset.mode !== 'picker') return;
+      const opts2 = [...autocompleteEl.querySelectorAll('[data-picker-id],[data-picker-more]')];
+      if (!opts2.length) return;
+      let k = opts2.findIndex(x => x.classList.contains('active'));
+      if (e.key === 'ArrowDown' || e.key === 'ArrowUp'){
+        e.preventDefault();
+        k = e.key === 'ArrowDown' ? (k + 1) % opts2.length : (k <= 0 ? opts2.length - 1 : k - 1);
+        opts2.forEach((x, j) => x.classList.toggle('active', j === k));
+        try { opts2[k].scrollIntoView({ block: 'nearest' }); } catch (err) {}
+      } else if (e.key === 'Enter' && k >= 0){
+        e.preventDefault();
+        const x = opts2[k];
+        if (x.dataset.pickerMore){ pickerExpand(autocompleteEl, x.dataset.pickerMore); return; }
+        pickRecentInto(pickerTarget, x.dataset.pickerId, Number(x.dataset.pickerP), selectEl, inputEl, doRender); autocompleteEl.hidden = true;
+      } else if (e.key === 'Escape'){
+        e.preventDefault(); autocompleteEl.hidden = true;
+      }
+    });
+  }
   inputEl.addEventListener('blur', ()=>{
     setTimeout(()=>{ if (autocompleteEl) autocompleteEl.hidden = true; }, 150);
   });
   if (autocompleteEl){
     autocompleteEl.addEventListener('mousedown', (e)=>{
+      if (pickerTarget != null && autocompleteEl.dataset.mode === 'picker'){   // 묶음 L25: 최근 본 단지 드롭다운
+        const more = e.target.closest('[data-picker-more]');
+        if (more){ e.preventDefault(); pickerExpand(autocompleteEl, more.dataset.pickerMore); return; }
+        const pick = e.target.closest('[data-picker-id]');
+        if (pick){ e.preventDefault(); pickRecentInto(pickerTarget, pick.dataset.pickerId, Number(pick.dataset.pickerP), selectEl, inputEl, doRender); autocompleteEl.hidden = true; return; }
+      }
       const item = e.target.closest('[data-name]');
       if (!item) return;
       e.preventDefault(); // input의 blur보다 먼저 처리되도록
@@ -7047,7 +7251,7 @@ function buildDiagCardBody(i, comp, r, sync, wide, estimate, benchStatusHtml, ke
     // 추상적 표현 앞에 현재/평균 배율과 그 차이(%p)를 먼저 구체적으로
     // 밝혀준다.
     const realSyncInterpText = buildRealSyncInterpretation(sync);
-    const ratioDetailText = (r.currentSaleRatio!=null && r.avgSaleRatio!=null && r.saleDiff!=null)
+    const ratioDetailText = (r.currentSaleRatio!=null && r.avgSaleRatio!=null && r.saleDiff!=null && !(BUNDLES.L29 && baseIsSameAsCompBench === false)) // L29: 기준단지 대비 숫자는 동조율 칸에 넣지 않음
       ? (BUNDLES.H5 ? syncRatioDetailText(r)
         : '현재 매매 배율은 '+r.currentSaleRatio.toFixed(1)+'%로, '+(r.refLabel==='과거 평균'?'평균':r.refLabel)+'('+r.avgSaleRatio.toFixed(1)+'%) 대비 '+Math.abs(r.saleDiff).toFixed(1)+'%p '+(r.saleDiff>=0?'높은':'낮은')+' 상태입니다.')
       : '';
@@ -7059,7 +7263,7 @@ function buildDiagCardBody(i, comp, r, sync, wide, estimate, benchStatusHtml, ke
         '<div class="sync-head">'+
           '<span class="k">동조율 <span class="info-icon" tabindex="0" data-tip="'+esc(syncTooltipText())+'">ⓘ</span></span>'+
           '<span class="sync-actual-tag">실측 상승률 '+sync.compCycle.rise.toFixed(1)+'%</span>'+
-          '<span class="sync-badge tier-'+sync.tier+'">'+SYNC_TIER_LABEL[sync.tier]+'</span>'+
+          '<span class="sync-badge tier-'+sync.tier+'">'+SYNC_TIER_LABEL[sync.tier]+((BUNDLES.L29 && BUNDLES.L29R && comp && comp.name && legacyBenchGroupForTarget(stripPyeongSuffix(comp.name)).groupKey==='rebuild') ? ' · 오래된 단지라 참고' : '')+'</span>'+
         '</div>'+
         (BUNDLES.H5
           // H5: 결론 한 줄만 보이고 5단계 구간표·긴 해설·기간 숫자는 상세보기(기본 접힘)로.
@@ -7341,6 +7545,9 @@ function legacyBenchGroupForTarget(name){
 // rebuildDisplayInfo가 맡는다. 묶음 B를 끄면 예전 그룹 판정 그대로다.
 function pickBenchGroupForTarget(name){
   const legacy = legacyBenchGroupForTarget(name);
+  // 묶음 L29(47단계): 재건축 선도단지 기준을 없앤다 — 28년 이상 단지도 적정가·배지·동조율·그래프를 서울 선도단지(일반)로 계산한다.
+  // 수도권 안내(caveat)는 그대로. 준거·쌍둥이 후보의 28년 규칙과 재건축 대표단지 제외, 전세가율 쪽 28년 안내는 건드리지 않는다.
+  if (BUNDLES.L29) return { groupKey:'seoul', caveat: legacy.caveat };
   return BUNDLES.B ? { groupKey:'seoul', caveat: legacy.caveat } : legacy;
 }
 // ---- 재건축 표시 분류 (묶음 B) ----
@@ -8168,10 +8375,12 @@ function currentSingleRecentRef(){
   if (isPyeong25Name(name)){ const ref = singleTargetRef(); return ref && ref.id && seedEntryById(ref.id) ? { id: ref.id, p: 25 } : null; }
   const byId = state.singleTargetId ? seedEntryById(state.singleTargetId) : null;
   const e = (byId && byId.name === plain) ? byId : seedEntryByName(plain);
-  return e && e.id ? { id: e.id, p: 34 } : null;
+  if (e && e.id) return { id: e.id, p: 34 };
+  const imp = importedLibraryEntryById(state.singleTargetId);   // 묶음 L24: 엑셀로 넣은 단지(34평 하나로 기록)
+  return imp && imp.name === plain ? { id: imp.id, p: 34 } : null;
 }
 function recordRecentView(id, pyeong){
-  if (!BUNDLES.L16 || !id || !seedEntryById(id) || recentStorageBlocked) return;
+  if (!BUNDLES.L16 || !id || !(seedEntryById(id) || importedLibraryEntryById(id)) || recentStorageBlocked) return;
   const p = pyeong === 25 ? 25 : 34;
   const old = loadRecentViews();
   if (old.length && old[0].id === id && old[0].p === p){ renderRecentViews(); return; }   // 이미 맨 위(다시 그리기만 한 경우) — 쓰지 않는다
@@ -8190,7 +8399,7 @@ function renderRecentViews(){
   try { rail = document.getElementById('recentRail'); chips = document.getElementById('recentChips'); wrap = document.getElementById('singleDiagSection'); } catch (e){ return; }
   if (!rail || !chips || !wrap || !wrap.classList) return;
   const items = (BUNDLES.L16 && !recentStorageBlocked)
-    ? loadRecentViews().map(x => { const e = seedEntryById(x.id); return e ? { id: x.id, p: x.p, name: e.name, region: recentRegionText(e) } : null; }).filter(Boolean)
+    ? recentViewItems()
     : [];
   const show = items.length > 0 && !recentStorageBlocked;
   wrap.classList.toggle('has-recent', show);
@@ -8206,7 +8415,7 @@ function renderRecentViews(){
     '<button type="button" class="recent-clear" data-recent-clear="1">모두 지우기</button>';
 }
 function openRecentView(id, p){
-  const e = seedEntryById(id);
+  const e = seedEntryById(id) || importedLibraryEntryById(id);
   if (!e){ renderRecentViews(); return; }
   state.singleTargetName = p === 25 ? e.name + PYEONG25_SUFFIX : e.name;
   state.singleTargetId = id;
@@ -8234,6 +8443,7 @@ try {
   });
 } catch (e) { /* DOM이 없는 환경(테스트 하네스) */ }
 function renderSingleDiag(name){
+  if (BUNDLES.L26){ try { hideRedundantSingleBenchSelect(); } catch (e) {} }
   const headEl = document.getElementById('singleDiagHead');
   const resultEl = document.getElementById('singleDiagResult');
   const chartSectionEl = document.getElementById('singleChartSection');
@@ -8305,7 +8515,7 @@ function renderSingleDiag(name){
   const pyeongNotice = _singlePyeongNotice ? '<div class="pyeong-notice warn">'+esc(_singlePyeongNotice)+'</div>' : '';
   _singlePyeongNotice = '';
   const headTopHtml =
-    '<div class="single-target-head"><span class="name">'+esc(name)+esc(complexMetaLabel(name))+rentalHeavyChip(name)+'</span>'+
+    '<div class="single-target-head"><span class="name">'+esc(name)+(BUNDLES.L32 ? '<span class="name-meta">'+esc(complexMetaLabel(name))+'</span>' : esc(complexMetaLabel(name)))+rentalHeavyChip(name)+'</span>'+
       pyeongChipsHtml(singleSlot(), 'single')+
       '<span class="bench-tag">'+(groupKey==='rebuild'?'🏗️ 재건축 선도단지':'🏙️ 서울 선도단지')+' 기준</span>'+
       '<button class="btn small single-add-compare-btn" id="singleAddCompareBtn">➕ 비교 단지 추가</button></div>';
@@ -8397,6 +8607,7 @@ function addCompareFromSingleDiag(name){
   const entry = state.library.find(x=>x.name===name) || (window.SEED_COMPLEXES||[]).find(x=>x.name===name);
   if (!entry || !entry.text) return;
   state.baseText = entry.text; state.baseName = entry.name; state.basePreset = 'custom'; usingSeed = false;
+  if (typeof BUNDLES !== 'undefined' && BUNDLES.L25) recordRecentPick(entry, 34);   // 묶음 L25: 비교로 열기
   saveState();
   setTopMode('multi');
   render();
@@ -8714,6 +8925,15 @@ function benchmarkSelectRedundant(sel, value){
   if (!BUNDLES.L17 || !sel || !sel.options) return false;
   return sel.options.length === 1 && sel.options[0].value === value;
 }
+// 묶음 L26(43단계): 단지를 고르기 전(처음 화면)에는 아래 updateSingleBenchmarkOverlayToggle이 불리지 않아(단지를 그릴 때
+// renderSingleActiveChart 안에서만 부름) 정적 마크업의 드롭박스가 그대로 보였다. 단일 진단을 그릴 때마다 먼저 L17과 같은 규칙
+// (선택지가 하나뿐이고 지금 값과 같으면 숨김)을 적용한다 — 저장 상태에 예전 "재건축" 값이 있으면 되돌리기 수단으로 그대로 보인다.
+// 단지가 그려지면 updateSingleBenchmarkOverlayToggle이 다시 정한다. 여러 단지 비교 화면의 드롭박스·디커플링 선택 상자는 건드리지 않는다.
+function hideRedundantSingleBenchSelect(){
+  const sel = document.getElementById('singleBenchmarkOverlaySelect');
+  if (!sel || !sel.options || !sel.style) return;
+  if (sel.options.length === 1 && sel.options[0].value === state.singleBenchmarkOverlayGroup) sel.style.display = 'none';
+}
 function updateSingleBenchmarkOverlayToggle(){
   const btn = document.getElementById('singleBenchmarkOverlayToggle');
   const sel = document.getElementById('singleBenchmarkOverlaySelect');
@@ -8837,6 +9057,8 @@ function setTopMode(mode){
   document.getElementById('multiCompareShell').hidden = mode !== 'multi';
   document.getElementById('singleDiagSection').hidden = mode !== 'single';
   document.getElementById('favoritesSection').hidden = mode !== 'favorites';
+  // 묶음 L26(43단계): 단지를 고르기 전(대상 없음)에는 아래 renderSingleDiag가 불리지 않으므로 여기서도 드롭박스 규칙을 적용한다
+  if (mode === 'single' && typeof BUNDLES !== 'undefined' && BUNDLES.L26){ try { hideRedundantSingleBenchSelect(); } catch (e) {} }
   if (mode === 'single' && state.singleTargetName){
     renderSingleDiag(state.singleTargetName);
   }
@@ -9098,8 +9320,22 @@ function priceWithRatioCell(price, ratio){
   return fmtEok(price)+' <span class="cell-ratio">('+fmtPct(ratio)+')</span>';
 }
 
+// 묶음 L30: 비교 요약 테이블은 기준단지 대비 표다 — 머리의 적정가 칸과 표 위 한 줄에 기준을 적는다(값·계산은 그대로).
+function labelSummaryTableBasisL30(base){
+  try {
+    const ths = document.querySelectorAll('#summaryTable thead th');
+    if (ths && ths.length >= 6){ ths[2].textContent = '기준단지 대비 적정가 (평균 배율)'; ths[5].textContent = '기준단지 대비 적정가 (평균 배율)'; }
+    const table = document.getElementById('summaryTable');
+    const wrap = table && table.parentNode;
+    if (!wrap || !wrap.parentNode) return;
+    let note = document.getElementById('summaryBasisNote');
+    if (!note){ note = document.createElement('div'); note.id = 'summaryBasisNote'; note.className = 'common-range'; wrap.parentNode.insertBefore(note, wrap); }
+    note.textContent = '이 표는 기준단지('+((base && base.name) || '기준단지')+') 대비예요. 각 단지의 선도단지 대비 적정가는 위 카드와 그래프(적정가 메뉴 "선도단지 대비")에서 볼 수 있어요.';
+  } catch (e) {}
+}
 function renderSummaryTable(base){
   const tbody = document.querySelector('#summaryTable tbody');
+  if (BUNDLES.L30) labelSummaryTableBasisL30(base); // L30
   tbody.innerHTML = '';
   let any = false;
   for (let i=0;i<MAX_SLOTS;i++){
@@ -9963,6 +10199,7 @@ function priceChartConfig(base, comps, field, ratioField, showFair, benchmarkOve
   const baseIsFairBench = !!(l5 && fairBench && base.isVirtualBenchmark && base.groupKey === fairBench.groupKey);
   const l5Bench = l5 && showFair && !!fairBench && (opts.fairKind === 'bench' || opts.fairKind === 'both' || baseIsFairBench);
   const l5Base = l5 && showFair && !baseIsFairBench && (opts.fairKind === 'base' || opts.fairKind === 'both');
+  const fbOf = x => (l5 && opts.ownBench && !x.isVirtualBenchmark) ? (ownBenchOf(x) || fairBench) : fairBench; // L30
   if (benchmarkUsable){
     const carriedLabels = new Set([...(benchmarkOverlay.carriedYms||[])].map(fmtYm));
     const benchColor = cssVar('--bench-line');
@@ -9986,11 +10223,12 @@ function priceChartConfig(base, comps, field, ratioField, showFair, benchmarkOve
   }
   // 묶음 L5: 선도단지 대비 선을 고르면 기준단지 자신의 선도단지 대비 적정가도 그린다(기준단지가 선도단지 자체면 없음).
   if (l5Bench && !baseIsFairBench){
-    const rBase = computeSlot(fairBench, base);
+    const fbB = fbOf(base);
+    const rBase = computeSlot(fbB, base);
     const baseAvg = rBase.error ? null : (ratioField==='sale' ? rBase.avgSaleRatio : rBase.avgJeonseRatio);
     if (baseAvg!=null) datasets.push({
       label: fairLineLabel(base.name||'기준단지', 'bench'), _kind:'benchFair',
-      data: labels.map(ym => fairBench.rowMap.get(ym) ? fairBench.rowMap.get(ym)[field]*baseAvg/100 : null),
+      data: labels.map(ym => fbB.rowMap.get(ym) ? fbB.rowMap.get(ym)[field]*baseAvg/100 : null),
       borderColor: cssVar('--series-base'), backgroundColor: cssVar('--series-base'), ...FAIR_LINE_STYLE, tension:.15, spanGaps:false
     });
   }
@@ -10002,11 +10240,12 @@ function priceChartConfig(base, comps, field, ratioField, showFair, benchmarkOve
     });
     if (l5){
       if (l5Bench){
-        const rB = computeSlot(fairBench, c);
+        const fbC = fbOf(c);
+        const rB = computeSlot(fbC, c);
         const avgB = rB.error ? null : (ratioField==='sale' ? rB.avgSaleRatio : rB.avgJeonseRatio);
         if (avgB!=null) datasets.push({
           label: fairLineLabel(c.name, 'bench'), _kind:'benchFair',
-          data: labels.map(ym => fairBench.rowMap.get(ym) ? fairBench.rowMap.get(ym)[field]*avgB/100 : null),
+          data: labels.map(ym => fbC.rowMap.get(ym) ? fbC.rowMap.get(ym)[field]*avgB/100 : null),
           borderColor: color, backgroundColor: color, ...FAIR_LINE_STYLE, tension:.15, spanGaps:false
         });
       }
@@ -10087,6 +10326,34 @@ function fairMenuOutlookNote(base, comps, ratioField, showFair, kind){
   const k = kind || fairMenuKind;
   return ((k==='bench' || k==='both') && !baseIsBench ? buildFairOutlookNote(base, comps, ratioField, true, true) : '')+
     ((k==='base' || k==='both' || baseIsBench) ? buildFairOutlookNote(base, comps, ratioField, true, false) : '');
+}
+// 묶음 L30: 메뉴 기준 그대로의 한 줄 문구. 선도단지 대비 = 기준단지·비교단지 모두 자기 선도단지 결론, 기준단지 대비 = 비교단지만 기준단지 대비 금액.
+// 결론 문장에 적정가 금액이 없으면(저평가·고평가 문장 등) 앞에 '적정 약 N억'을 붙인다 — 줄마다 금액이 보이게
+function fairNoteWithAmountL30(r, ratioField){
+  const concl = fairNoteConclusionText(r);
+  const fair = ratioField==='sale' ? r.fairSale : r.fairJeonse;
+  return ((fair!=null && concl.indexOf('적정가 약') < 0) ? '적정 약 '+(fair/10000).toFixed(1)+'억 · ' : '')+concl;
+}
+function fairMenuOutlookNoteL30(base, comps, ratioField, kind){
+  const dot = color => '<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:'+color+';margin-right:4px;"></span>';
+  const rows = [];
+  if (kind==='bench' || kind==='both'){
+    const list = (base.isVirtualBenchmark ? [] : [{ c: base, color: cssVar('--series-base') }]).concat(comps);
+    list.forEach(({c, color}) => {
+      const b = ownBenchOf(c); const r = b ? computeSlot(b, c) : null;
+      rows.push('<div class="fair-outlook-row">'+dot(color)+esc(fairLineLabel(c.name||'기준단지', 'bench'))+': '+((r && !r.error) ? fairNoteWithAmountL30(r, ratioField) : FAIR_NA_TEXT)+'</div>');
+    });
+  }
+  if ((kind==='base' || kind==='both') && !base.isVirtualBenchmark){
+    comps.forEach(({c, color}) => {
+      const r = computeSlot(base, c);
+      const fair = r.error ? null : (ratioField==='sale' ? r.fairSale : r.fairJeonse);
+      const avg = r.error ? null : (ratioField==='sale' ? r.avgSaleRatio : r.avgJeonseRatio);
+      rows.push('<div class="fair-outlook-row">'+dot(color)+esc(fairLineLabel(c.name, 'base'))+'('+(ratioField==='sale'?'매매':'전세')+'): '+
+        (fair!=null ? '약 '+(fair/10000).toFixed(1)+'억 — 기준단지 '+esc(base.name||'')+' 현재가 × 평소 배율 '+avg.toFixed(1)+'%' : FAIR_NA_TEXT)+'</div>');
+    });
+  }
+  return rows.join('');
 }
 // 묶음 K2: 차트 적정가 선 설명을 결론 박스와 같은 문장·같은 기준(금액·%·배지)으로 쓴다. 선 이름(L5 FAIR_BASIS_LABELS)을 앞에 붙인다.
 function fairNoteConclusionText(r){
@@ -10517,7 +10784,42 @@ const RECENT_TABLE_COL_TOOLTIP_HTML =
   '<div class="tip-kv"><b>최고</b><span>역대 최고가</span></div>'+
   '<div class="tip-kv"><b>적정</b><span>기준단지 현재가에 평균 배율을 적용한 적정가</span></div>';
 const RECENT_TABLE_COL_TOOLTIP_ICON = '<span class="info-icon" tabindex="0"><span class="info-tip-html">'+RECENT_TABLE_COL_TOOLTIP_HTML+'</span>ⓘ</span>';
-function buildRecentTable(base, comps, field, ratioField, benchmarkOverlay){
+// 묶음 L30(48단계): 여러 단지 비교 화면의 "선도단지 대비"는 단지마다 자기 선도단지(단일 진단·요약 카드와 같은 값)로 계산한다.
+function ownBenchOf(x){
+  if (!x || !x.name) return null;
+  const b = getVirtualBenchmarkComplex(pickBenchGroupForTarget(stripPyeongSuffix(x.name)).groupKey);
+  return (b && b.rows.length) ? b : null;
+}
+function ownBenchFairOf(x, ratioField){
+  if (!x || x.isVirtualBenchmark || !x.rows.length) return null;
+  const b = ownBenchOf(x); if (!b) return null;
+  const r = computeSlot(b, x);
+  return r.error ? null : (ratioField==='sale' ? r.fairSale : r.fairJeonse);
+}
+const FAIR_NA_TEXT = '해당 없음';
+// L30: 시세표 머리 ⓘ — 적정가 메뉴에 따라 바뀐다는 것을 쉬운 말로
+const RECENT_TABLE_COL_TOOLTIP_HTML_L30 =
+  '<div class="tip-kv"><b>배율</b><span>기준단지 대비 시세 비율(과거 평균)</span></div>'+
+  '<div class="tip-kv"><b>최고</b><span>역대 최고가</span></div>'+
+  '<div class="tip-kv"><b>적정</b><span>그래프 위 적정가 메뉴에서 고른 기준의 적정가 — 선도단지 대비: 단지마다 자기 선도단지 기준(단일 진단과 같은 값) · 기준단지 대비: 기준단지 현재가 × 평소 배율</span></div>';
+const RECENT_TABLE_COL_TOOLTIP_ICON_L30 = '<span class="info-icon" tabindex="0"><span class="info-tip-html">'+RECENT_TABLE_COL_TOOLTIP_HTML_L30+'</span>ⓘ</span>';
+// L30: 시세표 머리의 "최고 · 적정" 글자. kind = 'bench' | 'base' | 'both'(메뉴에서 실제로 쓰는 종류, 숨기기면 'bench')
+function recentFairTagL30(col, kind){
+  const v = x => x!=null ? fmtEok(x) : FAIR_NA_TEXT;
+  const ath = '<span class="ath-tag">최고 '+(col.ath!=null ? fmtEok(col.ath) : '—')+'</span>';
+  const tag = s => '<span class="ath-tag fair-basis-tag">'+s+'</span>';
+  if (col.isBench){
+    return ath + tag((kind==='bench') ? '적정 '+FAIR_NA_TEXT+'(선도단지 자신)' : '적정(기준단지 대비) '+v(col.fairBase));
+  }
+  if (col.isBase){
+    return ath + tag(kind==='base' ? '적정 '+FAIR_NA_TEXT+'(기준단지 자신)' : '적정(선도단지 대비) '+v(col.fairOwn));
+  }
+  if (kind==='bench') return ath + tag('적정(선도단지 대비) '+v(col.fairOwn));
+  if (kind==='base') return ath + tag('적정(기준단지 대비) '+v(col.fairBase));
+  return ath + tag('적정(선도단지 대비) '+v(col.fairOwn)) + tag('적정(기준단지 대비) '+v(col.fairBase));
+}
+function buildRecentTable(base, comps, field, ratioField, benchmarkOverlay, fairKind){
+  const l30 = !!(BUNDLES.L30 && fairKind); // L30: 여러 단지 비교 화면에서만(단일 진단은 fairKind 없이 부른다)
   // 기준단지 자신의 "적정가"는 스스로와 비교할 수 없으니 선도단지를 기준으로
   // 계산한다 — 사이드바 기준단지 요약 카드(renderBaseFairSummary)와 같은
   // 근거(computeSlot(bench, base))를 재사용해 숫자가 서로 다르게 보이지
@@ -10531,12 +10833,13 @@ function buildRecentTable(base, comps, field, ratioField, benchmarkOverlay){
       if (!rLead.error) baseFair = ratioField==='sale' ? rLead.fairSale : rLead.fairJeonse;
     }
   }
-  const cols = [{ name: pyeongDisplayName(base)||'기준단지', map: base.rowMap, color: cssVar('--series-base'), ratio: 100, isBase:true, ath: allTimeHigh(base.rowMap, field), fair: baseFair }]
+  const cols = [{ name: pyeongDisplayName(base)||'기준단지', map: base.rowMap, color: cssVar('--series-base'), ratio: 100, isBase:true, ath: allTimeHigh(base.rowMap, field), fair: baseFair, fairOwn: baseFair }]
     .concat(comps.map(({c,color})=>{
       const r = computeSlot(base, c);
       const ratio = r.error ? null : (ratioField==='sale' ? r.avgSaleRatio : r.avgJeonseRatio);
       const fair = r.error ? null : (ratioField==='sale' ? r.fairSale : r.fairJeonse);
-      return { name:pyeongDisplayName(c), map:c.rowMap, color, ratio, isBase:false, ath: allTimeHigh(c.rowMap, field), fair };
+      return { name:pyeongDisplayName(c), map:c.rowMap, color, ratio, isBase:false, ath: allTimeHigh(c.rowMap, field), fair,
+        fairBase: fair, fairOwn: l30 ? ownBenchFairOf(c, ratioField) : null };
     }));
   const baseMap = base.rowMap;
   const unionSet = new Set();
@@ -10558,14 +10861,16 @@ function buildRecentTable(base, comps, field, ratioField, benchmarkOverlay){
   // 3줄로 유지한다.
   let html = '<table><thead><tr><th>시세월</th>'+cols.map(c=>
     '<th class="num name-th"><span class="swatch" style="display:inline-block;width:7px;height:7px;border-radius:50%;background:'+c.color+';margin-right:5px"></span>'+esc(c.name)+
-    RECENT_TABLE_COL_TOOLTIP_ICON+
+    (l30 ? RECENT_TABLE_COL_TOOLTIP_ICON_L30 : RECENT_TABLE_COL_TOOLTIP_ICON)+
     '<span class="ratio-tag">배율 '+(c.ratio!=null ? fmtPct(c.ratio) : '—')+'</span>'+
-    '<span class="ath-tag">최고 '+(c.ath!=null ? fmtEok(c.ath) : '—')+' · 적정 '+(c.fair!=null ? fmtEok(c.fair) : '—')+'</span></th>'
+    (l30 ? recentFairTagL30(c, fairKind)+'</th>' :
+    '<span class="ath-tag">최고 '+(c.ath!=null ? fmtEok(c.ath) : '—')+' · 적정 '+(c.fair!=null ? fmtEok(c.fair) : '—')+'</span></th>')
   ).join('')+
     (benchmarkOverlay ? '<th class="num name-th">'+esc(benchmarkOverlay.name)+' (선도단지÷기준단지)'+
-      RECENT_TABLE_COL_TOOLTIP_ICON+
+      (l30 ? RECENT_TABLE_COL_TOOLTIP_ICON_L30 : RECENT_TABLE_COL_TOOLTIP_ICON)+
       '<span class="ratio-tag">배율 '+(benchAvgRatio!=null ? fmtPct(benchAvgRatio) : '—')+'</span>'+
-      '<span class="ath-tag">최고 '+(benchAth!=null ? fmtEok(benchAth) : '—')+' · 적정 '+(benchFairOwn!=null ? fmtEok(benchFairOwn) : '—')+'</span></th>' : '')+
+      (l30 ? recentFairTagL30({ isBench:true, ath: benchAth, fairBase: benchFairOwn }, fairKind)+'</th>' :
+      '<span class="ath-tag">최고 '+(benchAth!=null ? fmtEok(benchAth) : '—')+' · 적정 '+(benchFairOwn!=null ? fmtEok(benchFairOwn) : '—')+'</span></th>') : '')+
     '</tr></thead><tbody>';
   for (const ym of yms){
     html += '<tr><td>'+fmtYm(ym)+'</td>';
@@ -10787,12 +11092,12 @@ function renderActiveChart(base){
     const l5Kind = BUNDLES.L5 ? effectiveFairMenuKind(fairMenuKind, fairMenuAvailability(base, comps, l5Bench, ratioField)) : null;
     const l5Fair = showFair && !!l5Kind;
     const cfg = priceChartConfig(base, comps, field, ratioField, BUNDLES.L5 ? l5Fair : showFair, benchmarkOverlay, BUNDLES.L5
-      ? { fairKind: l5Kind || 'bench', fairBench: l5Bench }
+      ? { fairKind: l5Kind || 'bench', fairBench: l5Bench, ownBench: !!BUNDLES.L30 }
       : { compFairToo: fairCompAlsoOn });
     charts.mainCanvas = new Chart(document.getElementById('mainCanvas'), cfg);
-    if (fairNoteEl) fairNoteEl.innerHTML = BUNDLES.L5 ? fairMenuOutlookNote(base, comps, ratioField, l5Fair, l5Kind)
+    if (fairNoteEl) fairNoteEl.innerHTML = BUNDLES.L5 ? (BUNDLES.L30 ? (l5Fair && l5Kind ? fairMenuOutlookNoteL30(base, comps, ratioField, l5Kind) : '') : fairMenuOutlookNote(base, comps, ratioField, l5Fair, l5Kind))
       : buildFairOutlookNote(base, comps, ratioField, showFair, benchmarkUsable);
-    document.getElementById('recentTable').innerHTML = buildRecentTable(base, comps, field, ratioField, benchmarkOverlay);
+    document.getElementById('recentTable').innerHTML = buildRecentTable(base, comps, field, ratioField, benchmarkOverlay, (BUNDLES.L5 && BUNDLES.L30) ? ((l5Fair && l5Kind) || 'bench') : undefined);
     const dragResult = document.getElementById('dragResult');
     dragCleanup = wireDragSelect(charts.mainCanvas, document.getElementById('chartCanvasWrap'), document.getElementById('dragBox'), dragResult);
     document.getElementById('dragResultClear').addEventListener('click', ()=>{
@@ -10840,7 +11145,7 @@ function renderActiveChart(base){
 
     let decoupleHtml = '';
     if (!target.complex.isVirtualBenchmark){
-      const groupKey = state.benchmarkChoice['multi'] || 'seoul';
+      const groupKey = BUNDLES.L29 ? 'seoul' : (state.benchmarkChoice['multi'] || 'seoul'); // L29: 재건축 선택지 없음
       const dSale = computeDecoupling(target.complex, groupKey, 'saleMid');
       const dJeonse = computeDecoupling(target.complex, groupKey, 'jeonseMid');
       const saleInterp = decoupleInterpretation(dSale);
@@ -10848,7 +11153,7 @@ function renderActiveChart(base){
       const rowHtml = (label, interp) => interp.tone==='bad'
         ? '<div class="reinforce-msg bad" style="margin-top:8px;"><b>'+label+'</b> — '+interp.text+'</div>'
         : '<div class="card-msg" style="margin-top:8px;"><b>'+label+'</b> — '+interp.text+'</div>';
-      const groupSelect = '<select class="btn small" id="multiBenchmarkGroup">'+
+      const groupSelect = BUNDLES.L29 ? '' : '<select class="btn small" id="multiBenchmarkGroup">'+
         '<option value="seoul"'+(groupKey==='seoul'?' selected':'')+'>서울 선도단지(일반)</option>'+
         '<option value="rebuild"'+(groupKey==='rebuild'?' selected':'')+'>서울 선도단지(재건축)</option>'+
         '</select>';
@@ -11046,10 +11351,11 @@ function wireStaticEvents(){
     const entry = state.library.find(x=>x.name===e.target.value);
     if (!entry) return;
     state.baseText = entry.text; state.baseName = entry.name; state.basePreset = 'custom'; usingSeed = false;
-    applyDefaultPyeong('base'); // 라이브러리에서 직접 골라 넣을 때만 기본 평형을 쓴다
+    if (!(BUNDLES.L25 && _pickerPyeong)) applyDefaultPyeong('base'); // 라이브러리에서 직접 골라 넣을 때만 기본 평형을 쓴다
+    if (BUNDLES.L25) recordRecentPick(entry);   // 묶음 L25
     saveState(); render();
   });
-  wireLibrarySearch(document.getElementById('baseLibSearch'), document.getElementById('baseLibSelect'), null, document.getElementById('baseLibAutocomplete'), true);
+  wireLibrarySearch(document.getElementById('baseLibSearch'), document.getElementById('baseLibSelect'), null, document.getElementById('baseLibAutocomplete'), true, { recentTarget: 'base' });
   document.querySelectorAll('#topModeTabs .top-mode-btn').forEach(b=>{
     b.addEventListener('click', ()=>{ saveState(); setTopMode(b.dataset.topMode); });
   });
@@ -11266,6 +11572,253 @@ function applyUrlParams(){
   return true;
 }
 
+// ---- 묶음 L24(43단계): 우리 단지 진단하기에서도 "📂 엑셀 파일로 단지 넣기" ----
+// 여러 단지 비교와 같은 parseExcelFile·wireUploadButton·saveToLibrary를 쓴다(그쪽 동작은 그대로). 한 번에 한 파일.
+// 이름이 seed 단지의 지금 이름이나 옛 이름(F4~F6 이전 표 SEED_NAME_LEGACY)과 같으면 " (엑셀)"을 붙인다 — 같은 이름이면
+// saveToLibrary가 그 seed 항목을 덮어쓰고(같은 이름 항목을 바꿈), 이름으로 찾는 코드·저장된 옛 이름 옮기기가 엉뚱한 단지를 가리키기 때문.
+// 라이브러리에 이미 있는 같은 이름(전에 가져온 같은 파일)은 그대로 갱신한다. id가 L18 옛 id 표(SEED_ID_RENAMES)의 키와 같으면
+// L18 정리에 지워지므로 "xl-"을 붙인다. 가져온 단지는 파일에 담긴 시세 하나라 25평·34평 칩이 없다(안내 한 줄).
+// 최근 본 단지에는 라이브러리 id·34평으로 기록한다(importedLibraryEntryById).
+const IMPORT_SHORT_MONTHS = 36;   // 엑셀로 넣은 시세가 이보다 짧으면(3년 미만) "결과가 불안정할 수 있어요" 안내 — 화면 문구만
+function importedLibraryEntryById(id){
+  if (!BUNDLES.L24 || !id || seedEntryById(id) || !Array.isArray(state.library)) return null;
+  return state.library.find(x => x && x.id === id && x.text && !x.shared) || null;
+}
+function importNameTaken(name){
+  if (!name) return true;
+  if (seedEntryByName(name)) return true;
+  return !!(window.SEED_NAME_LEGACY && window.SEED_NAME_LEGACY.has(name));
+}
+function uniqueImportName(name){
+  const base = String(name || '').trim() || '엑셀 단지';
+  if (!importNameTaken(base)) return base;
+  let n = base + ' (엑셀)', k = 2;
+  while (importNameTaken(n)) n = base + ' (엑셀 ' + (k++) + ')';
+  return n;
+}
+function setSingleUploadNote(text){
+  const el = document.getElementById('singleUploadNote');
+  if (!el) return;
+  el.textContent = text || '';
+  el.hidden = !text;
+}
+function importExcelToSingle(results){
+  const r = results && results[0];
+  if (!r) return;
+  const orig = String(r.name || '').trim();
+  const name = uniqueImportName(orig);
+  const months = parsePastedTable(r.text).rows.length;   // 짧은 시세면 안내 한 줄(계산은 그대로)
+  if (!saveToLibrary(name, r.text, { silent: true })){ setSingleUploadNote('파일에서 시세를 읽지 못했어요. KB부동산에서 받은 "시세 변동" 엑셀 파일인지 확인해 주세요.'); return; }
+  const entry = state.library.find(e => e && e.name === name);
+  if (entry && typeof SEED_ID_RENAMES !== 'undefined' && SEED_ID_RENAMES[entry.id]){
+    entry.id = window.SharedLib.ensureUniqueId('xl-' + entry.id, new Set(state.library.filter(e => e && e.id && e !== entry).map(e => e.id)));
+  }
+  state.singleTargetName = name;
+  state.singleTargetId = entry ? entry.id : '';
+  recentRecordPending = true;
+  saveState();
+  if (state.topMode !== 'single') setTopMode('single'); else renderSingleDiag(name);
+  setSingleUploadNote('"' + name + '"을(를) 엑셀에서 불러왔어요' + (name !== orig ? '(같은 이름의 단지가 있어 "(엑셀)"을 붙였어요)' : '') +
+    '. 파일에 담긴 시세 하나로 계산해서 25평·34평 칩은 없어요.' + (results.length > 1 ? ' 한 번에 한 파일만 넣어요 — 첫 파일만 열었어요.' : '') +
+    (months < IMPORT_SHORT_MONTHS ? ' 시세가 ' + months + '개월뿐이라 결과가 불안정할 수 있어요 — 참고로만 보세요.' : ''));
+}
+function initSingleUpload(){
+  if (!BUNDLES.L24) return;
+  const row = document.getElementById('singleUploadRow'), btn = document.getElementById('singleUploadBtn'), input = document.getElementById('singleUploadInput');
+  if (!row || !btn || !input || !btn.addEventListener) return;
+  row.hidden = false;
+  wireUploadButton(btn, input, importExcelToSingle);
+}
+// ---- 묶음 L25(43단계): 여러 단지 비교 검색창 — 빈 입력에 커서를 두면 최근 본 단지 드롭다운 ----
+// 드롭다운 내용은 "섹션 목록"(pickerSections → [{ key, title, items:[{id, p, name, region}], top }])을 renderPickerSections가 그린다.
+// 32단계 즐겨찾기의 고정 항목은 같은 목록 앞에 { key:'pinned', title:'즐겨찾기', ... } 섹션 하나를 더하면 같은 자리에 붙는다(이번엔 없음).
+// 기록은 L16과 같은 저장 키·형식 {id, p, t}·최대 RECENT_MAX. 드롭다운은 섹션마다 위 PICKER_RECENT_TOP개만 보이고 "더 보기"로 나머지.
+// 기록이 없으면 아무것도 보이지 않는다(안내 줄 없음). 고르면 검색 결과를 골랐을 때와 같은 경로(숨은 select의 change)로 그 칸에 넣고,
+// 기록된 평형(25/34)으로 맞춘다. 단일 진단 검색창에는 붙이지 않는다(그쪽은 왼쪽 최근 본 단지 칸이 있다).
+const PICKER_RECENT_TOP = 5;
+let _pickerPyeong = 0;   // 드롭다운에서 고른 평형 — 이때는 기본 평형 규칙(applyDefaultPyeong)을 쓰지 않는다
+function recentViewItems(){
+  if (!BUNDLES.L16 || recentStorageBlocked) return [];
+  return loadRecentViews().map(x => {
+    const e = seedEntryById(x.id) || importedLibraryEntryById(x.id);
+    if (!e) return null;
+    return { id: x.id, p: x.p, name: e.name, region: seedEntryById(x.id) ? recentRegionText(e) : '엑셀' };
+  }).filter(Boolean);
+}
+function pickerSections(){
+  const recent = recentViewItems();
+  return recent.length ? [{ key: 'recent', title: '최근 본 단지', items: recent, top: PICKER_RECENT_TOP }] : [];
+}
+function renderPickerSections(acEl, sections, expanded){
+  if (!acEl || !sections || !sections.length){ return false; }
+  const exp = expanded || {};
+  acEl.innerHTML = sections.map(sec => {
+    const shown = exp[sec.key] ? sec.items : sec.items.slice(0, sec.top);
+    const rest = sec.items.length - shown.length;
+    return '<div class="picker-sec" data-picker-sec="' + esc(sec.key) + '"><div class="picker-head">' + esc(sec.title) + '</div>' +
+      shown.map(x => '<div class="lib-ac-item picker-item" role="option" data-picker-id="' + esc(x.id) + '" data-picker-p="' + x.p + '">' +
+        '<span class="picker-nm">' + esc(x.name) + '</span><span class="picker-meta">' + x.p + '평' + (x.region ? ' · ' + esc(x.region) : '') + '</span></div>').join('') +
+      (rest > 0 ? '<button type="button" class="picker-more" data-picker-more="' + esc(sec.key) + '">더 보기 (' + rest + '개)</button>' : '') +
+      '</div>';
+  }).join('');
+  acEl.dataset.mode = 'picker';
+  acEl.hidden = false;
+  return true;
+}
+function pickerExpand(acEl, key){
+  acEl._pickerExpanded = Object.assign({}, acEl._pickerExpanded || {}, { [key]: true });
+  renderPickerSections(acEl, pickerSections(), acEl._pickerExpanded);
+}
+function pickRecentInto(target, id, p, selectEl, inputEl, doRender){
+  const entry = state.library.find(x => x && x.id === id);
+  if (!entry || !selectEl) return false;
+  _pickerPyeong = p === 25 ? 25 : 34;
+  try {
+    selectEl.value = entry.name;
+    selectEl.dispatchEvent(new Event('change'));
+  } finally { _pickerPyeong = 0; }
+  if (inputEl) inputEl.value = '';
+  selectEl.dataset.filter = '';
+  if (doRender) doRender();
+  if (p === 25) switchPyeong(target, 25, id);
+  return true;
+}
+// 여러 단지 비교에서 사용자가 직접 고른 단지를 기록한다(드롭다운에서 고르면 그 평형, 아니면 기본 평형 규칙과 같은 평형).
+function recordRecentPick(entry, pyeong){
+  if (!entry || !entry.id) return;
+  let p = pyeong || _pickerPyeong;
+  if (!p){ const c = chipDataOf(entry.id); p = (c && c[6] === 25 && c[5]) ? 25 : 34; }
+  recordRecentView(entry.id, p);
+}
+// ---- 묶음 L22(40단계, 2026-10-05): 사용법 팝업 ----
+// 계산기 본 화면이 열리면 자동으로 한 번 띄우고, "다시 보지 않기"를 체크하고 닫으면 다음부터 띄우지 않는다.
+// 저장: localStorage[GUIDE_STORE_KEY] = { hidden, version } 하나뿐(다른 저장 키와 무관). 저장이 막힌 환경에서는 오류 없이 매번 뜬다.
+// 설명서 버전(GUIDE_VERSION)을 올리면, GUIDE_RESHOW_ON_UPDATE가 true일 때 숨김을 눌렀던 사람에게도 한 번 다시 보인다.
+// 상단 "❓ 사용법" 버튼으로 언제든 다시 연다. 로그인 화면(gate)에서는 계산기 스크립트가 돌지 않으므로 뜨지 않는다.
+// L22를 끄면(로컬 주소 플래그) 버튼·팝업 모두 없고 지금과 같다.
+// 설명서 글은 아래 GUIDE_HTML 한 곳에만 둔다 — 버튼·판정 이름은 화면 문구와 같게 맞춘다(40단계 대조표).
+// {ASOF}(시세 기준월)는 seed에서 읽고(dataAsOfLabel과 같은 계산), 못 읽으면 GUIDE_DATA_ASOF_FALLBACK을 쓴다. {N}은 서울 선도단지 개수.
+const GUIDE_VERSION = 1;
+const GUIDE_RESHOW_ON_UPDATE = true;
+const GUIDE_STORE_KEY = 'benchmarkCalc_guide_v1';
+const GUIDE_DATA_ASOF_FALLBACK = '2026년 8~9월'; // seed에서 기준월을 못 읽을 때만 쓰는 값(ARCHITECTURE.md L22 항목 참고)
+const GUIDE_HTML =
+  '<p class="guide-lead">우리 단지 가격이 지금 싼지 비싼지, 대장(선도) 단지와 비교해서 알려 주는 계산기예요. 폰·PC 모두 쓸 수 있어요. 단지 이름만 검색하면 결론부터 한눈에 보여 줘요.</p>'+
+  '<h3>■ 이렇게 쓰세요</h3>'+
+  '<ol>'+
+    '<li><b class="ui">🏠 우리 단지 진단하기</b> 탭에서 단지 이름을 검색해서 고르세요.</li>'+
+    '<li>맨 위 결론 박스가 결론이에요(판정에 따라 색이 달라요 — 저평가는 초록).'+
+      '<ul><li>저평가 / 적정 / 고평가 같은 판정</li>'+
+      '<li>현재 가격과 적정 가격, 얼마나 더 오를 여지가 있는지</li>'+
+      '<li>"선도단지 대비 가격 비율"과 "평소" 비율</li></ul>'+
+      '(선도단지 = 서울 대장 아파트 {N}곳을 묶은 기준)</li>'+
+    '<li>평형 칩(예: <b>25평 80세대</b> · <b>34평 186세대</b>)을 누르면 평형별로 바뀌어요. 25평은 "34평 기준 보정값 · 참고용"이에요.</li>'+
+    '<li>아래 그래프에서 시세 흐름과 적정가를 확인하세요.'+
+      '<ul><li><b class="ui">📈 적정가 확인하기</b>: 적정가 선을 켜요(켜지면 "적정가 표시 중 (끄기)"로 바뀌어요)</li>'+
+      '<li><b class="ui">🏙️ 선도단지 표시</b>: 대장 단지 흐름을 같이 그려요(켜지면 "선도단지 표시 중 (끄기)")</li>'+
+      '<li><b class="ui">📈 상승률 겹쳐보기</b>: 같은 출발점에서 얼마나 올랐는지 비교해요. 두 선이 겹치면 상승률이 같고, 벌어지면 차이가 나요.</li></ul></li>'+
+    '<li>더 깊이 보고 싶으면 <b class="ui">▸ 상세보기</b>, <b class="ui">🧑‍🤝‍🧑 쌍둥이 단지 보기</b>, <b class="ui">📎 심화분석 보기</b>를 눌러 보세요.</li>'+
+  '</ol>'+
+  '<h3>■ 판정은 이렇게 읽어요</h3>'+
+  '<ul>'+
+    '<li><b>저평가</b>: 평소 비율보다 지금 가격이 낮아서 오를 여지가 있다는 뜻이에요.</li>'+
+    '<li><b>적정</b>: 평소 수준이에요.</li>'+
+    '<li><b>고평가</b>: 평소보다 높은 가격이에요.</li>'+
+    '<li><b>주의</b>: 매매와 전세가 함께 평소보다 낮아요. 왜 함께 낮아졌는지 따로 확인해 보세요.</li>'+
+    '<li><b>확인 필요</b>: 전세 쪽만 평소보다 낮아요. 그 이유를 따로 확인해 보세요.</li>'+
+    '<li><b>시세 기록이 짧은 단지</b>: 새로 지은 단지처럼 시세 기록이 짧으면 평소 비율의 근거가 적어요. 판정과 적정가는 참고만 하세요.</li>'+
+    '<li><b>동조율</b>: 지난 상승장에서 "선도단지가 N% 오를 때 이 단지는 M% 올랐어요"와 등급(아주나쁨~아주좋음)으로, 이 단지가 선도단지를 얼마나 따라 올랐는지 보여 줘요.</li>'+
+    '<li>임대 비율이 높은 단지는 이름 옆에 "임대 주의" 또는 "임대 과다"가 떠요.</li>'+
+  '</ul>'+
+  '<details><summary>■ 여러 단지 비교</summary>'+
+    '<p><b class="ui">📊 여러 단지 비교</b> 탭에서 기준 단지를 정하고, 비교할 단지를 추가하세요. 시세·배율·적정가를 한 그래프와 표에서 겹쳐 볼 수 있어요. '+
+    '그래프 위 <b class="ui">📈 적정가</b> 메뉴에서 <b class="ui">선도단지 대비 적정가</b> / <b class="ui">기준단지 대비 적정가</b> / <b class="ui">둘 다 보기</b> / <b class="ui">숨기기</b> 중에서 골라요.{FAIR_TABLE_NOTE}</p>'+
+    '<p>쌍둥이 단지 카드의 ☆을 누르면 <b class="ui">⭐ 즐겨찾기</b> 탭에 모아 두고 엑셀로 내보낼 수 있어요. '+
+    '<b class="ui">📂 엑셀 파일로 단지 넣기</b>로 우리만의 단지를 넣어 비교할 수도 있어요.</p>'+
+  '</details>'+
+  '<details><summary>■ 꼭 알아 두세요</summary><ul>'+
+    '<li>시세는 KB시세 자료 기준이에요. (최근 자료: {ASOF})</li>'+
+    '<li>최근 본 단지와 즐겨찾기는 이 폰(또는 이 PC 브라우저)에만 저장돼요. 폰과 PC의 기록은 따로이고, 인터넷 기록을 지우면 사라져요.</li>'+
+    '<li>이 계산기는 판단을 돕는 참고용 도구예요. 가격은 실제 거래·호가와 다를 수 있고, 투자 결정과 결과에 대한 책임은 본인에게 있어요.</li>'+
+    '<li>화면이 예전 그대로면 새로고침(PC는 Ctrl+F5)을 눌러 주세요.</li>'+
+  '</ul></details>'+
+  '<p class="guide-lead">불편한 점이나 바라는 기능은 화면 오른쪽 아래 <b class="ui">💬 의견 보내기</b> 버튼{FAB_NOTE}으로 남겨 주세요 🙏</p>';
+function guideAsOfText(){
+  try { const label = dataAsOfLabel(); if (label) return label.replace(/ KB시세 자료 기준$/, ''); } catch (e) {}
+  return GUIDE_DATA_ASOF_FALLBACK;
+}
+function guideBodyHtml(){
+  let n = '';
+  try { n = String(BENCHMARK_GROUPS.seoul.members.length); } catch (e) {}
+  // 묶음 L23(43단계): 접이식 섹션을 처음부터 펼쳐 둔다(사용자가 접었다 펼 수는 있다)
+  const src = BUNDLES.L23 ? GUIDE_HTML.split('<details>').join('<details open>') : GUIDE_HTML;
+  return src.split('{ASOF}').join(esc(guideAsOfText())).split('{N}').join(esc(n))
+    .split('{FAIR_TABLE_NOTE}').join(BUNDLES.L30 ? ' 고른 기준이 그래프 점선과 옆 표의 "적정" 값에 똑같이 적혀요.' : '')
+    .split('{FAB_NOTE}').join(BUNDLES.L32 ? '(폰에서는 💬 동그라미)' : '');
+}
+function readGuidePref(){
+  try { const raw = localStorage.getItem(GUIDE_STORE_KEY); if (!raw) return null; const o = JSON.parse(raw); return (o && typeof o === 'object') ? o : null; }
+  catch (e) { return null; }
+}
+function writeGuidePref(hidden){
+  try { localStorage.setItem(GUIDE_STORE_KEY, JSON.stringify({ hidden: !!hidden, version: GUIDE_VERSION })); return true; }
+  catch (e) { return false; }
+}
+// 자동으로 띄울지(순수 함수 — 테스트에서 직접 쓴다)
+function guideShouldAutoOpen(pref, version, reshowOnUpdate){
+  if (!pref || !pref.hidden) return true;
+  if (reshowOnUpdate && !(Number(pref.version) >= version)) return true;
+  return false;
+}
+let _guideLastFocus = null;
+function guideIsOpen(){ const o = document.getElementById('guideOverlay'); return !!(o && !o.hidden); }
+function openGuide(){
+  const overlay = document.getElementById('guideOverlay'), body = document.getElementById('guideBody');
+  if (!overlay || !body) return;
+  body.innerHTML = guideBodyHtml();
+  body.scrollTop = 0;
+  const pref = readGuidePref();
+  const box = document.getElementById('guideDontShow'); if (box) box.checked = !!(pref && pref.hidden);
+  _guideLastFocus = document.activeElement;
+  overlay.hidden = false;
+  document.documentElement.classList.add('guide-open'); document.body.classList.add('guide-open');
+  const x = document.getElementById('guideCloseX'); if (x) x.focus();
+}
+function closeGuide(){
+  const overlay = document.getElementById('guideOverlay');
+  if (!overlay || overlay.hidden) return;
+  const box = document.getElementById('guideDontShow');
+  writeGuidePref(!!(box && box.checked));
+  overlay.hidden = true;
+  document.documentElement.classList.remove('guide-open'); document.body.classList.remove('guide-open');
+  const back = _guideLastFocus; _guideLastFocus = null;
+  if (back && typeof back.focus === 'function' && document.contains(back)) back.focus();
+}
+function guideKeydown(e){
+  if (!guideIsOpen()) return;
+  if (e.key === 'Escape'){ e.preventDefault(); closeGuide(); return; }
+  if (e.key !== 'Tab') return;
+  // 포커스를 팝업 안에서만 돌린다
+  const dlg = document.getElementById('guideDialog');
+  const items = [...dlg.querySelectorAll('button, input, summary, a[href], [tabindex]:not([tabindex="-1"])')].filter(el => el.offsetParent !== null);
+  if (!items.length) return;
+  const first = items[0], last = items[items.length - 1];
+  if (e.shiftKey && (document.activeElement === first || !dlg.contains(document.activeElement))){ e.preventDefault(); last.focus(); }
+  else if (!e.shiftKey && (document.activeElement === last || !dlg.contains(document.activeElement))){ e.preventDefault(); first.focus(); }
+}
+function initGuide(){
+  if (!BUNDLES.L22) return;
+  const btn = document.getElementById('guideOpenBtn'), overlay = document.getElementById('guideOverlay');
+  if (!btn || !overlay || !overlay.addEventListener) return;
+  btn.hidden = false;
+  btn.addEventListener('click', openGuide);
+  ['guideCloseX', 'guideCloseBtn', 'guideStartBtn'].forEach(id => { const b = document.getElementById(id); if (b) b.addEventListener('click', closeGuide); });
+  overlay.addEventListener('click', e => { if (e.target === overlay) closeGuide(); });
+  document.addEventListener('keydown', guideKeydown);
+  // 로그인(사이트 게이트)이 안 된 상태면 띄우지 않는다 — 배포본에서는 gate가 먼저 로그인 화면으로 보낸다.
+  if (typeof isSiteAuthed === 'function'){ try { if (!isSiteAuthed()) return; } catch (e) {} }
+  if (guideShouldAutoOpen(readGuidePref(), GUIDE_VERSION, GUIDE_RESHOW_ON_UPDATE)) openGuide();
+}
 loadState();
 const urlApplied = applyUrlParams();
 resumePendingPyeong(); // 저장·URL로 들어온 25평 슬롯이 있으면 25평 시세를 불러와 채운다
@@ -11291,4 +11844,7 @@ if (state.gasUrl) gasFetchList();
   badge.textContent = label;
   badge.hidden = false;
 })();
+// 묶음 L22(40단계): 사용법 팝업 — 정의는 위(initGuide 등), 여기서는 본 화면을 다 그린 뒤 한 번 부른다.
+try { initSingleUpload(); } catch (e) { /* 묶음 L24 */ }
+try { initGuide(); } catch (e) { /* 팝업 문제로 계산기가 멈추지 않게 */ }
 </script>
