@@ -1113,6 +1113,8 @@ html.guide-open, body.guide-open{overflow:hidden;}
 .guide-actions{display:flex;gap:8px;margin-left:auto;}
 .guide-actions .btn{min-height:44px;}
 .guide-actions .btn.guide-start{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);}
+/* 묶음 L36(55단계): 쓰는 사람이 없는 칸을 화면에서만 숨긴다 — 기준 단지 맨 위 선택 상자, 비교 단지 칸의 "라이브러리에서 불러오기…" 선택 상자, 단지 라이브러리·공용 라이브러리 연동 칸. 코드·상태·select는 그대로(검색 선택·가져오기·복원이 쓴다). */
+body.l36 #basePreset, body.l36 .lib-select-row, body.l36 #libBlock, body.l36 #gasBlock{display:none !important;}
 /* 묶음 L32(50단계): 폴드 커버(344~390px) 등 좁은 폭. 600px 이하에서만(쌍둥이·심화분석 세로 쌓기는 820px 이하) — 넓은 화면은 그대로. */
 @media (max-width:820px){
   body.l32 .single-diag-action-row{flex-direction:column;}
@@ -1304,7 +1306,7 @@ html.guide-open, body.guide-open{overflow:hidden;}
         </div>
       </details>
 
-      <details class="side-block">
+      <details class="side-block" id="libBlock">
         <summary>단지 라이브러리 (<span id="libCount">0</span>개)<span class="chevron">▸</span></summary>
         <div class="side-block-body">
           <div class="status-line" style="margin-top:10px;"><span class="dot"></span><span>여러 명이 같이 쓰려면 파일로 주고받으세요</span></div>
@@ -1316,7 +1318,7 @@ html.guide-open, body.guide-open{overflow:hidden;}
         </div>
       </details>
 
-      <details class="side-block">
+      <details class="side-block" id="gasBlock">
         <summary>공용 라이브러리 연동 (선택)<span class="chevron">▸</span></summary>
         <div class="side-block-body">
           <div class="status-line" style="margin-top:10px;">누군가 저장한 단지를 구글시트를 통해 다 같이 불러옵니다</div>
@@ -1467,7 +1469,19 @@ const SLOT_COLORS = ['--series-1','--series-2','--series-3','--series-4','--seri
 const MAX_SLOTS = 10;
 const STORE_KEY = 'benchmarkCalc.v3';
 
-function cssVar(name){ return getComputedStyle(document.documentElement).getPropertyValue(name).trim(); }
+// 묶음 L34: 같은 작업(JS 한 번 도는 동안) 안에서는 같은 변수를 다시 읽지 않는다 — getComputedStyle().getPropertyValue가 화면이 바뀐 직후엔 스타일 재계산을 일으켜 비싸다.
+// 작업이 끝나면(마이크로태스크) 비우고, 다크모드 토글·시스템 테마 변경 때도 비운다(cssVarCacheClearL34). L34를 끄면 예전처럼 매번 읽는다.
+let _cssVarMemoL34 = null;
+function cssVarCacheClearL34(){ _cssVarMemoL34 = null; }
+function cssVar(name){
+  let on = false; try { on = !!BUNDLES.L34; } catch (e) {}
+  if (!on) return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+  if (!_cssVarMemoL34){ _cssVarMemoL34 = new Map(); Promise.resolve().then(cssVarCacheClearL34); }
+  if (_cssVarMemoL34.has(name)) return _cssVarMemoL34.get(name);
+  const v = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+  _cssVarMemoL34.set(name, v);
+  return v;
+}
 // 항목(2026-09-19 세션, 여러 라운드에 걸쳐 다듬음) — Chart.js 기본
 // 데이터포인트 툴팁이 그래프 선을 가리는 문제를 커스텀 렌더링(external
 // 콜백)으로 해결한다. 처음엔 박스를 차트 밖(카드 위쪽 바깥)으로 완전히
@@ -1656,8 +1670,24 @@ function parsePastedTableRaw(text){
 // 캐시하고, entry.text가 실제로 바뀌는 지점(saveToLibrary/importLibraryFile/
 // gasFetchList/syncLibraryWithSeed)에서만 다시 계산되게 한다. 캐싱 적용 후
 // 재측정: 2,251~2,674ms → 첫 호출 306.6ms → 이후 109.8ms(95% 감소).
+// 묶음 L34: 드롭다운 힌트용 개월 수 — 전체 파싱(+파싱 결과를 캐시에 쌓음) 대신 줄 맨 앞 칸만 본다. 결과는 parsePastedTable(text).rows.length와 같다(시험으로 모든 seed 단지에서 확인).
+function monthCountFastL34(text){
+  const t = String(text || ''), n = t.length, seen = new Set();
+  let pos = 0;
+  while (pos <= n){
+    let end = t.indexOf('\n', pos); if (end < 0) end = n;
+    const line = t.slice(pos, end).trim(); pos = end + 1;
+    if (!line) continue;
+    let first;
+    const tab = line.indexOf('\t');
+    if (tab !== -1) first = line.slice(0, tab).trim();
+    else { const comma = line.indexOf(','); first = comma !== -1 ? line.slice(0, comma).trim() : line.split(/\s+/)[0]; }
+    if (/^\d{6}$/.test(first)){ const ym = parseInt(first, 10), mm = ym % 100; if (mm >= 1 && mm <= 12) seen.add(ym); }
+  }
+  return seen.size;
+}
 function libraryEntryMonthCount(entry){
-  if (entry._monthCount == null) entry._monthCount = parsePastedTable(entry.text).rows.length;
+  if (entry._monthCount == null) entry._monthCount = BUNDLES.L34 ? monthCountFastL34(entry.text) : parsePastedTable(entry.text).rows.length;
   return entry._monthCount;
 }
 function buildComplex(text, nameOverride, fallbackName){
@@ -2055,6 +2085,9 @@ function nameNewSeedsL31(all, ex, taken, take){
     if (next !== prev){
       const shortName = (e.dong && next.startsWith(e.dong + ' ')) ? shortDongName(e.dong) + next.slice(e.dong.length) : null;
       e.nameAliases = [...new Set([prev, e.kbName, shortName].filter(Boolean).flatMap(n => [n, n.replace(/\.$/, '')]))].filter(n => n !== next);
+      // 묶음 L33: 저장된 이름 이어짐용 — 이 단지가 seed 내용에 따라 가질 수 있던 이름들(원래 이름·동 이름 붙인 이름·동+지역 이름·구/시 이름). 검색에는 쓰지 않는다.
+      const forms = [base, e.dong ? e.dong + ' ' + base : '', e.dong ? e.dong + ' ' + base + ((region && base.indexOf('(' + region + ')') < 0) ? '(' + region + ')' : '') : '', regionFull ? regionFull + ' ' + base : ''];
+      e.formerNamesL33 = [...new Set([prev, e.kbName, shortName].concat(forms).filter(Boolean).flatMap(n => [n, n.replace(/\.$/, '')]))].filter(n => n !== next);
     }
   });
 }
@@ -2311,9 +2344,9 @@ function seoulHistoricalAvg(){
 // 라이브는 주소 플래그를 읽지 않으므로 이 기본값이 그대로 동작한다.
 const BUNDLES = { A:false, B:false, C:false, D1:false, D2:false, D3:false, D4:false, E1:true, E2:false, E3:true, F1:true, F2:true, F3:true, F4:true, F5:true, F6:true,
   H1:false, H2:true, H3:true, H4:true, H5:true, H6:true, H7:true,
-  L1:true, L2:true, L3:true, L4:true, L5:true, L6:false, L7:true, L8:true, L9:true, L10:true, L11:true, L12:true, L13:true, L14:true, L15:true, L16:true, L17:true, L18:true, L19:true, L19B:true, L20:true, L22:true, L23:true, L24:true, L25:true, L26:true, L27:!!window.POOL_EXCLUDE_ON, L31:!!window.NEW_NAME_RULE_ON, L32:true, L30:true, L29:true, L29R:false, K1:false, K2:true, K4:false };
+  L1:true, L2:true, L3:true, L4:true, L5:true, L6:false, L7:true, L8:true, L9:true, L10:true, L11:true, L12:true, L13:true, L14:true, L15:true, L16:true, L17:true, L18:true, L19:true, L19B:true, L20:true, L22:true, L23:true, L24:true, L25:true, L26:true, L27:!!window.POOL_EXCLUDE_ON, L31:!!window.NEW_NAME_RULE_ON, L32:true, L33:true, L34:true, L37:true, L35:true, L36:true, L30:true, L29:true, L29R:false, K1:false, K2:true, K4:false };
 const BUNDLE_GROUPS = { D:['D1','D2','D3','D4'], E:['E1','E2','E3'], F:['F1','F2','F3','F4','F5','F6'], H:['H1','H2','H3','H4','H5','H6','H7'],
-  L:['L1','L2','L3','L4','L5','L6','L7','L8','L9','L10','L11','L12','L13','L14','L15','L16','L17','L18','L19','L19B','L20','L22','L23','L24','L25','L26','L27','L29','L30','L31','L32'], K:['K1','K2','K4'] };
+  L:['L1','L2','L3','L4','L5','L6','L7','L8','L9','L10','L11','L12','L13','L14','L15','L16','L17','L18','L19','L19B','L20','L22','L23','L24','L25','L26','L27','L29','L30','L31','L32','L33','L34','L37','L35','L36'], K:['K1','K2','K4'] };
 function setBundles(next){
   next = Object.assign({}, next||{});
   // D·E 하나로 D1~D4·E1~E3을 한꺼번에 끄고 켤 수 있다(개별 키가 있으면 그쪽이 우선).
@@ -2336,6 +2369,7 @@ function applyBundleBodyClasses(){
   try { if (document && document.body && document.body.classList){ document.body.classList.toggle('l15', !!BUNDLES.L15); document.body.classList.toggle('l16', !!BUNDLES.L16); document.body.classList.toggle('l17', !!BUNDLES.L17); } } catch (e) {}
   try { if (document && document.body && document.body.classList) document.body.classList.toggle('l22', !!BUNDLES.L22); } catch (e) {}
   try { if (document && document.body && document.body.classList) document.body.classList.toggle('l32', !!BUNDLES.L32); } catch (e) {}   // 묶음 L32
+  try { if (document && document.body && document.body.classList) document.body.classList.toggle('l36', !!BUNDLES.L36); } catch (e) {}   // 묶음 L36
   if (typeof applyL9Toolbar === 'function') applyL9Toolbar();
   if (typeof applyL17Tips === 'function') applyL17Tips();
 }
@@ -3064,6 +3098,68 @@ function migrateSavedNames(){
   if (changed) saveState();
   return changed;
 }
+// 묶음 L33(53단계): 이름만 저장된 곳(기준단지·비교 슬롯·단일 진단 선택·쌍둥이 즐겨찾기)이 이름이 바뀐 단지를 다시 찾게 한다.
+// 풀에서 뺀 신규 단지는 seed가 늘면 이름이 바뀔 수 있다(L31: "범양" → "돈암동 범양"). 바뀌기 전 이름은 e.poolExcludedPrevName·검색 별칭(searchAliasesOf)에 남아 있다.
+// 저장된 이름이 지금 어떤 단지의 이름도 아닐 때만 이어 준다: ① 저장된 id의 단지가 그 옛 이름을 갖고 있으면 그 단지로 ② 옛 이름을 가진 단지가 하나뿐이면 그 단지로.
+// 둘 이상이거나 없으면 이어 주지 않는다(화면에 안내). 저장 형식은 그대로 — 이어진 뒤 다음 저장 때 새 이름(슬롯·단일은 id도)으로 저장된다. L33을 끄면 아무것도 하지 않는다.
+let _formerNameIndexL33 = null;
+function formerNameIndexL33(){
+  if (_formerNameIndexL33) return _formerNameIndexL33;
+  const prev = new Map(), alias = new Map();
+  const add = (m, n, e) => { if (!n) return; const l = m.get(n) || []; if (l.indexOf(e) < 0) l.push(e); m.set(n, l); };
+  (window.SEED_COMPLEXES || []).forEach(e => {
+    if (!e) return;
+    add(prev, e.poolExcludedPrevName, e);
+    (e.formerNamesL33 || []).forEach(n => add(prev, n, e));
+    searchAliasesOf(e.id).forEach(a => add(alias, a, e));
+  });
+  _formerNameIndexL33 = { prev, alias };
+  return _formerNameIndexL33;
+}
+function resolveSavedNameL33(name, id){
+  if (!BUNDLES.L33 || !name) return null;
+  const plain = stripPyeongSuffix(name), suffix = name.slice(plain.length);
+  seedIndexes();
+  if (_seedIdsByName.has(plain) || (state.library || []).some(x => x && x.name === plain)) return null; // 지금도 있는 이름 — 그대로 둔다
+  const idx = formerNameIndexL33();
+  const byPrev = idx.prev.get(plain) || [], byAlias = idx.alias.get(plain) || [];
+  const byId = id ? seedEntryById(id) : null;
+  let hit = (byId && (byPrev.indexOf(byId) >= 0 || byAlias.indexOf(byId) >= 0)) ? byId : null;
+  if (!hit){ const list = byPrev.length ? byPrev : byAlias; if (list.length === 1) hit = list[0]; }
+  return hit ? { name: hit.name + suffix, id: hit.id } : null;
+}
+function favoriteNameMissingL33(name){
+  return !!(BUNDLES.L33 && name && !(state.library || []).some(x => x && x.name === name) && !seedEntryByName(name));
+}
+const SAVED_NAME_LOST_L33 = '저장된 단지를 찾을 수 없어요. 다시 검색해 주세요.';
+function migrateSavedNamesL33(){
+  if (!BUNDLES.L33) return 0;
+  let n = 0;
+  try {
+    if (state.baseName && !baseIsVirtualPreset()){
+      const r0 = slotRef(baseSlot(), false), r = resolveSavedNameL33(state.baseName, r0 && r0.id);
+      if (r){ state.baseName = r.name; n++; }
+    }
+    (state.compares || []).forEach(s => {
+      if (!s || !s.name) return;
+      const r0 = slotRef(s, false), r = resolveSavedNameL33(s.name, (r0 && r0.id) || s.id);
+      if (r){ s.name = r.name; n++; }
+    });
+    if (state.singleTargetName){
+      const r = resolveSavedNameL33(state.singleTargetName, state.singleTargetId);
+      if (r){ state.singleTargetName = r.name; state.singleTargetId = r.id; n++; }
+    }
+    const list = loadTwinFavorites();
+    let favChanged = false;
+    list.forEach(f => ['baseName', 'twinName'].forEach(k => {
+      const r = f && f[k] ? resolveSavedNameL33(f[k], null) : null;
+      if (r){ f[k] = r.name; favChanged = true; }
+    }));
+    if (favChanged){ saveTwinFavorites(list); n++; }
+    if (n) saveState();
+  } catch (e) { /* 이어 주지 못해도 계산기는 평소대로 */ }
+  return n;
+}
 function loadState(){
   let raw = null;
   try { raw = localStorage.getItem(STORE_KEY); } catch(e){}
@@ -3080,6 +3176,7 @@ function loadState(){
       migrateStaleSeedLibrary(); // 묶음 L18
       migrateSavedNames();
       migrateRebuildStateL29(); // 묶음 L29
+      migrateSavedNamesL33(); // 묶음 L33
       return;
     } catch(e){}
   }
@@ -5786,7 +5883,7 @@ function setupComparePair(baseName, compName){
 // 전환한다. 단일단지 진단 화면에서 누르면 지금 보던 화면이 사라지므로,
 // 그 경우엔 handleViewMultiClick이 대신 openComparePairModal(팝업)로 보낸다.
 function viewComplexPairInMultiCompare(baseName, compName){
-  if (!setupComparePair(baseName, compName)) return;
+  if (!setupComparePair(baseName, compName)){ if (BUNDLES.L33) alert(SAVED_NAME_LOST_L33); return; }
   if (typeof BUNDLES !== 'undefined' && BUNDLES.L25){ [baseName, compName].forEach(n => { const e = state.library.find(x => x.name === n) || seedEntryByName(n); if (e) recordRecentPick(e, 34); }); }   // 묶음 L25: 비교로 열기
   setTopMode('multi');
   render();
@@ -6178,12 +6275,32 @@ function stripPyeongSuffix(name){ return String(name == null ? '' : name).replac
 function isPyeong25Name(name){ return /\(25평\)$/.test(String(name == null ? '' : name)); }
 
 let _seedById = null, _seedIdByText = null, _seedIdsByName = null;
+// 묶음 L34: 이름 → 첫 단지(seedEntryByName), 시세 원문 → 첫 단지의 id. 원문은 통째로 해시하지 않고 "길이|앞|뒤" 키로 후보를 좁힌 뒤 원문이 정확히 같은 첫 단지를 고른다(예전 Map과 같은 결과).
+let _seedFirstByName = null, _seedTextKeys = null, _seedIdxSrcL34 = null, _seedIdxLenL34 = -1, _seedIdxModeL34 = null;
+const seedTextKeyL34 = text => text.length + '|' + text.slice(0, 40) + '|' + text.slice(-40);
+function seedIdByText(text){
+  if (typeof text !== 'string') return undefined;
+  if (!BUNDLES.L34) return _seedIdByText.get(text);
+  const ids = _seedTextKeys.get(seedTextKeyL34(text));
+  if (!ids) return undefined;
+  for (const id of ids){ const s = _seedById.get(id); if (s && s.text === text) return id; }
+  return undefined;
+}
 function seedIndexes(){
-  if (_seedById) return;
-  _seedById = new Map(); _seedIdByText = new Map(); _seedIdsByName = new Map();
+  if (_seedById){
+    // L34: 켜고 끈 상태가 바뀌었거나(색인 종류가 다름) seed 목록 자체가 바뀌었으면(시험에서 단지를 더 붙이는 경우 등) 색인을 다시 만든다
+    let on = false; try { on = !!BUNDLES.L34; } catch (e) {}   // 기능 일부만 꺼내 쓰는 시험 환경엔 BUNDLES가 없을 수 있다
+    if (_seedIdxModeL34 === on && !(on && (_seedIdxSrcL34 !== window.SEED_COMPLEXES || _seedIdxLenL34 !== ((window.SEED_COMPLEXES || []).length)))) return;
+  }
+  _seedById = new Map(); _seedIdByText = new Map(); _seedIdsByName = new Map(); _seedFirstByName = new Map(); _seedTextKeys = new Map();
+  let l34 = false; try { l34 = !!BUNDLES.L34; } catch (e) {}
+  _seedIdxSrcL34 = window.SEED_COMPLEXES; _seedIdxLenL34 = (window.SEED_COMPLEXES || []).length; _seedIdxModeL34 = l34;
   (window.SEED_COMPLEXES || []).forEach(s => {
     _seedById.set(s.id, s);
-    if (s.text && !_seedIdByText.has(s.text)) _seedIdByText.set(s.text, s.id);
+    if (l34){
+      if (!_seedFirstByName.has(s.name)) _seedFirstByName.set(s.name, s);
+      if (s.text){ const k = seedTextKeyL34(s.text); const l = _seedTextKeys.get(k); if (l) l.push(s.id); else _seedTextKeys.set(k, [s.id]); }
+    } else if (s.text && !_seedIdByText.has(s.text)) _seedIdByText.set(s.text, s.id);
     if (!_seedIdsByName.has(s.name)) _seedIdsByName.set(s.name, []);
     _seedIdsByName.get(s.name).push(s.id);
   });
@@ -6193,6 +6310,8 @@ function seedEntryById(id){ seedIndexes(); return _seedById.get(id) || null; }
 // 이름 순회 방식은 예전 find()와 같아서, 34평 이름이면 결과도 예전과 같다.
 function seedEntryByName(name){
   const key = stripPyeongSuffix(name);
+  let on = false; try { on = !!BUNDLES.L34; } catch (e) {}
+  if (on){ seedIndexes(); return _seedFirstByName.get(key); }   // 묶음 L34: 이름 색인(첫 단지)
   return (window.SEED_COMPLEXES||[]).find(x=>x.name===key);
 }
 
@@ -6248,7 +6367,7 @@ function slotRef(slot, allowNameFallback){
   // id·pyeong 없이 text·이름만 옮기는 경로(기준단지로 바꾸기 등)도 "(25평)" 이름이면 25평으로 본다
   if (isPyeong25Name(slot.name) && _seed25IdByText.has(text)) return { id: _seed25IdByText.get(text), pyeong: 25 };
   seedIndexes();
-  if (_seedIdByText.has(text)) return { id: _seedIdByText.get(text), pyeong: 34 };
+  { const sid = (typeof seedIdByText === 'function') ? seedIdByText(text) : (_seedIdByText.has(text) ? _seedIdByText.get(text) : undefined); if (sid !== undefined) return { id: sid, pyeong: 34 }; }
   if (_seed25IdByText.has(text)) return { id: _seed25IdByText.get(text), pyeong: 25 };
   if (allowNameFallback && slot.name){
     const ids = _seedIdsByName.get(stripPyeongSuffix(slot.name));
@@ -6590,7 +6709,7 @@ function renderCompareTabs(base){
         '<input class="textish lib-search" data-role="libSearch" placeholder="🔍 단지명 검색..." autocomplete="off">'+
         '<div class="lib-autocomplete" data-role="libAutocomplete" hidden></div>'+
       '</div>'+
-      '<div class="lib-row">'+
+      '<div class="lib-row lib-select-row">'+
         '<select data-role="lib"><option value="">라이브러리에서 불러오기...</option></select>'+
       '</div>'+
       '<div class="lib-row">'+
@@ -6747,6 +6866,50 @@ function libraryMatchRank(name, filter){
   }
   return rank;
 }
+// 묶음 L35(55단계): 검색 일치 확대 — 대소문자·띄어쓰기·하이픈·점·가운뎃점·아포스트로피를 무시하고, "아이파크" = "ipark" = "i-park"로 서로 찾는다.
+// 일치 판정만 넓힌다: 기존 규칙(libraryMatchRank)이 찾은 단지·순위는 그대로이고, 못 찾은 단지만 아래 키 규칙으로 다시 보며 새로 찾은 단지는 순위 +10으로 기존 결과 뒤에 붙는다. 화면에 보이는 이름은 그대로.
+// 한글↔영문 동의어(SK=에스케이, e편한세상=이편한세상 등)는 넣지 않았다(대표님이 정함, F2 제안표 참고).
+const SEARCH_KEY_STRIP_L35 = /[\s\-‐-―−·ㆍ・‧•.'’ʼ`´]/g;
+const _searchKeyCacheL35 = new Map();
+function searchKeyL35(s){
+  s = String(s == null ? '' : s);
+  let k = _searchKeyCacheL35.get(s);
+  if (k === undefined){
+    k = s.normalize('NFC').toLowerCase().replace(SEARCH_KEY_STRIP_L35, '').replace(/ipark/g, '아이파크');
+    _searchKeyCacheL35.set(s, k);
+  }
+  return k;
+}
+// 띄어쓰기를 지운 키만 쓰면 짧은 검색어가 이웃한 두 낱말에 걸쳐 엉뚱하게 일치한다("현대" ↔ "용현 대림"). 그래서 글자 수가 3 미만인 검색어는 띄어쓰기를 남긴 키에서 한 낱말 안에서만 찾는다.
+const SEARCH_KEY_STRIP_NOSPACE_L35 = new RegExp(SEARCH_KEY_STRIP_L35.source.replace('\\s', ''), 'g');
+const _searchWordKeyCacheL35 = new Map();
+function searchWordKeyL35(s){
+  s = String(s == null ? '' : s);
+  let k = _searchWordKeyCacheL35.get(s);
+  if (k === undefined){
+    k = s.normalize('NFC').toLowerCase().replace(SEARCH_KEY_STRIP_NOSPACE_L35, '').replace(/\s+/g, ' ').trim().replace(/ipark/g, '아이파크');
+    _searchWordKeyCacheL35.set(s, k);
+  }
+  return k;
+}
+function libraryMatchRankL35(name, tokenKeys){
+  if (!tokenKeys.length) return null;
+  const nameK = searchKeyL35(name), noDongK = searchKeyL35(stripEmbeddedDong(name));
+  const nameW = searchWordKeyL35(name), noDongW = searchWordKeyL35(stripEmbeddedDong(name));
+  const inName = t => t.length >= 3 ? (nameK.includes(t) || noDongK.includes(t)) : (nameW.includes(t) || noDongW.includes(t));
+  let rank = 1;
+  for (const t of tokenKeys){
+    if (inName(t)) continue;
+    let split = false;
+    for (let i = 2; i <= t.length - 2 && !split; i++){
+      if (inName(t.slice(0, i)) && inName(t.slice(i))) split = true;
+    }
+    if (split){ rank = Math.max(rank, 2); continue; }
+    if (t.length >= 2 && librarySearchAddr(name).some(a => searchKeyL35(a).includes(t))){ rank = 3; continue; }
+    return null;
+  }
+  return rank;
+}
 function libraryNameMatches(name, filter){
   return libraryMatchRank(name, filter) != null;
 }
@@ -6763,11 +6926,19 @@ function searchLibraryEntries(list, filter){
   // 20위 밖으로 밀렸다 — 검색어와 이름(괄호 앞)이 똑같으면 맨 앞에 둔다.
   const q = String(filter||'').replace(/\s+/g, '');
   const ranked = [];
+  const tokenKeysL35 = BUNDLES.L35 ? tokenizeSearchFilter(filter).map(searchKeyL35).filter(Boolean) : null;   // 묶음 L35
+  const qKeyL35 = tokenKeysL35 ? searchKeyL35(filter) : null;
   list.forEach((e, i) => {
     let rank = libraryMatchRank(e.name, filter);
     // 묶음 K4: 이름이 바뀐 단지는 옛 이름(KB 원래 이름·F4 이름·끝 마침표 있는 이름)으로도 찾는다.
     const aliases = searchAliasesOf(e.id);
     aliases.forEach(a => { const ra = libraryMatchRank(a, filter); if (ra != null && (rank == null || ra < rank)) rank = ra; });
+    if (rank == null && tokenKeysL35 && tokenKeysL35.length){   // 묶음 L35: 기존 규칙으로 못 찾은 단지만 키 규칙으로 다시 본다(찾으면 기존 결과 뒤, 키가 통째로 같으면 그 안에서 맨 앞)
+      let r35 = libraryMatchRankL35(e.name, tokenKeysL35);
+      let exact35 = qKeyL35 && searchKeyL35(e.name) === qKeyL35;
+      aliases.forEach(a => { const ra = libraryMatchRankL35(a, tokenKeysL35); if (ra != null && (r35 == null || ra < r35)) r35 = ra; if (qKeyL35 && searchKeyL35(a) === qKeyL35) exact35 = true; });
+      if (r35 != null){ ranked.push({ e, rank: exact35 ? 10 : 10 + r35, i }); return; }
+    }
     if (rank == null) return;
     // 37단계: "신곡동 건영(의정부)"처럼 띄어쓰기가 든 이름도 붙여 쓴 검색어와 똑같으면 맨 앞에 둔다.
     const nameNs = e.name.replace(/\s+/g, '');
@@ -6777,11 +6948,52 @@ function searchLibraryEntries(list, filter){
   ranked.sort((a, b) => a.rank - b.rank || a.i - b.i);
   return ranked.map(x => x.e);
 }
+// 묶음 L34: 단지 선택 드롭다운(기준·비교 칸, 화면을 다시 그릴 때마다 11개)을 매번 전체 단지(<option> 수천 개)로 만들면 만드는 시간과 브라우저의 크기 계산이 단지 수에 비례해 커진다.
+// 검색어가 없을 때는 "라이브러리에서 불러오기..."(+지금 고른 단지)만 두고, 사용자가 드롭다운을 열 때(마우스·터치·포커스·키보드) 예전과 똑같은 전체 목록으로 채운다.
+// 숨은 select(단일 진단)는 열리지 않으므로 검색어가 있어도 채우지 않는다. 값을 코드로 넣는 곳(자동완성 선택·최근 본 단지)은 setLibSelectValueL34가 옵션을 보장한다.
+function libraryOptionHtmlL34(e){
+  return '<option value="'+esc(e.name)+'">'+esc(e.name)+esc(regionSuffix(e.name))+' ('+libraryEntryMonthCount(e)+'개월)'+(e.shared?' · 공용':'')+'</option>';
+}
+function fillLibraryOptionsL34(selectEl){
+  if (!selectEl || selectEl.dataset.lazyL34 !== '1') return;
+  selectEl.dataset.lazyL34 = '';
+  const cur = selectEl.value, entries = state.library;
+  selectEl.innerHTML = '<option value="">라이브러리에서 불러오기...</option>'+entries.map(libraryOptionHtmlL34).join('');
+  selectEl.value = cur && entries.some(e=>e.name===cur) ? cur : '';
+}
+function armLibrarySelectL34(selectEl){
+  if (selectEl._armedL34 || !selectEl.addEventListener) return;
+  selectEl._armedL34 = true;
+  ['pointerdown', 'mousedown', 'touchstart', 'focus', 'keydown'].forEach(ev => selectEl.addEventListener(ev, () => fillLibraryOptionsL34(selectEl), { passive: true }));
+}
+function setLibSelectValueL34(selectEl, name){
+  if (BUNDLES.L34 && selectEl.dataset.lazyL34 === '1' && !Array.prototype.some.call(selectEl.options || [], o => o.value === name)){
+    const e = state.library.find(x => x.name === name);
+    if (e) selectEl.insertAdjacentHTML('beforeend', libraryOptionHtmlL34(e));
+  }
+  selectEl.value = name;
+}
+let _searchMemoL34 = null, _searchMemoOnL34 = false;
+function searchEntriesL34(list, filter){   // 한 입력 이벤트 안에서 select 채우기와 자동완성이 같은 검색을 두 번 하지 않게
+  if (!(BUNDLES.L34 && _searchMemoOnL34)) return searchLibraryEntries(list, filter);
+  const m = _searchMemoL34;
+  if (m && m.list === list && m.len === list.length && m.filter === filter) return m.res;
+  const res = searchLibraryEntries(list, filter); _searchMemoL34 = { list, len: list.length, filter, res }; return res;
+}
 function renderLibraryOptions(selectEl, currentValue){
   if (!selectEl) return;
   const cur = currentValue!=null ? currentValue : selectEl.value;
   const filter = (selectEl.dataset.filter||'').trim();
-  const entries = filter ? searchLibraryEntries(state.library, filter) : state.library;
+  if (BUNDLES.L34 && (!filter || selectEl.hidden)){
+    const e0 = cur ? state.library.find(x=>x.name===cur) : null;
+    selectEl.innerHTML = '<option value="">라이브러리에서 불러오기...</option>'+(e0 ? libraryOptionHtmlL34(e0) : '');
+    selectEl.value = e0 ? cur : '';
+    selectEl.dataset.lazyL34 = '1';
+    armLibrarySelectL34(selectEl);
+    return;
+  }
+  selectEl.dataset.lazyL34 = '';
+  const entries = filter ? searchEntriesL34(state.library, filter) : state.library;
   // 검색해서 필터링된 결과가 0개면 <select> 자체엔 안내가 전혀 없어
   // 플레이스홀더 하나만 남은 텅 빈 드롭다운으로 보였다(2026-09 세션 —
   // 자동완성 오버레이(.lib-ac-empty)의 KB부동산 안내는 입력창이 포커스를
@@ -6810,7 +7022,7 @@ function wireLibrarySearch(inputEl, selectEl, renderFn, autocompleteEl, showRent
       if (pickerTarget != null && BUNDLES.L25 && renderPickerSections(autocompleteEl, pickerSections(), autocompleteEl._pickerExpanded)) return;
       autocompleteEl.hidden = true; autocompleteEl.innerHTML = ''; return;
     }
-    const matches = searchLibraryEntries(state.library, filter).slice(0, 20);
+    const matches = searchEntriesL34(state.library, filter).slice(0, 20);
     if (!matches.length){
       // 검색해도 안 나오면 "KB부동산에서 직접 확인" 경로를 안내한다(2026-09
       // 세션) — kbland.kr은 검색이 클라이언트 자동완성 기반이라(직접 확인:
@@ -6829,8 +7041,8 @@ function wireLibrarySearch(inputEl, selectEl, renderFn, autocompleteEl, showRent
   }
   inputEl.addEventListener('input', ()=>{
     selectEl.dataset.filter = inputEl.value;
-    doRender();
-    updateAutocomplete();
+    _searchMemoOnL34 = true;   // 묶음 L34: 이 이벤트 안에서만 검색 결과를 재사용
+    try { doRender(); updateAutocomplete(); } finally { _searchMemoOnL34 = false; _searchMemoL34 = null; }
   });
   inputEl.addEventListener('focus', updateAutocomplete);
   if (pickerTarget != null && autocompleteEl){   // 묶음 L25: 위아래·Enter·Esc
@@ -6868,7 +7080,7 @@ function wireLibrarySearch(inputEl, selectEl, renderFn, autocompleteEl, showRent
       const item = e.target.closest('[data-name]');
       if (!item) return;
       e.preventDefault(); // input의 blur보다 먼저 처리되도록
-      selectEl.value = item.dataset.name;
+      setLibSelectValueL34(selectEl, item.dataset.name);
       selectEl.dispatchEvent(new Event('change'));
       inputEl.value = '';
       selectEl.dataset.filter = '';
@@ -8480,7 +8692,7 @@ function renderSingleDiag(name){
       renderSingleDiag(plain);
       return;
     }
-    headEl.innerHTML = '<div class="empty-state">"'+esc(name)+'" 단지의 시세 데이터를 찾을 수 없습니다.</div>';
+    headEl.innerHTML = BUNDLES.L33 ? '<div class="empty-state">저장된 단지 "'+esc(name)+'"을(를) 찾을 수 없어요. 위 검색창에서 다시 검색해 주세요.</div>' : '<div class="empty-state">"'+esc(name)+'" 단지의 시세 데이터를 찾을 수 없습니다.</div>';
     resultEl.innerHTML = '';
     if (chartSectionEl) chartSectionEl.style.display = 'none';
     return;
@@ -9090,6 +9302,7 @@ function renderFavoritesTab(){
     const savedDate = f.savedAt ? f.savedAt.slice(0,10) : '—';
     return '<div class="favorite-card">'+
       '<div class="favorite-card-title">'+esc(f.baseName)+esc(regionSuffix(f.baseName))+' ↔ '+esc(f.twinName)+esc(regionSuffix(f.twinName))+'</div>'+
+      ((favoriteNameMissingL33(f.baseName) || favoriteNameMissingL33(f.twinName)) ? '<div class="favorite-card-meta">⚠ '+SAVED_NAME_LOST_L33+'</div>' : '')+
       '<div class="favorite-card-meta">'+esc(twinFavMatchLabel(f.matchType))+' · 상관계수 '+(f.corr!=null?f.corr.toFixed(2):'—')+' · 겹침 '+(f.overlapMonths!=null?f.overlapMonths:'—')+'개월</div>'+
       '<div class="favorite-card-meta">배율괴리 '+gapText+' · 저장 '+esc(savedDate)+'</div>'+
       '<div class="favorite-card-actions">'+
@@ -10979,11 +11192,58 @@ function wireDragSelect(chart, wrapEl, boxEl, resultEl, opts){
   canvasEl.addEventListener('mousedown', onMouseDown);
   window.addEventListener('mousemove', onMouseMove);
   window.addEventListener('mouseup', onMouseUp);
+  // 묶음 L37: 터치 화면 두 손가락 구간 선택(마우스 경로는 위 그대로)
+  let touchOffL37 = null;
+  try { if (typeof BUNDLES !== 'undefined' && BUNDLES.L37) touchOffL37 = wireTwoFingerSelectL37(chart, wrapEl, boxEl, resultEl, opts, setBox); } catch (e) { touchOffL37 = null; }
 
   return () => {
     canvasEl.removeEventListener('mousedown', onMouseDown);
     window.removeEventListener('mousemove', onMouseMove);
     window.removeEventListener('mouseup', onMouseUp);
+    if (touchOffL37) touchOffL37();
+  };
+}
+
+// ---- 묶음 L37(55단계 ■H): 모바일 두 손가락 구간 선택 ----
+// 모바일에는 마우스 끌기가 없어 선택 구간 박스를 볼 수 없었고, 두 손가락으로 그래프를 건드리면 브라우저가 화면을 확대했다.
+// 이 그래프(canvas) 위에서만: touch-action:pan-y(한 손가락 세로 스크롤은 그대로, 핀치 확대는 끔) + 두 손가락이면 preventDefault.
+// 두 손가락의 가로 위치를 마우스 끌기의 시작·끝으로 보고, 마우스와 같은 pixelIndexFromEvent·renderDragResult로 박스를 그린다
+// (같은 구간이면 숫자가 마우스 끌기와 같다). 손가락을 움직이면 바로 갱신, 손을 떼도 박스는 남는다(✕ 또는 그래프를 한 번 누르면 지워짐 —
+// 한 번 누르기는 브라우저가 마우스 누르기·떼기로 바꿔 보내 기존 마우스 경로가 "구간 1칸 미만"으로 지운다).
+// 한 손가락은 손대지 않는다(Chart.js 값 표시·세로 스크롤 그대로). 두 손가락일 때만 그래프의 터치 처리(값 표시)로 넘기지 않는다.
+function wireTwoFingerSelectL37(chart, wrapEl, boxEl, resultEl, opts, setBox){
+  const canvasEl = chart.canvas;
+  if (!canvasEl || !wrapEl || !wrapEl.addEventListener) return null;
+  const prevTouchAction = canvasEl.style.touchAction;
+  canvasEl.style.touchAction = 'pan-y';
+  let active = false, lastOk = false;
+  const clampX = (x) => { const r = canvasEl.getBoundingClientRect(); return Math.max(r.left, Math.min(r.right, x)); };
+  function onTouch(e){
+    if (e.target !== canvasEl) return;
+    const tt = e.targetTouches;
+    if (!tt || tt.length < 2){
+      if (active && (e.type === 'touchend' || e.type === 'touchcancel')){
+        active = false;
+        if (!lastOk){ boxEl.hidden = true; resultEl.hidden = true; }
+      }
+      return;
+    }
+    if (e.cancelable) e.preventDefault();
+    e.stopPropagation();
+    active = true;
+    const x1 = clampX(tt[0].clientX), x2 = clampX(tt[1].clientX);
+    setBox(x1, x2);
+    const a = pixelIndexFromEvent(chart, x1), b = pixelIndexFromEvent(chart, x2);
+    if (Math.abs(b - a) < 1){ lastOk = false; resultEl.hidden = true; return; }
+    lastOk = true;
+    renderDragResult(chart, Math.min(a, b), Math.max(a, b), resultEl, opts);
+  }
+  const OPT = { capture: true, passive: false };
+  const TYPES = ['touchstart', 'touchmove', 'touchend', 'touchcancel'];
+  TYPES.forEach(ty => wrapEl.addEventListener(ty, onTouch, OPT));
+  return () => {
+    TYPES.forEach(ty => wrapEl.removeEventListener(ty, onTouch, OPT));
+    canvasEl.style.touchAction = prevTouchAction || '';
   };
 }
 
@@ -11425,7 +11685,7 @@ function wireStaticEvents(){
   });
   document.getElementById('gasRefreshBtn').addEventListener('click', gasFetchList);
   if (window.matchMedia){
-    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', ()=> { updateThemeToggleBtn(); rerenderCurrentScreen(); });
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', ()=> { cssVarCacheClearL34(); updateThemeToggleBtn(); rerenderCurrentScreen(); });
   }
   initTheme();
   initSidebarToggle();
@@ -11475,7 +11735,9 @@ function initTheme(){
   const btn = document.getElementById('themeToggleBtn');
   if (btn) btn.addEventListener('click', () => {
     const next = currentEffectiveTheme() === 'dark' ? 'light' : 'dark';
+    cssVarCacheClearL34();
     document.documentElement.dataset.theme = next;
+    cssVarCacheClearL34();
     try { localStorage.setItem(THEME_STORE_KEY, next); } catch(e){}
     updateThemeToggleBtn();
     rerenderCurrentScreen();
@@ -11674,7 +11936,7 @@ function pickRecentInto(target, id, p, selectEl, inputEl, doRender){
   if (!entry || !selectEl) return false;
   _pickerPyeong = p === 25 ? 25 : 34;
   try {
-    selectEl.value = entry.name;
+    setLibSelectValueL34(selectEl, entry.name);
     selectEl.dispatchEvent(new Event('change'));
   } finally { _pickerPyeong = 0; }
   if (inputEl) inputEl.value = '';
