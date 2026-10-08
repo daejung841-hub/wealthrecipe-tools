@@ -2344,9 +2344,9 @@ function seoulHistoricalAvg(){
 // 라이브는 주소 플래그를 읽지 않으므로 이 기본값이 그대로 동작한다.
 const BUNDLES = { A:false, B:false, C:false, D1:false, D2:false, D3:false, D4:false, E1:true, E2:false, E3:true, F1:true, F2:true, F3:true, F4:true, F5:true, F6:true,
   H1:false, H2:true, H3:true, H4:true, H5:true, H6:true, H7:true,
-  L1:true, L2:true, L3:true, L4:true, L5:true, L6:false, L7:true, L8:true, L9:true, L10:true, L11:true, L12:true, L13:true, L14:true, L15:true, L16:true, L17:true, L18:true, L19:true, L19B:true, L20:true, L22:true, L23:true, L24:true, L25:true, L26:true, L27:!!window.POOL_EXCLUDE_ON, L31:!!window.NEW_NAME_RULE_ON, L32:true, L33:true, L34:true, L37:true, L35:true, L36:true, L30:true, L29:true, L29R:false, K1:false, K2:true, K4:false };
+  L1:true, L2:true, L3:true, L4:true, L5:true, L6:false, L7:true, L8:true, L9:true, L10:true, L11:true, L12:true, L13:true, L14:true, L15:true, L16:true, L17:true, L18:true, L19:true, L19B:true, L20:true, L22:true, L23:true, L24:true, L25:true, L26:true, L27:!!window.POOL_EXCLUDE_ON, L31:!!window.NEW_NAME_RULE_ON, L32:true, L33:true, L34:true, L37:true, L28:true, L35:true, L36:true, L30:true, L29:true, L29R:false, K1:false, K2:true, K4:false };
 const BUNDLE_GROUPS = { D:['D1','D2','D3','D4'], E:['E1','E2','E3'], F:['F1','F2','F3','F4','F5','F6'], H:['H1','H2','H3','H4','H5','H6','H7'],
-  L:['L1','L2','L3','L4','L5','L6','L7','L8','L9','L10','L11','L12','L13','L14','L15','L16','L17','L18','L19','L19B','L20','L22','L23','L24','L25','L26','L27','L29','L30','L31','L32','L33','L34','L37','L35','L36'], K:['K1','K2','K4'] };
+  L:['L1','L2','L3','L4','L5','L6','L7','L8','L9','L10','L11','L12','L13','L14','L15','L16','L17','L18','L19','L19B','L20','L22','L23','L24','L25','L26','L27','L29','L30','L31','L32','L33','L34','L37','L35','L36','L28'], K:['K1','K2','K4'] };
 function setBundles(next){
   next = Object.assign({}, next||{});
   // D·E 하나로 D1~D4·E1~E3을 한꺼번에 끄고 켤 수 있다(개별 키가 있으면 그쪽이 우선).
@@ -3353,6 +3353,17 @@ function diagnoseShortHistory(hist, currentSaleRatio, who){
   const msg = who+'와 겹치는 시세가 '+hist+'개월로 '+FAIR_MIN_HISTORY_MONTHS+'개월 미만이라, 평균 배율로 적정가를 계산하지 않았어요.'+cur;
   return { badge:'이력 부족', tone:'neutral', message: msg, easyMessage: msg };
 }
+// 묶음 L28(58단계): 매매 시세가 겹치는 개월 수가 이 값 미만이면 "이력 부족"(대표님 결정 12개월, 이 상수 하나로 바꿈).
+// 짧은 기간의 평균 배율로 낸 적정가는 현재가와 거의 같게 나와 "적정"으로 보이기 쉬워서(예: 시세 3개월 단지), 배지·결론만 바꾸고
+// 적정가 숫자는 결론 박스·요약 카드·가격 줄에서 숨긴다. 계산 값(r.fairSale 등)은 그대로 둔다(그래프 적정가 점선·적정가 메뉴는 그대로).
+const L28_MIN_HISTORY_MONTHS = 12;
+function diagnoseShortHistoryL28(months, orig){
+  const msg = '시세 기록이 '+months+'개월뿐이라 적정가 판단 근거가 부족해요. 기록이 '+L28_MIN_HISTORY_MONTHS+'개월 이상 쌓이면 판정을 보여 드려요.';
+  return { badge:'이력 부족', tone:'neutral', shortL28:true, monthsL28: months, origBadgeL28: orig ? orig.badge : null, message: msg, easyMessage: msg };
+}
+function isShortHistoryL28(r){
+  try { return !!(typeof BUNDLES !== 'undefined' && BUNDLES.L28 && r && r.diag && r.diag.shortL28); } catch (e) { return false; }
+}
 
 function computeSlot(base, comp){
   if (!base.rows.length || !comp.rows.length) return { error:'데이터 없음' };
@@ -3444,7 +3455,7 @@ function computeSlot(base, comp){
 
   const salePriceGapPct = (fairSale!=null && curSale && curSale.c) ? (fairSale-curSale.c)/curSale.c*100 : null;
   const baseLabel = base.isVirtualBenchmark ? '선도단지' : '기준단지';
-  const diag = (fairPlan && fairPlan.method === 'none' && fairPlan.short)
+  let diag = (fairPlan && fairPlan.method === 'none' && fairPlan.short)
     ? diagnoseShortHistory(histMonths, currentSaleRatio, baseLabel)
     : diagnose(saleDiff, jeonseDiff, state.threshold, salePriceGapPct, {
         curSale: currentSaleRatio, refSale: avgSaleRatio,
@@ -3453,6 +3464,9 @@ function computeSlot(base, comp){
         baseLabel,
         priceGapPctFair: (fairSale!=null && curSale && fairSale) ? (fairSale-curSale.c)/fairSale*100 : null,
       });
+  // 묶음 L28: 매매 시세가 겹치는 개월 수(선도단지 대비면 이 단지의 시세 개월 수와 같다)가 기준 미만이면 배지·문구만 "이력 부족".
+  const saleMonthsL28 = full.filter(ym => base.rowMap.get(ym).saleMid!=null && comp.rowMap.get(ym).saleMid!=null).length;
+  if (BUNDLES.L28 && saleMonthsL28 < L28_MIN_HISTORY_MONTHS && !(fairPlan && fairPlan.method === 'none' && fairPlan.short)) diag = diagnoseShortHistoryL28(saleMonthsL28, diag);
 
   const saleSeries = full.map(ym => (base.rowMap.get(ym).saleMid!=null && comp.rowMap.get(ym).saleMid!=null) ? comp.rowMap.get(ym).saleMid/base.rowMap.get(ym).saleMid*100 : null);
   const jeonseSeries = full.map(ym => (base.rowMap.get(ym).jeonseMid!=null && comp.rowMap.get(ym).jeonseMid!=null) ? comp.rowMap.get(ym).jeonseMid/base.rowMap.get(ym).jeonseMid*100 : null);
@@ -7343,6 +7357,7 @@ function diffAmountText(diffPP, cur, ref){
 }
 // 매매 갭 줄(H7): 금액은 결론과 같은 화면 표시값 뺄셈, %는 카드 공통 값(cardGapPct). H7을 끄면 예전 표기.
 function saleGapCellText(r){
+  if (isShortHistoryL28(r)) return '— (이력 부족)';   // 묶음 L28
   if (!BUNDLES.H7 || r.saleGap == null || r.fairSale == null || !r.curSalePrice) return fmtEok(r.saleGap)+fmtGapPct(r.saleGap, r.curSalePrice);
   const n = conclusionNumbers(r);
   const sign = r.saleGap < 0 ? '-' : '';
@@ -7562,7 +7577,7 @@ function buildDiagCardBody(i, comp, r, sync, wide, estimate, benchStatusHtml, ke
   // 기준의 숫자로 통일돼 보인다.
   const ratioTips = buildRatioStatTooltips(frameLabel);
   const priceHighlightHtml = (activeR.curSalePrice!=null || activeR.fairSale!=null)
-    ? '<div class="stat-row price-highlight"><span class="k">현재가 / 적정가</span><span class="v">'+fmtEok(activeR.curSalePrice)+' / '+fmtEok(activeR.fairSale)+'</span></div>'
+    ? '<div class="stat-row price-highlight"><span class="k">현재가 / 적정가</span><span class="v">'+fmtEok(activeR.curSalePrice)+' / '+(isShortHistoryL28(activeR) ? '이력 부족' : fmtEok(activeR.fairSale))+'</span></div>'
     : '';
   // 항목(2026-09 세션, "정보 위계 재구성" 시안 A/B) — 매매(핵심)와 전세(심화)를
   // 분리한다. 예전엔 매매/전세 4줄이 한 문자열로 합쳐져 있어서 둘을 다른
@@ -8017,6 +8032,7 @@ function fmtConclusionAmount(v){
 // 예전 방식(반올림 전 값). pct는 현재가 기준, pctFair는 적정가 기준(고평가 문장이 쓴다).
 function conclusionNumbers(r){
   if (!r || r.fairSale == null || r.curSalePrice == null || !r.curSalePrice) return null;
+  if (isShortHistoryL28(r)) return null;   // 묶음 L28: 이력 부족이면 결론 박스에 적정가 숫자를 쓰지 않는다
   const amt = r.fairSale - r.curSalePrice;
   const out = { amt, pct: Math.round(Math.abs(amt) / r.curSalePrice * 100), pctFair: Math.round(Math.abs(amt) / r.fairSale * 100),
     amtText: fmtConclusionAmount(amt), fairText: (r.fairSale/10000).toFixed(1)+'억', up: amt >= 0, same: false };
@@ -8062,7 +8078,7 @@ function buildConclusionParts(r, label){
   const out = { badge: diag.badge, tone: diag.tone, mainHtml: '', fairText: '', evidence: conclusionEvidenceLine(r, label) };
   if (!n){
     // 이력 부족 등 적정가가 없는 경우 — 적정가 없이 사유 한 줄만.
-    out.mainHtml = esc(diag.badge === '이력 부족'
+    out.mainHtml = esc(isShortHistoryL28(r) ? r.diag.message : diag.badge === '이력 부족'
       ? (label || '선도단지')+'와 겹치는 시세가 '+r.histMonths+'개월로 짧아 적정가를 계산하지 않았어요.'
       : '적정가를 계산할 데이터가 부족해요.');
     return out;
@@ -8171,7 +8187,11 @@ function easyDetailItems(r, opts){
   const label = opts.label || '선도단지';
   const lines = [];
   const badge = r.diag ? r.diag.badge : '';
-  if (r.fairSale == null && badge === '이력 부족'){
+  if (isShortHistoryL28(r)){   // 묶음 L28: 판정 대신 이유, 적정가는 참고로만 한 줄
+    lines.push(r.diag.message);
+    if (r.currentSaleRatio != null) lines.push('이 단지 가격은 지금 '+label+'의 '+easyNum(r.currentSaleRatio)+'% 수준이에요.');
+    if (r.fairSale != null) lines.push('이 짧은 기간의 평균으로 계산한 값은 약 '+(r.fairSale/10000).toFixed(1)+'억인데, 기간이 짧아 현재가와 거의 같게 나와요. 판정에는 쓰지 않았어요.');
+  } else if (r.fairSale == null && badge === '이력 부족'){
     lines.push(withParticle(label, '과', '와').replace(/&amp;/g,'&')+' 함께 있는 시세가 '+r.histMonths+'개월뿐이에요.');
     lines.push('평소 비율을 믿고 계산하기엔 짧아서 적정가를 내지 않았어요.');
     if (r.currentSaleRatio != null) lines.push('이 단지 가격은 지금 '+label+'의 '+easyNum(r.currentSaleRatio)+'% 수준이에요.');
@@ -8213,6 +8233,7 @@ function easyDetailItems(r, opts){
 }
 function fairCardDetailItems(r){
   let h = '';
+  if (isShortHistoryL28(r)) return conclusionDetailItem(r.diag.message);   // 묶음 L28
   if (r.diag && r.diag.smallOverGapPct != null) h += conclusionDetailItem(OVERVALUED_SMALL_GAP_NOTE(Math.max(1, Math.round(r.diag.smallOverGapPct))));
   if (r.fairSale != null && BUNDLES.D1 && r.diag && r.diag.kind === 'bothDown') h += conclusionDetailItem(bothDownFairSentence(r));
   if (r.factorSurged) h += conclusionDetailItem('다만 최근 이미 상당히 반등한 상태라(진행률 약 '+Math.round(r.factorProgress)+'%), 추가 상승 여력은 보수적으로 볼 필요가 있습니다.');
@@ -8225,7 +8246,7 @@ function fairCardDetailItems(r){
 }
 function buildFairPriceSummaryCard(r){
   // 묶음 A: 선도 대비 이력이 36개월 미만이라 적정가를 끈 단지는 숫자 대신 이유를 보여준다.
-  if (r.fairSale == null && r.fairShortHistory && r.diag){
+  if ((r.fairSale == null && r.fairShortHistory && r.diag) || isShortHistoryL28(r)){   // 묶음 L28도 같은 모양(숫자 없이 이유)
     return '<div class="fair-price-summary-card tone-'+r.diag.tone+'">'+
       '<span class="badge '+r.diag.tone+'">'+esc(r.diag.badge)+'</span>'+
       '<div class="fair-price-summary-body">'+esc(r.diag.message)+'</div>'+
@@ -9575,7 +9596,7 @@ function renderSummaryTable(base){
     tr.innerHTML =
       '<td class="name-cell"><span class="swatch" style="width:9px;height:9px;border-radius:50%;background:var('+SLOT_COLORS[i]+')"></span>'+esc(pyeongDisplayName(comp))+esc(complexMetaLabel(comp.name))+rentalHeavyChip(comp.name)+'</td>'+
       '<td class="num'+saleCellClass+'">'+priceWithRatioCell(curSalePrice, r.currentSaleRatio)+'</td>'+
-      '<td class="num">'+priceWithRatioCell(fairSale, r.avgSaleRatio)+'</td>'+
+      '<td class="num">'+(isShortHistoryL28(r) ? '— (이력 부족)' : priceWithRatioCell(fairSale, r.avgSaleRatio))+'</td>'+
       '<td class="num">'+fmtPP(r.saleDiff)+'</td>'+
       '<td class="num'+jeonseCellClass+'">'+priceWithRatioCell(curJeonsePrice, r.currentJeonseRatio)+'</td>'+
       '<td class="num">'+priceWithRatioCell(fairJeonse, r.avgJeonseRatio)+'</td>'+
@@ -11988,7 +12009,9 @@ const GUIDE_HTML =
     '<li><b>고평가</b>: 평소보다 높은 가격이에요.</li>'+
     '<li><b>주의</b>: 매매와 전세가 함께 평소보다 낮아요. 왜 함께 낮아졌는지 따로 확인해 보세요.</li>'+
     '<li><b>확인 필요</b>: 전세 쪽만 평소보다 낮아요. 그 이유를 따로 확인해 보세요.</li>'+
-    '<li><b>시세 기록이 짧은 단지</b>: 새로 지은 단지처럼 시세 기록이 짧으면 평소 비율의 근거가 적어요. 판정과 적정가는 참고만 하세요.</li>'+
+    ((typeof BUNDLES !== 'undefined' && BUNDLES.L28)
+      ? '<li><b>이력 부족</b>: 시세 기록이 '+L28_MIN_HISTORY_MONTHS+'개월이 안 되는 단지는 판정 대신 "이력 부족"이 떠요. 기록이 쌓이면 판정이 보여요. 그보다 조금 긴 단지도 평소 비율의 근거가 적으니 참고만 하세요.</li>'
+      : '<li><b>시세 기록이 짧은 단지</b>: 새로 지은 단지처럼 시세 기록이 짧으면 평소 비율의 근거가 적어요. 판정과 적정가는 참고만 하세요.</li>')+
     '<li><b>동조율</b>: 지난 상승장에서 "선도단지가 N% 오를 때 이 단지는 M% 올랐어요"와 등급(아주나쁨~아주좋음)으로, 이 단지가 선도단지를 얼마나 따라 올랐는지 보여 줘요.</li>'+
     '<li>임대 비율이 높은 단지는 이름 옆에 "임대 주의" 또는 "임대 과다"가 떠요.</li>'+
   '</ul>'+
