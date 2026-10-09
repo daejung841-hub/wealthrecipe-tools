@@ -30,6 +30,11 @@
   --good:#1E8E5A;
   --good-bg:#E5F5EC;
   --bad:#C63F3F;
+  --l47-ratio:#7C6FB0;
+  --l47-sale:#4F7CAC;
+  --l47-jeonse:#C7655E;
+  --l47-ref:#8A949C;
+  --l47-grid:rgba(24,36,48,.06);
   --bad-bg:#FBEAEA;
   --warn:#A9720E;
   --warn-bg:#FBF1DF;
@@ -72,6 +77,11 @@
     --good:#3FD495;
     --good-bg:#123328;
     --bad:#FF7A7A;
+    --l47-ratio:#A99DD6;
+    --l47-sale:#7FA6D1;
+    --l47-jeonse:#E08D86;
+    --l47-ref:#8C99A3;
+    --l47-grid:rgba(231,236,239,.07);
     --bad-bg:#3A1D1D;
     --warn:#E8B85B;
     --warn-bg:#3A2E14;
@@ -111,6 +121,11 @@
   --good:#3FD495;
   --good-bg:#123328;
   --bad:#FF7A7A;
+  --l47-ratio:#A99DD6;
+  --l47-sale:#7FA6D1;
+  --l47-jeonse:#E08D86;
+  --l47-ref:#8C99A3;
+  --l47-grid:rgba(231,236,239,.07);
   --bad-bg:#3A1D1D;
   --warn:#E8B85B;
   --warn-bg:#3A2E14;
@@ -957,6 +972,7 @@ body.l44 .tier-seg.current.tier-low, body.l44 .tier-seg.current.tier-veryLow{box
 .chart-ext-line{display:inline-flex;align-items:center;gap:5px;max-width:100%;font-size:15px;line-height:1.3;}
 .chart-ext-label{white-space:normal;word-break:keep-all;overflow-wrap:break-word;}
 .chart-ext-dot{width:9px;height:9px;border-radius:50%;flex:none;display:inline-block;}
+.chart-ext-dot.dash-l46,.chart-ext-tooltip-compact .chart-ext-dot.dash-l46,.chart-ext-tooltip-tiny .chart-ext-dot.dash-l46,.chart-ext-tooltip-main .chart-ext-dot.dash-l46{width:14px;height:2.5px;border-radius:0;background:repeating-linear-gradient(90deg,var(--dash-c) 0 5px,transparent 5px 9px);}
 /* 항목 2(2026-09-19 세션, 2026-09-20 세션 재조정) — "선도단지 현재 위치"
    카드(M2 대비 위치/전세가율 자기이탈, .bench-chart-wrap)는 메인 시세추이/
    쌍둥이 미니차트와 같은 전역 외부 툴팁 플러그인을 쓰지만, 이 카드 안에서는
@@ -1110,6 +1126,9 @@ tr.diag-detail-row td{white-space:normal;background:var(--surface-alt);padding:1
   border-radius:12px;background:var(--surface-alt);font-size:13.5px;
 }
 .common-range{font-size:11px;color:var(--ink-faint);margin-top:4px;}
+.ratio-avg-l46{font-size:13px;color:var(--ink);line-height:1.55;margin:0 0 8px;word-break:keep-all;}
+.ratio-avg-l46 b{font-weight:800;}
+.ratio-avg-l46.short{color:var(--ink-muted);}
 .fair-outlook-row{font-size:12.5px;color:var(--ink-muted);margin-top:4px;}
 footer{margin-top:36px;color:var(--ink-faint);font-size:12px;text-align:center;}
 /* 묶음 L24·L25(43단계): 단일 진단 엑셀 넣기 줄, 비교 검색창의 최근 본 단지 드롭다운(섹션 목록 — 32단계 즐겨찾기 줄을 같은 틀에 얹는다). */
@@ -1620,11 +1639,20 @@ function chartExternalTooltipHandler(context){
   // 길이가 늘어나지 않게, flex-wrap으로 옆으로 흐르다 넘치면만 줄바꿈).
   const lines = (tooltip.body || []).map((b, i) => {
     const lc = tooltip.labelColors && tooltip.labelColors[i];
-    const dot = lc ? '<span class="chart-ext-dot" style="background:'+lc.borderColor+'"></span>' : '';
+    const dashed = typeof BUNDLES !== 'undefined' && BUNDLES.L46 && lc && Array.isArray(lc.borderDash) && lc.borderDash.length;   // 묶음 L46: 점선은 점선 막대
+    const dot = lc ? (dashed ? '<span class="chart-ext-dot dash-l46" style="--dash-c:'+lc.borderColor+'"></span>' : '<span class="chart-ext-dot" style="background:'+lc.borderColor+'"></span>') : '';
     return '<span class="chart-ext-line">'+dot+'<span class="chart-ext-label">'+esc(b.lines.join(' '))+'</span></span>';
   });
   box.innerHTML = (title ? '<div class="chart-ext-title">'+esc(title)+'</div>' : '') + '<div class="chart-ext-values">'+lines.join('')+'</div>';
 }
+// 묶음 L46: 점선 데이터셋(borderDash가 있는 선)은 범례 표시를 동그라미 대신 선 모양으로 — 범례가 그 선의 borderDash로 그린다.
+const dashLegendPluginL46 = {
+  id: 'dashLegendL46',
+  beforeUpdate(chart){
+    if (typeof BUNDLES === 'undefined' || !BUNDLES.L46) return;
+    (chart.data.datasets || []).forEach(d => { if (Array.isArray(d.borderDash) && d.borderDash.length && d.pointStyle == null) d.pointStyle = 'line'; });
+  }
+};
 const chartExternalTooltipPlugin = {
   id: 'chartExternalTooltipBox',
   afterInit(chart){ ensureChartExtTooltipBox(chart); },
@@ -1634,6 +1662,7 @@ const chartExternalTooltipPlugin = {
 };
 if (window.Chart && Chart.register && Chart.defaults && Chart.defaults.plugins && Chart.defaults.plugins.tooltip){
   Chart.register(chartExternalTooltipPlugin);
+  Chart.register(dashLegendPluginL46);   // 묶음 L46
   Object.assign(Chart.defaults.plugins.tooltip, {
     enabled: false,
     external: chartExternalTooltipHandler
@@ -2383,9 +2412,13 @@ function seoulHistoricalAvg(){
 // 라이브는 주소 플래그를 읽지 않으므로 이 기본값이 그대로 동작한다.
 const BUNDLES = { A:false, B:false, C:false, D1:false, D2:false, D3:false, D4:false, E1:true, E2:false, E3:true, F1:true, F2:true, F3:true, F4:true, F5:true, F6:true,
   H1:false, H2:true, H3:true, H4:true, H5:true, H6:true, H7:true,
-  L1:true, L2:true, L3:true, L4:true, L5:true, L6:false, L7:true, L8:true, L9:true, L10:true, L11:true, L12:true, L13:true, L14:true, L15:true, L16:true, L17:true, L18:true, L19:true, L19B:true, L20:true, L22:true, L23:true, L24:true, L25:true, L26:true, L27:!!window.POOL_EXCLUDE_ON, L31:!!window.NEW_NAME_RULE_ON, L32:true, L33:true, L34:true, L37:true, L28:true, L38:true, L40:true, L39:true, L41:true, L42:true, L43:true, L44:true, L45:true, L35:true, L36:true, L30:true, L29:true, L29R:false, K1:false, K2:true, K4:false };
+  L1:true, L2:true, L3:true, L4:true, L5:true, L6:false, L7:true, L8:true, L9:true, L10:true, L11:true, L12:true, L13:true, L14:true, L15:true, L16:true, L17:true, L18:true, L19:true, L19B:true, L20:true, L22:true, L23:true, L24:true, L25:true, L26:true, L27:!!window.POOL_EXCLUDE_ON, L31:!!window.NEW_NAME_RULE_ON, L32:true, L33:true, L34:true, L37:true, L28:true, L38:true, L40:true, L39:true, L41:true, L42:true, L43:true, L44:true, L45:true, L46:true, L47:true, L35:true, L36:true, L30:true, L29:true, L29R:false, K1:false, K2:true, K4:false };
 const BUNDLE_GROUPS = { D:['D1','D2','D3','D4'], E:['E1','E2','E3'], F:['F1','F2','F3','F4','F5','F6'], H:['H1','H2','H3','H4','H5','H6','H7'],
-  L:['L1','L2','L3','L4','L5','L6','L7','L8','L9','L10','L11','L12','L13','L14','L15','L16','L17','L18','L19','L19B','L20','L22','L23','L24','L25','L26','L27','L29','L30','L31','L32','L33','L34','L37','L35','L36','L28','L38','L40','L39','L41','L42','L43','L44','L45'], K:['K1','K2','K4'] };
+  L:['L1','L2','L3','L4','L5','L6','L7','L8','L9','L10','L11','L12','L13','L14','L15','L16','L17','L18','L19','L19B','L20','L22','L23','L24','L25','L26','L27','L29','L30','L31','L32','L33','L34','L37','L35','L36','L28','L38','L40','L39','L41','L42','L43','L44','L45','L46','L47'], K:['K1','K2','K4'] };
+// 묶음 L46(69단계): 그래프 점선 모양 통일 — 모든 점선을 "선도단지 대비 적정가" 선(FAIR_LINE_STYLE.borderDash)과 같은 긴 점선으로.
+// 촘촘한 점("좁쌀")·점-선 섞인 패턴을 없앤다. 새 점선은 항상 dashL46(예전 값)을 쓴다 — L46을 끄면 예전 값 그대로.
+const DASH_L46 = [5, 4];
+function dashL46(orig){ return (typeof BUNDLES !== 'undefined' && BUNDLES.L46) ? DASH_L46.slice() : orig; }
 function setBundles(next){
   next = Object.assign({}, next||{});
   // D·E 하나로 D1~D4·E1~E3을 한꺼번에 끄고 켤 수 있다(개별 키가 있으면 그쪽이 우선).
@@ -4855,7 +4888,7 @@ function indexedOverlayChartConfig(comp, otherComplex, otherName, overlapYms, ex
       if (!allYms.length) return;
       const base = es.complex.rowMap.get(allYms[0]).saleMid;
       const data = yms.map(ym => { const row = es.complex.rowMap.get(ym); return row && row.saleMid!=null ? row.saleMid/base*100 : null; });
-      datasets.push({ label: es.name+'(상승률)', data, borderColor: cssVar(es.colorVar), backgroundColor: cssVar(es.colorVar), borderWidth:2, borderDash:[5,3], pointRadius:0, tension:.15, spanGaps:false });
+      datasets.push({ label: es.name+'(상승률)', data, borderColor: cssVar(es.colorVar), backgroundColor: cssVar(es.colorVar), borderWidth:2, borderDash: dashL46([5,3]), pointRadius:0, tension:.15, spanGaps:false });
     });
   }
   return {
@@ -4906,7 +4939,7 @@ function addPredictionSegment(config, overlapYms, predictionMonths, cls){
     borderColor: 'rgba(130,130,130,0.55)',
     backgroundColor: 'rgba(130,130,130,0.55)',
     borderWidth: 2,
-    borderDash: [5,4],
+    borderDash: dashL46([5,4]),
     pointRadius: 0,
     spanGaps: true,
     // 항목 4(2026-09-19 세션): 이 점선은 마지막 실측 지점~예측 지점 딱
@@ -4963,7 +4996,7 @@ function addFairPriceSegment(config, overlapYms, predictionMonths, fairPriceInde
     borderColor: 'rgba(130,130,130,0.55)',
     backgroundColor: 'rgba(130,130,130,0.55)',
     borderWidth: 2,
-    borderDash: [5,4],
+    borderDash: dashL46([5,4]),
     pointRadius: 0,
     spanGaps: true,
     // addPredictionSegment와 같은 이유로 rebase 대상에서 제외한다 — 이
@@ -4998,7 +5031,7 @@ function gapEpisodesChartPlugin(overlapYms, episodes){
         ctx.fillStyle = 'rgba(74,109,199,0.10)';
         ctx.fillRect(x0, chartArea.top, x1-x0, chartArea.bottom-chartArea.top);
         ctx.strokeStyle = 'rgba(74,109,199,0.55)';
-        ctx.setLineDash([3,2]);
+        ctx.setLineDash(dashL46([3,2]));
         ctx.beginPath(); ctx.moveTo(x0, chartArea.top); ctx.lineTo(x0, chartArea.bottom); ctx.stroke();
         ctx.beginPath(); ctx.moveTo(x1, chartArea.top); ctx.lineTo(x1, chartArea.bottom); ctx.stroke();
         ctx.setLineDash([]);
@@ -5058,7 +5091,7 @@ function twinMiniChartConfig(comp, twinComplex, twinName, overlapYms, mode, pred
       ctx.fillStyle = 'rgba(214,71,61,0.08)';
       ctx.fillRect(x, chartArea.top, chartArea.right-x, chartArea.bottom-chartArea.top);
       ctx.strokeStyle = 'rgba(214,71,61,0.55)';
-      ctx.setLineDash([4,3]);
+      ctx.setLineDash(dashL46([4,3]));
       ctx.beginPath();
       ctx.moveTo(x, chartArea.top);
       ctx.lineTo(x, chartArea.bottom);
@@ -5101,7 +5134,7 @@ function twinMiniChartConfig(comp, twinComplex, twinName, overlapYms, mode, pred
       finalConfig.data.datasets.push({
         label: '서울 선도단지(상승률)', data: benchData,
         borderColor: cssVar('--series-4'), backgroundColor: cssVar('--series-4'),
-        borderWidth: 2, borderDash: [5,3], pointRadius: 0, tension:.15, spanGaps:false
+        borderWidth: 2, borderDash: dashL46([5,3]), pointRadius: 0, tension:.15, spanGaps:false
       });
     }
   }
@@ -5136,7 +5169,7 @@ function refMiniChartConfig(comp, refComplex, refName, overlapYms, mode, rangeMo
       config.data.datasets.push({
         label: '서울 선도단지(상승률)', data: benchData,
         borderColor: cssVar('--series-4'), backgroundColor: cssVar('--series-4'),
-        borderWidth: 2, borderDash: [5,3], pointRadius: 0, tension:.15, spanGaps:false
+        borderWidth: 2, borderDash: dashL46([5,3]), pointRadius: 0, tension:.15, spanGaps:false
       });
     }
   }
@@ -9391,7 +9424,7 @@ function renderSingleActiveChart(bench, target){
       .concat(comps.map(({i,c})=>({ key:String(i), name:c.name, complex:c, varName:SLOT_COLORS[i] })));
     entries.forEach(entry => { entry.stats = computeSelfRatioStats(entry.complex); });
     const cardsHtml = entries.map(entry => buildRatioStatCard(entry, entry.stats, state.threshold)).join('');
-    area.innerHTML =
+    area.innerHTML = (BUNDLES.L46 ? ratioAvgLineL46(entries, 'single') : '')+   // 묶음 L46
       '<div class="chart-layout solo"><div class="chart-box"><canvas id="singleMainCanvas"></canvas></div></div>'+
       '<div class="common-range" id="singleRatioNote"></div>'+
       '<div class="cards-grid" style="margin-top:14px;">'+cardsHtml+'</div>';
@@ -10384,7 +10417,7 @@ function growthMarkersPlugin(labels, startYm, highYm){
         ctx.fillText(text, tx, chartArea.top + 12 + row * 14); ctx.restore();
       };
       const narrow = (chartArea.right - chartArea.left) < 480;
-      if (highYm != null && highYm !== startYm) draw(highYm, [4, 3], chartFontColor(), narrow ? GROWTH_VIEW_TEXT.highRefShort : GROWTH_VIEW_TEXT.highRef, 1);
+      if (highYm != null && highYm !== startYm) draw(highYm, dashL46([4, 3]), chartFontColor(), narrow ? GROWTH_VIEW_TEXT.highRefShort : GROWTH_VIEW_TEXT.highRef, 1);
       draw(startYm, [], cssVar('--accent'), '시작 '+fmtYm(startYm), 0);
     }
   };
@@ -10509,7 +10542,7 @@ const FAIR_BASE_LINE_STYLE_L14 = { borderWidth: 2.5, borderDash: [1.5, 3], borde
 function fairBaseLineDataset(){
   if (typeof BUNDLES !== 'undefined' && BUNDLES.L14){
     const c = cssVar('--fair-base-line') || FAIR_BASE_LINE_COLOR;
-    return Object.assign({ borderColor: c, backgroundColor: c }, FAIR_BASE_LINE_STYLE_L14);
+    return Object.assign({ borderColor: c, backgroundColor: c }, FAIR_BASE_LINE_STYLE_L14, BUNDLES.L46 ? { borderDash: DASH_L46.slice(), borderCapStyle: 'butt' } : {});   // 묶음 L46
   }
   return Object.assign({ borderColor: FAIR_BASE_LINE_COLOR, backgroundColor: FAIR_BASE_LINE_COLOR }, FAIR_LINE_STYLE);
 }
@@ -10572,7 +10605,7 @@ function priceChartConfig(base, comps, field, ratioField, showFair, benchmarkOve
       label: benchmarkOverlay.name, _kind:'comp', _color: benchColor, _carriedLabels: carriedLabels,
       data: labels.map(ym => benchmarkOverlay.rowMap.get(ym) ? benchmarkOverlay.rowMap.get(ym)[field] : null),
       borderColor: benchColor, backgroundColor: benchColor, borderWidth: 2.5, pointRadius: 0, tension: .15, spanGaps: false,
-      segment: carriedLabels.size ? { borderDash: (ctx)=> carriedLabels.has(labelStrs[ctx.p1DataIndex]) ? [4,3] : undefined } : undefined
+      segment: carriedLabels.size ? { borderDash: (ctx)=> carriedLabels.has(labelStrs[ctx.p1DataIndex]) ? dashL46([4,3]) : undefined } : undefined
     });
     if (showFair && !l5){
       const rBase = computeSlot(benchmarkOverlay, base);
@@ -10811,7 +10844,7 @@ function ratioChartConfig(base, comps, field){
   const datasets = [{
     label: (base.name||'기준단지')+' = 100%', data: labels.map(()=>100),
     borderColor: cssVar('--series-base'), backgroundColor: cssVar('--series-base'),
-    borderWidth: 2, borderDash:[6,4], pointRadius:0, tension:0
+    borderWidth: 2, borderDash: dashL46([6,4]), pointRadius:0, tension:0
   }];
   perComp.forEach((entry)=>{
     if (!entry) return;
@@ -10827,7 +10860,7 @@ function ratioChartConfig(base, comps, field){
       datasets.push({
         label: c.name+' 평균('+avgVal.toFixed(1)+'%)',
         data: labels.map(ym => map.has(ym) ? avgVal : null),
-        borderColor: color, backgroundColor: color, borderWidth: 1.25, borderDash:[4,3], pointRadius:0, tension:0
+        borderColor: color, backgroundColor: color, borderWidth: 1.25, borderDash: dashL46([4,3]), pointRadius:0, tension:0
       });
     }
   });
@@ -10848,11 +10881,11 @@ function overlayChartConfig(base, comp){
   ];
   if (r.avgSaleRatio!=null){
     datasets.push({ label:'매매 평균('+r.avgSaleRatio.toFixed(1)+'%)', data: r.saleSeries.map(v=> v==null?null:r.avgSaleRatio),
-      borderColor: saleColor, backgroundColor: saleColor, borderWidth:1.25, borderDash:[4,3], pointRadius:0, tension:0 });
+      borderColor: saleColor, backgroundColor: saleColor, borderWidth:1.25, borderDash: dashL46([4,3]), pointRadius:0, tension:0 });
   }
   if (r.avgJeonseRatio!=null){
     datasets.push({ label:'전세 평균('+r.avgJeonseRatio.toFixed(1)+'%)', data: r.jeonseSeries.map(v=> v==null?null:r.avgJeonseRatio),
-      borderColor: jeonseColor, backgroundColor: jeonseColor, borderWidth:1.25, borderDash:[4,3], pointRadius:0, tension:0 });
+      borderColor: jeonseColor, backgroundColor: jeonseColor, borderWidth:1.25, borderDash: dashL46([4,3]), pointRadius:0, tension:0 });
   }
   return {
     type:'line',
@@ -10916,8 +10949,9 @@ function addRatioPriceLinesL45(cfg, entries, mode){
   const fi = ratioPriceFocusL45(entries, mode);
   if (fi < 0 || !cfg.data.datasets[fi]) return cfg;
   const entry = entries[fi], c = entry.complex;
+  const origDatasets = cfg.data.datasets.slice();   // 묶음 L47: 최고·최저 버튼 상태
   const red = cssVar('--bad');
-  const ratioDs = Object.assign({}, cfg.data.datasets[fi], { borderColor: red, backgroundColor: red, borderDash: L45_RATIO_DASH, borderWidth: 3, pointStyle: 'line', pointRadius: 0, pointHoverRadius: 4 });
+  const ratioDs = Object.assign({}, cfg.data.datasets[fi], { borderColor: red, backgroundColor: red, borderDash: BUNDLES.L46 ? DASH_L46.slice() : L45_RATIO_DASH, borderWidth: 3, pointStyle: 'line', pointRadius: 0, pointHoverRadius: 4 });
   const yms = cfg.data.labels.map(ymFromLabelL40), n = yms.length;
   const marks = yms.map((_, i) => ((n - 1 - i) % L45_MARK_EVERY === 0) ? 3.5 : 0);
   const val = (ym, f) => { const r = ym == null || !c || !c.rowMap ? null : c.rowMap.get(ym); return r && r[f] != null ? r[f] : null; };
@@ -10931,7 +10965,64 @@ function addRatioPriceLinesL45(cfg, entries, mode){
     ticks: { color: fontColor, font: { size: 11 }, callback: v => fmtEok(v) } };
   const orig = cfg.options.plugins.tooltip.callbacks.label;
   cfg.options.plugins.tooltip.callbacks.label = ctx => (ctx.dataset && ctx.dataset._fmtL45 === 'eok') ? ctx.dataset.label + ': ' + fmtEok(ctx.parsed.y) : orig(ctx);
+  if (BUNDLES.L47) restyleRatioPriceL47(cfg, entry, origDatasets);   // 묶음 L47
   return cfg;
+}
+// 묶음 L47(70단계): 토글을 켠 화면을 참고 사진(서울 전세가율 지수 그래프)처럼 — 굵은 실선 3개(마커 없음), 전세가율 = 보라·오른쪽 축(%),
+// 매매가·전세가 = 파랑·빨강·왼쪽 축(억). 점선은 기준선(역사상 평균 항상 · 최고/최저는 버튼을 켰을 때)에만 L46 점선으로. 범례는 위 한 줄.
+const L47_WIDTH = { ratio: 2, price: 1.8, avg: 1.5, peak: 1 };   // 71단계: 가는 선(대표님 피드백 — 진하고 굵어 가시성이 나쁨)
+function restyleRatioPriceL47(cfg, entry, origDatasets){
+  const [ratioDs, saleDs, jeonseDs] = cfg.data.datasets;
+  const solid = (d, color, width, axis) => Object.assign(d, { borderColor: color, backgroundColor: color, borderWidth: width, borderDash: [], yAxisID: axis,
+    pointStyle: 'circle', pointRadius: 0, pointHoverRadius: 3, tension: .3, cubicInterpolationMode: 'monotone' });
+  solid(ratioDs, cssVar('--l47-ratio'), L47_WIDTH.ratio, 'y2'); ratioDs._fmtL47 = 'pct';
+  solid(saleDs, cssVar('--l47-sale'), L47_WIDTH.price, 'y');
+  solid(jeonseDs, cssVar('--l47-jeonse'), L47_WIDTH.price, 'y');
+  const n = cfg.data.labels.length, stats = entry.stats || computeSelfRatioStats(entry.complex);
+  const ref = (word, v, color, width) => ({ label: word + ' ' + v.toFixed(1) + '%', _kind: 'refL47', _fmtL47: 'pct', yAxisID: 'y2', data: new Array(n).fill(v),
+    borderColor: color, backgroundColor: color, borderWidth: width, borderDash: DASH_L46.slice(), pointRadius: 0, pointHoverRadius: 0, tension: 0 });
+  const had = word => (origDatasets || []).some(d => typeof d.label === 'string' && d.label.indexOf(entry.name + ' 역사상 ' + word) === 0);
+  const refs = [];
+  if (stats && stats.avg != null) refs.push(ref('평균', stats.avg, cssVar('--l47-ref'), L47_WIDTH.avg));
+  if (stats && stats.maxVal != null && had('최고')) refs.push(ref('최고', stats.maxVal, cssVar('--l47-ref'), L47_WIDTH.peak));
+  if (stats && stats.minVal != null && had('최저')) refs.push(ref('최저', stats.minVal, cssVar('--l47-ref'), L47_WIDTH.peak));
+  cfg.data.datasets = [ratioDs, saleDs, jeonseDs].concat(refs);
+  const fontColor = chartFontColor(), grid = cssVar('--l47-grid') || cssVar('--border');
+  const tick = { color: fontColor, font: { size: 10.5 }, maxTicksLimit: 7 };
+  cfg.options.scales.y = Object.assign({}, cfg.options.scales.y, { position: 'left', grace: '6%', beginAtZero: false,
+    grid: { color: grid, lineWidth: 0.5, drawTicks: false }, border: { display: false },
+    title: { display: true, text: '매매가·전세가(억)', color: fontColor, font: { size: 10.5 } },
+    ticks: Object.assign({}, tick, { callback: v => fmtEok(v) }) });
+  cfg.options.scales.y2 = { position: 'right', grace: '6%', beginAtZero: false, grid: { drawOnChartArea: false, drawTicks: false }, border: { display: false },
+    title: { display: true, text: '전세가율(%)', color: fontColor, font: { size: 10.5 } },
+    ticks: Object.assign({}, tick, { callback: v => Number(v).toFixed(0) + '%' }) };
+  if (cfg.options.scales.x) cfg.options.scales.x = Object.assign({}, cfg.options.scales.x, { grid: { color: grid, lineWidth: 0.5, drawTicks: false } });
+  const lg = cfg.options.plugins.legend || {};
+  cfg.options.plugins.legend = Object.assign({}, lg, { position: 'top', align: 'start',
+    labels: Object.assign({}, lg.labels || {}, { usePointStyle: true, boxWidth: 7, boxHeight: 7, padding: 10, font: { family: "'Noto Sans KR'", size: 11 } }) });
+  const orig = cfg.options.plugins.tooltip.callbacks.label;
+  cfg.options.plugins.tooltip.callbacks.label = ctx => (ctx.dataset && ctx.dataset._fmtL47 === 'pct')
+    ? ctx.dataset.label.replace(/ [0-9.]+%$/, '') + ': ' + (ctx.parsed.y == null ? '—' : ctx.parsed.y.toFixed(1) + '%') : orig(ctx);
+  return cfg;
+}
+// 묶음 L46: 전세가율 탭 그래프 위 한 줄 — 지금 전세가율이 그 단지의 역사상 평균(카드의 "역사상 평균"과 같은 값)보다 높은지 낮은지.
+// 보이는 두 숫자의 차이가 ±RATIO_AVG_NEAR_L46 %p 이내면 "비슷해요". 평균선 표시를 꺼도 보인다. 대상은 L45 토글과 같은 단지.
+// 전세가율 기록이 L28_MIN_HISTORY_MONTHS(12)개월 미만이면 비교는 참고만.
+const RATIO_AVG_NEAR_L46 = 1;
+function ratioAvgLineL46(entries, mode){
+  const i = ratioPriceFocusL45(entries, mode); const e = i >= 0 ? entries[i] : null;
+  const s = e ? (e.stats || computeSelfRatioStats(e.complex)) : null;
+  if (!s || s.cur == null || s.avg == null) return '';
+  const months = selfRatioSeries(e.complex).yms.length;
+  // 보이는 숫자(소수 1자리)끼리 빼서 문장 안 숫자가 서로 맞게 한다(예: 60.3 − 52.2 = 8.1).
+  const c1 = Math.round(s.cur * 10) / 10, a1 = Math.round(s.avg * 10) / 10, ad = Math.round(Math.abs(c1 - a1) * 10) / 10;
+  const head = withParticle(e.name, '은', '는')+' 지금 전세가율 <b>'+c1.toFixed(1)+'%</b>('+fmtYm(s.curYm)+')';
+  if (months < L28_MIN_HISTORY_MONTHS)
+    return '<div class="ratio-avg-l46 short">'+head+'예요. 시세 기록이 짧아('+months+'개월) 평균 비교는 참고만 해 주세요(역사상 평균 '+a1.toFixed(1)+'%).</div>';
+  const tail = ad <= RATIO_AVG_NEAR_L46
+    ? '역사상 평균 <b>'+a1.toFixed(1)+'%</b>와 비슷해요(차이 '+ad.toFixed(1)+'%p).'
+    : '역사상 평균 <b>'+a1.toFixed(1)+'%</b>보다 <b>'+ad.toFixed(1)+'%p '+(c1 > a1 ? '높아요' : '낮아요')+'</b>.';
+  return '<div class="ratio-avg-l46">'+head+'로, '+tail+'</div>';
 }
 function jeonseRatioChartConfig(entries, showPeak, showTrough, showAvg, compactLabels){
   const allYmsSet = new Set();
@@ -10944,7 +11035,7 @@ function jeonseRatioChartConfig(entries, showPeak, showTrough, showAvg, compactL
   const labelStrs = labels.map(fmtYm);
   const flat = (v) => labels.map(()=>v);
   const datasets = seriesByEntry.map(entry=>({
-    label: entry.name, _kind: entry.key==='base'?'base':'comp',
+    label: BUNDLES.L46 ? entry.name+' 전세가율' : entry.name, _kind: entry.key==='base'?'base':'comp',   // 묶음 L46: 범례·툴팁 "<단지명> 전세가율"
     data: labels.map(ym => entry.map.has(ym) ? entry.map.get(ym) : null),
     borderColor: cssVar(entry.varName), backgroundColor: cssVar(entry.varName),
     borderWidth: entry.key==='base'?3:2, pointRadius:0, tension:.15, spanGaps:false
@@ -10956,7 +11047,7 @@ function jeonseRatioChartConfig(entries, showPeak, showTrough, showAvg, compactL
       datasets.push({
         label: entry.name+' 역사상 최고(전세가율, '+entry.stats.maxVal.toFixed(1)+'%)', data: flat(entry.stats.maxVal),
         borderColor: cssVar(entry.varName), backgroundColor: cssVar(entry.varName),
-        borderWidth:1.25, borderDash:[1,2], pointRadius:0, tension:0
+        borderWidth:1.25, borderDash: dashL46([1,2]), pointRadius:0, tension:0
       });
     });
   }
@@ -10966,7 +11057,7 @@ function jeonseRatioChartConfig(entries, showPeak, showTrough, showAvg, compactL
       datasets.push({
         label: entry.name+' 역사상 최저(전세가율, '+entry.stats.minVal.toFixed(1)+'%)', data: flat(entry.stats.minVal),
         borderColor: cssVar(entry.varName), backgroundColor: cssVar(entry.varName),
-        borderWidth:1.25, borderDash:[5,2,1,2], pointRadius:0, tension:0
+        borderWidth:1.25, borderDash: dashL46([5,2,1,2]), pointRadius:0, tension:0
       });
     });
   }
@@ -10986,7 +11077,7 @@ function jeonseRatioChartConfig(entries, showPeak, showTrough, showAvg, compactL
       datasets.push({
         label, data: flat(entry.stats.avg),
         borderColor: cssVar(entry.varName), backgroundColor: cssVar(entry.varName),
-        borderWidth:1.75, borderDash:[2,2], pointRadius:0, tension:0
+        borderWidth:1.75, borderDash: dashL46([2,2]), pointRadius:0, tension:0
       });
     });
     const seoul = seoulHistoricalAvg();
@@ -10994,7 +11085,7 @@ function jeonseRatioChartConfig(entries, showPeak, showTrough, showAvg, compactL
       datasets.push({
         label:'서울시 평균(전세가율)', data: flat(seoul.avg),
         borderColor: cssVar('--ink-faint'), backgroundColor: cssVar('--ink-faint'),
-        borderWidth:1.5, borderDash:[6,3], pointRadius:0, tension:0
+        borderWidth:1.5, borderDash: dashL46([6,3]), pointRadius:0, tension:0
       });
     }
   }
@@ -11055,7 +11146,7 @@ function benchOvershootChartConfig(bench, overshoot, target, rangeMode){
     },
     {
       label:'M2(유동성)', data: allYms.map(ym => m2Series[ym]!=null ? m2Series[ym]/m2Base*100 : null),
-      borderColor: cssVar('--series-2'), backgroundColor: cssVar('--series-2'), borderWidth:2.5, borderDash:[6,4], pointRadius:0, tension:.15, spanGaps:false
+      borderColor: cssVar('--series-2'), backgroundColor: cssVar('--series-2'), borderWidth:2.5, borderDash: dashL46([6,4]), pointRadius:0, tension:.15, spanGaps:false
     }
   ];
   if (anchorTargetVal != null){
@@ -11095,19 +11186,19 @@ function multiChartConfig(entry, flags){
   const datasets = [
     { label:'매매가', _kind:'base', _color:saleColor, data: rows.map(r=>r.saleMid), borderColor: saleColor, backgroundColor: saleColor, borderWidth:2.5, pointRadius:0, tension:.15, spanGaps:false, yAxisID:'y' },
     { label:'전세가', _kind:'comp', _color:jeonseColor, data: rows.map(r=>r.jeonseMid), borderColor: jeonseColor, backgroundColor: jeonseColor, borderWidth:2.5, pointRadius:0, tension:.15, spanGaps:false, yAxisID:'y' },
-    { label:'전세가율', _kind:'ratio', _color:ratioColor, data: rows.map(r=> ratioMap.has(r.ym) ? ratioMap.get(r.ym) : null), borderColor: ratioColor, backgroundColor: ratioColor, borderWidth:2, borderDash:[4,3], pointRadius:0, tension:.15, spanGaps:false, yAxisID:'y1' }
+    { label:'전세가율', _kind:'ratio', _color:ratioColor, data: rows.map(r=> ratioMap.has(r.ym) ? ratioMap.get(r.ym) : null), borderColor: ratioColor, backgroundColor: ratioColor, borderWidth:2, borderDash: dashL46([4,3]), pointRadius:0, tension:.15, spanGaps:false, yAxisID:'y1' }
   ];
   if (flags.showAvg && stats && stats.avg!=null){
     datasets.push({ label:'전세가율 역사상 평균('+stats.avg.toFixed(1)+'%)', data: flatRatio(stats.avg),
-      borderColor: ratioColor, backgroundColor: ratioColor, borderWidth:1.25, borderDash:[3,3], pointRadius:0, tension:0, yAxisID:'y1' });
+      borderColor: ratioColor, backgroundColor: ratioColor, borderWidth:1.25, borderDash: dashL46([3,3]), pointRadius:0, tension:0, yAxisID:'y1' });
   }
   if (flags.showPeak && stats && stats.maxVal!=null){
     datasets.push({ label:'전세가율 역사상 최고('+stats.maxVal.toFixed(1)+'%)', data: flatRatio(stats.maxVal),
-      borderColor: ratioColor, backgroundColor: ratioColor, borderWidth:1.25, borderDash:[1,2], pointRadius:0, tension:0, yAxisID:'y1' });
+      borderColor: ratioColor, backgroundColor: ratioColor, borderWidth:1.25, borderDash: dashL46([1,2]), pointRadius:0, tension:0, yAxisID:'y1' });
   }
   if (flags.showTrough && stats && stats.minVal!=null){
     datasets.push({ label:'전세가율 역사상 최저('+stats.minVal.toFixed(1)+'%)', data: flatRatio(stats.minVal),
-      borderColor: ratioColor, backgroundColor: ratioColor, borderWidth:1.25, borderDash:[5,2,1,2], pointRadius:0, tension:0, yAxisID:'y1' });
+      borderColor: ratioColor, backgroundColor: ratioColor, borderWidth:1.25, borderDash: dashL46([5,2,1,2]), pointRadius:0, tension:0, yAxisID:'y1' });
   }
   return {
     type:'line',
@@ -11682,7 +11773,7 @@ function renderActiveChart(base){
       .concat(comps.map(({i,c})=>({ key:String(i), name:c.name, complex:c, varName:SLOT_COLORS[i] })));
     entries.forEach(entry => { entry.stats = computeSelfRatioStats(entry.complex); });
     const cardsHtml = entries.map(entry => buildRatioStatCard(entry, entry.stats, state.threshold)).join('');
-    area.innerHTML =
+    area.innerHTML = (BUNDLES.L46 ? ratioAvgLineL46(entries, 'multi') : '')+   // 묶음 L46
       '<div class="chart-layout solo"><div class="chart-box"><canvas id="mainCanvas"></canvas></div></div>'+
       '<div class="common-range" id="ratioNote"></div>'+
       '<div class="cards-grid" style="margin-top:14px;">'+cardsHtml+'</div>';
