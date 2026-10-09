@@ -2344,9 +2344,9 @@ function seoulHistoricalAvg(){
 // 라이브는 주소 플래그를 읽지 않으므로 이 기본값이 그대로 동작한다.
 const BUNDLES = { A:false, B:false, C:false, D1:false, D2:false, D3:false, D4:false, E1:true, E2:false, E3:true, F1:true, F2:true, F3:true, F4:true, F5:true, F6:true,
   H1:false, H2:true, H3:true, H4:true, H5:true, H6:true, H7:true,
-  L1:true, L2:true, L3:true, L4:true, L5:true, L6:false, L7:true, L8:true, L9:true, L10:true, L11:true, L12:true, L13:true, L14:true, L15:true, L16:true, L17:true, L18:true, L19:true, L19B:true, L20:true, L22:true, L23:true, L24:true, L25:true, L26:true, L27:!!window.POOL_EXCLUDE_ON, L31:!!window.NEW_NAME_RULE_ON, L32:true, L33:true, L34:true, L37:true, L28:true, L35:true, L36:true, L30:true, L29:true, L29R:false, K1:false, K2:true, K4:false };
+  L1:true, L2:true, L3:true, L4:true, L5:true, L6:false, L7:true, L8:true, L9:true, L10:true, L11:true, L12:true, L13:true, L14:true, L15:true, L16:true, L17:true, L18:true, L19:true, L19B:true, L20:true, L22:true, L23:true, L24:true, L25:true, L26:true, L27:!!window.POOL_EXCLUDE_ON, L31:!!window.NEW_NAME_RULE_ON, L32:true, L33:true, L34:true, L37:true, L28:true, L38:true, L35:true, L36:true, L30:true, L29:true, L29R:false, K1:false, K2:true, K4:false };
 const BUNDLE_GROUPS = { D:['D1','D2','D3','D4'], E:['E1','E2','E3'], F:['F1','F2','F3','F4','F5','F6'], H:['H1','H2','H3','H4','H5','H6','H7'],
-  L:['L1','L2','L3','L4','L5','L6','L7','L8','L9','L10','L11','L12','L13','L14','L15','L16','L17','L18','L19','L19B','L20','L22','L23','L24','L25','L26','L27','L29','L30','L31','L32','L33','L34','L37','L35','L36','L28'], K:['K1','K2','K4'] };
+  L:['L1','L2','L3','L4','L5','L6','L7','L8','L9','L10','L11','L12','L13','L14','L15','L16','L17','L18','L19','L19B','L20','L22','L23','L24','L25','L26','L27','L29','L30','L31','L32','L33','L34','L37','L35','L36','L28','L38'], K:['K1','K2','K4'] };
 function setBundles(next){
   next = Object.assign({}, next||{});
   // D·E 하나로 D1~D4·E1~E3을 한꺼번에 끄고 켤 수 있다(개별 키가 있으면 그쪽이 우선).
@@ -11794,6 +11794,14 @@ function initSidebarToggle(){
   });
 }
 
+// 묶음 L38: 주소로 단지를 채우기 전 확인창 문구. 링크는 급지표 말고 다른 곳(공유 링크 등)에서도 오므로 출처를 말하지 않는다.
+// 끄면(setBundles({L38:false})) 예전 문구 그대로.
+function urlApplyConfirmMessageL38(baseLabel, compareLabels){
+  const lines = '\n기준: '+baseLabel+(compareLabels.length ? '\n비교: '+compareLabels.join(', ') : '');
+  if (typeof BUNDLES !== 'undefined' && BUNDLES.L38) return '선택한 단지로 계속할까요?'+lines+'\n현재 입력된 내용은 대체됩니다.';
+  return '급지표에서 선택한 단지로 기준/비교단지를 채웁니다.'+lines+'\n현재 입력된 내용은 대체됩니다. 계속할까요?';
+}
+
 function findLibraryEntryById(id){
   return state.library.find(e => e.id === id)
       || (window.SEED_COMPLEXES || []).find(s => s.id === id)
@@ -11820,9 +11828,7 @@ function applyUrlParams(){
   const compareSpecs = parseCompareSpec(compareIdsRaw).slice(0, MAX_SLOTS);
   const specLabel = (entry, id, p) => entry.name + (p === 25 ? (has25Data(id) ? '(25평)' : '(25평 없음 → 34평)') : '(34평)');
   const compareLabels = compareSpecs.map(sp => { const e = findLibraryEntryById(sp.id); return e ? specLabel(e, sp.id, sp.pyeong) : null; }).filter(Boolean);
-  if (!confirm('급지표에서 선택한 단지로 기준/비교단지를 채웁니다.\n기준: '+specLabel(baseEntry, baseId, basePyeongReq)+
-    (compareLabels.length ? '\n비교: '+compareLabels.join(', ') : '')+
-    '\n현재 입력된 내용은 대체됩니다. 계속할까요?')) return false;
+  if (!confirm(urlApplyConfirmMessageL38(specLabel(baseEntry, baseId, basePyeongReq), compareLabels))) return false;
 
   const want25 = (id, p, name) => {
     if (p !== 25) return false;
