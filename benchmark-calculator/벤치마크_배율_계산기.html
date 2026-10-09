@@ -264,6 +264,9 @@ select, .textish{
 .lib-search-wrap .lib-search{margin-bottom:0;}
 .lib-autocomplete{position:absolute;top:100%;left:0;right:0;z-index:20;background:var(--surface);border:1px solid var(--border-strong);border-radius:8px;margin-top:2px;max-height:220px;overflow-y:auto;box-shadow:0 4px 14px rgba(0,0,0,.15);}
 .lib-ac-item{padding:7px 10px;font-size:12.5px;cursor:pointer;}
+/* 묶음 L39(61단계): 드롭다운이 열려 있는 동안 왼쪽 상자가 잘라내지 않게. 높이는 fitAutocompleteL39가 정한다(줄 10개분·좁은 화면 50% 이내). */
+body.l39 .side-block:has(.lib-autocomplete:not([hidden])){overflow:visible;}
+body.l39 .lib-autocomplete{overscroll-behavior:contain;}
 .lib-ac-item:hover{background:var(--surface-alt);}
 .lib-ac-empty{padding:7px 10px;font-size:12.5px;color:var(--ink-faint);}
 .lib-ac-kb-hint{margin-top:5px;font-size:11.5px;line-height:1.5;color:var(--ink-muted);}
@@ -1052,6 +1055,24 @@ tr.diag-detail-row td{white-space:normal;background:var(--surface-alt);padding:1
   background:var(--surface);border:1px solid var(--border-strong);border-radius:10px;
   box-shadow:var(--shadow);padding:9px 10px;
 }
+/* 묶음 L40(61단계): 그래프 아래 표시 기간 슬라이더 — 두 개의 range를 겹쳐 손잡이 두 개로 쓴다(트랙은 뒤 막대, 손잡이만 눌림). */
+.chart-box.l40-box{height:auto;}   /* 그래프 영역은 지금과 같은 높이(520 - 위아래 여백·테두리 34 = 486px), 슬라이더는 그 아래 */
+.chart-box.l40-box > .chart-canvas-wrap{height:486px;}
+.period-l40{margin:10px 2px 0;}
+.period-l40-head{display:flex;flex-wrap:wrap;align-items:center;gap:6px 8px;font-size:12px;color:var(--ink-muted);}
+.period-l40-head b{color:var(--ink);font-weight:700;font-variant-numeric:tabular-nums;}
+.period-l40-btns{margin-left:auto;display:flex;gap:6px;}
+.period-l40-btns .chart-mode-toggle{display:inline-block;margin:0;padding:5px 10px;font-size:11.5px;}
+.period-l40-btns .chart-mode-toggle:disabled{opacity:.45;cursor:default;}
+.period-l40-track{position:relative;height:40px;margin:2px 13px 0;}
+.period-l40-track::before{content:'';position:absolute;left:0;right:0;top:50%;height:4px;margin-top:-2px;border-radius:2px;background:var(--border-strong);}
+.period-l40-fill{position:absolute;top:50%;height:4px;margin-top:-2px;border-radius:2px;background:var(--accent);pointer-events:none;}
+.period-l40-track input[type=range]{position:absolute;left:-13px;right:-13px;top:0;width:calc(100% + 26px);height:40px;margin:0;padding:0;background:transparent;pointer-events:none;-webkit-appearance:none;appearance:none;}
+.period-l40-track input[type=range]::-webkit-slider-runnable-track{background:transparent;height:40px;border:0;}
+.period-l40-track input[type=range]::-moz-range-track{background:transparent;border:0;}
+.period-l40-track input[type=range]::-webkit-slider-thumb{pointer-events:auto;-webkit-appearance:none;appearance:none;width:26px;height:26px;margin-top:7px;border-radius:50%;background:var(--surface);border:2px solid var(--accent);box-shadow:0 1px 4px rgba(0,0,0,.25);cursor:grab;}
+.period-l40-track input[type=range]::-moz-range-thumb{pointer-events:auto;width:22px;height:22px;border-radius:50%;background:var(--surface);border:2px solid var(--accent);box-shadow:0 1px 4px rgba(0,0,0,.25);cursor:grab;}
+.period-l40-track input[type=range]:focus-visible::-webkit-slider-thumb{outline:2px solid var(--accent);outline-offset:2px;}
 .drag-result-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px;position:sticky;top:0;background:var(--surface);}
 .drag-result-head span{font-weight:700;font-size:11.5px;}
 .drag-result-head .clear-link{font-size:14px;padding:0 2px;line-height:1;}
@@ -2344,9 +2365,9 @@ function seoulHistoricalAvg(){
 // 라이브는 주소 플래그를 읽지 않으므로 이 기본값이 그대로 동작한다.
 const BUNDLES = { A:false, B:false, C:false, D1:false, D2:false, D3:false, D4:false, E1:true, E2:false, E3:true, F1:true, F2:true, F3:true, F4:true, F5:true, F6:true,
   H1:false, H2:true, H3:true, H4:true, H5:true, H6:true, H7:true,
-  L1:true, L2:true, L3:true, L4:true, L5:true, L6:false, L7:true, L8:true, L9:true, L10:true, L11:true, L12:true, L13:true, L14:true, L15:true, L16:true, L17:true, L18:true, L19:true, L19B:true, L20:true, L22:true, L23:true, L24:true, L25:true, L26:true, L27:!!window.POOL_EXCLUDE_ON, L31:!!window.NEW_NAME_RULE_ON, L32:true, L33:true, L34:true, L37:true, L28:true, L38:true, L35:true, L36:true, L30:true, L29:true, L29R:false, K1:false, K2:true, K4:false };
+  L1:true, L2:true, L3:true, L4:true, L5:true, L6:false, L7:true, L8:true, L9:true, L10:true, L11:true, L12:true, L13:true, L14:true, L15:true, L16:true, L17:true, L18:true, L19:true, L19B:true, L20:true, L22:true, L23:true, L24:true, L25:true, L26:true, L27:!!window.POOL_EXCLUDE_ON, L31:!!window.NEW_NAME_RULE_ON, L32:true, L33:true, L34:true, L37:true, L28:true, L38:true, L40:true, L39:true, L35:true, L36:true, L30:true, L29:true, L29R:false, K1:false, K2:true, K4:false };
 const BUNDLE_GROUPS = { D:['D1','D2','D3','D4'], E:['E1','E2','E3'], F:['F1','F2','F3','F4','F5','F6'], H:['H1','H2','H3','H4','H5','H6','H7'],
-  L:['L1','L2','L3','L4','L5','L6','L7','L8','L9','L10','L11','L12','L13','L14','L15','L16','L17','L18','L19','L19B','L20','L22','L23','L24','L25','L26','L27','L29','L30','L31','L32','L33','L34','L37','L35','L36','L28','L38'], K:['K1','K2','K4'] };
+  L:['L1','L2','L3','L4','L5','L6','L7','L8','L9','L10','L11','L12','L13','L14','L15','L16','L17','L18','L19','L19B','L20','L22','L23','L24','L25','L26','L27','L29','L30','L31','L32','L33','L34','L37','L35','L36','L28','L38','L40','L39'], K:['K1','K2','K4'] };
 function setBundles(next){
   next = Object.assign({}, next||{});
   // D·E 하나로 D1~D4·E1~E3을 한꺼번에 끄고 켤 수 있다(개별 키가 있으면 그쪽이 우선).
@@ -2370,6 +2391,7 @@ function applyBundleBodyClasses(){
   try { if (document && document.body && document.body.classList) document.body.classList.toggle('l22', !!BUNDLES.L22); } catch (e) {}
   try { if (document && document.body && document.body.classList) document.body.classList.toggle('l32', !!BUNDLES.L32); } catch (e) {}   // 묶음 L32
   try { if (document && document.body && document.body.classList) document.body.classList.toggle('l36', !!BUNDLES.L36); } catch (e) {}   // 묶음 L36
+  try { if (document && document.body && document.body.classList){ document.body.classList.toggle('l39', !!BUNDLES.L39); if (!BUNDLES.L39) document.querySelectorAll('.lib-autocomplete').forEach(el => { el.style.maxHeight = ''; }); } } catch (e) {}   // 묶음 L39
   if (typeof applyL9Toolbar === 'function') applyL9Toolbar();
   if (typeof applyL17Tips === 'function') applyL17Tips();
 }
@@ -7024,16 +7046,79 @@ function renderLibraryOptions(selectEl, currentValue){
 }
 // showRentalChip: 기준단지 검색창에만 켠다(2026-09-28 세션) — 임대 비율이 문제가
 // 되는 건 그 단지를 기준단지로 고를 때라, 다른 검색창엔 넣지 않는다.
+// ---- 묶음 L39(61단계): 검색 드롭다운 높이 ----
+// 최대 = 결과 L39_MAX_ROWS개가 들어가는 높이(이름이 두 줄로 접혀도 10개). 좁은 화면(980px 이하)은 보이는 화면(키보드 제외) 높이의 L39_NARROW_VH 이내.
+// 드롭다운 아래가 스크롤 상자(넓은 화면 왼쪽 칸)나 화면 끝에 걸리면, 입력창 위쪽이 가려지지 않는 범위에서 그 상자(없으면 화면)를 스크롤해 자리를 만든다.
+// 그래도 모자라면 남은 높이로 줄이되 L39_MIN_ROWS줄은 보장한다. 결과 개수·순서·내용은 건드리지 않는다.
+const L39_MAX_ROWS = 10, L39_ROW_PX = 34, L39_NARROW_VH = 0.5, L39_MIN_ROWS = 3, L39_GAP = 8;
+function l39ClipInfo(acEl){
+  const vv = window.visualViewport;
+  let bottom = vv ? vv.offsetTop + vv.height : window.innerHeight, top = vv ? vv.offsetTop : 0, scroller = null;
+  for (let p = acEl.parentElement; p && p !== document.body && p !== document.documentElement; p = p.parentElement){
+    if (p.classList && p.classList.contains('side-block')) continue;   // 위 CSS로 잘라내지 않음
+    const s = getComputedStyle(p);
+    if (s.overflowY === 'visible' && s.overflowX === 'visible') continue;
+    const r = p.getBoundingClientRect();
+    if (r.bottom < bottom) bottom = r.bottom;
+    if (r.top > top) top = r.top;
+    if (!scroller && /(auto|scroll)/.test(s.overflowY)) scroller = p;
+  }
+  return { bottom, top, scroller };
+}
+function l39RowsHeight(acEl){   // 앞에서부터 결과 L39_MAX_ROWS개(또는 전부)가 들어가는 높이
+  const items = acEl.querySelectorAll('.lib-ac-item, .lib-ac-empty, .picker-head, .picker-more');
+  if (!items.length) return acEl.scrollHeight;
+  let n = 0, last = null;
+  for (const it of items){ if (it.classList.contains('lib-ac-item')) n++; last = it; if (n >= L39_MAX_ROWS) break; }
+  const top = acEl.getBoundingClientRect().top - acEl.scrollTop;
+  const b = last.getBoundingClientRect().bottom - top;
+  const cs = getComputedStyle(acEl);
+  return Math.ceil(b + (parseFloat(cs.borderBottomWidth) || 0) + (n >= L39_MAX_ROWS ? 0 : 0));
+}
+function fitAutocompleteL39(acEl, inputEl, allowScroll){
+  if (!BUNDLES.L39 || !acEl || acEl.hidden || !inputEl) return;
+  try {
+    const vv = window.visualViewport, vh = vv ? vv.height : window.innerHeight;
+    const narrow = window.matchMedia ? window.matchMedia('(max-width:980px)').matches : window.innerWidth <= 980;
+    const rowsH = Math.max(L39_MIN_ROWS * L39_ROW_PX, l39RowsHeight(acEl));
+    const cap = narrow ? Math.min(rowsH, Math.floor(vh * L39_NARROW_VH)) : rowsH;
+    const floor = Math.min(L39_MIN_ROWS * L39_ROW_PX, cap);
+    const want = Math.min(cap, acEl.scrollHeight);
+    let info = l39ClipInfo(acEl), ir = inputEl.getBoundingClientRect();
+    let avail = info.bottom - ir.bottom - L39_GAP;
+    if (allowScroll && avail < want){
+      acEl.style.maxHeight = want + 'px';   // 먼저 펼쳐 두면 왼쪽 칸이 스크롤할 자리가 생긴다
+      info = l39ClipInfo(acEl);
+      const room = Math.max(0, ir.top - info.top - L39_GAP);   // 입력창이 위로 가려지지 않는 만큼만
+      const d = Math.min(want - avail, room);
+      if (d > 1){
+        if (info.scroller) info.scroller.scrollTop += d; else window.scrollBy(0, d);
+        info = l39ClipInfo(acEl); ir = inputEl.getBoundingClientRect(); avail = info.bottom - ir.bottom - L39_GAP;
+      }
+    }
+    acEl.style.maxHeight = Math.round(Math.max(Math.min(cap, avail), floor)) + 'px';
+  } catch (e) {}
+}
+function refitOpenAutocompletesL39(){
+  if (!BUNDLES.L39) return;
+  try { document.querySelectorAll('.lib-autocomplete').forEach(el => { if (!el.hidden && el._l39Input) fitAutocompleteL39(el, el._l39Input, false); }); } catch (e) {}
+}
+try {
+  if (window.visualViewport && window.visualViewport.addEventListener) window.visualViewport.addEventListener('resize', refitOpenAutocompletesL39);
+  else if (window.addEventListener) window.addEventListener('resize', refitOpenAutocompletesL39);
+} catch (e) {}
+
 function wireLibrarySearch(inputEl, selectEl, renderFn, autocompleteEl, showRentalChip, opts){
   if (!inputEl || !selectEl) return;
   const pickerTarget = (opts && opts.recentTarget != null) ? opts.recentTarget : null;   // 묶음 L25: 여러 단지 비교의 칸('base' 또는 슬롯 번호)
   const doRender = renderFn || (()=>renderLibraryOptions(selectEl));
+  if (autocompleteEl) autocompleteEl._l39Input = inputEl;   // 묶음 L39: 높이 맞출 때 기준 입력창
   function updateAutocomplete(){
     if (!autocompleteEl) return;
     const filter = inputEl.value.trim();
     autocompleteEl.dataset.mode = '';
     if (!filter){
-      if (pickerTarget != null && BUNDLES.L25 && renderPickerSections(autocompleteEl, pickerSections(), autocompleteEl._pickerExpanded)) return;
+      if (pickerTarget != null && BUNDLES.L25 && renderPickerSections(autocompleteEl, pickerSections(), autocompleteEl._pickerExpanded)){ fitAutocompleteL39(autocompleteEl, inputEl, true); return; }
       autocompleteEl.hidden = true; autocompleteEl.innerHTML = ''; return;
     }
     const matches = searchEntriesL34(state.library, filter).slice(0, 20);
@@ -7052,6 +7137,7 @@ function wireLibrarySearch(inputEl, selectEl, renderFn, autocompleteEl, showRent
       ).join('');
     }
     autocompleteEl.hidden = false;
+    fitAutocompleteL39(autocompleteEl, inputEl, true);   // 묶음 L39
   }
   inputEl.addEventListener('input', ()=>{
     selectEl.dataset.filter = inputEl.value;
@@ -11166,12 +11252,115 @@ function nearestValue(arr, idx, lo, hi, dir){
   }
   return null;
 }
+// ---- 묶음 L40(61단계): 여러 단지 비교 매매가·전세가 추이 그래프의 표시 기간 ----
+// 기본값(62단계) = "모두 있는 구간": 기준·비교 단지가 모두 시세를 가진 가장 이른 달 ~ 끝.
+//   비교 단지가 없거나, 모두 있는 달이 없거나, 그 구간이 L40_DEFAULT_MIN_MONTHS개월 미만이면 전체 기간.
+// periodL40 = { key, full } 또는 { key, startYm, endYm } — 사용자가 직접 고른 기간(이번 방문에만, 저장하지 않음).
+//   key는 단지 선택(기준·비교 단지 이름)이라, 같은 선택으로 다시 그리면 유지하고 선택이 바뀌면 버리고 기본값으로 돌아간다.
+let periodL40 = null;
+const L40_MIN_SPAN = 1;   // 시작과 끝 사이 최소 칸 수(달 2개 이상 보이게)
+const L40_DEFAULT_MIN_MONTHS = 12;   // 모두 있는 구간이 이보다 짧으면 기본은 전체 기간
+function selectionKeyL40(base, comps){ return JSON.stringify([base ? base.name : null, (comps || []).map(x => x && x.c ? x.c.name : null)]); }
+function defaultRangeL40(n, commonIdx, hasComps){
+  if (!hasComps || commonIdx <= 0 || n - commonIdx < L40_DEFAULT_MIN_MONTHS) return [0, n - 1];
+  return [Math.min(commonIdx, n - 1 - L40_MIN_SPAN), n - 1];
+}
+function ymFromLabelL40(s){ const m = /^(\d{4})\.(\d{2})$/.exec(String(s)); return m ? Number(m[1]) * 100 + Number(m[2]) : null; }
+function periodSliderHtmlL40(){
+  return '<div class="period-l40" id="periodL40">'+
+    '<div class="period-l40-head"><span>표시 기간</span><b id="periodL40Label"></b>'+
+      '<span class="period-l40-btns"><button type="button" class="chart-mode-toggle" id="periodL40Common">모두 있는 구간</button>'+
+      '<button type="button" class="chart-mode-toggle" id="periodL40All">전체 기간</button></span></div>'+
+    '<div class="period-l40-track"><div class="period-l40-fill" id="periodL40Fill"></div>'+
+      '<input type="range" id="periodL40Start" min="0" max="0" step="1" value="0" aria-label="표시 시작 월">'+
+      '<input type="range" id="periodL40End" min="0" max="0" step="1" value="0" aria-label="표시 끝 월"></div>'+
+  '</div>';
+}
+// 기준·비교 단지가 모두 이 값(field)의 시세를 가진 가장 이른 달 = 단지마다 첫 달 중 가장 늦은 달. 한 곳이라도 없으면 null.
+function commonStartYmL40(base, comps, field){
+  const firsts = [base].concat((comps || []).map(x => x.c)).map(cx => { const r = cx && cx.rows ? cx.rows.find(r => r[field] != null) : null; return r ? r.ym : null; });
+  if (!firsts.length || firsts.some(v => v == null)) return null;
+  return Math.max.apply(null, firsts);
+}
+// 지금 보여 줄 구간 {s, e}(라벨 번호): 같은 단지 선택에서 사용자가 고른 것이 있으면 그것, 없으면 기본값. 선택이 바뀌었으면 고른 것을 버린다.
+function periodRangeL40(yms, base, comps, field){
+  const n = yms.length;
+  const commonYm = commonStartYmL40(base, comps, field);
+  const commonIdx = commonYm == null ? -1 : yms.findIndex(v => v >= commonYm);
+  const key = selectionKeyL40(base, comps);
+  const def = defaultRangeL40(n, commonIdx, (comps || []).length > 0);
+  let s = def[0], e = def[1];
+  if (periodL40 && periodL40.key === key){
+    if (periodL40.full){ s = 0; e = n - 1; }
+    else {
+      const a = yms.findIndex(v => v >= periodL40.startYm); s = a < 0 ? n - 1 : a;
+      e = 0; for (let i = n - 1; i >= 0; i--) if (yms[i] <= periodL40.endYm){ e = i; break; }
+      if (e - s < L40_MIN_SPAN){ s = def[0]; e = def[1]; }
+    }
+  } else periodL40 = null;   // 단지 선택이 바뀌었거나 직접 고른 적 없음 → 기본값
+  return { s, e, commonYm, commonIdx, key };
+}
+// 그래프를 만들기 전에 그 구간을 설정에 넣어 둔다 — 만든 뒤에 바꾸면 한 번 더 그려 느려지고, 등장 애니메이션이 새 범위를 덮어쓴다.
+function presetPeriodL40(cfg, base, comps, field){
+  try {
+    const labels = cfg && cfg.data && cfg.data.labels;
+    if (!labels || labels.length < 2) return;
+    const yms = labels.map(ymFromLabelL40);
+    if (yms.some(v => v == null)) return;
+    const pr = periodRangeL40(yms, base, comps, field);
+    if (pr.s === 0 && pr.e === yms.length - 1) return;
+    cfg.options.scales.x.min = pr.s; cfg.options.scales.x.max = pr.e;
+  } catch (err) {}
+}
+function wirePeriodSliderL40(chart, base, comps, field){
+  const box = document.getElementById('periodL40');
+  if (!box || !chart || !chart.data || !chart.data.labels) return null;
+  const yms = chart.data.labels.map(ymFromLabelL40), n = yms.length;
+  const sEl = document.getElementById('periodL40Start'), eEl = document.getElementById('periodL40End');
+  const label = document.getElementById('periodL40Label'), fill = document.getElementById('periodL40Fill');
+  const btnCommon = document.getElementById('periodL40Common'), btnAll = document.getElementById('periodL40All');
+  if (n < 2 || yms.some(v => v == null)){ box.hidden = true; return null; }
+  sEl.max = eEl.max = String(n - 1);
+  const pr = periodRangeL40(yms, base, comps, field);
+  const commonYm = pr.commonYm, commonIdx = pr.commonIdx, key = pr.key;
+  let s = pr.s, e = pr.e;
+  function apply(fromUser){
+    const full = s === 0 && e === n - 1;
+    const x = chart.options.scales.x;
+    if (full){ delete x.min; delete x.max; } else { x.min = s; x.max = e; }
+    if (fromUser) periodL40 = full ? { key, full: true } : { key, startYm: yms[s], endYm: yms[e] };
+    sEl.value = String(s); eEl.value = String(e);
+    sEl.style.zIndex = s > (n - 1) / 2 ? '3' : '2'; eEl.style.zIndex = s > (n - 1) / 2 ? '2' : '3';   // 겹칠 때 움직일 수 있는 손잡이가 위로
+    fill.style.left = (s / (n - 1) * 100) + '%'; fill.style.width = ((e - s) / (n - 1) * 100) + '%';
+    label.textContent = fmtYm(yms[s]) + ' ~ ' + fmtYm(yms[e]) + ' (' + (e - s + 1) + '개월)';
+    btnAll.disabled = full;
+    btnCommon.disabled = commonIdx <= 0 || (s === commonIdx && e === n - 1);
+    btnCommon.title = commonYm == null ? '모든 단지가 함께 있는 달이 없어요' : fmtYm(commonYm) + '부터';
+    if (fromUser){
+      const box2 = document.getElementById('dragBox'), res = document.getElementById('dragResult');   // 보이는 범위가 바뀌면 예전 구간 선택은 지운다
+      if (box2) box2.hidden = true; if (res) res.hidden = true;
+      try { if (chart.stop) chart.stop(); } catch (err) {}   // 진행 중인 애니메이션이 새 범위를 덮어쓰지 않게
+      chart.update('none');
+    }
+  }
+  sEl.addEventListener('input', () => { s = Math.min(Number(sEl.value), e - L40_MIN_SPAN); apply(true); });
+  eEl.addEventListener('input', () => { e = Math.max(Number(eEl.value), s + L40_MIN_SPAN); apply(true); });
+  btnCommon.addEventListener('click', () => { if (commonIdx > 0){ s = Math.min(commonIdx, n - 1 - L40_MIN_SPAN); e = n - 1; apply(true); } });
+  btnAll.addEventListener('click', () => { s = 0; e = n - 1; apply(true); });
+  apply(false);
+  { const sx = chart.scales && chart.scales.x;   // 보통은 presetPeriodL40이 만들기 전에 이미 넣어 둠 → 다시 그리지 않는다
+    if (!(s === 0 && e === n - 1) && !(sx && Math.round(sx.min) === s && Math.round(sx.max) === e)){ try { if (chart.stop) chart.stop(); } catch (err) {} chart.update('none'); } }
+  return { get range(){ return [s, e]; } };
+}
 function pixelIndexFromEvent(chart, clientX){
   const rect = chart.canvas.getBoundingClientRect();
   const px = clientX - rect.left;
   const idx = chart.scales.x.getValueForPixel(px);
   const n = chart.data.labels.length;
-  return Math.max(0, Math.min(n-1, Math.round(idx)));
+  // 묶음 L40: 표시 기간을 줄였으면 보이는 범위 안에서만 고른다(전체 기간이면 0~n-1로 지금과 같음)
+  let lo = 0, hi = n-1;
+  if (BUNDLES.L40 && chart.scales.x.min != null && chart.scales.x.max != null){ lo = Math.max(0, Math.round(chart.scales.x.min)); hi = Math.min(n-1, Math.round(chart.scales.x.max)); }
+  return Math.max(lo, Math.min(hi, Math.round(idx)));
 }
 
 let dragCleanup = null;
@@ -11351,7 +11540,7 @@ function renderActiveChart(base){
     if (growthViewActive()){ renderGrowthView(area, base, comps, field); return; }   // 묶음 L11 상승률 보기
     area.innerHTML =
       '<div class="chart-layout">'+
-        '<div class="chart-box"><div class="chart-canvas-wrap" id="chartCanvasWrap">'+
+        '<div class="chart-box'+(BUNDLES.L40 ? ' l40-box' : '')+'"><div class="chart-canvas-wrap" id="chartCanvasWrap">'+
           '<canvas id="mainCanvas"></canvas>'+
           '<div class="drag-select-box" id="dragBox" hidden></div>'+
           '<div class="drag-result" id="dragResult" hidden>'+
@@ -11361,7 +11550,7 @@ function renderActiveChart(base){
             '</div>'+
             '<div class="drag-result-list" data-role="dragList"></div>'+
           '</div>'+
-        '</div></div>'+
+        '</div>'+(BUNDLES.L40 ? periodSliderHtmlL40() : '')+'</div>'+
         '<div class="recent-box" id="recentTable"></div>'+
       '</div>';
     const ratioField = state.activeChart==='sale' ? 'sale' : 'jeonse';
@@ -11375,12 +11564,14 @@ function renderActiveChart(base){
     const cfg = priceChartConfig(base, comps, field, ratioField, BUNDLES.L5 ? l5Fair : showFair, benchmarkOverlay, BUNDLES.L5
       ? { fairKind: l5Kind || 'bench', fairBench: l5Bench, ownBench: !!BUNDLES.L30 }
       : { compFairToo: fairCompAlsoOn });
+    if (BUNDLES.L40) presetPeriodL40(cfg, base, comps, field);   // 묶음 L40: 만들기 전에 표시 기간(기본 = 모두 있는 구간)
     charts.mainCanvas = new Chart(document.getElementById('mainCanvas'), cfg);
     if (fairNoteEl) fairNoteEl.innerHTML = BUNDLES.L5 ? (BUNDLES.L30 ? (l5Fair && l5Kind ? fairMenuOutlookNoteL30(base, comps, ratioField, l5Kind) : '') : fairMenuOutlookNote(base, comps, ratioField, l5Fair, l5Kind))
       : buildFairOutlookNote(base, comps, ratioField, showFair, benchmarkUsable);
     document.getElementById('recentTable').innerHTML = buildRecentTable(base, comps, field, ratioField, benchmarkOverlay, (BUNDLES.L5 && BUNDLES.L30) ? ((l5Fair && l5Kind) || 'bench') : undefined);
     const dragResult = document.getElementById('dragResult');
     dragCleanup = wireDragSelect(charts.mainCanvas, document.getElementById('chartCanvasWrap'), document.getElementById('dragBox'), dragResult);
+    if (BUNDLES.L40) wirePeriodSliderL40(charts.mainCanvas, base, comps, field);   // 묶음 L40
     document.getElementById('dragResultClear').addEventListener('click', ()=>{
       dragResult.hidden = true;
       document.getElementById('dragBox').hidden = true;
@@ -11957,6 +12148,7 @@ function renderPickerSections(acEl, sections, expanded){
 function pickerExpand(acEl, key){
   acEl._pickerExpanded = Object.assign({}, acEl._pickerExpanded || {}, { [key]: true });
   renderPickerSections(acEl, pickerSections(), acEl._pickerExpanded);
+  fitAutocompleteL39(acEl, acEl._l39Input, true);   // 묶음 L39: "더 보기"로 길어지면 다시 맞춤
 }
 function pickRecentInto(target, id, p, selectEl, inputEl, doRender){
   const entry = state.library.find(x => x && x.id === id);
