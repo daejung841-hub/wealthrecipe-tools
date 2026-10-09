@@ -743,6 +743,21 @@ body.l17 .btn-tip-pair .info-icon.tip-unified.tip-open::before{left:50%;right:au
 .tier-seg{flex:1;text-align:center;font-size:9.5px;line-height:1.4;padding:3px 2px;border-radius:5px;background:var(--neutral-bg);color:var(--ink-faint);}
 .tier-seg.current{background:var(--ink);color:var(--surface);font-weight:700;}
 .tier-bench-note{font-size:11px;color:var(--ink-faint);line-height:1.45;margin:-2px 0 6px;}
+/* 묶음 L44(65단계): 동조율 등급 색 — 좋음 계열 초록, 보통 노랑, 나쁨 계열 빨강. 글자는 본문색, 색은 배경·테두리(대비 확보). */
+body.l44 .sync-badge.tier-mid{background:var(--warn-bg);color:var(--warn);}
+body.l44 .sync-badge.tier-low, body.l44 .sync-badge.tier-veryLow{background:var(--bad-bg);color:var(--bad);}
+body.l44 .sync-badge.estimated{background:transparent;color:var(--ink-muted);}   /* 추정 배지는 예전처럼 점선·투명(색은 옆 "추정 상승률" 박스로) */
+body.l44 .sync-actual-tag.tier-high, body.l44 .sync-actual-tag.tier-veryHigh, body.l44 .sync-est-tag.tier-high, body.l44 .sync-est-tag.tier-veryHigh{background:var(--good-bg);border-color:var(--good);color:var(--ink);}
+body.l44 .sync-actual-tag.tier-mid, body.l44 .sync-est-tag.tier-mid{background:var(--warn-bg);border-color:var(--warn);color:var(--ink);}
+body.l44 .sync-actual-tag.tier-low, body.l44 .sync-actual-tag.tier-veryLow, body.l44 .sync-est-tag.tier-low, body.l44 .sync-est-tag.tier-veryLow{background:var(--bad-bg);border-color:var(--bad);color:var(--ink);}
+body.l44 .tier-seg{color:var(--ink-muted);}
+body.l44 .tier-seg.tier-high, body.l44 .tier-seg.tier-veryHigh{background:var(--good-bg);}
+body.l44 .tier-seg.tier-mid{background:var(--warn-bg);}
+body.l44 .tier-seg.tier-low, body.l44 .tier-seg.tier-veryLow{background:var(--bad-bg);}
+body.l44 .tier-seg.current{color:var(--ink);font-weight:800;box-shadow:inset 0 0 0 2px var(--ink);}
+body.l44 .tier-seg.current.tier-high, body.l44 .tier-seg.current.tier-veryHigh{box-shadow:inset 0 0 0 2px var(--good);}
+body.l44 .tier-seg.current.tier-mid{box-shadow:inset 0 0 0 2px var(--warn);}
+body.l44 .tier-seg.current.tier-low, body.l44 .tier-seg.current.tier-veryLow{box-shadow:inset 0 0 0 2px var(--bad);}
 .sync-detail{font-size:11.5px;color:var(--ink-faint);font-family:var(--font-mono);font-variant-numeric:tabular-nums;}
 .sync-msg{font-size:12px;color:var(--ink-muted);line-height:1.5;}
 .hedge-block{margin-top:8px;}
@@ -1136,6 +1151,7 @@ html.guide-open, body.guide-open{overflow:hidden;}
 .guide-actions .btn.guide-start{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);}
 /* 묶음 L36(55단계): 쓰는 사람이 없는 칸을 화면에서만 숨긴다 — 기준 단지 맨 위 선택 상자, 비교 단지 칸의 "라이브러리에서 불러오기…" 선택 상자, 단지 라이브러리·공용 라이브러리 연동 칸. 코드·상태·select는 그대로(검색 선택·가져오기·복원이 쓴다). */
 body.l36 #basePreset, body.l36 .lib-select-row, body.l36 #libBlock, body.l36 #gasBlock{display:none !important;}
+body.l36 #baseLibSelect, body.l36 .lib-row:has(> #baseLibSelect){display:none !important;}   /* 65단계 수정판: 기준 단지 칸 "라이브러리에서 불러오기" 상자(검색으로 고름) */
 /* 묶음 L32(50단계): 폴드 커버(344~390px) 등 좁은 폭. 600px 이하에서만(쌍둥이·심화분석 세로 쌓기는 820px 이하) — 넓은 화면은 그대로. */
 @media (max-width:820px){
   body.l32 .single-diag-action-row{flex-direction:column;}
@@ -1226,6 +1242,7 @@ body.l36 #basePreset, body.l36 .lib-select-row, body.l36 #libBlock, body.l36 #ga
             <button class="btn small fair-cta" id="singleRatioAvgToggle">📊 평균선 표시(전세가율)</button>
             <button class="btn small fair-cta" id="singleRatioPeakToggle">📈 최고점 표시(전세가율)</button>
             <button class="btn small fair-cta" id="singleRatioTroughToggle">📉 최저점 표시(전세가율)</button>
+            <button class="btn small fair-cta" id="singleRatioPriceToggleL45" style="display:none">📈 매매가·전세가 함께 보기</button>
             <button class="btn small fair-cta" id="singleBenchmarkOverlayToggle">🏙️ 선도단지 표시</button>
             <button class="btn small fair-cta" id="singleAxisSplitToggle" style="display:none" title="선도단지 선을 오른쪽 축에 따로 그려 단지 선·적정가 선을 크게 봅니다">↔️ 축 분리</button>
             <span class="info-icon info-icon-lead" tabindex="0"><span class="info-tip-html">
@@ -1372,6 +1389,7 @@ body.l36 #basePreset, body.l36 .lib-select-row, body.l36 #libBlock, body.l36 #ga
               <button class="btn small fair-cta" id="ratioAvgToggle">📊 평균선 표시(전세가율)</button>
               <button class="btn small fair-cta" id="ratioPeakToggle">📈 최고점 표시(전세가율)</button>
               <button class="btn small fair-cta" id="ratioTroughToggle">📉 최저점 표시(전세가율)</button>
+              <button class="btn small fair-cta" id="ratioPriceToggleL45" style="display:none">📈 매매가·전세가 함께 보기</button>
               <button class="btn small fair-cta" id="benchmarkOverlayToggle">🏙️ 선도단지 표시</button>
               <button class="btn small fair-cta" id="fairCompAlsoToggle" style="display:none" title="선도단지 대비 적정가에 더해, 고른 기준단지 대비 적정가도 같은 점선으로(연한 색) 함께 봅니다">(비교단지 대비 적정가도 보기)</button>
               <span class="info-icon info-icon-lead" tabindex="0"><span class="info-tip-html">
@@ -2365,9 +2383,9 @@ function seoulHistoricalAvg(){
 // 라이브는 주소 플래그를 읽지 않으므로 이 기본값이 그대로 동작한다.
 const BUNDLES = { A:false, B:false, C:false, D1:false, D2:false, D3:false, D4:false, E1:true, E2:false, E3:true, F1:true, F2:true, F3:true, F4:true, F5:true, F6:true,
   H1:false, H2:true, H3:true, H4:true, H5:true, H6:true, H7:true,
-  L1:true, L2:true, L3:true, L4:true, L5:true, L6:false, L7:true, L8:true, L9:true, L10:true, L11:true, L12:true, L13:true, L14:true, L15:true, L16:true, L17:true, L18:true, L19:true, L19B:true, L20:true, L22:true, L23:true, L24:true, L25:true, L26:true, L27:!!window.POOL_EXCLUDE_ON, L31:!!window.NEW_NAME_RULE_ON, L32:true, L33:true, L34:true, L37:true, L28:true, L38:true, L40:true, L39:true, L35:true, L36:true, L30:true, L29:true, L29R:false, K1:false, K2:true, K4:false };
+  L1:true, L2:true, L3:true, L4:true, L5:true, L6:false, L7:true, L8:true, L9:true, L10:true, L11:true, L12:true, L13:true, L14:true, L15:true, L16:true, L17:true, L18:true, L19:true, L19B:true, L20:true, L22:true, L23:true, L24:true, L25:true, L26:true, L27:!!window.POOL_EXCLUDE_ON, L31:!!window.NEW_NAME_RULE_ON, L32:true, L33:true, L34:true, L37:true, L28:true, L38:true, L40:true, L39:true, L41:true, L42:true, L43:true, L44:true, L45:true, L35:true, L36:true, L30:true, L29:true, L29R:false, K1:false, K2:true, K4:false };
 const BUNDLE_GROUPS = { D:['D1','D2','D3','D4'], E:['E1','E2','E3'], F:['F1','F2','F3','F4','F5','F6'], H:['H1','H2','H3','H4','H5','H6','H7'],
-  L:['L1','L2','L3','L4','L5','L6','L7','L8','L9','L10','L11','L12','L13','L14','L15','L16','L17','L18','L19','L19B','L20','L22','L23','L24','L25','L26','L27','L29','L30','L31','L32','L33','L34','L37','L35','L36','L28','L38','L40','L39'], K:['K1','K2','K4'] };
+  L:['L1','L2','L3','L4','L5','L6','L7','L8','L9','L10','L11','L12','L13','L14','L15','L16','L17','L18','L19','L19B','L20','L22','L23','L24','L25','L26','L27','L29','L30','L31','L32','L33','L34','L37','L35','L36','L28','L38','L40','L39','L41','L42','L43','L44','L45'], K:['K1','K2','K4'] };
 function setBundles(next){
   next = Object.assign({}, next||{});
   // D·E 하나로 D1~D4·E1~E3을 한꺼번에 끄고 켤 수 있다(개별 키가 있으면 그쪽이 우선).
@@ -2391,6 +2409,7 @@ function applyBundleBodyClasses(){
   try { if (document && document.body && document.body.classList) document.body.classList.toggle('l22', !!BUNDLES.L22); } catch (e) {}
   try { if (document && document.body && document.body.classList) document.body.classList.toggle('l32', !!BUNDLES.L32); } catch (e) {}   // 묶음 L32
   try { if (document && document.body && document.body.classList) document.body.classList.toggle('l36', !!BUNDLES.L36); } catch (e) {}   // 묶음 L36
+  try { if (document && document.body && document.body.classList) document.body.classList.toggle('l44', !!BUNDLES.L44); } catch (e) {}   // 묶음 L44
   try { if (document && document.body && document.body.classList){ document.body.classList.toggle('l39', !!BUNDLES.L39); if (!BUNDLES.L39) document.querySelectorAll('.lib-autocomplete').forEach(el => { el.style.maxHeight = ''; }); } } catch (e) {}   // 묶음 L39
   if (typeof applyL9Toolbar === 'function') applyL9Toolbar();
   if (typeof applyL17Tips === 'function') applyL17Tips();
@@ -3708,6 +3727,10 @@ function syncTier(rate){
 }
 const SYNC_TIER_LABEL = { high:'동조율 높음', mid:'동조율 보통', low:'동조율 낮음',
   veryHigh:'동조율 아주좋음', veryLow:'동조율 아주나쁨' };
+// 묶음 L42(64단계): 배지 낱말을 구간표(아주나쁨·나쁨·보통·좋음·아주좋음)·사용법·단지 요약 인덱스와 같게. 끄면 위 예전 낱말.
+const SYNC_TIER_LABEL_L42 = { high:'동조율 좋음', mid:'동조율 보통', low:'동조율 나쁨',
+  veryHigh:'동조율 아주좋음', veryLow:'동조율 아주나쁨' };
+function syncTierLabelL42(tier){ return ((typeof BUNDLES !== 'undefined' && BUNDLES.L42) ? SYNC_TIER_LABEL_L42 : SYNC_TIER_LABEL)[tier]; }
 const SYNC_EASY_SUMMARY = {
   veryLow: '선도단지가 100 오를 때 이 단지는 절반도 안 올랐어요.',
   low: '선도단지보다 오름폭이 눈에 띄게 작았어요.',
@@ -5768,7 +5791,7 @@ function buildEstRefCardHtml(r, idx, usedInAvg, mode, namePrefix, rangeMode, sho
     (mode==='price' ? '' : '<button class="chart-mode-toggle" data-'+namePrefix+'-item-bench-toggle="'+idx+'">'+(showBenchLine?'🏙️선도단지 끄기':'🏙️선도단지 보기')+'</button>')+
   '</div>';
   return '<div class="twin-card">'+
-    '<div class="twin-card-head">'+(usedInAvg?'<span class="twin-match-tag similar">평균 반영</span> ':'<span class="twin-match-tag">참고</span> ')+lowConfTag+esc(r.referenceName)+esc(regionSuffix(r.referenceName))+rentalHeavyChip(r.referenceName)+' <span class="cell-ratio">(상관계수 '+r.correlation.toFixed(2)+', 겹치는 구간 '+r.overlapMonths+'개월'+(r.tier?', '+SYNC_TIER_LABEL[r.tier]:'')+')</span></div>'+
+    '<div class="twin-card-head">'+(usedInAvg?'<span class="twin-match-tag similar">평균 반영</span> ':'<span class="twin-match-tag">참고</span> ')+lowConfTag+esc(r.referenceName)+esc(regionSuffix(r.referenceName))+rentalHeavyChip(r.referenceName)+' <span class="cell-ratio">(상관계수 '+r.correlation.toFixed(2)+', 겹치는 구간 '+r.overlapMonths+'개월'+(r.tier?', '+syncTierLabelL42(r.tier):'')+')</span></div>'+
     selectReasonHtml+
     itemToggleRowHtml+
     '<div class="twin-chart-note">'+(mode==='price'?'실제 가격(억원) · 같은 축 공유':'양쪽 모두 겹치는 구간 첫 달 대비 상승률(%) · 그래프의 지점을 클릭하면 그 지점을 새 기준점으로 다시 계산합니다')+benchLineNoteHtml+rangeNoteHtml+'</div>'+
@@ -6358,6 +6381,14 @@ let seed25State = 'idle'; // 'idle' | 'loading' | 'loaded' | 'error'
 let seed25Promise = null;
 let SEED25_BY_ID = new Map();
 let _seed25IdByText = new Map();
+// ---- 묶음 L43(64단계): 데이터 파일을 못 받았을 때 안내(모바일 안전망 M2의 P3·P10) ----
+// 단지 데이터(seedComplexes.js)는 본 스크립트보다 먼저 읽는 파일이라, 본 스크립트가 돌 때 window.SEED_COMPLEXES가 없으면 받지 못한 것이다.
+const SEED_FAIL_TEXT_L43 = '단지 데이터를 불러오지 못했어요. 인터넷 연결을 확인하고 새로고침해 주세요.';
+const SEED25_FAIL_SLOT_TEXT_L43 = '25평 시세를 불러오지 못했어요. "25평 다시 시도"를 눌러 주세요';
+function seedMissingL43(){ return !!(typeof BUNDLES !== 'undefined' && BUNDLES.L43 && !Array.isArray(window.SEED_COMPLEXES)); }
+function seed25FailedL43(){ return !!(typeof BUNDLES !== 'undefined' && BUNDLES.L43 && seed25State === 'error'); }
+function onSeed25FailL43(){ if (typeof BUNDLES !== 'undefined' && BUNDLES.L43) rerenderCurrentScreen(); }   // 실패 뒤 칩·칸을 다시 그린다
+
 function loadSeed25(){
   if (seed25State === 'loaded') return Promise.resolve();
   if (seed25Promise) return seed25Promise;
@@ -6494,7 +6525,7 @@ function fillPending25(){
 }
 function resumePendingPyeong(){
   if (!hasPending25()) return;
-  loadSeed25().then(() => { fillPending25(); saveState(); rerenderCurrentScreen(); }).catch(() => {});
+  loadSeed25().then(() => { fillPending25(); saveState(); rerenderCurrentScreen(); }).catch(onSeed25FailL43);
 }
 function setSlotData(target, v){
   if (target === 'single'){
@@ -6528,7 +6559,7 @@ function applyPyeongNow(target, pyeong, expectedId){
 }
 function switchPyeong(target, pyeong, expectedId){
   if (pyeong === 25 && seed25State !== 'loaded'){
-    loadSeed25().then(() => { if (applyPyeongNow(target, 25, expectedId)){ saveState(); rerenderCurrentScreen(); } }).catch(() => {});
+    loadSeed25().then(() => { if (applyPyeongNow(target, 25, expectedId)){ saveState(); rerenderCurrentScreen(); } }).catch(onSeed25FailL43);
     rerenderCurrentScreen(); // 칩에 "불러오는 중" 표시
     return;
   }
@@ -6542,7 +6573,7 @@ function applyDefaultPyeong(target){
   const c = chipDataOf(ref.id);
   if (!c || c[6] !== 25 || !c[5]) return;
   if (seed25State === 'loaded') applyPyeongNow(target, 25, ref.id);
-  else loadSeed25().then(() => { if (applyPyeongNow(target, 25, ref.id)){ saveState(); rerenderCurrentScreen(); } }).catch(() => {});
+  else loadSeed25().then(() => { if (applyPyeongNow(target, 25, ref.id)){ saveState(); rerenderCurrentScreen(); } }).catch(onSeed25FailL43);
 }
 document.addEventListener('click', (e) => {
   const btn = e.target.closest && e.target.closest('[data-pyeong-switch]');
@@ -6552,7 +6583,7 @@ document.addEventListener('click', (e) => {
     return;
   }
   const retry = e.target.closest && e.target.closest('[data-pyeong-retry]');
-  if (retry){ loadSeed25().then(() => { fillPending25(); saveState(); rerenderCurrentScreen(); }).catch(() => {}); renderPyeongNotice(); return; }
+  if (retry){ loadSeed25().then(() => { fillPending25(); saveState(); rerenderCurrentScreen(); }).catch(onSeed25FailL43); renderPyeongNotice(); return; }
   const close = e.target.closest && e.target.closest('[data-pyeong-notice-close]');
   if (close){ _pyeongNotices = []; renderPyeongNotice(); }
 });
@@ -6635,8 +6666,10 @@ function pyeongChipsHtml(slot, target){
   if (has25){
     const tip = (b ? '25평대(전용 '+fmtM2Range(b[1], b[2])+') 전체 '+b[0]+'세대\n' : '') + basis25Text;
     const label = '<b>25평</b>'+(b ? b[0]+'세대' : '');
-    if (cur === 25 && ref.pending) out.push('<span class="pyeong-chip current" title="'+esc(tip)+'"><b>25평</b>불러오는 중…</span>');
+    if (cur === 25 && ref.pending && seed25FailedL43()) out.push('<button type="button" class="pyeong-chip current" data-pyeong-retry="1" title="25평 시세를 불러오지 못했어요. 누르면 다시 불러와요"><b>25평</b>다시 시도</button>');   // 묶음 L43(P10)
+    else if (cur === 25 && ref.pending) out.push('<span class="pyeong-chip current" title="'+esc(tip)+'"><b>25평</b>불러오는 중…</span>');
     else if (cur === 25) out.push('<span class="pyeong-chip current" title="'+esc(tip)+'">'+label+'</span>');
+    else if (seed25FailedL43()) out.push('<button type="button" class="pyeong-chip switchable" title="25평 시세를 불러오지 못했어요. 누르면 다시 불러와요"'+btnAttrs(25)+'><b>25평</b>다시 시도</button>');   // 묶음 L43(P10)
     else if (seed25State === 'loading') out.push('<button type="button" class="pyeong-chip" disabled title="25평 시세를 불러오는 중입니다"><b>25평</b>불러오는 중…</button>');
     else out.push('<button type="button" class="pyeong-chip switchable" title="'+esc(tip+'\n클릭하면 25평 시세로 바꿉니다')+'"'+btnAttrs(25)+'>'+label+'</button>');
   }
@@ -6685,7 +6718,7 @@ function renderBaseStatus(base){
   renderBaseFairSummary(base);
   if (!base.rows.length){
     el.className = 'status-line';
-    el.innerHTML = '<span class="dot"></span><span>데이터를 붙여넣어주세요</span>';
+    el.innerHTML = '<span class="dot"></span><span>'+((state.basePending25 && seed25FailedL43()) ? esc(SEED25_FAIL_SLOT_TEXT_L43) : '데이터를 붙여넣어주세요')+'</span>';   // 묶음 L43(P10)
     return;
   }
   el.className = 'status-line ok';
@@ -6753,7 +6786,7 @@ function renderCompareTabs(base){
         '<input type="file" data-role="uploadInput" accept=".xlsx,.xls" multiple hidden>'+
       '</div>'+
       '<div class="status-line'+(comp.rows.length?' ok':'')+'">'+
-        '<span class="dot"></span><span>'+(comp.rows.length ? comp.rows.length+'개월 · '+fmtYm(comp.rows[0].ym)+'~'+fmtYm(comp.rows[comp.rows.length-1].ym) : (state.compares[i].pending25 ? '25평 시세를 불러오는 중…' : '데이터 없음'))+'</span>'+seedTag+
+        '<span class="dot"></span><span>'+(comp.rows.length ? comp.rows.length+'개월 · '+fmtYm(comp.rows[0].ym)+'~'+fmtYm(comp.rows[comp.rows.length-1].ym) : (state.compares[i].pending25 ? (seed25FailedL43() ? esc(SEED25_FAIL_SLOT_TEXT_L43) : '25평 시세를 불러오는 중…') : '데이터 없음'))+'</span>'+seedTag+
       '</div>'+
       '<div class="common-range" data-role="common"></div>';
     slotsEl.appendChild(panel);
@@ -7122,7 +7155,9 @@ function wireLibrarySearch(inputEl, selectEl, renderFn, autocompleteEl, showRent
       autocompleteEl.hidden = true; autocompleteEl.innerHTML = ''; return;
     }
     const matches = searchEntriesL34(state.library, filter).slice(0, 20);
-    if (!matches.length){
+    if (!matches.length && seedMissingL43()){
+      autocompleteEl.innerHTML = '<div class="lib-ac-empty">'+esc(SEED_FAIL_TEXT_L43)+'</div>';   // 묶음 L43(P3)
+    } else if (!matches.length){
       // 검색해도 안 나오면 "KB부동산에서 직접 확인" 경로를 안내한다(2026-09
       // 세션) — kbland.kr은 검색이 클라이언트 자동완성 기반이라(직접 확인:
       // Enter로 제출해도 URL에 검색어가 남지 않음) 단지명을 쿼리 파라미터로
@@ -7509,8 +7544,8 @@ function buildDiagCardBody(i, comp, r, sync, wide, estimate, benchStatusHtml, ke
       '<div class="sync-block">'+
         '<div class="sync-head">'+
           '<span class="k">동조율 <span class="info-icon" tabindex="0" data-tip="'+esc(syncTooltipText())+'">ⓘ</span></span>'+
-          '<span class="sync-est-tag">추정 상승률 '+(estimate.avgRawRise!=null?estimate.avgRawRise.toFixed(1)+'%':'—')+'</span>'+
-          '<span class="sync-badge estimated tier-'+estimate.tier+'">'+(estimate.tier?SYNC_TIER_LABEL[estimate.tier]:estimate.rate.toFixed(1)+'%')+'</span>'+
+          '<span class="sync-est-tag'+((BUNDLES.L44 && estimate.tier) ? ' tier-'+estimate.tier : '')+'">추정 상승률 '+(estimate.avgRawRise!=null?estimate.avgRawRise.toFixed(1)+'%':'—')+'</span>'+
+          '<span class="sync-badge estimated tier-'+estimate.tier+'">'+(estimate.tier?syncTierLabelL42(estimate.tier):estimate.rate.toFixed(1)+'%')+'</span>'+
         '</div>'+
         (BUNDLES.H5
           // H5: 결론 한 줄 + "비슷하게 움직인 단지로 추정한 값" 한 줄만 보이고, 구간표·해설·준거단지 설명은 상세보기로.
@@ -7575,8 +7610,8 @@ function buildDiagCardBody(i, comp, r, sync, wide, estimate, benchStatusHtml, ke
       '<div class="sync-block">'+
         '<div class="sync-head">'+
           '<span class="k">동조율 <span class="info-icon" tabindex="0" data-tip="'+esc(syncTooltipText())+'">ⓘ</span></span>'+
-          '<span class="sync-actual-tag">실측 상승률 '+sync.compCycle.rise.toFixed(1)+'%</span>'+
-          '<span class="sync-badge tier-'+sync.tier+'">'+SYNC_TIER_LABEL[sync.tier]+((BUNDLES.L29 && BUNDLES.L29R && comp && comp.name && legacyBenchGroupForTarget(stripPyeongSuffix(comp.name)).groupKey==='rebuild') ? ' · 오래된 단지라 참고' : '')+'</span>'+
+          '<span class="sync-actual-tag'+((BUNDLES.L44 && sync.tier) ? ' tier-'+sync.tier : '')+'">실측 상승률 '+sync.compCycle.rise.toFixed(1)+'%</span>'+
+          '<span class="sync-badge tier-'+sync.tier+'">'+syncTierLabelL42(sync.tier)+((BUNDLES.L29 && BUNDLES.L29R && comp && comp.name && legacyBenchGroupForTarget(stripPyeongSuffix(comp.name)).groupKey==='rebuild') ? ' · 오래된 단지라 참고' : '')+'</span>'+
         '</div>'+
         (BUNDLES.H5
           // H5: 결론 한 줄만 보이고 5단계 구간표·긴 해설·기간 숫자는 상세보기(기본 접힘)로.
@@ -8772,7 +8807,7 @@ function renderSingleDiag(name){
   // 사라져 orphan 상태로 남는다(2026-09-17 세션, 항목 2).
   closeSidePanel();
   if (!name){
-    headEl.innerHTML = ''; resultEl.innerHTML = '';
+    headEl.innerHTML = seedMissingL43() ? '<div class="empty-state">'+esc(SEED_FAIL_TEXT_L43)+'</div>' : ''; resultEl.innerHTML = '';   // 묶음 L43(P3)
     if (chartSectionEl) chartSectionEl.style.display = 'none';
     return;
   }
@@ -8799,7 +8834,7 @@ function renderSingleDiag(name){
       renderSingleDiag(plain);
       return;
     }
-    headEl.innerHTML = BUNDLES.L33 ? '<div class="empty-state">저장된 단지 "'+esc(name)+'"을(를) 찾을 수 없어요. 위 검색창에서 다시 검색해 주세요.</div>' : '<div class="empty-state">"'+esc(name)+'" 단지의 시세 데이터를 찾을 수 없습니다.</div>';
+    headEl.innerHTML = seedMissingL43() ? '<div class="empty-state">'+esc(SEED_FAIL_TEXT_L43)+'</div>' : BUNDLES.L33 ? '<div class="empty-state">저장된 단지 "'+esc(name)+'"을(를) 찾을 수 없어요. 위 검색창에서 다시 검색해 주세요.</div>' : '<div class="empty-state">"'+esc(name)+'" 단지의 시세 데이터를 찾을 수 없습니다.</div>';
     resultEl.innerHTML = '';
     if (chartSectionEl) chartSectionEl.style.display = 'none';
     return;
@@ -9110,9 +9145,14 @@ const SINGLE_L12_TEXT = {
 };
 let singleFairDrawable = true;   // 지금 단일 진단 대상의 적정가 선을 그릴 수 있는지(renderSingleActiveChart가 정한다)
 let singleFairBlockedWhy = '';
+// 묶음 L41(63단계): 이력 부족(L28) 단지는 적정가 점선이 처음엔 꺼짐. 그 단지에서 켜면 singleFairShortOnL41(단지 이름)에 남겨 이번 방문 동안 유지(저장 안 함).
+// 이 단지에서 누른 것은 다른 단지의 설정(state.singleFairLineOverride)을 바꾸지 않는다. renderSingleActiveChart가 singleShortL41을 정한다.
+let singleShortL41 = false, singleShortKeyL41 = '';
+const singleFairShortOnL41 = new Set();
 function singleFairOn(){
   const v = state.singleFairLineOverride;
   if (!BUNDLES.L12) return v === null ? false : v;
+  if (BUNDLES.L41 && singleShortL41) return singleFairShortOnL41.has(singleShortKeyL41) && singleFairDrawable;
   return (v === null ? true : v) && singleFairDrawable;
 }
 function singleBenchLineVisible(){ return !BUNDLES.L12 || state.singleBenchLineOn !== false; }
@@ -9122,7 +9162,8 @@ function updateSingleAxisSplitToggle(){
   const isPriceChart = state.singleActiveChart==='sale' || state.singleActiveChart==='jeonse';
   const l12 = typeof BUNDLES !== 'undefined' && BUNDLES.L12;   // 플래그가 없는 환경(함수만 꺼내 쓰는 테스트)은 예전 동작
   const drawable = typeof singleFairDrawable === 'undefined' || singleFairDrawable;
-  const fairOn = state.singleFairLineOverride === null ? !!(l12 && drawable) : !!(state.singleFairLineOverride && (!l12 || drawable));
+  const fairOn = (typeof BUNDLES !== 'undefined' && BUNDLES.L41 && singleShortL41) ? singleFairOn()   // 묶음 L41
+    : state.singleFairLineOverride === null ? !!(l12 && drawable) : !!(state.singleFairLineOverride && (!l12 || drawable));
   const l19b = typeof BUNDLES !== 'undefined' && BUNDLES.L19B;   // 27단계: 상승률 겹쳐보기는 적정가를 꺼도 쓸 수 있다(점선만 빠짐)
   btn.style.display = (isPriceChart && (fairOn || l19b)) ? '' : 'none'; // 적정가를 켠 가격 그래프에서만 의미가 있다(L19B는 가격 그래프면 항상)
   // 묶음 L12: 선도단지 선을 끄면 모양 겹쳐보기도 꺼지고 비활성(선도단지 선이 있어야 쓸 수 있다)
@@ -9275,10 +9316,13 @@ function renderSingleActiveChart(bench, target){
     const av = fairMenuAvailability(base, comps, base, state.singleActiveChart==='jeonse' ? 'jeonse' : 'sale');
     singleFairDrawable = av.bench.ok; singleFairBlockedWhy = av.bench.ok ? '' : av.bench.reason;
   } else { singleFairDrawable = true; singleFairBlockedWhy = ''; }
+  singleShortL41 = false; singleShortKeyL41 = '';   // 묶음 L41: 이 대상이 이력 부족이면 적정가 점선 기본 꺼짐
+  if (BUNDLES.L41 && BUNDLES.L28 && target){ try { singleShortL41 = isShortHistoryL28(computeSlot(base, target)); singleShortKeyL41 = target.name || ''; } catch (e) { singleShortL41 = false; } }
   updateSingleFairLineToggle();
   updateSingleRatioAvgToggle();
   updateSingleRatioPeakToggle();
   updateSingleRatioTroughToggle();
+  updateRatioPriceToggleL45('singleRatioPriceToggleL45', state.singleActiveChart==='jeonseRatioSelf', singleRatioPriceOnL45);   // 묶음 L45
   updateSingleBenchmarkOverlayToggle();
   updateSingleAxisSplitToggle();
   const fairNoteEl = document.getElementById('singleFairOutlookNote');
@@ -9352,6 +9396,7 @@ function renderSingleActiveChart(bench, target){
       '<div class="common-range" id="singleRatioNote"></div>'+
       '<div class="cards-grid" style="margin-top:14px;">'+cardsHtml+'</div>';
     const cfg = jeonseRatioChartConfig(entries, state.singleRatioPeakOn, state.singleRatioTroughOn, state.singleRatioAvgOn);
+    if (BUNDLES.L45 && singleRatioPriceOnL45) addRatioPriceLinesL45(cfg, entries, 'single');   // 묶음 L45
     charts.singleMainCanvas = new Chart(document.getElementById('singleMainCanvas'), cfg);
     document.getElementById('singleRatioNote').textContent = state.singleRatioAvgOn ? '서울시 평균은 현재 라이브러리에 등록된 단지 기준 근사치이며, 실제 서울 전체 통계와 다를 수 있습니다.' : '';
     return;
@@ -9380,7 +9425,7 @@ function setTopMode(mode){
   if (mode === 'single' && typeof BUNDLES !== 'undefined' && BUNDLES.L26){ try { hideRedundantSingleBenchSelect(); } catch (e) {} }
   if (mode === 'single' && state.singleTargetName){
     renderSingleDiag(state.singleTargetName);
-  }
+  } else if (mode === 'single' && seedMissingL43()) renderSingleDiag('');   // 묶음 L43(P3): 고른 단지가 없어도 데이터 실패 안내
   if (mode === 'favorites') renderFavoritesTab();
 }
 
@@ -10649,7 +10694,13 @@ function fairMenuOutlookNote(base, comps, ratioField, showFair, kind){
 }
 // 묶음 L30: 메뉴 기준 그대로의 한 줄 문구. 선도단지 대비 = 기준단지·비교단지 모두 자기 선도단지 결론, 기준단지 대비 = 비교단지만 기준단지 대비 금액.
 // 결론 문장에 적정가 금액이 없으면(저평가·고평가 문장 등) 앞에 '적정 약 N억'을 붙인다 — 줄마다 금액이 보이게
+// 묶음 L41: 이력 부족 단지는 적정가 금액·판정 대신 이 한 줄(여러 단지 비교 적정가 메뉴 안내)
+function fairShortNoteL41(r){
+  const m = r && r.diag && r.diag.monthsL28 != null ? r.diag.monthsL28 : null;
+  return '<span class="badge neutral" style="font-size:11px;padding:0 6px;">이력 부족</span> '+esc((m != null ? '시세 기록이 '+m+'개월뿐이라' : '시세 기록이 짧아')+' 적정가 선은 참고로만 봐 주세요.');
+}
 function fairNoteWithAmountL30(r, ratioField){
+  if (BUNDLES.L41 && isShortHistoryL28(r)) return fairShortNoteL41(r);
   const concl = fairNoteConclusionText(r);
   const fair = ratioField==='sale' ? r.fairSale : r.fairJeonse;
   return ((fair!=null && concl.indexOf('적정가 약') < 0) ? '적정 약 '+(fair/10000).toFixed(1)+'억 · ' : '')+concl;
@@ -10670,7 +10721,8 @@ function fairMenuOutlookNoteL30(base, comps, ratioField, kind){
       const fair = r.error ? null : (ratioField==='sale' ? r.fairSale : r.fairJeonse);
       const avg = r.error ? null : (ratioField==='sale' ? r.avgSaleRatio : r.avgJeonseRatio);
       rows.push('<div class="fair-outlook-row">'+dot(color)+esc(fairLineLabel(c.name, 'base'))+'('+(ratioField==='sale'?'매매':'전세')+'): '+
-        (fair!=null ? '약 '+(fair/10000).toFixed(1)+'억 — 기준단지 '+esc(base.name||'')+' 현재가 × 평소 배율 '+avg.toFixed(1)+'%' : FAIR_NA_TEXT)+'</div>');
+        ((BUNDLES.L41 && !r.error && isShortHistoryL28(r)) ? fairShortNoteL41(r)   // 묶음 L41
+          : (fair!=null ? '약 '+(fair/10000).toFixed(1)+'억 — 기준단지 '+esc(base.name||'')+' 현재가 × 평소 배율 '+avg.toFixed(1)+'%' : FAIR_NA_TEXT))+'</div>');
     });
   }
   return rows.join('');
@@ -10836,6 +10888,51 @@ function buildRatioStatCard(entry, stats, threshold){
   return '<div class="card">'+ratioStatCardInner(entry.name, entry.varName, stats, threshold)+'</div>';
 }
 
+// ---- 묶음 L45(65단계): 전세가율 추이 그래프에 매매가·전세가 함께 보기 ----
+// 상태는 저장하지 않는다(이번 방문만): 여러 단지 비교 / 단일 진단 각각 하나.
+let ratioPriceOnL45 = false, singleRatioPriceOnL45 = false;
+const RATIO_PRICE_LABEL_L45 = { off: '📈 매매가·전세가 함께 보기', on: '📈 매매가·전세가 함께 보는 중 (끄기)' };
+function updateRatioPriceToggleL45(id, show, on){
+  const btn = document.getElementById(id);
+  if (!btn) return;
+  const vis = !!(BUNDLES.L45 && show);
+  btn.style.display = vis ? '' : 'none';
+  if (!vis) return;
+  btn.classList.toggle('active', on);
+  btn.textContent = on ? RATIO_PRICE_LABEL_L45.on : RATIO_PRICE_LABEL_L45.off;
+}
+// 65단계 수정판: 켜면 한 단지의 세 선만 — 전세가율(66단계: 빨간 긴 점선, 굵게, 마커 없음)·매매가(본문색 실선 ■)·전세가(파랑 실선 ●), 오른쪽 보조 축(억).
+// mode 'single' = 단일 진단(고른 단지, 선도단지 아닌 칸), 'multi' = 여러 단지 비교(기준 단지). 나머지 선(선도단지·비교 단지·평균/최고/최저·서울 평균)은 빼고 그린다.
+// jeonseRatioChartConfig는 entries 순서대로 전세가율 선을 먼저 넣으므로, 그 단지의 전세가율 선은 datasets[entries 안 위치].
+const L45_MARK_EVERY = 12;   // 마커 간격(달) — 마지막 달에 맞춤
+const L45_RATIO_DASH = [12, 9];   // 66단계: 전세가율 점선(선 12px · 여백 9px, 촘촘한 점 모양 금지)
+function ratioPriceFocusL45(entries, mode){
+  if (!entries || !entries.length) return -1;
+  if (mode === 'single'){ const i = entries.findIndex(e => e.key !== 'base'); return i >= 0 ? i : 0; }
+  return 0;
+}
+function addRatioPriceLinesL45(cfg, entries, mode){
+  if (!cfg || !cfg.data) return cfg;
+  const fi = ratioPriceFocusL45(entries, mode);
+  if (fi < 0 || !cfg.data.datasets[fi]) return cfg;
+  const entry = entries[fi], c = entry.complex;
+  const red = cssVar('--bad');
+  const ratioDs = Object.assign({}, cfg.data.datasets[fi], { borderColor: red, backgroundColor: red, borderDash: L45_RATIO_DASH, borderWidth: 3, pointStyle: 'line', pointRadius: 0, pointHoverRadius: 4 });
+  const yms = cfg.data.labels.map(ymFromLabelL40), n = yms.length;
+  const marks = yms.map((_, i) => ((n - 1 - i) % L45_MARK_EVERY === 0) ? 3.5 : 0);
+  const val = (ym, f) => { const r = ym == null || !c || !c.rowMap ? null : c.rowMap.get(ym); return r && r[f] != null ? r[f] : null; };
+  const line = (f, word, color, shape) => ({ label: entry.name + ' ' + word, _kind: 'priceL45', _fmtL45: 'eok', yAxisID: 'y2',
+    data: yms.map(ym => val(ym, f)), borderColor: color, backgroundColor: color, borderWidth: 2, tension: .15, spanGaps: false,
+    pointStyle: shape, pointRadius: marks, pointHoverRadius: 4.5 });
+  cfg.data.datasets = [ratioDs, line('saleMid', '매매가', cssVar('--ink'), 'rect'), line('jeonseMid', '전세가', cssVar('--fair-base-line'), 'circle')];
+  const fontColor = chartFontColor();
+  cfg.options.scales.y2 = { position: 'right', grid: { drawOnChartArea: false },
+    title: { display: true, text: '매매가·전세가(억)', color: fontColor, font: { size: 11 } },
+    ticks: { color: fontColor, font: { size: 11 }, callback: v => fmtEok(v) } };
+  const orig = cfg.options.plugins.tooltip.callbacks.label;
+  cfg.options.plugins.tooltip.callbacks.label = ctx => (ctx.dataset && ctx.dataset._fmtL45 === 'eok') ? ctx.dataset.label + ': ' + fmtEok(ctx.parsed.y) : orig(ctx);
+  return cfg;
+}
 function jeonseRatioChartConfig(entries, showPeak, showTrough, showAvg, compactLabels){
   const allYmsSet = new Set();
   const seriesByEntry = entries.map(entry=>{
@@ -11260,9 +11357,10 @@ function nearestValue(arr, idx, lo, hi, dir){
 let periodL40 = null;
 const L40_MIN_SPAN = 1;   // 시작과 끝 사이 최소 칸 수(달 2개 이상 보이게)
 const L40_DEFAULT_MIN_MONTHS = 12;   // 모두 있는 구간이 이보다 짧으면 기본은 전체 기간
+const L40_DEFAULT_COMMON = false;   // 65단계: 기본 표시 기간 = 전체 기간(true면 62단계처럼 모두 있는 구간)
 function selectionKeyL40(base, comps){ return JSON.stringify([base ? base.name : null, (comps || []).map(x => x && x.c ? x.c.name : null)]); }
 function defaultRangeL40(n, commonIdx, hasComps){
-  if (!hasComps || commonIdx <= 0 || n - commonIdx < L40_DEFAULT_MIN_MONTHS) return [0, n - 1];
+  if (!L40_DEFAULT_COMMON || !hasComps || commonIdx <= 0 || n - commonIdx < L40_DEFAULT_MIN_MONTHS) return [0, n - 1];
   return [Math.min(commonIdx, n - 1 - L40_MIN_SPAN), n - 1];
 }
 function ymFromLabelL40(s){ const m = /^(\d{4})\.(\d{2})$/.exec(String(s)); return m ? Number(m[1]) * 100 + Number(m[2]) : null; }
@@ -11520,6 +11618,7 @@ function renderActiveChart(base){
   updateRatioAvgToggle();
   updateRatioPeakToggle();
   updateRatioTroughToggle();
+  updateRatioPriceToggleL45('ratioPriceToggleL45', state.activeChart==='jeonseRatioSelf', ratioPriceOnL45);   // 묶음 L45
   updateBenchmarkOverlayToggle();
   updateFairCompAlsoToggle(base);
   const fairNoteEl = document.getElementById('fairOutlookNote');
@@ -11588,6 +11687,7 @@ function renderActiveChart(base){
       '<div class="common-range" id="ratioNote"></div>'+
       '<div class="cards-grid" style="margin-top:14px;">'+cardsHtml+'</div>';
     const cfg = jeonseRatioChartConfig(entries, state.ratioPeakOn, state.ratioTroughOn, state.ratioAvgOn);
+    if (BUNDLES.L45 && ratioPriceOnL45) addRatioPriceLinesL45(cfg, entries, 'multi');   // 묶음 L45
     charts.mainCanvas = new Chart(document.getElementById('mainCanvas'), cfg);
     let note = '';
     if (state.ratioAvgOn){
@@ -11755,6 +11855,10 @@ function wireStaticEvents(){
     state.ratioTroughOn = !state.ratioTroughOn;
     saveState(); render();
   });
+  document.getElementById('ratioPriceToggleL45').addEventListener('click', ()=>{   // 묶음 L45: 저장하지 않음
+    ratioPriceOnL45 = !ratioPriceOnL45;
+    render();
+  });
   document.getElementById('fairCompAlsoToggle').addEventListener('click', ()=>{
     fairCompAlsoOn = !fairCompAlsoOn; // 저장하지 않는다(새로고침하면 꺼짐)
     render();
@@ -11774,6 +11878,10 @@ function wireStaticEvents(){
   document.getElementById('singleFairLineToggle').addEventListener('click', (e)=>{
     if (e.currentTarget.getAttribute('aria-disabled') === 'true') return;   // 묶음 L12: 적정가를 그릴 수 없는 단지(title에 이유)
     const current = singleFairOn();
+    if (BUNDLES.L41 && singleShortL41){   // 묶음 L41: 이력 부족 단지는 이 단지만 켜고 끈다(다른 단지 설정·저장값은 그대로)
+      if (current) singleFairShortOnL41.delete(singleShortKeyL41); else singleFairShortOnL41.add(singleShortKeyL41);
+      rerenderSingleDiag(); return;
+    }
     state.singleFairLineOverride = !current;
     rerenderSingleDiag();
   });
@@ -11787,6 +11895,10 @@ function wireStaticEvents(){
   });
   document.getElementById('singleRatioTroughToggle').addEventListener('click', ()=>{
     state.singleRatioTroughOn = !state.singleRatioTroughOn;
+    rerenderSingleDiag();
+  });
+  document.getElementById('singleRatioPriceToggleL45').addEventListener('click', ()=>{   // 묶음 L45: 저장하지 않음
+    singleRatioPriceOnL45 = !singleRatioPriceOnL45;
     rerenderSingleDiag();
   });
   applyRentalChipStyle(); applyBundleBodyClasses();   // 묶음 L10 칩 색(body.l10) — 상수가 정의된 뒤에
@@ -12187,7 +12299,7 @@ const GUIDE_HTML =
   '<p class="guide-lead">우리 단지 가격이 지금 싼지 비싼지, 대장(선도) 단지와 비교해서 알려 주는 계산기예요. 폰·PC 모두 쓸 수 있어요. 단지 이름만 검색하면 결론부터 한눈에 보여 줘요.</p>'+
   '<h3>■ 이렇게 쓰세요</h3>'+
   '<ol>'+
-    '<li><b class="ui">🏠 우리 단지 진단하기</b> 탭에서 단지 이름을 검색해서 고르세요.</li>'+
+    '<li><b class="ui">🏠 우리 단지 진단하기</b> 탭에서 단지 이름을 검색해서 고르세요(띄어쓰기나 영문 대소문자가 달라도 찾아요).</li>'+
     '<li>맨 위 결론 박스가 결론이에요(판정에 따라 색이 달라요 — 저평가는 초록).'+
       '<ul><li>저평가 / 적정 / 고평가 같은 판정</li>'+
       '<li>현재 가격과 적정 가격, 얼마나 더 오를 여지가 있는지</li>'+
@@ -12195,9 +12307,10 @@ const GUIDE_HTML =
       '(선도단지 = 서울 대장 아파트 {N}곳을 묶은 기준)</li>'+
     '<li>평형 칩(예: <b>25평 80세대</b> · <b>34평 186세대</b>)을 누르면 평형별로 바뀌어요. 25평은 "34평 기준 보정값 · 참고용"이에요.</li>'+
     '<li>아래 그래프에서 시세 흐름과 적정가를 확인하세요.'+
-      '<ul><li><b class="ui">📈 적정가 확인하기</b>: 적정가 선을 켜요(켜지면 "적정가 표시 중 (끄기)"로 바뀌어요)</li>'+
-      '<li><b class="ui">🏙️ 선도단지 표시</b>: 대장 단지 흐름을 같이 그려요(켜지면 "선도단지 표시 중 (끄기)")</li>'+
-      '<li><b class="ui">📈 상승률 겹쳐보기</b>: 같은 출발점에서 얼마나 올랐는지 비교해요. 두 선이 겹치면 상승률이 같고, 벌어지면 차이가 나요.</li></ul></li>'+
+      '<ul><li><b class="ui">📈 적정가 표시 중 (끄기)</b>: 적정가 점선이 처음부터 켜져 있어요. 누르면 꺼지고 "📈 적정가 확인하기"로 바뀌어요.{L41_FAIR_NOTE}</li>'+
+      '<li><b class="ui">🏙️ 선도단지 표시 중 (끄기)</b>: 대장 단지 흐름도 처음부터 같이 그려요. 누르면 꺼져요.</li>'+
+      '<li><b class="ui">📈 상승률 겹쳐보기</b>: 같은 출발점에서 얼마나 올랐는지 비교해요. 두 선이 겹치면 상승률이 같고, 벌어지면 차이가 나요.</li>'+
+      '<li>그래프 위를 마우스로 끌거나 폰에서 두 손가락으로 짚으면, 그 기간에 얼마나 올랐는지 보여 줘요.</li></ul></li>'+
     '<li>더 깊이 보고 싶으면 <b class="ui">▸ 상세보기</b>, <b class="ui">🧑‍🤝‍🧑 쌍둥이 단지 보기</b>, <b class="ui">📎 심화분석 보기</b>를 눌러 보세요.</li>'+
   '</ol>'+
   '<h3>■ 판정은 이렇게 읽어요</h3>'+
@@ -12208,14 +12321,14 @@ const GUIDE_HTML =
     '<li><b>주의</b>: 매매와 전세가 함께 평소보다 낮아요. 왜 함께 낮아졌는지 따로 확인해 보세요.</li>'+
     '<li><b>확인 필요</b>: 전세 쪽만 평소보다 낮아요. 그 이유를 따로 확인해 보세요.</li>'+
     ((typeof BUNDLES !== 'undefined' && BUNDLES.L28)
-      ? '<li><b>이력 부족</b>: 시세 기록이 '+L28_MIN_HISTORY_MONTHS+'개월이 안 되는 단지는 판정 대신 "이력 부족"이 떠요. 기록이 쌓이면 판정이 보여요. 그보다 조금 긴 단지도 평소 비율의 근거가 적으니 참고만 하세요.</li>'
+      ? '<li><b>이력 부족</b>: 시세 기록이 '+L28_MIN_HISTORY_MONTHS+'개월이 안 되는 단지는 판정 대신 "이력 부족"이 떠요. 기록이 쌓이면 판정이 보여요.{L41_SHORT_NOTE} 그보다 조금 긴 단지도 평소 비율의 근거가 적으니 참고만 하세요.</li>'
       : '<li><b>시세 기록이 짧은 단지</b>: 새로 지은 단지처럼 시세 기록이 짧으면 평소 비율의 근거가 적어요. 판정과 적정가는 참고만 하세요.</li>')+
     '<li><b>동조율</b>: 지난 상승장에서 "선도단지가 N% 오를 때 이 단지는 M% 올랐어요"와 등급(아주나쁨~아주좋음)으로, 이 단지가 선도단지를 얼마나 따라 올랐는지 보여 줘요.</li>'+
     '<li>임대 비율이 높은 단지는 이름 옆에 "임대 주의" 또는 "임대 과다"가 떠요.</li>'+
   '</ul>'+
   '<details><summary>■ 여러 단지 비교</summary>'+
     '<p><b class="ui">📊 여러 단지 비교</b> 탭에서 기준 단지를 정하고, 비교할 단지를 추가하세요. 시세·배율·적정가를 한 그래프와 표에서 겹쳐 볼 수 있어요. '+
-    '그래프 위 <b class="ui">📈 적정가</b> 메뉴에서 <b class="ui">선도단지 대비 적정가</b> / <b class="ui">기준단지 대비 적정가</b> / <b class="ui">둘 다 보기</b> / <b class="ui">숨기기</b> 중에서 골라요.{FAIR_TABLE_NOTE}</p>'+
+    '그래프 위 <b class="ui">📈 적정가</b> 메뉴에서 <b class="ui">선도단지 대비 적정가</b> / <b class="ui">기준단지 대비 적정가</b> / <b class="ui">둘 다 보기</b> / <b class="ui">숨기기</b> 중에서 골라요.{FAIR_TABLE_NOTE}{PERIOD_NOTE}</p>'+
     '<p>쌍둥이 단지 카드의 ☆을 누르면 <b class="ui">⭐ 즐겨찾기</b> 탭에 모아 두고 엑셀로 내보낼 수 있어요. '+
     '<b class="ui">📂 엑셀 파일로 단지 넣기</b>로 우리만의 단지를 넣어 비교할 수도 있어요.</p>'+
   '</details>'+
@@ -12237,7 +12350,11 @@ function guideBodyHtml(){
   const src = BUNDLES.L23 ? GUIDE_HTML.split('<details>').join('<details open>') : GUIDE_HTML;
   return src.split('{ASOF}').join(esc(guideAsOfText())).split('{N}').join(esc(n))
     .split('{FAIR_TABLE_NOTE}').join(BUNDLES.L30 ? ' 고른 기준이 그래프 점선과 옆 표의 "적정" 값에 똑같이 적혀요.' : '')
-    .split('{FAB_NOTE}').join(BUNDLES.L32 ? '(폰에서는 💬 동그라미)' : '');
+    .split('{FAB_NOTE}').join(BUNDLES.L32 ? '(폰에서는 💬 동그라미)' : '')
+    .split('{L41_FAIR_NOTE}').join(BUNDLES.L41 ? ' 이력 부족 단지는 처음엔 꺼져 있어요.' : '')
+    .split('{L41_SHORT_NOTE}').join(BUNDLES.L41 ? ' 이런 단지는 적정가 숫자를 숨기고, 그래프 적정가 점선도 처음엔 꺼 둬요(켜서 참고로 볼 수 있어요).' : '')
+    .split('{PERIOD_NOTE}').join(BUNDLES.L40 ? (L40_DEFAULT_COMMON ? ' 그래프 아래 <b class="ui">표시 기간</b> 막대는 처음엔 고른 단지의 시세가 모두 있는 기간만 보여 줘요. 손잡이로 기간을 바꾸거나 <b class="ui">전체 기간</b>을 누르면 처음부터 끝까지 보여요.'
+      : ' 그래프 아래 <b class="ui">표시 기간</b> 막대로 보고 싶은 기간만 크게 볼 수 있어요. <b class="ui">모두 있는 구간</b>을 누르면 고른 단지의 시세가 모두 있는 기간만, <b class="ui">전체 기간</b>을 누르면 처음부터 끝까지 보여요.') : '');
 }
 function readGuidePref(){
   try { const raw = localStorage.getItem(GUIDE_STORE_KEY); if (!raw) return null; const o = JSON.parse(raw); return (o && typeof o === 'object') ? o : null; }
