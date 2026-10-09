@@ -10970,17 +10970,24 @@ function addRatioPriceLinesL45(cfg, entries, mode){
 }
 // 묶음 L47(70단계): 토글을 켠 화면을 참고 사진(서울 전세가율 지수 그래프)처럼 — 굵은 실선 3개(마커 없음), 전세가율 = 보라·오른쪽 축(%),
 // 매매가·전세가 = 파랑·빨강·왼쪽 축(억). 점선은 기준선(역사상 평균 항상 · 최고/최저는 버튼을 켰을 때)에만 L46 점선으로. 범례는 위 한 줄.
-const L47_WIDTH = { ratio: 2, price: 1.8, avg: 1.5, peak: 1 };   // 71단계: 가는 선(대표님 피드백 — 진하고 굵어 가시성이 나쁨)
+const L47_WIDTH = { ratio: 2.2, price: 1.8, avg: 1.5, peak: 1 };   // 71단계: 가는 선(대표님 피드백 — 진하고 굵어 가시성이 나쁨), 72단계: 전세가율 점선 2.2
+// 72단계: 토글을 켰을 때 x축 = 보이는 데이터 선에 값이 있는 첫 달 ~ 마지막 달(데이터 없는 앞 기간 때문에 그래프가 작아지지 않게).
+function dataSpanL47(dsList){
+  let a = Infinity, b = -1;
+  dsList.forEach(d => (d && d.data || []).forEach((v, i) => { if (v != null){ if (i < a) a = i; if (i > b) b = i; } }));
+  return b >= 0 ? [a, b] : null;
+}
 function restyleRatioPriceL47(cfg, entry, origDatasets){
   const [ratioDs, saleDs, jeonseDs] = cfg.data.datasets;
   const solid = (d, color, width, axis) => Object.assign(d, { borderColor: color, backgroundColor: color, borderWidth: width, borderDash: [], yAxisID: axis,
     pointStyle: 'circle', pointRadius: 0, pointHoverRadius: 3, tension: .3, cubicInterpolationMode: 'monotone' });
   solid(ratioDs, cssVar('--l47-ratio'), L47_WIDTH.ratio, 'y2'); ratioDs._fmtL47 = 'pct';
+  Object.assign(ratioDs, { borderDash: DASH_L46.slice(), pointStyle: 'line', tension: .2 });   // 72단계: 전세가율(%)은 보라 점선 — 가격(억) 실선과 확연히 구분
   solid(saleDs, cssVar('--l47-sale'), L47_WIDTH.price, 'y');
   solid(jeonseDs, cssVar('--l47-jeonse'), L47_WIDTH.price, 'y');
   const n = cfg.data.labels.length, stats = entry.stats || computeSelfRatioStats(entry.complex);
   const ref = (word, v, color, width) => ({ label: word + ' ' + v.toFixed(1) + '%', _kind: 'refL47', _fmtL47: 'pct', yAxisID: 'y2', data: new Array(n).fill(v),
-    borderColor: color, backgroundColor: color, borderWidth: width, borderDash: DASH_L46.slice(), pointRadius: 0, pointHoverRadius: 0, tension: 0 });
+    borderColor: color, backgroundColor: color, borderWidth: width, borderDash: [], pointStyle: 'line', pointRadius: 0, pointHoverRadius: 0, tension: 0 });   // 72단계: 기준선은 회색 가는 실선
   const had = word => (origDatasets || []).some(d => typeof d.label === 'string' && d.label.indexOf(entry.name + ' 역사상 ' + word) === 0);
   const refs = [];
   if (stats && stats.avg != null) refs.push(ref('평균', stats.avg, cssVar('--l47-ref'), L47_WIDTH.avg));
@@ -10997,6 +11004,8 @@ function restyleRatioPriceL47(cfg, entry, origDatasets){
     title: { display: true, text: '전세가율(%)', color: fontColor, font: { size: 10.5 } },
     ticks: Object.assign({}, tick, { callback: v => Number(v).toFixed(0) + '%' }) };
   if (cfg.options.scales.x) cfg.options.scales.x = Object.assign({}, cfg.options.scales.x, { grid: { color: grid, lineWidth: 0.5, drawTicks: false } });
+  const span = dataSpanL47([ratioDs, saleDs, jeonseDs]);   // 72단계: 데이터 기간에 꽉 차게(눈금 간격은 Chart.js 자동 건너뛰기)
+  if (span) cfg.options.scales.x = Object.assign({}, cfg.options.scales.x || {}, { min: cfg.data.labels[span[0]], max: cfg.data.labels[span[1]] });
   const lg = cfg.options.plugins.legend || {};
   cfg.options.plugins.legend = Object.assign({}, lg, { position: 'top', align: 'start',
     labels: Object.assign({}, lg.labels || {}, { usePointStyle: true, boxWidth: 7, boxHeight: 7, padding: 10, font: { family: "'Noto Sans KR'", size: 11 } }) });
