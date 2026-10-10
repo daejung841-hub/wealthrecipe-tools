@@ -52,7 +52,7 @@
   .complex-card .role-badge{ display:none; font-size:9px; font-weight:700; margin-top:2px; }
   .complex-card.role-base .role-badge{ display:block; color:var(--base-color); }
   .complex-card.role-compare .role-badge{ display:block; color:var(--compare-color); }
-  .bottom-bar{ position:fixed; left:0; right:0; bottom:0; background:var(--card-bg); border-top:1px solid var(--border); padding:10px 20px; display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+  .bottom-bar{ position:fixed; left:0; right:0; bottom:0; z-index:50; /* 가격축 sticky th(z-index 1~3)보다 위 — 없으면 두 번째 이후 칩이 구간 라벨 열 뒤로 가려졌다(2026-10). ctx-menu(100)보다는 아래 */ background:var(--card-bg); border-top:1px solid var(--border); padding:10px 20px; display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
   .bottom-bar .chip{ font-size:12px; padding:4px 10px; border-radius:12px; background:#eee; }
   .bottom-bar .chip.base{ background:var(--base-color); color:#fff; }
   .bottom-bar .chip.compare{ background:var(--compare-color); color:#fff; }
