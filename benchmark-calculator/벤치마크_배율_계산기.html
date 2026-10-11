@@ -4,15 +4,42 @@
 <script src="../config.js"></script>
 <script src="../gate.js"></script>
 <script>requireSiteAuth('../index.html');</script>
-<script src="../feedback-widget.js" data-calculator="benchmark-calculator"></script>
+<script>
+// 묶음 L52·L53(83단계): 아래 정적 스크립트 주소의 ?v=와 이 표는 build_l52_versions.py가 빌드 때 실제 파일 해시로 채운다(손으로 쓰지 않음).
+// 표는 25평 seed 지연 로딩(loadSeed25)이 실행 중에 쓴다. EARLY_FLAGS_L52는 xlsx 태그(L53)를 쓸지 정하려고 주소 플래그를 먼저 읽는다
+// (applyBundlesFromUrl과 같은 규칙, 로컬 주소에서만: 값이 없으면 모두 켬, 있으면 적힌 묶음만 — 묶음 이름 'L' 포함).
+var ASSET_VERSIONS_L52 = /*L52_VERSIONS*/{"shared.js":"8e8ee813","seedComplexes.js":"65724010","seedChips.js":"cea8e3e5","m2Series.js":"acc3bcaa","seedComplexes25.js":"5b6eb5da","feedback-widget.js":"52cf1fae"}/*END_L52_VERSIONS*/;
+var EARLY_FLAGS_L52 = (function(){
+  var on = { L52: true, L53: true };
+  try {
+    var raw = null;
+    if (typeof window.BUNDLE_URL_OVERRIDE === 'string') raw = window.BUNDLE_URL_OVERRIDE;
+    else {
+      var loc = window.BUNDLE_LOCATION_OVERRIDE || window.location, h = String((loc && loc.hostname) || '').toLowerCase();
+      if (loc && (loc.protocol === 'file:' || h === 'localhost' || h === '127.0.0.1' || h === '[::1]' || h === '::1')) raw = new URLSearchParams(loc.search || '').get('bundles');
+    }
+    if (raw != null){
+      var set = raw.split(',').map(function(x){ return x.trim().toUpperCase(); });
+      on.L52 = set.indexOf('L52') >= 0 || set.indexOf('L') >= 0;
+      on.L53 = set.indexOf('L53') >= 0 || set.indexOf('L') >= 0;
+    }
+  } catch (e) {}
+  return on;
+})();
+function assetUrlL52(path, enabled){
+  var v = ASSET_VERSIONS_L52[String(path).replace(/^.*\//, '')];
+  return ((enabled === undefined ? EARLY_FLAGS_L52.L52 : enabled) && v) ? path + '?v=' + v : path;
+}
+</script>
+<script src="../feedback-widget.js?v=52cf1fae" data-calculator="benchmark-calculator"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@600;700&family=Noto+Sans+KR:wght@400;500;700&family=JetBrains+Mono:wght@400;500;600&display=swap">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.5.1/chart.umd.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-<script src="shared.js"></script>
-<script src="seedComplexes.js"></script>
-<script src="seedChips.js"></script>
-<script src="m2Series.js"></script>
+<script>if (!EARLY_FLAGS_L52.L53) document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"><\/script>');   // 묶음 L53: 켜면 엑셀 기능을 처음 쓸 때 받음</script>
+<script src="shared.js?v=8e8ee813"></script>
+<script src="seedComplexes.js?v=65724010"></script>
+<script src="seedChips.js?v=cea8e3e5"></script>
+<script src="m2Series.js?v=acc3bcaa"></script>
 <style>
 :root{
   color-scheme: light;
@@ -2418,9 +2445,9 @@ function seoulHistoricalAvg(){
 // 라이브는 주소 플래그를 읽지 않으므로 이 기본값이 그대로 동작한다.
 const BUNDLES = { A:false, B:false, C:false, D1:false, D2:false, D3:false, D4:false, E1:true, E2:false, E3:true, F1:true, F2:true, F3:true, F4:true, F5:true, F6:true,
   H1:false, H2:true, H3:true, H4:true, H5:true, H6:true, H7:true,
-  L1:true, L2:true, L3:true, L4:true, L5:true, L6:false, L7:true, L8:true, L9:true, L10:true, L11:true, L12:true, L13:true, L14:true, L15:true, L16:true, L17:true, L18:true, L19:true, L19B:true, L20:true, L22:true, L23:true, L24:true, L25:true, L26:true, L27:!!window.POOL_EXCLUDE_ON, L31:!!window.NEW_NAME_RULE_ON, L32:true, L33:true, L34:true, L37:true, L28:true, L38:true, L40:true, L39:true, L41:true, L42:true, L43:true, L44:true, L45:true, L46:true, L47:true, L49:true, L48:true, L50:true, L51:true, L35:true, L36:true, L30:true, L29:true, L29R:false, K1:false, K2:true, K4:false };
+  L1:true, L2:true, L3:true, L4:true, L5:true, L6:false, L7:true, L8:true, L9:true, L10:true, L11:true, L12:true, L13:true, L14:true, L15:true, L16:true, L17:true, L18:true, L19:true, L19B:true, L20:true, L22:true, L23:true, L24:true, L25:true, L26:true, L27:!!window.POOL_EXCLUDE_ON, L31:!!window.NEW_NAME_RULE_ON, L32:true, L33:true, L34:true, L37:true, L28:true, L38:true, L40:true, L39:true, L41:true, L42:true, L43:true, L44:true, L45:true, L46:true, L47:true, L49:true, L48:true, L50:true, L51:true, L52:true, L53:true, L35:true, L36:true, L30:true, L29:true, L29R:false, K1:false, K2:true, K4:false };
 const BUNDLE_GROUPS = { D:['D1','D2','D3','D4'], E:['E1','E2','E3'], F:['F1','F2','F3','F4','F5','F6'], H:['H1','H2','H3','H4','H5','H6','H7'],
-  L:['L1','L2','L3','L4','L5','L6','L7','L8','L9','L10','L11','L12','L13','L14','L15','L16','L17','L18','L19','L19B','L20','L22','L23','L24','L25','L26','L27','L29','L30','L31','L32','L33','L34','L37','L35','L36','L28','L38','L40','L39','L41','L42','L43','L44','L45','L46','L47','L49','L48','L50','L51'], K:['K1','K2','K4'] };
+  L:['L1','L2','L3','L4','L5','L6','L7','L8','L9','L10','L11','L12','L13','L14','L15','L16','L17','L18','L19','L19B','L20','L22','L23','L24','L25','L26','L27','L29','L30','L31','L32','L33','L34','L37','L35','L36','L28','L38','L40','L39','L41','L42','L43','L44','L45','L46','L47','L49','L48','L50','L51','L52','L53'], K:['K1','K2','K4'] };
 // 묶음 L46(69단계): 그래프 점선 모양 통일 — 모든 점선을 "선도단지 대비 적정가" 선(FAIR_LINE_STYLE.borderDash)과 같은 긴 점선으로.
 // 촘촘한 점("좁쌀")·점-선 섞인 패턴을 없앤다. 새 점선은 항상 dashL46(예전 값)을 쓴다 — L46을 끄면 예전 값 그대로.
 const DASH_L46 = [5, 4];
@@ -6562,7 +6589,7 @@ function loadSeed25(){
       resolve();
     };
     s.onerror = () => fail(new Error('load failed'));
-    s.src = SEED25_URL;
+    s.src = BUNDLES.L52 ? assetUrlL52(SEED25_URL, true) : SEED25_URL;   // 묶음 L52
     document.head.appendChild(s);
   });
   renderPyeongNotice();
@@ -7464,7 +7491,25 @@ function deriveNameFromFilename(filename){
   return base;
 }
 
+// 묶음 L53(83단계): xlsx(cdnjs, 약 0.2MB)는 엑셀 기능을 처음 쓸 때 받는다. 실패하면 안내 한 줄(다시 누르면 다시 시도).
+const XLSX_URL_L53 = 'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';
+const XLSX_FAIL_TEXT_L53 = '엑셀 기능을 불러오지 못했어요. 인터넷 연결을 확인하고 다시 시도해 주세요.';
+let _xlsxPromiseL53 = null;
+function ensureXlsxL53(){
+  if (typeof XLSX !== 'undefined') return Promise.resolve();
+  if (_xlsxPromiseL53) return _xlsxPromiseL53;
+  _xlsxPromiseL53 = new Promise((resolve, reject) => {
+    const s = document.createElement('script');
+    const fail = () => { _xlsxPromiseL53 = null; s.remove(); reject(new Error(XLSX_FAIL_TEXT_L53)); };
+    s.onload = () => { if (typeof XLSX !== 'undefined') resolve(); else fail(); };
+    s.onerror = fail;
+    s.src = XLSX_URL_L53;
+    document.head.appendChild(s);
+  });
+  return _xlsxPromiseL53;
+}
 function parseExcelFile(file){
+  if (BUNDLES.L53 && typeof XLSX === 'undefined') return ensureXlsxL53().then(() => parseExcelFile(file));   // 묶음 L53
   return new Promise((resolve, reject) => {
     if (typeof XLSX === 'undefined'){
       reject(new Error('엑셀 파싱 라이브러리를 불러오지 못했습니다. 인터넷 연결을 확인하고 새로고침해주세요.'));
@@ -9678,6 +9723,7 @@ function favoriteSeriesRows(baseName, twinName){
 function exportFavoritesXlsx(){
   const list = loadTwinFavorites();
   if (!list.length){ alert('저장된 즐겨찾기가 없습니다.'); return; }
+  if (BUNDLES.L53 && typeof XLSX === 'undefined'){ ensureXlsxL53().then(exportFavoritesXlsx, () => alert(XLSX_FAIL_TEXT_L53)); return; }   // 묶음 L53
   if (typeof XLSX === 'undefined'){ alert('엑셀 라이브러리를 불러오지 못했습니다. 잠시 후 다시 시도해주세요.'); return; }
   const today = new Date().toISOString().slice(0,10);
   const wb = XLSX.utils.book_new();
