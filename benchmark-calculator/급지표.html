@@ -127,6 +127,9 @@
   .mode-seg button:last-child{ border-right:none; }
   .mode-seg button.active{ background:var(--base-color); color:#fff; font-weight:700; }
   .mode-seg button:disabled{ cursor:wait; opacity:.6; }
+  .mode-toggle{ padding:6px 12px; border:1px solid var(--border); border-radius:8px; background:var(--card-bg); cursor:pointer; font-size:13px; }
+  .mode-toggle:hover{ background:var(--bg); }
+  .mode-toggle:disabled{ cursor:wait; opacity:.6; }
   .mode-status{ font-size:12px; color:var(--muted); }
   .mode-status.err{ color:#c0392b; }
   /* 25평/34평 카드 구분 — "25평" 태그와 다른 배경색(전체 보기에서 두 평형이 한 축에 섞일 때) */
@@ -697,7 +700,17 @@ function renderBottomBar(){
   bar.innerHTML = (chips.length ? chips.join('') : '<span class="empty">단지를 클릭해 선택하세요</span>') +
     '<button id="compareBtn"'+(baseId ? '' : ' disabled')+'>시세비교</button>';
   document.getElementById('compareBtn').addEventListener('click', goToCalculator);
+  fitBottomPad();
 }
+// 하단 바가 두 줄 이상으로 늘면(칩이 많을 때, 91px~) 표 끝이 바에 가려지므로 PC에서만 body 하단 여백을 바 높이 + 12px로 맞춘다.
+// 한 줄(≤60px)·칩 없음·모바일(body.m-on, CSS 92px)은 인라인 값을 비워 원래 CSS 값(60px / 92px)으로 돌린다.
+function fitBottomPad(){
+  const bar = document.getElementById('bottomBar');
+  if (!bar) return;
+  const pc = !document.body.classList.contains('m-on');
+  document.body.style.paddingBottom = (pc && bar.offsetHeight > 60) ? (bar.offsetHeight + 12) + 'px' : '';
+}
+window.addEventListener('resize', fitBottomPad);
 
 // 계산기 URL: 34평 카드는 기존과 같은 id 그대로, 25평 카드는 비교단지에 "id:25", 기준단지면 기준평형=25를 붙인다.
 function goToCalculator(){
@@ -751,7 +764,13 @@ function complexPassesFilters(c){
 // 함께 빠진다). 기본값은 빈 Set = 전체 체크.
 const hiddenCols = new Set();
 const collapsedGroups = new Set();
-let panelCollapsed = false;
+// 지역 패널 접힘 상태 기억(2026-10): 사용자가 직접 바꾼 값(localStorage)이 있으면 그것을, 없으면 화면 폭이 좁을 때(PANEL_NARROW_MAX 이하) 접힌 채 시작한다.
+// 저장소를 못 쓰는 환경(시크릿 모드·차단)은 try/catch로 건너뛰고 폭 기준만 쓴다. 기본값은 저장하지 않는다(직접 바꿀 때만 저장).
+const PANEL_PREF_KEY = 'geupPanelCollapsed';
+const PANEL_NARROW_MAX = 900;
+function readPanelPref(){ try { const v = localStorage.getItem(PANEL_PREF_KEY); return v === '1' ? true : v === '0' ? false : null; } catch (e) { return null; } }
+function savePanelPref(v){ try { localStorage.setItem(PANEL_PREF_KEY, v ? '1' : '0'); } catch (e) {} }
+let panelCollapsed = (function(){ const p = readPanelPref(); return p != null ? p : window.innerWidth <= PANEL_NARROW_MAX; })();
 
 const REGION_GROUP_ORDER = ['seoul', 'gyeonggi', 'incheon', 'unclassified'];
 const REGION_GROUP_LABEL = { seoul: '서울특별시', gyeonggi: '경기도', incheon: '인천광역시', unclassified: '미분류' };
@@ -945,7 +964,7 @@ function initFilterBar(){
     renderRegionPanel();
     renderBandContent();
   });
-  document.getElementById('panelToggle').addEventListener('click', () => setPanelCollapsed(!panelCollapsed));
+  document.getElementById('panelToggle').addEventListener('click', () => { setPanelCollapsed(!panelCollapsed); savePanelPref(panelCollapsed); });
   setPanelCollapsed(panelCollapsed);
 }
 
@@ -965,8 +984,11 @@ function renderModeBar(statusText, isError){
   const busy = seed25State === 'loading';
   el.innerHTML = '<span class="mode-label">평형:</span><div class="mode-seg">' +
     ['34', '25', 'both'].map(m => '<button type="button" data-mode="'+m+'" class="'+(viewMode === m ? 'active' : '')+'"'+(busy ? ' disabled' : '')+'>'+MODE_LABEL[m]+'</button>').join('') +
-    '</div><span class="mode-status'+(isError ? ' err' : '')+'" id="modeStatus">'+esc(statusText || '')+'</span>';
+    '</div><button type="button" id="modeToggle" class="mode-toggle" title="34평과 25평을 번갈아 전환(전체 보기에서는 34평으로)"'+(busy ? ' disabled' : '')+'>⇄ 34↔25</button>' +
+    '<span class="mode-status'+(isError ? ' err' : '')+'" id="modeStatus">'+esc(statusText || '')+'</span>';
   el.querySelectorAll('button[data-mode]').forEach(btn => btn.addEventListener('click', () => setMode(btn.dataset.mode)));
+  const tg = document.getElementById('modeToggle'); // PC 전용(모바일은 #mRoot의 3분할 버튼을 그대로 쓴다)
+  if (tg) tg.addEventListener('click', () => setMode(viewMode === '34' ? '25' : '34'));
 }
 
 async function setMode(m){
@@ -1267,7 +1289,7 @@ function renderPriceRowGrid(content, regionFilterFn, showRegionLabel){
     cols.forEach(col => {
       const entries = entriesInCol(list, col);
       const cls = col.regionStart ? ' class="region-start"' : '';
-      html += '<td'+cls+'>'+entries.map(p => cardHtml(p.complex)).join('')+'</td>';
+      html += '<td'+cls+'>'+entries.map(p => cardHtml(p.complex, p.price)).join('')+'</td>';
     });
     html += '</tr>';
   });
