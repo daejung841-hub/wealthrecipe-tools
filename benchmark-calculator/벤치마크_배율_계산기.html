@@ -824,6 +824,7 @@ body.l44 .tier-seg.current.tier-low, body.l44 .tier-seg.current.tier-veryLow{box
   padding:7px 14px;border-radius:999px;font-size:12.5px;font-weight:600;cursor:pointer;z-index:1;
 }
 .modal-close-btn:hover{border-color:var(--accent);color:var(--accent);}
+.cmp-full-btn-l48{margin:0 0 10px;}   /* 묶음 L48: 팝업 전체보기 */
 @media (max-width:760px){.modal-panel{height:96vh;padding:14px 12px 30px;}}
 /* 항목 2(2026-09-21 세션) — KB부동산 다운로드 안내 팝업. 위 .modal-panel은
    화면 전체 앱을 옮겨 보여주는 용도라 커서, 이 안내는 짧은 글이라 폭/
@@ -902,6 +903,8 @@ body.l44 .tier-seg.current.tier-low, body.l44 .tier-seg.current.tier-veryLow{box
 .page-btn{border:1px solid var(--border);background:var(--surface);border-radius:6px;padding:3px 9px;font-size:12px;cursor:pointer;color:var(--ink-muted);}
 .page-btn:hover{border-color:var(--ink-faint);}
 .page-btn.active{background:var(--ink);color:var(--surface);border-color:var(--ink);font-weight:700;}
+.page-btn.page-arrow-l51{min-width:3em;font-weight:700;}   /* 묶음 L51: 화살표 = 번호 버튼 이상 크기 */
+.page-btn.page-arrow-l51:disabled{opacity:.35;cursor:default;}
 .twin-more-btn{display:block;width:100%;margin-top:8px;padding:7px;border:1px dashed var(--border);border-radius:8px;background:none;color:var(--ink-muted);font-size:12px;cursor:pointer;}
 .twin-more-btn:hover{border-color:var(--ink-faint);}
 .easy-summary{font-size:13.5px;color:var(--ink);line-height:1.5;font-weight:600;}
@@ -1131,6 +1134,9 @@ tr.diag-detail-row td{white-space:normal;background:var(--surface-alt);padding:1
 .ratio-avg-l46.short{color:var(--ink-muted);}
 .fair-outlook-row{font-size:12.5px;color:var(--ink-muted);margin-top:4px;}
 footer{margin-top:36px;color:var(--ink-faint);font-size:12px;text-align:center;}
+/* 묶음 L50(78단계): 공용 의견 버튼(.fw-fab, feedback-widget.js)을 이 계산기 화면에서만 모든 폭에서 왼쪽 아래로(홈 표시줄·가장자리에서 띄움) */
+body.l50 .fw-fab{left:calc(14px + env(safe-area-inset-left, 0px)) !important;right:auto !important;bottom:calc(14px + env(safe-area-inset-bottom, 0px)) !important;}
+body.l50 .wrap{padding-bottom:calc(84px + env(safe-area-inset-bottom, 0px));}
 /* 묶음 L24·L25(43단계): 단일 진단 엑셀 넣기 줄, 비교 검색창의 최근 본 단지 드롭다운(섹션 목록 — 32단계 즐겨찾기 줄을 같은 틀에 얹는다). */
 #singleUploadRow[hidden], #singleUploadNote[hidden]{display:none !important;}
 .single-upload-row{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;margin-top:8px;}
@@ -2412,9 +2418,9 @@ function seoulHistoricalAvg(){
 // 라이브는 주소 플래그를 읽지 않으므로 이 기본값이 그대로 동작한다.
 const BUNDLES = { A:false, B:false, C:false, D1:false, D2:false, D3:false, D4:false, E1:true, E2:false, E3:true, F1:true, F2:true, F3:true, F4:true, F5:true, F6:true,
   H1:false, H2:true, H3:true, H4:true, H5:true, H6:true, H7:true,
-  L1:true, L2:true, L3:true, L4:true, L5:true, L6:false, L7:true, L8:true, L9:true, L10:true, L11:true, L12:true, L13:true, L14:true, L15:true, L16:true, L17:true, L18:true, L19:true, L19B:true, L20:true, L22:true, L23:true, L24:true, L25:true, L26:true, L27:!!window.POOL_EXCLUDE_ON, L31:!!window.NEW_NAME_RULE_ON, L32:true, L33:true, L34:true, L37:true, L28:true, L38:true, L40:true, L39:true, L41:true, L42:true, L43:true, L44:true, L45:true, L46:true, L47:true, L49:true, L35:true, L36:true, L30:true, L29:true, L29R:false, K1:false, K2:true, K4:false };
+  L1:true, L2:true, L3:true, L4:true, L5:true, L6:false, L7:true, L8:true, L9:true, L10:true, L11:true, L12:true, L13:true, L14:true, L15:true, L16:true, L17:true, L18:true, L19:true, L19B:true, L20:true, L22:true, L23:true, L24:true, L25:true, L26:true, L27:!!window.POOL_EXCLUDE_ON, L31:!!window.NEW_NAME_RULE_ON, L32:true, L33:true, L34:true, L37:true, L28:true, L38:true, L40:true, L39:true, L41:true, L42:true, L43:true, L44:true, L45:true, L46:true, L47:true, L49:true, L48:true, L50:true, L51:true, L35:true, L36:true, L30:true, L29:true, L29R:false, K1:false, K2:true, K4:false };
 const BUNDLE_GROUPS = { D:['D1','D2','D3','D4'], E:['E1','E2','E3'], F:['F1','F2','F3','F4','F5','F6'], H:['H1','H2','H3','H4','H5','H6','H7'],
-  L:['L1','L2','L3','L4','L5','L6','L7','L8','L9','L10','L11','L12','L13','L14','L15','L16','L17','L18','L19','L19B','L20','L22','L23','L24','L25','L26','L27','L29','L30','L31','L32','L33','L34','L37','L35','L36','L28','L38','L40','L39','L41','L42','L43','L44','L45','L46','L47','L49'], K:['K1','K2','K4'] };
+  L:['L1','L2','L3','L4','L5','L6','L7','L8','L9','L10','L11','L12','L13','L14','L15','L16','L17','L18','L19','L19B','L20','L22','L23','L24','L25','L26','L27','L29','L30','L31','L32','L33','L34','L37','L35','L36','L28','L38','L40','L39','L41','L42','L43','L44','L45','L46','L47','L49','L48','L50','L51'], K:['K1','K2','K4'] };
 // 묶음 L46(69단계): 그래프 점선 모양 통일 — 모든 점선을 "선도단지 대비 적정가" 선(FAIR_LINE_STYLE.borderDash)과 같은 긴 점선으로.
 // 촘촘한 점("좁쌀")·점-선 섞인 패턴을 없앤다. 새 점선은 항상 dashL46(예전 값)을 쓴다 — L46을 끄면 예전 값 그대로.
 const DASH_L46 = [5, 4];
@@ -2443,6 +2449,7 @@ function applyBundleBodyClasses(){
   try { if (document && document.body && document.body.classList) document.body.classList.toggle('l32', !!BUNDLES.L32); } catch (e) {}   // 묶음 L32
   try { if (document && document.body && document.body.classList) document.body.classList.toggle('l36', !!BUNDLES.L36); } catch (e) {}   // 묶음 L36
   try { if (document && document.body && document.body.classList) document.body.classList.toggle('l44', !!BUNDLES.L44); } catch (e) {}   // 묶음 L44
+  try { if (document && document.body && document.body.classList) document.body.classList.toggle('l50', !!BUNDLES.L50); } catch (e) {}   // 묶음 L50
   try { if (document && document.body && document.body.classList){ document.body.classList.toggle('l39', !!BUNDLES.L39); if (!BUNDLES.L39) document.querySelectorAll('.lib-autocomplete').forEach(el => { el.style.maxHeight = ''; }); } } catch (e) {}   // 묶음 L39
   if (typeof applyL9Toolbar === 'function') applyL9Toolbar();
   if (typeof applyL17Tips === 'function') applyL17Tips();
@@ -5314,7 +5321,18 @@ function rangeModeToggleHtml(key){
   const rangeMode = rangeModeState.get(key) || 'overlap';
   return '<button class="chart-mode-toggle" data-range-mode-toggle="'+key+'">'+(rangeMode==='overlap'?'🗓️ 전체기간 함께 보기':'🔗 겹치는 구간만 보기')+'</button>';
 }
+// 묶음 L51(78단계): 전체가 PAGE_GROUP_L51쪽을 넘으면 현재 쪽이 속한 묶음만 ‹ 1 2 3 4 5 ›. ‹는 이전 묶음 끝 쪽, ›는 다음 묶음 첫 쪽으로.
+// 첫/끝 묶음의 화살표는 disabled(번호 data 속성이 없어 눌러도 무반응). 5쪽 이하는 예전 그대로(화살표 없음).
+const PAGE_GROUP_L51 = 5;
+function renderPageNavGroupedL51(page, totalPages, dataAttr){
+  const start = Math.floor((page - 1) / PAGE_GROUP_L51) * PAGE_GROUP_L51 + 1, end = Math.min(start + PAGE_GROUP_L51 - 1, totalPages);
+  const arrow = (target, ok, label, aria) => '<button type="button" class="page-btn page-arrow-l51"'+(ok ? ' data-'+dataAttr+'-page="'+target+'"' : ' disabled aria-disabled="true"')+' aria-label="'+aria+'">'+label+'</button>';
+  let html = '<div class="page-nav">' + arrow(start - 1, start > 1, '‹', '이전 쪽 묶음');
+  for (let p = start; p <= end; p++) html += '<button class="page-btn'+(p===page?' active':'')+'" data-'+dataAttr+'-page="'+p+'">'+p+'</button>';
+  return html + arrow(end + 1, end < totalPages, '›', '다음 쪽 묶음') + '</div>';
+}
 function renderTwinPageNav(page, totalPages, dataAttr){
+  if (BUNDLES.L51 && totalPages > PAGE_GROUP_L51) return renderPageNavGroupedL51(page, totalPages, dataAttr);   // 묶음 L51
   let html = '<div class="page-nav">';
   for (let p=1;p<=totalPages;p++){
     html += '<button class="page-btn'+(p===page?' active':'')+'" data-'+dataAttr+'-page="'+p+'">'+p+'</button>';
@@ -6006,12 +6024,15 @@ function closeComparePairModal(){
   const overlay = document.getElementById('comparePairModalOverlay');
   const shell = document.getElementById('multiCompareShell');
   if (!overlay || !shell) return;
+  const restoredL48 = restorePairSnapL48();   // 묶음 L48: 팝업에서 잠시 바꾼 기준·비교 목록을 원래대로
   overlay.hidden = true;
   if (_multiShellHomeMarker && _multiShellHomeMarker.parentNode){
     _multiShellHomeMarker.replaceWith(shell);
   }
   // 팝업 밖(원래 자리)으로 돌아간 뒤엔 지금 활성 탭 기준으로 다시 숨김 여부를 맞춘다.
   shell.hidden = state.topMode !== 'multi';
+  if (restoredL48) render();   // 묶음 L48: 되돌린 목록으로 여러 단지 비교 화면을 다시 그림
+  const fullBtn = document.getElementById('comparePairModalFullL48'); if (fullBtn) fullBtn.hidden = true;
 }
 // 항목 2(2026-09-21 세션) — KB부동산 다운로드→설치 안내 팝업. 위
 // comparePairModal과 달리 화면 상태를 옮기지 않는 순수 정적 안내라
@@ -6031,11 +6052,113 @@ function closeKbGuideModal(){
 // 진단 콘텐츠도 같은 취급 — 패널은 단일단지 진단 화면 전용이라 물리적
 // 위치만 옮겨졌을 뿐 origin은 그대로 단일단지 진단이다.
 function handleViewMultiClick(baseName, compName, originEl){
+  if (BUNDLES.L48){   // 묶음 L48(80단계): 진단 화면·옆 패널은 팝업(비교 목록 보존), 그 밖은 목록을 보존한 채 탭 이동
+    if (originEl && (originEl.closest('#singleDiagSection') || originEl.closest('#sidePanel'))) openComparePairModalL48(baseName, compName);
+    else viewComplexPairInMultiCompareL48(baseName, compName);
+    return;
+  }
   if (originEl && (originEl.closest('#singleDiagSection') || originEl.closest('#sidePanel'))){
     openComparePairModal(baseName, compName);
   } else {
     viewComplexPairInMultiCompare(baseName, compName);
   }
+}
+// 묶음 L48(78·80단계): 이름(25평이면 "○○(25평)") → 슬롯 값. 진단 중인 단지는 저장된 id(singleTargetId)로 찾아 이름이 같은 다른 단지와 섞이지 않게.
+// 25평 파일이 아직 없으면 pending25로 넣고 불러온 뒤 채운다(resumePendingPyeong). 못 찾으면 null.
+function slotValueForNameL48(name){
+  const is25 = isPyeong25Name(name), plain = stripPyeongSuffix(name);
+  const ownId = (name === state.singleTargetName && state.singleTargetId) ? state.singleTargetId : '';
+  const seed = (ownId && seedEntryById(ownId)) || seedEntryByName(plain) || null;
+  if (is25){
+    if (!seed) return null;
+    const text = getSeries(seed.id, 25);
+    if (text) return { text, name: plain + PYEONG25_SUFFIX, id: seed.id, pyeong: 25 };
+    return seed25State === 'loaded' ? null : { text: '', name: plain + PYEONG25_SUFFIX, id: seed.id, pyeong: 25, pending25: true };
+  }
+  const lib = state.library.find(x => x.name === name);
+  if (lib && lib.text) return { text: lib.text, name: lib.name };
+  if (seed && seed.text) return { text: seed.text, name: seed.name, id: seed.id, pyeong: 34 };
+  return null;
+}
+// 기준 = baseName, 비교 1번 = compName, 원래 비교 목록은 뒤로 밀어 이어 붙인다(같은 단지·기준 단지는 빼고, MAX_SLOTS 넘치면 뒤를 자름).
+function setupComparePairL48(baseName, compName){
+  const b = slotValueForNameL48(baseName), cv = slotValueForNameL48(compName);
+  if (!b || !cv) return { ok: false };
+  const same = (s, v) => s.name === v.name || (!!v.id && s.id === v.id && (s.pyeong === 25) === (v.pyeong === 25));
+  const keep = state.compares.filter(s => s && (s.text || s.pending25) && !same(s, cv) && !same(s, b));
+  const dropped = keep.slice(Math.max(0, MAX_SLOTS - 1)).map(s => stripPyeongSuffix(s.name));
+  setSlotData('base', b);
+  state.compares = Array.from({length: MAX_SLOTS}, (_, i) => i === 0 ? { text: '', name: '', visible: true } : (keep[i - 1] || { text: '', name: '', visible: true }));
+  setSlotData(0, cv);
+  state.activeSlot = 0;
+  saveState();
+  return { ok: true, dropped, b, cv };
+}
+// 여러 단지 비교 탭으로 이동(목록 보존판 viewComplexPairInMultiCompare). 팝업의 "전체보기"와 여러 단지 비교 화면 안 카드가 쓴다.
+function viewComplexPairInMultiCompareL48(baseName, compName){
+  const r = setupComparePairL48(baseName, compName);
+  if (!r.ok) return;   // 경고창 없음(찾지 못하면 화면을 바꾸지 않는다)
+  if (BUNDLES.L25) [r.b, r.cv].forEach(v => { const e = v.id ? seedEntryById(v.id) : (state.library.find(x => x.name === v.name) || seedEntryByName(v.name)); if (e) recordRecentPick(e, v.pyeong === 25 ? 25 : 34); });
+  if (r.dropped.length) _pyeongNotices.push('비교 단지는 최대 '+MAX_SLOTS+'개라 뒤쪽 '+r.dropped.length+'개('+r.dropped.join(', ')+')는 목록에서 뺐어요.');
+  const panel = document.getElementById('sidePanel'); if (panel && panel.classList.contains('open')) closeSidePanel();
+  const overlay = document.getElementById('comparePairModalOverlay'); if (overlay && !overlay.hidden) closeComparePairModal();
+  setTopMode('multi');
+  render();
+  if (hasPending25()) resumePendingPyeong();
+  try { window.scrollTo(0, 0); } catch (e) {}
+}
+// 팝업: 지금 기준·비교 목록을 기억해 두고 잠시 "기준 + 카드 단지 1곳"으로 바꿔 보여 준다(저장하지 않음). 닫으면 원래대로,
+// "전체보기"를 누르면 원래 목록을 뒤로 보존한 채 여러 단지 비교 탭으로 이동한다.
+let _pairSnapL48 = null;
+function snapshotCompareStateL48(){
+  return { baseText: state.baseText, baseName: state.baseName, baseId: state.baseId, basePyeong: state.basePyeong, basePending25: state.basePending25,
+    basePreset: state.basePreset, usingSeed: usingSeed, activeSlot: state.activeSlot, compares: state.compares.map(s => Object.assign({}, s)) };
+}
+function restorePairSnapL48(){
+  if (!_pairSnapL48) return false;
+  const s = _pairSnapL48.snap; _pairSnapL48 = null;
+  state.baseText = s.baseText; state.baseName = s.baseName; state.baseId = s.baseId; state.basePyeong = s.basePyeong; state.basePending25 = s.basePending25;
+  state.basePreset = s.basePreset; usingSeed = s.usingSeed; state.activeSlot = s.activeSlot; state.compares = s.compares.map(x => Object.assign({}, x));
+  saveState();
+  return true;
+}
+function openComparePairModalL48(baseName, compName){
+  const b = slotValueForNameL48(baseName), cv = slotValueForNameL48(compName);
+  if (!b || !cv) return;   // 경고창 없음
+  const shell = document.getElementById('multiCompareShell');
+  const mount = document.getElementById('comparePairModalMount');
+  const overlay = document.getElementById('comparePairModalOverlay');
+  if (!shell || !mount || !overlay) return;
+  if (!_pairSnapL48) _pairSnapL48 = { snap: snapshotCompareStateL48() };
+  _pairSnapL48.baseName = baseName; _pairSnapL48.compName = compName;
+  setSlotData('base', b);
+  state.compares = Array.from({length: MAX_SLOTS}, () => ({ text: '', name: '', visible: true }));
+  setSlotData(0, cv);
+  state.activeSlot = 0;
+  if (!_multiShellHomeMarker){
+    _multiShellHomeMarker = document.createElement('span');
+    _multiShellHomeMarker.hidden = true;
+    shell.before(_multiShellHomeMarker);
+  }
+  let fullBtn = document.getElementById('comparePairModalFullL48');
+  if (!fullBtn){
+    fullBtn = document.createElement('button');
+    fullBtn.type = 'button'; fullBtn.id = 'comparePairModalFullL48'; fullBtn.className = 'btn small fair-cta cmp-full-btn-l48';
+    fullBtn.textContent = '🔍 전체보기 — 여러 단지 비교로 이동';
+    fullBtn.addEventListener('click', openPairFullViewL48);
+    mount.before(fullBtn);
+  }
+  fullBtn.hidden = false;
+  shell.hidden = false;
+  mount.appendChild(shell);
+  render();
+  overlay.hidden = false;
+  if (hasPending25()) resumePendingPyeong();
+}
+function openPairFullViewL48(){
+  const p = _pairSnapL48; if (!p) return;
+  restorePairSnapL48();   // 원래 목록으로 되돌린 뒤 그 목록을 뒤로 보존해 이동
+  viewComplexPairInMultiCompareL48(p.baseName, p.compName);
 }
 function renderEstDetailBody(body, comp, estimate, key, skipCount){
   const references = (estimate && estimate.references) || [];
