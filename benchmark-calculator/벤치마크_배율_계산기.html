@@ -2445,9 +2445,9 @@ function seoulHistoricalAvg(){
 // 라이브는 주소 플래그를 읽지 않으므로 이 기본값이 그대로 동작한다.
 const BUNDLES = { A:false, B:false, C:false, D1:false, D2:false, D3:false, D4:false, E1:true, E2:false, E3:true, F1:true, F2:true, F3:true, F4:true, F5:true, F6:true,
   H1:false, H2:true, H3:true, H4:true, H5:true, H6:true, H7:true,
-  L1:true, L2:true, L3:true, L4:true, L5:true, L6:false, L7:true, L8:true, L9:true, L10:true, L11:true, L12:true, L13:true, L14:true, L15:true, L16:true, L17:true, L18:true, L19:true, L19B:true, L20:true, L22:true, L23:true, L24:true, L25:true, L26:true, L27:!!window.POOL_EXCLUDE_ON, L31:!!window.NEW_NAME_RULE_ON, L32:true, L33:true, L34:true, L37:true, L28:true, L38:true, L40:true, L39:true, L41:true, L42:true, L43:true, L44:true, L45:true, L46:true, L47:true, L49:true, L48:true, L50:true, L51:true, L52:true, L53:true, L35:true, L36:true, L30:true, L29:true, L29R:false, K1:false, K2:true, K4:false };
+  L1:true, L2:true, L3:true, L4:true, L5:true, L6:false, L7:true, L8:true, L9:true, L10:true, L11:true, L12:true, L13:true, L14:true, L15:true, L16:true, L17:true, L18:true, L19:true, L19B:true, L20:true, L22:true, L23:true, L24:true, L25:true, L26:true, L27:!!window.POOL_EXCLUDE_ON, L31:!!window.NEW_NAME_RULE_ON, L32:true, L33:true, L34:true, L37:true, L28:true, L38:true, L40:true, L39:true, L41:true, L42:true, L43:true, L44:true, L45:true, L46:true, L47:true, L49:true, L48:true, L50:true, L51:true, L52:true, L53:true, L54:true, L35:true, L36:true, L30:true, L29:true, L29R:false, K1:false, K2:true, K4:false };
 const BUNDLE_GROUPS = { D:['D1','D2','D3','D4'], E:['E1','E2','E3'], F:['F1','F2','F3','F4','F5','F6'], H:['H1','H2','H3','H4','H5','H6','H7'],
-  L:['L1','L2','L3','L4','L5','L6','L7','L8','L9','L10','L11','L12','L13','L14','L15','L16','L17','L18','L19','L19B','L20','L22','L23','L24','L25','L26','L27','L29','L30','L31','L32','L33','L34','L37','L35','L36','L28','L38','L40','L39','L41','L42','L43','L44','L45','L46','L47','L49','L48','L50','L51','L52','L53'], K:['K1','K2','K4'] };
+  L:['L1','L2','L3','L4','L5','L6','L7','L8','L9','L10','L11','L12','L13','L14','L15','L16','L17','L18','L19','L19B','L20','L22','L23','L24','L25','L26','L27','L29','L30','L31','L32','L33','L34','L37','L35','L36','L28','L38','L40','L39','L41','L42','L43','L44','L45','L46','L47','L49','L48','L50','L51','L52','L53','L54'], K:['K1','K2','K4'] };
 // 묶음 L46(69단계): 그래프 점선 모양 통일 — 모든 점선을 "선도단지 대비 적정가" 선(FAIR_LINE_STYLE.borderDash)과 같은 긴 점선으로.
 // 촘촘한 점("좁쌀")·점-선 섞인 패턴을 없앤다. 새 점선은 항상 dashL46(예전 값)을 쓴다 — L46을 끄면 예전 값 그대로.
 const DASH_L46 = [5, 4];
@@ -9720,6 +9720,97 @@ function favoriteSeriesRows(baseName, twinName){
       (k0 && k != null && ym >= benchStartYm) ? round((k / k0 - 1) * 100, 1) : ''];
   });
 }
+// 묶음 L54(86단계): 즐겨찾기 엑셀 저장 때 쌍 시트마다 두 단지 매매가 꺾은선 차트 1개(기준 파랑·비교 주황)를 넣는다.
+// SheetJS 무료판은 차트를 쓰지 못해, 만든 파일을 같은 라이브러리의 압축 도구(XLSX.CFB)로 열어 엑셀 표준 차트 XML을 덧붙인다(추가 파일 없음).
+// 차트는 시트의 A열(시세월)·B·C열(매매가)을 가리키기만 하므로 셀 값은 끄기와 같다. 붙이기가 실패하면 차트 없이 예전처럼 저장한다.
+const CHART_COLORS_L54 = { base:'2F6FE0', twin:'F28C28' };
+const CHART_FIRST_ROW_L54 = 5;   // 쌍 시트: 1~3행 안내, 4행 머리글, 5행부터 월별 데이터(exportFavoritesXlsx의 aoa와 맞춘다)
+const XLSX_MIME_L54 = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+function xmlEscL54(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function xmlUnescL54(s){ return String(s).replace(/&quot;/g,'"').replace(/&apos;/g,"'").replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&amp;/g,'&'); }
+// 값 축: 0부터 그리면 두 선이 위에 몰려 차이가 안 보여서, 눈금 간격을 (최고−최저)/5 이상인 1·2·2.5·5×10^k 중 가장 작은 값으로 잡고
+// 아래쪽을 최저값 아래 그 간격의 배수로 내린다(셀 값과 무관, 엑셀에서 바꿀 수 있음). 숫자가 없으면 엑셀 자동.
+function chartAxisL54(rows){
+  let lo = Infinity, hi = -Infinity;
+  rows.forEach(r => { [r[1], r[2]].forEach(v => { if (typeof v === 'number' && isFinite(v)){ if (v < lo) lo = v; if (v > hi) hi = v; } }); });
+  if (!isFinite(lo) || lo <= 0) return null;
+  const raw = Math.max(hi - lo, hi * 0.1) / 5, mag = Math.pow(10, Math.floor(Math.log10(raw)));
+  const major = [1, 2, 2.5, 5, 10].map(m => m * mag).find(s => s >= raw);
+  return { min: Math.max(0, Math.floor(lo / major) * major), major };
+}
+function chartXmlL54(c){
+  const last = CHART_FIRST_ROW_L54 + c.n - 1;
+  const ref = col => xmlEscL54("'" + c.sheet.replace(/'/g, "''") + "'!$" + col + '$' + CHART_FIRST_ROW_L54 + ':$' + col + '$' + last);
+  const one = c.n < 2;   // 한 달뿐이면 선이 안 보여 점으로 표시
+  const ser = (idx, col, name, rgb) => '<c:ser><c:idx val="'+idx+'"/><c:order val="'+idx+'"/><c:tx><c:v>'+xmlEscL54(name)+'</c:v></c:tx>'+
+    '<c:spPr><a:ln w="22225" cap="rnd"><a:solidFill><a:srgbClr val="'+rgb+'"/></a:solidFill><a:round/></a:ln></c:spPr>'+
+    '<c:marker>'+(one ? '<c:symbol val="circle"/><c:size val="6"/><c:spPr><a:solidFill><a:srgbClr val="'+rgb+'"/></a:solidFill><a:ln><a:solidFill><a:srgbClr val="'+rgb+'"/></a:solidFill></a:ln></c:spPr>' : '<c:symbol val="none"/>')+'</c:marker>'+
+    '<c:cat><c:strRef><c:f>'+ref('A')+'</c:f></c:strRef></c:cat><c:val><c:numRef><c:f>'+ref(col)+'</c:f></c:numRef></c:val><c:smooth val="0"/></c:ser>';
+  const skip = c.n > 36 ? 12 : (c.n > 12 ? 3 : 1);
+  const grid = '<c:majorGridlines><c:spPr><a:ln w="6350"><a:solidFill><a:srgbClr val="D9D9D9"/></a:solidFill></a:ln></c:spPr></c:majorGridlines>';
+  return '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n'+
+    '<c:chartSpace xmlns:c="http://schemas.openxmlformats.org/drawingml/2006/chart" xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">'+
+    '<c:roundedCorners val="0"/><c:chart><c:title><c:tx><c:rich><a:bodyPr/><a:p><a:pPr><a:defRPr sz="1200" b="1"/></a:pPr><a:r><a:rPr lang="ko-KR" sz="1200" b="1"/><a:t>'+xmlEscL54('매매가 추이(만원) — '+c.base+' / '+c.twin)+'</a:t></a:r></a:p></c:rich></c:tx><c:overlay val="0"/></c:title>'+
+    '<c:autoTitleDeleted val="0"/><c:plotArea><c:layout/><c:lineChart><c:grouping val="standard"/><c:varyColors val="0"/>'+
+    ser(0, 'B', '기준 '+c.base, CHART_COLORS_L54.base)+ser(1, 'C', '비교 '+c.twin, CHART_COLORS_L54.twin)+
+    '<c:marker val="1"/><c:axId val="54001"/><c:axId val="54002"/></c:lineChart>'+
+    '<c:catAx><c:axId val="54001"/><c:scaling><c:orientation val="minMax"/></c:scaling><c:delete val="0"/><c:axPos val="b"/><c:numFmt formatCode="General" sourceLinked="1"/><c:majorTickMark val="out"/><c:minorTickMark val="none"/><c:tickLblPos val="low"/><c:crossAx val="54002"/><c:crosses val="autoZero"/><c:auto val="1"/><c:lblAlgn val="ctr"/><c:lblOffset val="100"/><c:tickLblSkip val="'+skip+'"/><c:tickMarkSkip val="'+skip+'"/><c:noMultiLvlLbl val="0"/></c:catAx>'+
+    '<c:valAx><c:axId val="54002"/><c:scaling><c:orientation val="minMax"/>'+(c.axis ? '<c:min val="'+c.axis.min+'"/>' : '')+'</c:scaling><c:delete val="0"/><c:axPos val="l"/>'+grid+'<c:numFmt formatCode="#,##0" sourceLinked="0"/><c:majorTickMark val="out"/><c:minorTickMark val="none"/><c:tickLblPos val="nextTo"/><c:crossAx val="54001"/><c:crosses val="autoZero"/><c:crossBetween val="between"/>'+(c.axis ? '<c:majorUnit val="'+c.axis.major+'"/>' : '')+'</c:valAx>'+
+    '</c:plotArea><c:legend><c:legendPos val="b"/><c:overlay val="0"/></c:legend><c:plotVisOnly val="1"/><c:dispBlanksAs val="gap"/></c:chart></c:chartSpace>';
+}
+// 차트 위치: 표(A~G열) 오른쪽 I~Q열, 4~23행.
+function chartDrawingXmlL54(){
+  return '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n'+
+    '<xdr:wsDr xmlns:xdr="http://schemas.openxmlformats.org/drawingml/2006/spreadsheetDrawing" xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main">'+
+    '<xdr:twoCellAnchor editAs="oneCell"><xdr:from><xdr:col>8</xdr:col><xdr:colOff>0</xdr:colOff><xdr:row>3</xdr:row><xdr:rowOff>0</xdr:rowOff></xdr:from><xdr:to><xdr:col>17</xdr:col><xdr:colOff>0</xdr:colOff><xdr:row>23</xdr:row><xdr:rowOff>0</xdr:rowOff></xdr:to>'+
+    '<xdr:graphicFrame macro=""><xdr:nvGraphicFramePr><xdr:cNvPr id="2" name="매매가 차트"/><xdr:cNvGraphicFramePr/></xdr:nvGraphicFramePr><xdr:xfrm><a:off x="0" y="0"/><a:ext cx="0" cy="0"/></xdr:xfrm>'+
+    '<a:graphic><a:graphicData uri="http://schemas.openxmlformats.org/drawingml/2006/chart"><c:chart xmlns:c="http://schemas.openxmlformats.org/drawingml/2006/chart" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" r:id="rId1"/></a:graphicData></a:graphic>'+
+    '</xdr:graphicFrame><xdr:clientData/></xdr:twoCellAnchor></xdr:wsDr>';
+}
+function relsXmlL54(rels){
+  return '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'+
+    rels.map(r => '<Relationship Id="'+r[0]+'" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/'+r[1]+'" Target="'+r[2]+'"/>').join('')+'</Relationships>';
+}
+// data: XLSX.write(..., {type:'array'}) 결과, charts: [{sheet, n, base, twin, axis}] → 차트를 붙인 xlsx 바이트(Uint8Array)
+function addLineChartsL54(data, charts){
+  const CFB = XLSX.CFB, enc = new TextEncoder(), dec = new TextDecoder();
+  const zip = CFB.read(new Uint8Array(data), { type:'array' });
+  const get = p => { const e = CFB.find(zip, '/' + p); if (!e) throw new Error('엑셀 파일 안에 '+p+'가 없습니다'); return e; };
+  const readText = p => dec.decode(new Uint8Array(get(p).content));
+  const put = (p, s) => { const e = CFB.find(zip, '/' + p); if (e) e.content = enc.encode(s); else CFB.utils.cfb_add(zip, '/' + p, enc.encode(s)); };
+  // 시트 이름 → 시트 파일(workbook.xml의 r:id → workbook.xml.rels의 Target)
+  const relTarget = {};
+  readText('xl/_rels/workbook.xml.rels').replace(/<Relationship [^>]*?Id="([^"]+)"[^>]*?Target="([^"]+)"/g, (m, id, target) => { relTarget[id] = target; return m; });
+  const sheetFile = {};
+  readText('xl/workbook.xml').replace(/<sheet [^>]*?name="([^"]*)"[^>]*?r:id="([^"]+)"/g, (m, name, id) => { if (relTarget[id]) sheetFile[xmlUnescL54(name)] = 'xl/' + relTarget[id].replace(/^\/?xl\//, '').replace(/^\//, ''); return m; });
+  let types = readText('[Content_Types].xml');
+  charts.forEach((c, i) => {
+    const k = i + 1, sp = sheetFile[c.sheet];
+    if (!sp) throw new Error('시트를 찾지 못했습니다: '+c.sheet);
+    const relsPath = sp.replace(/([^\/]+)$/, '_rels/$1.rels');
+    if (CFB.find(zip, '/' + relsPath)) throw new Error('시트 관계 파일이 이미 있습니다: '+relsPath);
+    let sx = readText(sp);
+    if (sx.indexOf('<drawing ') >= 0) throw new Error('시트에 이미 그림이 있습니다: '+sp);
+    if (!/<worksheet [^>]*xmlns:r=/.test(sx)) sx = sx.replace('<worksheet ', '<worksheet xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" ');
+    put(sp, sx.replace('</worksheet>', '<drawing r:id="rId1"/></worksheet>'));
+    put(relsPath, relsXmlL54([['rId1', 'drawing', '../drawings/drawing'+k+'.xml']]));
+    put('xl/drawings/drawing'+k+'.xml', chartDrawingXmlL54());
+    put('xl/drawings/_rels/drawing'+k+'.xml.rels', relsXmlL54([['rId1', 'chart', '../charts/chart'+k+'.xml']]));
+    put('xl/charts/chart'+k+'.xml', chartXmlL54(c));
+    types = types.replace('</Types>', '<Override PartName="/xl/drawings/drawing'+k+'.xml" ContentType="application/vnd.openxmlformats-officedocument.drawing+xml"/>'+
+      '<Override PartName="/xl/charts/chart'+k+'.xml" ContentType="application/vnd.openxmlformats-officedocument.drawingml.chart+xml"/></Types>');
+  });
+  put('[Content_Types].xml', types);
+  return CFB.write(zip, { fileType:'zip', type:'array' });
+}
+function downloadBytesL54(filename, bytes){
+  const blob = new Blob([bytes], { type: XLSX_MIME_L54 });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = filename;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
 function exportFavoritesXlsx(){
   const list = loadTwinFavorites();
   if (!list.length){ alert('저장된 즐겨찾기가 없습니다.'); return; }
@@ -9730,9 +9821,11 @@ function exportFavoritesXlsx(){
   const summary = [[FAV_EXPORT_RECALC_NOTE+' (내보낸 날: '+today+'). 조합별 월별 시세는 각 시트에 있습니다.'], [],
     ['조합번호','시트 이름','기준단지','비교단지','매치타입','상관계수','겹침개월수','배율괴리(%p)','저장일시','비고']];
   const sheets = [];
+  const chartsL54 = [];   // 묶음 L54: 차트를 넣을 쌍 시트
   list.forEach((f, i) => {
     const sheetName = favoriteSheetName(i + 1, f.baseName, f.twinName);
     const rows = favoriteSeriesRows(f.baseName, f.twinName);
+    if (BUNDLES.L54 && rows && rows.length) chartsL54.push({ sheet: sheetName, n: rows.length, base: f.baseName, twin: f.twinName, axis: chartAxisL54(rows) });
     summary.push([i + 1, sheetName, f.baseName, f.twinName, twinFavMatchLabel(f.matchType),
       f.corr != null ? Math.round(f.corr * 100) / 100 : '', f.overlapMonths != null ? f.overlapMonths : '',
       f.decouplingGap != null ? Math.round(f.decouplingGap * 10) / 10 : '', f.savedAt || '',
@@ -9747,7 +9840,13 @@ function exportFavoritesXlsx(){
   summaryWs['!cols'] = [{wch:8},{wch:28},{wch:22},{wch:22},{wch:10},{wch:8},{wch:10},{wch:12},{wch:22},{wch:30}];
   XLSX.utils.book_append_sheet(wb, summaryWs, '요약');
   sheets.forEach(([ws, name]) => XLSX.utils.book_append_sheet(wb, ws, name));
-  XLSX.writeFile(wb, '쌍둥이단지_즐겨찾기_'+today.replace(/-/g,'')+'.xlsx');
+  const fileNameL54 = '쌍둥이단지_즐겨찾기_'+today.replace(/-/g,'')+'.xlsx';
+  if (BUNDLES.L54 && chartsL54.length){   // 묶음 L54: 차트를 붙여 저장, 실패하면 아래 예전 방법(차트 없음)
+    let bytes = null;
+    try { bytes = addLineChartsL54(XLSX.write(wb, { type:'array', bookType:'xlsx' }), chartsL54); } catch (e) { bytes = null; }
+    if (bytes){ downloadBytesL54(fileNameL54, bytes); return; }
+  }
+  XLSX.writeFile(wb, fileNameL54);
 }
 // exportLibrary/importLibraryFile(단지 라이브러리 JSON 내보내기/불러오기)와
 // 같은 {type, version, ...} 봉투 형식을 그대로 따른다 — 이 계산기 안에서
