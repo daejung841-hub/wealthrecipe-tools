@@ -2445,9 +2445,9 @@ function seoulHistoricalAvg(){
 // 라이브는 주소 플래그를 읽지 않으므로 이 기본값이 그대로 동작한다.
 const BUNDLES = { A:false, B:false, C:false, D1:false, D2:false, D3:false, D4:false, E1:true, E2:false, E3:true, F1:true, F2:true, F3:true, F4:true, F5:true, F6:true,
   H1:false, H2:true, H3:true, H4:true, H5:true, H6:true, H7:true,
-  L1:true, L2:true, L3:true, L4:true, L5:true, L6:false, L7:true, L8:true, L9:true, L10:true, L11:true, L12:true, L13:true, L14:true, L15:true, L16:true, L17:true, L18:true, L19:true, L19B:true, L20:true, L22:true, L23:true, L24:true, L25:true, L26:true, L27:!!window.POOL_EXCLUDE_ON, L31:!!window.NEW_NAME_RULE_ON, L32:true, L33:true, L34:true, L37:true, L28:true, L38:true, L40:true, L39:true, L41:true, L42:true, L43:true, L44:true, L45:true, L46:true, L47:true, L49:true, L48:true, L50:true, L51:true, L52:true, L53:true, L54:true, L35:true, L36:true, L30:true, L29:true, L29R:false, K1:false, K2:true, K4:false };
+  L1:true, L2:true, L3:true, L4:true, L5:true, L6:false, L7:true, L8:true, L9:true, L10:true, L11:true, L12:true, L13:true, L14:true, L15:true, L16:true, L17:true, L18:true, L19:true, L19B:true, L20:true, L22:true, L23:true, L24:true, L25:true, L26:true, L27:!!window.POOL_EXCLUDE_ON, L31:!!window.NEW_NAME_RULE_ON, L32:true, L33:true, L34:true, L37:true, L28:true, L38:true, L40:true, L39:true, L41:true, L42:true, L43:true, L44:true, L45:true, L46:true, L47:true, L49:true, L48:true, L50:true, L51:true, L52:true, L53:true, L54:true, L55:true, L56:true, L35:true, L36:true, L30:true, L29:true, L29R:false, K1:false, K2:true, K4:false };
 const BUNDLE_GROUPS = { D:['D1','D2','D3','D4'], E:['E1','E2','E3'], F:['F1','F2','F3','F4','F5','F6'], H:['H1','H2','H3','H4','H5','H6','H7'],
-  L:['L1','L2','L3','L4','L5','L6','L7','L8','L9','L10','L11','L12','L13','L14','L15','L16','L17','L18','L19','L19B','L20','L22','L23','L24','L25','L26','L27','L29','L30','L31','L32','L33','L34','L37','L35','L36','L28','L38','L40','L39','L41','L42','L43','L44','L45','L46','L47','L49','L48','L50','L51','L52','L53','L54'], K:['K1','K2','K4'] };
+  L:['L1','L2','L3','L4','L5','L6','L7','L8','L9','L10','L11','L12','L13','L14','L15','L16','L17','L18','L19','L19B','L20','L22','L23','L24','L25','L26','L27','L29','L30','L31','L32','L33','L34','L37','L35','L36','L28','L38','L40','L39','L41','L42','L43','L44','L45','L46','L47','L49','L48','L50','L51','L52','L53','L54','L55','L56'], K:['K1','K2','K4'] };
 // 묶음 L46(69단계): 그래프 점선 모양 통일 — 모든 점선을 "선도단지 대비 적정가" 선(FAIR_LINE_STYLE.borderDash)과 같은 긴 점선으로.
 // 촘촘한 점("좁쌀")·점-선 섞인 패턴을 없앤다. 새 점선은 항상 dashL46(예전 값)을 쓴다 — L46을 끄면 예전 값 그대로.
 const DASH_L46 = [5, 4];
@@ -4630,11 +4630,40 @@ function twinCohortAllowed(entry){
 // 반환 형태: { curated: [1페이지 고정 — 갭메우기이력 상위 GAP_CLOSED_PAGE1_COUNT개
 //               + 닮은꼴2 + 괴리3], rest: [2페이지부터 5개씩 — 넘친 갭메우기
 //               이력이 먼저, 그다음 기존 닮음/괴리 나머지(상관계수 내림차순)] }
+// 묶음 L55(89단계): 쌍둥이 목록은 상관 0.92만 넘으면 같은 자격이라, 시세가 2~3년뿐인 신축이 우연히 높은 상관으로
+// 맨 위에 오르곤 했다(88단계: 1페이지 첫 카드 3,294곳 중 1,040곳이 겹침 60개월 미만). 각 정렬 지점에서 기존 기준으로
+// 정렬한 뒤 겹침 60개월 이상 단지를 앞으로, 미만 단지는 그 뒤에 같은 순서로 둔다(빼지 않음). 대상 단지 자신이
+// 60개월 미만이면 모든 후보가 60개월 미만이라 순서는 지금과 같다. 계산(적정가·배지)에는 쓰이지 않는 표시 순서다.
+const TWIN_PREFER_OVERLAP_MONTHS_L55 = 60;
+function orderTwinsL55(list, cmp, compMonths){
+  const sorted = list.slice().sort(cmp);
+  if (!BUNDLES.L55 || !(compMonths >= TWIN_PREFER_OVERLAP_MONTHS_L55)) return sorted;
+  return sorted.filter(t => t.overlapMonths >= TWIN_PREFER_OVERLAP_MONTHS_L55).concat(sorted.filter(t => !(t.overlapMonths >= TWIN_PREFER_OVERLAP_MONTHS_L55)));
+}
+// 묶음 L56(92단계): 쌍둥이 후보 자격 두 가지를 더 본다(상관 0.92·겹침 30개월·배율 CV 8%는 그대로, 준거·적정가와 무관).
+// 상관은 두 단지가 반대로 움직여도 추세 모양만 같으면 높게 나와서(90단계: 우장산롯데캐슬 +27.8% ↔ 고덕국제신도시아너스 −13.1%,
+// 상관 0.955), (A) 겹침 기간 전체의 매매가 변화율 방향이 같아야 하고(±2% 안은 보합으로 같은 방향), (B) 겹침이 60개월 미만이면
+// 시작=100으로 맞춘 두 곡선의 차이(RMS)가 15 이하여야 한다. 곡선 차이는 겹침이 길수록 자연히 커져서 긴 겹침에는 쓰지 않는다
+// (91단계: 전 구간에 쓰면 잠실엘스–트리지움처럼 20년 넘게 함께 오른 쌍도 빠짐).
+const TWIN_DIRECTION_TOL_PCT_L56 = 2;
+const TWIN_SHORT_OVERLAP_MONTHS_L56 = 60;
+const TWIN_SHORT_MAX_AMP_RMS_L56 = 15;
+const TWIN_EMPTY_TEXT_L56 = '가격 흐름과 오르내린 방향이 모두 닮은 단지를 찾지 못했어요. 이 단지는 비교할 쌍둥이 없이 보시는 게 정확해요.';
+function twinShapeOkL56(comp, cand, overlapYms){
+  const first = overlapYms[0], last = overlapYms[overlapYms.length-1];
+  // 소수점 오차로 정확히 ±2%가 경계 밖으로 밀리지 않게 소수 6자리에서 반올림한다(예: 98/100−1 = −0.0200000000000000018)
+  const chgComp = Math.round((comp.rowMap.get(last).saleMid / comp.rowMap.get(first).saleMid - 1) * 1e8) / 1e6;
+  const chgCand = Math.round((cand.rowMap.get(last).saleMid / cand.rowMap.get(first).saleMid - 1) * 1e8) / 1e6;
+  const tol = TWIN_DIRECTION_TOL_PCT_L56;
+  if ((chgComp > tol && chgCand < -tol) || (chgComp < -tol && chgCand > tol)) return false;
+  if (overlapYms.length < TWIN_SHORT_OVERLAP_MONTHS_L56 && computeTwinAmpRmsDiff(comp.rowMap, cand.rowMap, overlapYms) > TWIN_SHORT_MAX_AMP_RMS_L56) return false;
+  return true;
+}
 function findTwinCandidates(comp){
   if (isPyeong25Name(comp.name)) return { curated: [], rest: [], bestFairPriceCandidate: null }; // 25평 쌍둥이 풀은 다음 단계(2026-09-30)
   if (_twinCandidatesCache[comp.name]) return _twinCandidatesCache[comp.name];
   const rebuildMembers = new Set(BENCHMARK_GROUPS.rebuild.members);
-  let result = { curated: [], rest: [], bestFairPriceCandidate: null };
+  let result = { curated: [], rest: [], bestFairPriceCandidate: null, compMonthsL55: 0 };
   if (!rebuildMembers.has(comp.name)){
     const compYms = [...comp.rowMap.keys()].filter(ym => comp.rowMap.get(ym).saleMid!=null).sort((a,b)=>a-b);
     const minOverlap = TWIN_MIN_OVERLAP_MONTHS;
@@ -4660,6 +4689,7 @@ function findTwinCandidates(comp){
         if (corr == null || corr < TWIN_CORR_THRESHOLD) return;
         const decoupling = computeTwinDecoupling(comp, cand, overlapYms);
         if (!decoupling || decoupling.pastCV == null || decoupling.pastCV > TWIN_PAST_CV_THRESHOLD) return;
+        if (BUNDLES.L56 && !twinShapeOkL56(comp, cand, overlapYms)) return;   // 묶음 L56
         const candYms = [...cand.rowMap.keys()].filter(ym => cand.rowMap.get(ym).saleMid!=null).sort((a,b)=>a-b);
         const candBenchOverlapYms = overlapYmsOf(cand.rowMap, bench.rowMap, candYms);
         const twinBenchDecoupling = computeFixedWindowGap(cand, bench, candBenchOverlapYms);
@@ -4672,7 +4702,7 @@ function findTwinCandidates(comp){
         const ampRms = computeTwinAmpRmsDiff(comp.rowMap, cand.rowMap, overlapYms);
         scored.push({ name: e.name, complex: cand, corr, ampRms, overlapMonths: overlapYms.length, overlapYms, decoupling, compBenchDecoupling, twinBenchDecoupling, gapStats });
       });
-      const byCorr = scored.slice().sort((a,b)=> b.corr - a.corr);
+      const byCorr = orderTwinsL55(scored, (a,b)=> b.corr - a.corr, compYms.length);   // 묶음 L55
       // 🎯 갭메우기 이력 — "완료"가 아니라 "이력"인 이유: 역사적으로 회복
       // 사례가 있으면 지금 한창 진행중(아직 안 돌아온 상태)이어도 이
       // 카테고리에 넣는다 — 과거에 늘 돌아왔다는 사실 자체가 지금도 회복
@@ -4731,7 +4761,7 @@ function findTwinCandidates(comp){
       // "상승폭 유사"라는 배지 라벨과 실제 선정 기준이 다시 어긋나 같은
       // 종류의 오해를 재현하게 되므로, 빈 슬롯이 더 안전한 선택이다.
       const ampPool = notClosed.filter(t => !similarCorrNames.has(t.name) && !(t.decoupling && t.decoupling.deviated));
-      const byAmp = ampPool.slice().sort((a,b)=> a.ampRms - b.ampRms);
+      const byAmp = orderTwinsL55(ampPool, (a,b)=> a.ampRms - b.ampRms, compYms.length);   // 묶음 L55
       const similarAmp = byAmp.slice(0, Math.max(0, TWIN_SIMILAR_COUNT-1)).map(t => ({ ...t, matchType: 'similar', similarReason: 'amp' }));
       const similar = similarCorr.concat(similarAmp);
       const similarNames = new Set(similar.map(t=>t.name));
@@ -4742,8 +4772,8 @@ function findTwinCandidates(comp){
       // "%p 벌어짐" 텍스트와 같은 판정 기준을 쓴다. 모자라면 gapPicked가
       // TWIN_GAP_COUNT보다 적어질 뿐, 노이즈로 채우지 않는다. 남은 것들은
       // 강도 2단계(뚜렷한 괴리 15%p+/괴리 5~15%p, depth 기준)로 표시한다.
-      const byGap = notClosed.filter(t => !similarNames.has(t.name) && t.decoupling.deviated)
-        .sort((a,b)=> b.decoupling.depth - a.decoupling.depth);
+      const byGap = orderTwinsL55(notClosed.filter(t => !similarNames.has(t.name) && t.decoupling.deviated),
+        (a,b)=> b.decoupling.depth - a.decoupling.depth, compYms.length);   // 묶음 L55
       const gapPicked = byGap.slice(0, TWIN_GAP_COUNT).map(t => ({ ...t, matchType: 'gap', gapSeverity: t.decoupling.depth >= 15 ? 'strong' : 'normal' }));
       const gapPickedNames = new Set(gapPicked.map(t=>t.name));
       const more = notClosed.filter(t => !similarNames.has(t.name) && !gapPickedNames.has(t.name)).map(t => ({ ...t, matchType: 'more' }));
@@ -4751,7 +4781,7 @@ function findTwinCandidates(comp){
       const rest = closedOverflow.concat(more);
       // 기본 노출 목록의 표시 순서는 카테고리 무관하게 상관계수 내림차순
       // ("가장 닮은꼴부터 먼저") — 카테고리 태그는 각 항목에 그대로 남는다.
-      const curated = closed.concat(similar).concat(gapPicked).sort((a,b)=> b.corr - a.corr);
+      const curated = orderTwinsL55(closed.concat(similar).concat(gapPicked), (a,b)=> b.corr - a.corr, compYms.length);   // 묶음 L55
       // E-3: "베스트" 갭메우기 사례 — 에피소드 3회 이상(FAIR_PRICE_MIN_EPISODES) +
       // 현재도 진행중 + 상관계수 0.92 이상(TWIN_CORR_THRESHOLD, scored 단계에서
       // 이미 걸러져 있어 사실상 자동 충족되지만 명시적으로 다시 확인한다)일 때만
@@ -4764,7 +4794,7 @@ function findTwinCandidates(comp){
         t.corr >= TWIN_CORR_THRESHOLD
       );
       const bestFairPriceCandidate = fairPriceEligible[0] || null;
-      result = { curated, rest, bestFairPriceCandidate };
+      result = { curated, rest, bestFairPriceCandidate, compMonthsL55: compYms.length };
     }
   }
   _twinCandidatesCache[comp.name] = result;
@@ -5291,6 +5321,11 @@ const SIMILAR_AMP_TAG_TOOLTIP = '방향성 상관계수는 기준(0.92) 이상�
 // 래미안부평-힐스테이트황금산: 2018년 이후 시세만 있어 쌍둥이로만 뜸).
 const TWIN_KIND_CAPTION =
   '<div class="twin-kind-caption"><b>쌍둥이 단지</b> = 가격 흐름이 닮은 단지예요(시세 이력 길이와 무관). 2014년 이전 시세가 없는 단지는 동조율 추정(준거단지)에는 쓸 수 없어 여기에만 나와요.</div>';
+const TWIN_ORDER_NOTE_L55 = '<div class="twin-kind-caption">순서: 시세가 5년 이상 겹치는(이력이 긴) 단지를 먼저 보여 드려요. 이력이 짧은 단지는 그 뒤에 이어서 나와요.</div>';   // 묶음 L55
+// 묶음 L56: "(시세 이력 길이와 무관)"을 자격 설명으로 다듬고(L55의 "이력이 긴 단지 먼저" 순서 안내와 부딪히지 않게), 방향·모양 조건 한 줄.
+const TWIN_KIND_CAPTION_L56 =
+  '<div class="twin-kind-caption"><b>쌍둥이 단지</b> = 가격 흐름이 닮은 단지예요. 쌍둥이가 되는 자격은 시세 이력이 짧든 길든 같아요. 2014년 이전 시세가 없는 단지는 동조율 추정(준거단지)에는 쓸 수 없어 여기에만 나와요.</div>';
+const TWIN_FILTER_NOTE_L56 = '<div class="twin-kind-caption">같은 기간에 한쪽은 오르고 한쪽은 내린 단지, 겹친 기간이 5년이 안 되는데 오르내린 모양이 크게 다른 단지는 빼고 보여 드려요.</div>';
 const TWIN_CATEGORY_LEGEND = TWIN_KIND_CAPTION +
   '<div class="twin-legend">'+
     '<span>🎯 동조 1위 = 오르내리는 방향·타이밍이 가장 비슷했던 단지(상관계수 기준)</span>'+
@@ -5586,7 +5621,7 @@ function wireOneTwinCard(containerEl, t, idx, comp, r, bestFairPriceCandidate, i
 // 탭은 칸1/2 개념이 없어 이 플래그 없이 기존처럼 본문 안에 닮은꼴1위/
 // 현재괴리1위가 그대로 포함된다.
 function renderTwinBody(body, comp, r, key, hideTopPreview){
-  const { curated: rawCurated, rest: rawRest, bestFairPriceCandidate } = findTwinCandidates(comp);
+  const { curated: rawCurated, rest: rawRest, bestFairPriceCandidate, compMonthsL55 } = findTwinCandidates(comp);
   // 항목(2026-09 세션, "갭메우기 이력 UI 숨김") — 계산 레이어(closed 분류,
   // gapStats, historicalGapEpisodes)는 findTwinCandidates 안에 그대로 두고,
   // 렌더링 목록에서만 matchType==='closed'를 걸러낸다. E-3 적정가 추정과
@@ -5596,7 +5631,8 @@ function renderTwinBody(body, comp, r, key, hideTopPreview){
   const curated = rawCurated.filter(t => t.matchType !== 'closed');
   const rest = rawRest.filter(t => t.matchType !== 'closed');
   if (!curated.length && !rest.length){
-    body.innerHTML = '<div class="twin-msg">상관계수 '+TWIN_CORR_THRESHOLD.toFixed(2)+' 이상인 쌍둥이 단지를 찾지 못했습니다.</div>';
+    body.innerHTML = BUNDLES.L56 ? '<div class="twin-msg">'+TWIN_EMPTY_TEXT_L56+'</div>'   // 묶음 L56
+      : '<div class="twin-msg">상관계수 '+TWIN_CORR_THRESHOLD.toFixed(2)+' 이상인 쌍둥이 단지를 찾지 못했습니다.</div>';
     return;
   }
   // 기본 노출은 curated(닮은꼴2+괴리2)만 — 페이지 번호 없이 그대로 보여준다.
@@ -5612,7 +5648,7 @@ function renderTwinBody(body, comp, r, key, hideTopPreview){
   if (previewLimit){
     const previewSimilar = curated.filter(t => t.matchType === 'similar').slice(0, 1);
     const previewGap = curated.filter(t => t.matchType === 'gap').slice(0, 1);
-    visibleCurated = previewSimilar.concat(previewGap).sort((a,b)=> b.corr-a.corr);
+    visibleCurated = orderTwinsL55(previewSimilar.concat(previewGap), (a,b)=> b.corr-a.corr, compMonthsL55);   // 묶음 L55
     const shownNames = new Set(visibleCurated.map(t=>t.name));
     overflowCurated = curated.filter(t => !shownNames.has(t.name));
   } else {
@@ -5656,7 +5692,7 @@ function renderTwinBody(body, comp, r, key, hideTopPreview){
   const itemModeOf = (t) => { const k = itemOverrideKey(key, t.name); return cardChartModeOverride.get(k) || mode; };
   const itemRangeModeOf = (t) => { const k = itemOverrideKey(key, t.name); return cardRangeModeOverride.get(k) || rangeMode; };
   const itemShowBenchOf = (t) => { const k = itemOverrideKey(key, t.name); return cardBenchLineOverride.has(k) ? cardBenchLineOverride.get(k) : (t.matchType === 'closed'); };
-  body.innerHTML = TWIN_CATEGORY_LEGEND + chartModeToggleHtml(key) + rangeModeToggleHtml(key) + curatedLabelHtml + pagedAllItems.map((t, idx) => {
+  body.innerHTML = (BUNDLES.L56 ? TWIN_CATEGORY_LEGEND.replace(TWIN_KIND_CAPTION, TWIN_KIND_CAPTION_L56) + TWIN_FILTER_NOTE_L56 : TWIN_CATEGORY_LEGEND) + (BUNDLES.L55 ? TWIN_ORDER_NOTE_L55 : '') + chartModeToggleHtml(key) + rangeModeToggleHtml(key) + curatedLabelHtml + pagedAllItems.map((t, idx) => {
     const sectionDividerHtml = (idx === pageCurated.length) ? restLabelHtml : '';
     return sectionDividerHtml + buildTwinCardHtml(t, idx, comp, r, bestFairPriceCandidate, itemModeOf(t), itemRangeModeOf(t), itemShowBenchOf(t));
   }).join('') + moreBtnHtml + (moreOpen && totalRestPages > 1 ? renderTwinPageNav(page, totalRestPages, 'twin') : '');
