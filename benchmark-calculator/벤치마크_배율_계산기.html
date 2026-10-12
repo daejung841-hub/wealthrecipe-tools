@@ -1208,6 +1208,11 @@ html.guide-open, body.guide-open{overflow:hidden;}
 /* 묶음 L36(55단계): 쓰는 사람이 없는 칸을 화면에서만 숨긴다 — 기준 단지 맨 위 선택 상자, 비교 단지 칸의 "라이브러리에서 불러오기…" 선택 상자, 단지 라이브러리·공용 라이브러리 연동 칸. 코드·상태·select는 그대로(검색 선택·가져오기·복원이 쓴다). */
 body.l36 #basePreset, body.l36 .lib-select-row, body.l36 #libBlock, body.l36 #gasBlock{display:none !important;}
 body.l36 #baseLibSelect, body.l36 .lib-row:has(> #baseLibSelect){display:none !important;}   /* 65단계 수정판: 기준 단지 칸 "라이브러리에서 불러오기" 상자(검색으로 고름) */
+/* 묶음 L58(97단계): 메뉴 8개가 601~899px에서 두 줄로 접혀서, 이 구간도 L32처럼 한 줄 가로 밀기(L22 규칙 뒤라 같은 우선순위에서 이김) */
+@media (min-width:601px) and (max-width:899px){
+  body.l58 .topbar-actions{flex-wrap:nowrap;justify-content:flex-start;overflow-x:auto;max-width:100%;width:100%;padding-bottom:2px;-webkit-overflow-scrolling:touch;}
+  body.l58 .topbar-actions > *{flex:none;white-space:nowrap;}
+}
 /* 묶음 L32(50단계): 폴드 커버(344~390px) 등 좁은 폭. 600px 이하에서만(쌍둥이·심화분석 세로 쌓기는 820px 이하) — 넓은 화면은 그대로. */
 @media (max-width:820px){
   body.l32 .single-diag-action-row{flex-direction:column;}
@@ -2449,9 +2454,9 @@ function seoulHistoricalAvg(){
 // 라이브는 주소 플래그를 읽지 않으므로 이 기본값이 그대로 동작한다.
 const BUNDLES = { A:false, B:false, C:false, D1:false, D2:false, D3:false, D4:false, E1:true, E2:false, E3:true, F1:true, F2:true, F3:true, F4:true, F5:true, F6:true,
   H1:false, H2:true, H3:true, H4:true, H5:true, H6:true, H7:true,
-  L1:true, L2:true, L3:true, L4:true, L5:true, L6:false, L7:true, L8:true, L9:true, L10:true, L11:true, L12:true, L13:true, L14:true, L15:true, L16:true, L17:true, L18:true, L19:true, L19B:true, L20:true, L22:true, L23:true, L24:true, L25:true, L26:true, L27:!!window.POOL_EXCLUDE_ON, L31:!!window.NEW_NAME_RULE_ON, L32:true, L33:true, L34:true, L37:true, L28:true, L38:true, L40:true, L39:true, L41:true, L42:true, L43:true, L44:true, L45:true, L46:true, L47:true, L49:true, L48:true, L50:true, L51:true, L52:true, L53:true, L54:true, L55:true, L56:true, L57:true, L35:true, L36:true, L30:true, L29:true, L29R:false, K1:false, K2:true, K4:false };
+  L1:true, L2:true, L3:true, L4:true, L5:true, L6:false, L7:true, L8:true, L9:true, L10:true, L11:true, L12:true, L13:true, L14:true, L15:true, L16:true, L17:true, L18:true, L19:true, L19B:true, L20:true, L22:true, L23:true, L24:true, L25:true, L26:true, L27:!!window.POOL_EXCLUDE_ON, L31:!!window.NEW_NAME_RULE_ON, L32:true, L33:true, L34:true, L37:true, L28:true, L38:true, L40:true, L39:true, L41:true, L42:true, L43:true, L44:true, L45:true, L46:true, L47:true, L49:true, L48:true, L50:true, L51:true, L52:true, L53:true, L54:true, L55:true, L56:true, L57:true, L58:true, L35:true, L36:true, L30:true, L29:true, L29R:false, K1:false, K2:true, K4:false };
 const BUNDLE_GROUPS = { D:['D1','D2','D3','D4'], E:['E1','E2','E3'], F:['F1','F2','F3','F4','F5','F6'], H:['H1','H2','H3','H4','H5','H6','H7'],
-  L:['L1','L2','L3','L4','L5','L6','L7','L8','L9','L10','L11','L12','L13','L14','L15','L16','L17','L18','L19','L19B','L20','L22','L23','L24','L25','L26','L27','L29','L30','L31','L32','L33','L34','L37','L35','L36','L28','L38','L40','L39','L41','L42','L43','L44','L45','L46','L47','L49','L48','L50','L51','L52','L53','L54','L55','L56','L57'], K:['K1','K2','K4'] };
+  L:['L1','L2','L3','L4','L5','L6','L7','L8','L9','L10','L11','L12','L13','L14','L15','L16','L17','L18','L19','L19B','L20','L22','L23','L24','L25','L26','L27','L29','L30','L31','L32','L33','L34','L37','L35','L36','L28','L38','L40','L39','L41','L42','L43','L44','L45','L46','L47','L49','L48','L50','L51','L52','L53','L54','L55','L56','L57','L58'], K:['K1','K2','K4'] };
 // 묶음 L46(69단계): 그래프 점선 모양 통일 — 모든 점선을 "선도단지 대비 적정가" 선(FAIR_LINE_STYLE.borderDash)과 같은 긴 점선으로.
 // 촘촘한 점("좁쌀")·점-선 섞인 패턴을 없앤다. 새 점선은 항상 dashL46(예전 값)을 쓴다 — L46을 끄면 예전 값 그대로.
 const DASH_L46 = [5, 4];
@@ -2471,8 +2476,31 @@ function setBundles(next){
   if (!sharedParseOn) _parsedCache.clear();
   applyBundleBodyClasses();
 }
+// ---- 묶음 L58(97단계): 상단 이동 메뉴에 재개발 목록표·임장 체크리스트 ----
+// 기존 링크처럼 같은 탭으로 이동한다(gate.js 인증은 sessionStorage라 다시 묻지 않고, 임장 앱도 사이트 입구 통과를 그대로 인정).
+// 켜면 "비례율 계산기" 바로 뒤에 넣고, 끄면 뺀다(끈 화면은 L57까지와 같은 DOM).
+const NAV_LINKS_L58 = [
+  { href: '../redevelopment-list/재개발_목록표.html', label: '🏗️ 재개발 목록표' },
+  { href: '../imjang/', label: '🧭 임장 체크리스트' },
+];
+function applyNavLinksL58(){
+  if (typeof document === 'undefined' || !document.querySelector) return;
+  const bar = document.querySelector('.topbar-actions');
+  if (!bar || !bar.querySelectorAll) return;
+  bar.querySelectorAll('[data-nav-l58]').forEach(a => a.remove());
+  if (!BUNDLES.L58) return;
+  const after = bar.querySelector('a[href="../rate-simulator/비례율_시뮬레이터.html"]');
+  const ref = after ? after.nextElementSibling : bar.querySelector('a[href="../index.html"]');
+  NAV_LINKS_L58.forEach(l => {
+    const a = document.createElement('a');
+    a.className = 'btn'; a.href = l.href; a.textContent = l.label; a.setAttribute('data-nav-l58', '1');
+    bar.insertBefore(a, ref || null);
+  });
+}
 // 묶음 H4는 CSS라 body 클래스로 끈다.
 function applyBundleBodyClasses(){
+  try { applyNavLinksL58(); } catch (e) {}   // 묶음 L58
+  try { if (document && document.body && document.body.classList) document.body.classList.toggle('l58', !!BUNDLES.L58); } catch (e) {}   // 묶음 L58
   try { if (document && document.body && document.body.classList) document.body.classList.toggle('no-h4', !BUNDLES.H4); } catch (e) {}
   try { if (document && document.body && document.body.classList) document.body.classList.toggle('l10', !!BUNDLES.L10); } catch (e) {}
   try { if (document && document.body && document.body.classList){ document.body.classList.toggle('l15', !!BUNDLES.L15); document.body.classList.toggle('l16', !!BUNDLES.L16); document.body.classList.toggle('l17', !!BUNDLES.L17); } } catch (e) {}
