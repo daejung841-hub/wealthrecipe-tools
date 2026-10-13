@@ -421,7 +421,6 @@
         // 비율의 정의를 라벨로 밝힌다: 목록표와 같은 계산(일반분양 ÷ 조합원수). 값은 그대로 두고 표시만 한다.
         i.suspect ? h('div', null, ratioLabel(), h('b', { class: 'none' }, '확인 중')) : infoCell(ratioLabel(), i.generalRatio, null, { fmt: (v) => v + '%', est: has('ratio'), conv }),
         origPct != null ? infoCell(h('span', null, '원문 표기', h('small', { class: 'notes' }, '전체세대 대비')), origPct, null, { fmt: (v) => v + '%' }) : null,
-        infoCell('최저초투', i.minInitial, i.minInitialText, { fmt: (v) => v + '억', note: i.minInitialNote }),
         infoCell('사업성등급', i.grade, null, { fmt: (v) => v, est: !!i.gradeEst })),
       h('div', { class: 'flab', style: 'margin-top:16px' }, '기본 정보'),
       h('div', { class: 'kv' },
@@ -472,7 +471,6 @@
         kpiCard('k2', '조합원수', i.members, null, { fmt: nf, est: has('members') }),
         kpiCard('k3', '일반분양수', i.generalUnits, null, { fmt: nf, est: has('general') && !conv, conv }),
         ratio,
-        kpiCard('k5', '최저초투', i.minInitial, i.minInitialText, { fmt: (v) => v + '억', note: i.minInitialNote }),
         kpiCard('k6', '사업성등급', i.grade, null, { fmt: (v) => v, est: !!i.gradeEst, node: (v) => h('span', { class: 'gbadge ' + gradeClass(v) }, v) }),
         kpiCard('k7', '구역면적', i.area, i.areaText, { fmt: fmtArea }),
         kpiCard('k8', '평균 대지지분', i.landShare, i.landShareText, { fmt: (v) => v + '평' })),

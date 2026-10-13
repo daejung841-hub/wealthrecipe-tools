@@ -46,7 +46,7 @@ const rulesApi = () => ((typeof require !== 'undefined' && typeof module !== 'un
 
   // 목록표 값 복사본(info) — 앱이 쓰는 필드만
   const INFO_SPEC = { id: 'n', sheet: 's', name: 's', subCode: 's', gu: 's', jibun: 's', dong: 's', stage: 's', stageIdx: 'n', stageNames: 'sa', stageDates: 'dates', hist: 'hist', area: 'n', areaText: 's', landShare: 'n', landShareText: 's', landShareRaw: 's',
-    households: 'n', householdsText: 's', members: 'n', generalUnits: 'n', generalRatio: 'n', generalText: 's', est: 'sa', minInitial: 'n', minInitialText: 's', minInitialNote: 's', grade: 's', gradeEst: 'b', estFlag: 's', suspect: 'b' };
+    households: 'n', householdsText: 's', members: 'n', generalUnits: 'n', generalRatio: 'n', generalText: 's', est: 'sa', grade: 's', gradeEst: 'b', estFlag: 's', suspect: 'b' };
   function cleanInfo(raw, L, errs, where) {
     if (raw === null || raw === undefined) return null;
     if (!isObj(raw)) return fail(errs, where, '구역 정보 형식이 아니에요');

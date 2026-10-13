@@ -21,7 +21,7 @@
  */
 (function (root) {
   'use strict';
-  const DB_NAME = 'imjang', DB_VERSION = 1, ZONE_SCHEMA = 2;   // 구역 기록 형식: 2 = 목록표 정보에 단계 이름(stageNames)이 함께 저장됨
+  const DB_NAME = 'imjang', DB_VERSION = 1, ZONE_SCHEMA = 3;   // 구역 기록 형식: 2 = 목록표 정보에 단계 이름(stageNames)이 함께 저장됨
   const clone = (x) => (x === undefined ? undefined : JSON.parse(JSON.stringify(x)));
 
   function storeError(e) {
@@ -107,7 +107,8 @@
   // 옛 형식 구역 기록을 지금 형식으로 올린다(스키마 번호가 올라갈 때 여기에 추가).
   const RR = (typeof require !== 'undefined') ? require('./rules.js') : root.ImjangRules;
   function upgradeZone(z) {
-    if (!z.schema || z.schema < 2) { if (RR && z.info) RR.fillStageNames(z.info); z.schema = ZONE_SCHEMA; }   // 1 → 2: 번호만 저장된 단계에 이름을 채운다
+    if (!z.schema || z.schema < 2) { if (RR && z.info) RR.fillStageNames(z.info); z.schema = 2; }   // 1 → 2: 번호만 저장된 단계에 이름을 채운다
+    if (z.schema < 3) { if (z.info) { delete z.info.minInitial; delete z.info.minInitialText; delete z.info.minInitialNote; } z.schema = ZONE_SCHEMA; }   // 2 → 3: 공개 목록표에서 뺀 매물 값(최저초투)을 저장된 기록에서도 지운다
     return z;
   }
 
