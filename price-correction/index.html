@@ -151,6 +151,9 @@ a.btn{display:inline-flex;align-items:center;text-decoration:none;}
 .badge.g1{background:var(--bad-bg);color:var(--bad);}
 .badge.neutral{background:var(--neutral-bg);color:var(--ink-muted);}
 .jline{display:flex;flex-wrap:wrap;gap:4px 8px;align-items:center;font-size:13.5px;color:var(--ink-muted);margin:4px 0;}
+/* 17-7(LS50): 판정 배지 = 결론 표시(글자 약 2배·굵게·넉넉한 여백, 판정별 색 그대로) */
+body.l50 .jline[data-badge]{gap:8px 12px;margin:8px 0 10px;}
+body.l50 .jline[data-badge] > .badge:first-child{font-size:28px;font-weight:800;line-height:1.2;padding:10px 26px;border-radius:14px;letter-spacing:.02em;}
 .ratios{font-size:14px;margin:4px 0;}
 .fsum{font-size:13.5px;color:var(--ink-muted);margin:4px 0;overflow-wrap:anywhere;}
 .notice{margin:6px 0;padding:7px 10px;border-radius:8px;font-size:13.5px;line-height:1.55;}
@@ -997,6 +1000,11 @@ window.SBJ_GUIDE = {
     pickBand: '고른 단지 사이 시세 차이가 커요(최저 {MIN} ~ 최고 {MAX}, {R}배)',
     pickPop: '고른 단지 사이 시세 차이가 커요(최저 {MIN} ~ 최고 {MAX}, {R}배). 같은 생활권이라도 이 정도 차이면 결과가 크게 달라질 수 있어요. 입지·연식이 구역과 가장 비슷한 단지만 남겨 보세요.',
     pickPopTitle: '고른 단지를 확인해 주세요', keepIt: '그대로 쓰기', repick: '다시 고르기',
+    welcomeStep1: '구역 정보를 넣으세요(목록표에서 불러오거나 구역명을 치면 돼요). 급지는 추천 6곳 중 이 구역과 비슷한 단지를 3~5곳 골라 정하고, 비교단지(1~3곳)는 [⭐ 추천 단지에서 고르기]나 [단지 찾기]로 넣으세요.',
+    welcomeNote175: '판정은 급지와 진행단계로 해요. 급지는 구역 주변 추천 6곳(준공 3~15년) 중 직접 고른 3~5곳의 34평 KB 시세 평균으로 정하고(금액을 직접 넣을 수도 있어요, 서울과 인천·경기 구분 없음), 급지가 높을수록 기준 마진비율이 낮아져요(후기 25~112.5%, 초기·중기도 같은 비율로).',
+    stageRow175: '구역 주변 추천 6곳(준공 3~15년) 중 직접 고른 3~5곳의 34평 KB 시세 평균',
+    xlsxJudge175: '급지는 구역 주변 추천 6곳(준공 3~15년) 중 직접 고른 3~5곳의 34평 KB 시세 평균(또는 직접 입력한 금액)으로 정합니다',
+    pickedToast: '고른 단지 {N}곳을 담았어요.', pickedOwTitle: '비교단지를 고른 단지로 바꿀까요?',
     fillPick: '⭐ 추천 단지에서 고르기', selGuide: '비슷한 입지·생활권이라고 생각하는 단지를 골라 주세요(최대 {N}곳).', selApply: '고른 단지 넣기', selMax: '{N}곳까지 고를 수 있어요', selNone: '단지를 하나 이상 골라 주세요',
     fill: '⭐ 추천 단지 채우기', fillNeed: '구역을 먼저 불러와 주세요', fillNone: '추천할 단지가 없어요. [🔎 단지 찾기]에서 직접 골라 주세요.',
   },
@@ -1168,12 +1176,13 @@ window.SBJ_GUIDE = {
     if (res && res.mode !== 'apt') {
       const colors = jv.kind === 'graded' ? C['g' + (jv.gradeIndex + 1)] : C.neutral;
       const label = jv.kind === 'graded' ? jv.grade : (jv.text || '판정 없음');
-      const bw = Math.min(inner, measure(label, 36, true) + 64);
-      shapes.push({ type: 'rect', x: P, y, w: bw, h: 64, fill: colors[0], r: 32 });
-      texts.push({ text: label, x: P + 32, y: y + 12, size: 36, bold: true, color: colors[1], align: 'left' });
+      const BB = M.bigBadge ? { fs: 60, h: 100, pad: 44, r: 22, ty: 18, sy: 30, step: 128 } : { fs: 36, h: 64, pad: 32, r: 32, ty: 12, sy: 16, step: 92 };   // 17-7(LS50): 큰 판정 배지
+      const bw = Math.min(inner, measure(label, BB.fs, true) + BB.pad * 2);
+      shapes.push({ type: 'rect', x: P, y, w: bw, h: BB.h, fill: colors[0], r: BB.r });
+      texts.push({ text: label, x: P + BB.pad, y: y + BB.ty, size: BB.fs, bold: true, color: colors[1], align: 'left' });
       const side = jv.kind === 'graded' ? judgeLabel(res.judgement, M.stage) + ' · 기준 B ' + res.judgement.B + '%' : (M.stage ? stageText(M.stage) : '');
-      if (side) wrap(side, 28, false, inner - bw - 24, measure, 1).forEach((l) => texts.push({ text: l, x: P + bw + 20, y: y + 16, size: 28, bold: false, color: C.muted, align: 'left' }));
-      y += 92;
+      if (side) wrap(side, 28, false, inner - bw - 24, measure, 1).forEach((l) => texts.push({ text: l, x: P + bw + 24, y: y + BB.sy, size: 28, bold: false, color: C.muted, align: 'left' }));
+      y += BB.step;
       if (M.gradeNote) { wrap(M.gradeNote, 28, true, inner, measure, 1).forEach((l) => { T(l, 28, { color: C.bad, bold: true, note17: true }); y += 42; }); y += 6; }   // 17단계(LS33): 사용자 수정·금액 직접 입력·편차 큼 한 줄
     }
     // 보정 합계·비교단지
@@ -2410,6 +2419,11 @@ window.SBJ_RENT16 = {"source":"seedComplexes.js@67d3760 (md5 65724010) rentalHou
   const SBJ175 = { LS42: true, LS43: true, LS44: true, LS45: true };
   // 17-6단계 플래그: LS46 전용면적 84/59 토글 글자 한 줄(칸 너비 자동·줄바꿈 없음), LS47 구역 카드 [목록표에서 보기] 주소에 구역 식별값(#zone=시트|구역명|세부&id=목록표 id). 끄면 17-5 동작
   const SBJ176 = { LS46: true, LS47: true };
+  // 17-7단계 플래그: LS48 화면 문구를 17-5 이후 동작(급지 = 추천 6곳 중 고른 3~5곳, 비교단지 = 고른 1~3곳)에 맞춤 — 문구만, 계산 그대로. 끄면 17-6 문구
+  // LS49: 예시(서계통합)를 연 뒤 목록표·구역명 자동완성으로 다른 구역을 불러오면 예시 상태를 끔(예시가 채운 값은 비우고 사용자가 바꾼 값만 남긴 새 기록에서 시작 → 미리 고르기·예시 안내·예시 금액 없음)
+  // LS50: 결과 칸 판정 배지 크게(글자 약 2배·굵게·넉넉한 여백, 색은 그대로) + 카톡 공유 이미지 배지도 키움. 판정 글자·기준·엑셀 그대로
+  const SBJ177 = { LS48: true, LS49: true, LS50: true };
+  if (SBJ177.LS50 && document.body) document.body.classList.add('l50');
   const SBJ_PICK_DEV = 1.2;   // 17-5(LS44): 고른 단지 시세 최고 ÷ 최저가 이 값을 넘으면 경고(10억 vs 12억 = 경고 없음)
   const RENT16 = (window.SBJ_RENT16 && window.SBJ_RENT16.ids) || {};
   // 16-1: 저장값 on 일 때만 켬. 17단계(LS30): 저장값이 없으면 켬(끄면 { on: false } 로 저장)
@@ -2426,6 +2440,10 @@ window.SBJ_RENT16 = {"source":"seedComplexes.js@67d3760 (md5 65724010) rentalHou
   // 기준월이 다른 25평 단지(정식 인덱스에는 값이 있지만 단일 기준월 2026-09 가 아님): 25평 값으로 쓰지 않고 추정 경로로 보낸다(14단계 결정 5, LS23). 목록은 ㉮ 인덱스가 바뀌면 같이 갱신
   const STALE25 = new Set(['신반포수원-한신-_17-58B_41-85', '주공-5단지-고잔동-_15-52A_46-74', '정자동느티마을']);   // 마지막 [추천 3곳 담기]의 가드 결과(화면 안내용, 저장하지 않음)
   // 12단계: 급지 판정(LS15)을 켜면 도움말 표·첫 방문 팝업의 지역 기준 문구를 SBJ_GUIDE.grade12 시안으로 바꿔 보여 준다(문구는 GUIDE 한 곳)
+  if (SBJ177.LS48 && SBJ175.LS42) {   // 17-7: 첫 방문 안내·도움말 급지표·엑셀 사용법의 급지 설명(GUIDE 원문은 그대로 두고 화면에서만 바꿈)
+    const W = G.welcome; if (W && Array.isArray(W.steps) && W.steps.length) W.steps = [G.g17.welcomeStep1].concat(W.steps.slice(1));
+    const g12 = G.grade12; if (g12) { g12.welcomeNote = G.g17.welcomeNote175; if (Array.isArray(g12.stages) && g12.stages[0] && g12.stages[0][0] === '급지 정하는 법') g12.stages = [['급지 정하는 법', G.g17.stageRow175]].concat(g12.stages.slice(1)); if (typeof g12.xlsxJudge === 'string') g12.xlsxJudge = g12.xlsxJudge.replace('급지는 구역 주변 추천 5곳(준공 3~15년)의 34평 KB 시세 평균으로 정합니다', G.g17.xlsxJudge175); }
+  }
   if (SBJ11.LS15 && G.grade12) { const g12 = G.grade12; G.quick.stagesTitle = g12.stagesTitle; G.quick.stages = g12.stages; G.welcome.notes = (G.welcome.notes || []).map((n) => (/판정은 진행단계별 기준/.test(n) ? g12.welcomeNote : n)); }
   const GR = window.SBJGrade11;
   const G11 = { sig: null, rec: null, open: false };   // 추천 급지 캐시(구역 위치·연도·세대수가 같으면 다시 읽지 않음)
@@ -3308,7 +3326,7 @@ window.SBJ_RENT16 = {"source":"seedComplexes.js@67d3760 (md5 65724010) rentalHou
   }
   async function makeCard(mode) {
     const res = frozen ? frozenView(frozen) : calc(state);
-    const layout = V.buildCardLines(res, mode, { zoneName: state.target.zoneName, stage: state.target.stage, compNames: state.comps.map((c) => c.name), ruleVersion: frozen ? frozen.ruleVersion : R.version, measure: measureFn(), memberPrice: state.buy.memberPrice, appraisalRange: !!(state.buy.appraisal && state.buy.appraisal.type === 'range'), gradeNote: cardNote17(res), pyNote: res && res.mode === 'redev' ? pyNote17(state.target.pyeong) : '' });
+    const layout = V.buildCardLines(res, mode, { zoneName: state.target.zoneName, stage: state.target.stage, compNames: state.comps.map((c) => c.name), ruleVersion: frozen ? frozen.ruleVersion : R.version, measure: measureFn(), memberPrice: state.buy.memberPrice, appraisalRange: !!(state.buy.appraisal && state.buy.appraisal.type === 'range'), gradeNote: cardNote17(res), bigBadge: SBJ177.LS50, pyNote: res && res.mode === 'redev' ? pyNote17(state.target.pyeong) : '' });
     const cv = drawCard(layout);
     const blob = await new Promise((ok, no) => cv.toBlob((b) => (b ? ok(b) : no(new Error('이미지를 만들지 못했어요'))), 'image/png'));
     const zone = (state.target.zoneName || '구역').replace(/[\\/:*?"<>|]/g, ' ').trim().slice(0, 30) || '구역';
@@ -4053,10 +4071,10 @@ window.SBJ_RENT16 = {"source":"seedComplexes.js@67d3760 (md5 65724010) rentalHou
         G14.noA = gd && gd.noA ? { ids: pick.map((x) => x.id) } : null;   // 16-1: A 없음 안내
         $('modalRoot').innerHTML = ''; frozen = null; renderComps(); renderAdj(); recompute(); renderGuard();
         if (SBJ174.LS41) G17.compArm = Date.now();   // 17-4단계: 담은 뒤 비교단지 시세 편차 확인(현재가가 다 채워지면)
-        toast('추천 ' + pick.length + '곳을 담았어요.' + (t3.cut ? ' ' + G.g17.top3Rent.replace('{N}', String(t3.cut)) + '.' : '') + ' 현재가와 보정은 직접 확인하세요.');
+        toast((SBJ177.LS48 && over ? G.g17.pickedToast.replace('{N}', String(pick.length)) : '추천 ' + pick.length + '곳을 담았어요.') + (t3.cut ? ' ' + G.g17.top3Rent.replace('{N}', String(t3.cut)) + '.' : '') + ' 현재가와 보정은 직접 확인하세요.');
       };
       const used = state.comps.slice(0, pick.length).some((c) => (c.name && c.name.trim()) || E.isNum(c.price));
-      if (used) { modal('비교단지를 추천 단지로 바꿀까요?', [para('비교단지 1~' + pick.length + ' 칸의 이름·준공연도·세대수가 바뀌어요. 바꾼 뒤에도 언제든 고치거나 뺄 수 있어요.')], [{ label: '바꾸기', primary: true, id: 'btnTop3Force', on: go }, { label: '취소', on: () => openPicker7(i) }]); return; }
+      if (used) { modal(SBJ177.LS48 && over ? G.g17.pickedOwTitle : '비교단지를 추천 단지로 바꿀까요?', [para('비교단지 1~' + pick.length + ' 칸의 이름·준공연도·세대수가 바뀌어요. 바꾼 뒤에도 언제든 고치거나 뺄 수 있어요.')], [{ label: '바꾸기', primary: true, id: 'btnTop3Force', on: go }, { label: '취소', on: () => openPicker7(i) }]); return; }
       go();
     }
     drawCtl(); drawList();
@@ -4183,6 +4201,15 @@ window.SBJ_RENT16 = {"source":"seedComplexes.js@67d3760 (md5 65724010) rentalHou
     const imp = (state.options && state.options.imported) || {}, ex = state.options && state.options.example ? exampleState() : null;
     return USER_PATHS.filter((p) => { const v = getPath(state, p); if (v === null || v === undefined || v === '') return false; if (imp[p]) return false; if (ex && getPath(ex, p) === v) return false; return true; });
   }
+  // 17-7(LS49): 예시 상태 해제 — 예시가 채운 값(구역·비교단지·매수 금액)은 버리고, 사용자가 예시와 다르게 바꾼 구역·매수 칸과 바꾼 비교단지만 새 기록으로 옮김
+  function exitExample177() {
+    if (!(state.options && state.options.example)) return;
+    const ex = exampleState(), fresh = blankRecord();
+    fresh.mode = state.mode; fresh.target.pyeong = state.target.pyeong;
+    USER_PATHS.forEach((p) => { const v = getPath(state, p); if (v !== null && v !== undefined && v !== '' && getPath(ex, p) !== v) setPath(fresh, p, v); });
+    if (JSON.stringify(state.comps) !== JSON.stringify(ex.comps)) fresh.comps = state.comps; else fresh.comps[0].factors.age.rate = E.suggestAgeRate(null, THIS_YEAR, false);
+    state = fresh; activeComp = 0; openMemo.clear(); openInfo.clear(); renderExampleNote();
+  }
   function applyListRow(x, force, opt) {
     const now = Date.now(), v = L.validateInbox(RD.buildInbox(x.row, now), now);
     if (!v.ok) { modal('이 구역은 불러올 수 없어요', [para('목록표 값이 올바르지 않아요(' + v.reason + '). 직접 입력해 주세요.')], [{ label: '확인' }]); return; }
@@ -4191,6 +4218,7 @@ window.SBJ_RENT16 = {"source":"seedComplexes.js@67d3760 (md5 65724010) rentalHou
       const mine = userEnteredPaths().filter((p) => !(opt && opt.acQuery !== undefined && p === 'target.zoneName' && String(state.target.zoneName || '').trim() === opt.acQuery));   // 17단계(LS32): 자동완성으로 친 검색어는 '직접 넣은 값'으로 보지 않음
       if (mine.length) { const b = modal('입력한 구역 정보를 덮어쓸까요?', [para('직접 입력한 구역·매수 정보가 있어요. "' + x.label + '" 목록표에 값이 있는 칸은 목록표 값으로 바뀌고, 진행단계는 목록표 기준으로 다시 정해져요. 비교단지와 보정 값은 그대로예요.')], [{ label: '덮어쓰기', primary: true, id: 'btnListForce', on: () => applyListRow(x, true, opt) }, { label: '취소', id: 'btnListCancel' }]); b.dataset.listOverwrite = mine.join(','); return; }
     }
+    if (SBJ177.LS49) exitExample177();   // 17-7: 예시 위에 구역을 불러오면 예시 상태 해제
     if (state.mode !== 'redev') state.mode = 'redev';
     if (SBJ17.LS32) ['target.units', 'target.builtYear'].forEach((p) => { if (!(p in pt.set) && state.options.imported && state.options.imported[p]) { setPath(state, p, null); delete state.options.imported[p]; } });   // 17단계: 앞 구역에서 가져온 세대수·준공연도가 새 구역에 남지 않게(직접 넣은 값은 그대로)
     Object.keys(pt.set).forEach((p) => setPath(state, p, pt.set[p]));
