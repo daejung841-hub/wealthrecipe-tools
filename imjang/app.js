@@ -651,6 +651,87 @@
     return kids;
   }
   const DISCLAIMER = '이 앱은 판단을 돕는 참고용 도구예요. 투자 결정과 결과에 대한 책임은 본인에게 있어요.';
+
+  // ───────── 시세보정 연동(5단계 후보) ─────────
+  // LS1: "시세 보정하기" 버튼 → sbj_inbox 를 쓰고 같은 탭에서 시세보정으로 이동, 돌아오면 sbj_link_index 의 결과를 4개 숫자 칸에 반영(확인 버튼을 누를 때만).
+  // 이 연동이 읽고 쓰는 브라우저 저장 키는 sbj_inbox(쓰기)·sbj_link_index(읽기) 두 개뿐이다. LS1 을 끄면 예전 "준비 중" 버튼과 같다.
+  const SBJ_FLAGS = { LS1: true };
+  const SBJ_URL = '../price-correction/index.html';
+  const SBJ_TTL = 30 * 60 * 1000;
+  // 앱 12단계 → 시세보정 4구간(극초기=후보지 지정 이전, 초기=후보지 지정~조합설립 이전, 중기=조합설립~감정평가 이전, 후기=감정평가 이후). 모호 = null
+  const SBJ_STAGE4 = { '연번부여': '극초기', '후보지 지정': '초기', '정비구역 공람': '초기', '정비구역 지정': '초기', '추진위 승인': '초기', '조합설립인가·사업시행자 지정': '중기', '시공사 선정': '중기', '건축심의(통합심의)': '중기', '사업시행인가': null, '관리처분인가': '후기', '이주·철거': '후기', '착공 이후': '후기' };
+  // 진행단계: 사용자가 고른 답(사전 확인 "지금 사업은 어느 단계인가요?")을 먼저, 없으면 목록표에서 가져온 단계
+  function sbjStageName(z) {
+    const a = z.ans && z.ans.p1 && z.ans.p1.v;
+    if (hasVal(a) && D.stages.includes(a)) return a;
+    if (z.info) { const rs = R.resolveStage(z.info, D.stages); if (rs.idx !== null) return D.stages[rs.idx]; }
+    return null;
+  }
+  const sbjStage4 = (name) => (name && Object.prototype.hasOwnProperty.call(SBJ_STAGE4, name) ? SBJ_STAGE4[name] : null);
+  const sbjRedevKey = (i) => (i && i.sheet && i.name ? [i.sheet, i.name, i.subCode === null || i.subCode === undefined ? '' : String(i.subCode)].join('|') : null);
+  function sbjInbox(z, now) {
+    const fields = {}, src = {}, put = (k, v) => { if (v !== null && v !== undefined && v !== '') { fields[k] = v; src[k] = 'imjang'; } };
+    const nm = z.info ? z.info.name + (z.info.subCode ? ' ' + z.info.subCode : '') : shortName(z.name);
+    put('구역명', nm);
+    put('진행단계', sbjStage4(sbjStageName(z)));
+    if (z.info) put('지역구분', '서울');   // 목록표(서울)에서 고른 구역만. 직접 입력 구역은 지역을 모름
+    if (z.info && Number.isInteger(z.info.households) && z.info.households > 0) put('세대수', z.info.households);
+    const y = Number(z.n && z.n.y); if (Number.isInteger(y) && y >= 1980 && y <= 2060) put('준공연도', y);
+    const from = { tool: 'imjang', id: z.id, key: z.id, name: nm };
+    const rk = sbjRedevKey(z.info); if (rk) from.redevKey = rk;
+    return { schemaVersion: 1, createdAt: now, expiresAt: now + SBJ_TTL, from, fields, fieldSources: src };
+  }
+  async function openPriceCorrection(z) {
+    if (!window.ImjangPWA.online()) { needInternet('시세보정은'); return; }
+    await flushAll();   // 입력 대기 중인 글을 먼저 저장(이미 입력마다 임시 사본 + 0.3초 뒤 저장)
+    try { localStorage.setItem('sbj_inbox', JSON.stringify(sbjInbox(z, Date.now()))); }
+    catch (e) { toast('이 브라우저에서는 값을 넘길 수 없어요. 시세보정을 직접 열어 입력해 주세요.'); return; }
+    window.location.href = SBJ_URL;   // 같은 탭(새 탭은 입장 확인이 주소를 버릴 수 있음)
+  }
+  function sbjItem(z) {
+    if (!SBJ_FLAGS.LS1 || !z) return null;
+    let o = null; try { o = JSON.parse(localStorage.getItem('sbj_link_index') || 'null'); } catch (e) { return null; }
+    if (!o || o.schemaVersion !== 1 || !o.items || typeof o.items !== 'object') return null;
+    const it = o.items['imjang|' + z.id];
+    if (!it || typeof it !== 'object' || !it.headline4 || (it.source && it.source.key !== z.id)) return null;
+    return it;
+  }
+  // 4개 숫자 칸: y=준공연도(년), v=준공 후 적정가치(억), p=총매매가(억), i=필요 투자금(만원). 칸 값은 앱이 쓰는 글자 그대로(억은 소수 2자리, 만원은 정수)
+  const sbjEok = (m) => (typeof m === 'number' && Number.isFinite(m) ? String(Math.round(m / 100) / 100) : null);
+  function sbjValues(it) {
+    const h4 = it.headline4 || {}, out = {};
+    if (Number.isInteger(h4.준공연도)) out.y = String(h4.준공연도);
+    if (sbjEok(h4.적정가치) !== null) out.v = sbjEok(h4.적정가치);
+    if (sbjEok(h4.총매매가) !== null) out.p = sbjEok(h4.총매매가);
+    if (typeof h4.실투자금 === 'number' && Number.isFinite(h4.실투자금)) out.i = String(Math.round(h4.실투자금));
+    return out;
+  }
+  const sbjLater = new Set();   // [나중에] 누른 결과(이번 실행 동안만 기억, 저장 안 함)
+  const N_LABEL = { y: '준공연도(년)', v: '적정가치(억)', p: '총매매가(억)', i: '필요 투자금(만원)' };
+  function sbjBanner(z) {
+    const it = sbjItem(z); if (!it) return null;
+    const nv = sbjValues(it), cur = z.n || {};
+    const same = Object.keys(nv).every((k) => String(cur[k] === undefined ? '' : cur[k]) === nv[k]);
+    if (same || sbjLater.has(z.id + '|' + it.savedAt)) return null;
+    const mins = Math.max(0, Math.round((Date.now() - it.savedAt) / 60000));
+    const when = mins < 60 ? mins + '분 전' : (mins < 1440 ? Math.round(mins / 60) + '시간 전' : Math.round(mins / 1440) + '일 전');
+    return h('div', { class: 'card', id: 'sbjBanner', style: 'margin-bottom:12px;border:1px solid var(--gold, #c9a227)' },
+      h('div', { style: 'font-weight:700' }, '시세보정 결과가 있습니다(저장 ' + when + '). 4개 숫자 칸에 반영할까요?'),
+      h('div', { class: 'sub', style: 'margin:4px 0 10px' }, Object.keys(nv).map((k) => N_LABEL[k] + ' ' + nv[k]).join(' · ') + (it.판정 ? ' · 판정 ' + it.판정 : '')),
+      h('div', { class: 'stack' }, h('button', { class: 'btn gold', id: 'sbjApply', onclick: () => sbjApply(z, it) }, '반영'), h('button', { class: 'btn ghost', id: 'sbjLater', onclick: () => { sbjLater.add(z.id + '|' + it.savedAt); keepScroll(renderZone); } }, '나중에')));
+  }
+  async function sbjApply(z, it) {
+    const nv = sbjValues(it), cur = z.n || {};
+    const changed = Object.keys(nv).filter((k) => hasVal(cur[k]) && String(cur[k]) !== nv[k]);
+    if (changed.length) {
+      const ok = await confirmModal({ title: '이미 적은 숫자를 바꿀까요?', body: h('div', null, changed.map((k) => h('div', null, N_LABEL[k] + ': ' + cur[k] + ' → ' + nv[k]))), yes: '바꾸기', no: '취소' });
+      if (!ok) return;
+    }
+    z.n = Object.assign({}, cur, nv);
+    persist(z);                       // 앱 자신의 저장 함수(임시 사본 + IndexedDB)
+    keepScroll(renderZone); toast('시세보정 결과를 4개 숫자 칸에 반영했어요.');
+  }
+  function sbjRefresh() { if (SBJ_FLAGS.LS1 && S.cur && S.step === 'wrap' && $('s-zone').classList.contains('on')) keepScroll(renderZone); }
   function updConc() { const e = $('concPrev'); if (e) mount(e, concNode(zone())); }
   function setN(k, v) { const z = zone(); z.n = z.n || {}; z.n[k] = v; persist(z, 300); updConc(); updPanelConc(); }
   const concInput = (k, ph, suf) => { const n = (zone() && zone().n) || {}; return h('div', { style: 'display:flex;align-items:center;gap:8px;margin-bottom:8px' },
@@ -665,12 +746,14 @@
         h('h3', null, '아직 못 확인한 것 ' + open.length + '건'), h('ul', null, open.slice(0, 4).map((it) => h('li', null, qText(it))), open.length > 4 ? h('li', null, '외 ' + (open.length - 4) + '건') : null)),
       cs ? [h('h3', null, '비교단지 대비 입지'), cs] : null),
       h('div', { class: 'sum-r' },
+      sbjBanner(z),
       h('h3', null, '내 결론 · 4개 숫자'),
       h('div', { class: 'card' }, inp('y', '2033', '년에'), inp('v', '15', '억짜리 아파트를'), inp('p', '8', '억에 사온다'), inp('i', '500', '만원 필요'),
         h('div', { id: 'concPrev', class: 'hint solid', style: 'margin:6px 0 0;font-size:16px' })),
       h('div', { class: 'card', style: 'margin-top:12px' }, h('div', { style: 'font-weight:700' }, '몇 억짜리가 될지 모르겠다면?'), h('div', { class: 'sub', style: 'margin:4px 0 10px' }, '비교 대상 아파트 시세부터 확인해 보세요.'),
         h('button', { class: 'btn navy', onclick: openCalcConfirm }, '📊 비교대상 아파트 ' + D.config.calculator.label, h('small', null, '계산기에서 단지 이름 검색하기')),
-        h('button', { class: 'btn ghost', style: 'margin-top:10px;opacity:.6', onclick: () => toast('시세 보정 기능은 준비 중이에요') }, '🛠 시세 보정하기 ', h('span', { class: 'flagtag mute' }, '준비 중'))),
+        SBJ_FLAGS.LS1 ? h('button', { class: 'btn ghost', style: 'margin-top:10px', id: 'btnSbj', onclick: () => openPriceCorrection(z) }, '🛠 시세 보정하기')
+          : h('button', { class: 'btn ghost', style: 'margin-top:10px;opacity:.6', onclick: () => toast('시세 보정 기능은 준비 중이에요') }, '🛠 시세 보정하기 ', h('span', { class: 'flagtag mute' }, '준비 중'))),
       ),
       h('div', { class: 'sum-b' },
       h('h3', null, '이 구역, 내 판단은?'),
@@ -1352,6 +1435,11 @@
     if (sm.addEventListener) sm.addEventListener('change', onSite); else if (sm.addListener) sm.addListener(onSite);
     // 화면이 가려지거나 앱이 닫힐 때 아직 저장 안 된 글을 바로 저장
     document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') flushAll(); });
+    if (SBJ_FLAGS.LS1) {   // 시세보정 결과가 저장되면(다른 탭) 또는 이 화면으로 돌아오면 배너를 다시 그린다
+      window.addEventListener('storage', (e) => { if (e.key === 'sbj_link_index') sbjRefresh(); });
+      document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') sbjRefresh(); });
+      window.addEventListener('pageshow', (e) => { if (e.persisted) sbjRefresh(); });
+    }
     window.addEventListener('pagehide', flushAll);
     $('lockForm').addEventListener('submit', async (e) => {
       e.preventDefault();
