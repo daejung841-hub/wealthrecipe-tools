@@ -598,6 +598,10 @@ button.pyeong-chip{font:inherit;font-size:11.5px;}
 .concl-box.tone-bad .concl-fairv b{color:var(--bad);}
 .concl-box.tone-warn .concl-fairv b{color:var(--warn);}
 .concl-evidence{font-size:12.5px;color:var(--ink-muted);}
+/* 묶음 L60(118단계): "주의" 상세 설명·서울 밖 안내 — 결론 문장 바로 아래, 근거 줄과 같은 크기 */
+.concl-why-l60{font-size:12.5px;line-height:1.6;color:var(--ink-soft, var(--ink));margin:6px 0 2px;padding:6px 10px;border-left:3px solid var(--warn);background:rgba(0,0,0,.03);border-radius:0 6px 6px 0;word-break:keep-all;}
+.concl-why-l60 b{color:var(--warn);}
+.concl-note-l60{font-size:12.5px;line-height:1.6;color:var(--ink-muted);margin:4px 0 2px;word-break:keep-all;}
 .concl-more{margin-top:2px;}
 .concl-toggle{background:none;border:none;padding:6px 0;min-height:32px;font-size:13px;color:var(--ink-muted);cursor:pointer;display:inline-flex;align-items:center;gap:4px;}
 .concl-toggle .arrow{display:inline-block;transition:transform .15s;}
@@ -2026,6 +2030,19 @@ function latestWithField(yms, baseMap, compMap, baseField, compField){
 // 전세낙폭이 매매낙폭의 절반 이상일 때만 "동네 전체가 같이 밀렸다"고 보고,
 // 그에 못 미치면(전세는 상대적으로 견조) "저평가" 쪽으로 재분류한다.
 const WARN_JEONSE_RATIO_THRESHOLD = 0.5;
+// 묶음 L60(118단계, L60_REL): 낙폭을 %p가 아니라 상대 낙폭(1 − 현재 배율 ÷ 평균 배율)으로 비교한다. 전세 배율은 원래 값이
+// 높아(예: 매매 39% · 전세 48%) 같은 비율로 빠져도 %p로는 더 크게 찍혀 "주의"가 과하게 붙었다(117단계 분석).
+// 전세 상대 낙폭 ÷ 매매 상대 낙폭이 이 값 이상일 때만 "주의". 대표님 판단 0.7(0.5는 너무 보수적) — 값은 이 한 곳만 바꾼다.
+const L60_WARN_REL_THRESHOLD = 0.7;
+// 상대 낙폭 비(전세 ÷ 매매). 값이 모자라거나 매매 낙폭이 0 이하면 null(→ 예전 %p 비교).
+function relDropRatioL60(R){
+  if (!R || !(R.refSale > 0) || !(R.avgJeonse > 0) || R.curSale == null || R.curJeonse == null) return null;
+  const rs = 1 - R.curSale / R.refSale, rj = 1 - R.curJeonse / R.avgJeonse;
+  return rs > 0 ? rj / rs : null;
+}
+// 서울 밖 안내(L60_NOTE) 기준: (적정가 − 현재가) ÷ 현재가
+const L60_NOTE_MIN_GAP = 0.25;
+const L60_NOTE_TEXT = '서울 선도단지와의 과거 가격 비율로 계산한 값이에요. 서울과 가격 차이가 크게 벌어진 지역은 적정가가 높게 나올 수 있으니, 같은 동네 최근 단지와 함께 비교해 보세요.';
 // priceGapPct = (적정가-현재가)/현재가×100. 배지 판정은 아직 배율 %p(saleDiff)로
 // 하지만, 쉬운 문구의 숫자는 적정가 카드와 같은 실제 가격 %로 보여준다
 // (2026-09-24 단위 통일 1단계) — 예전엔 %p를 "N% 싸게"로 적어, 배율이 낮은 단지는
@@ -2080,15 +2097,19 @@ function diagnose(saleDiff, jeonseDiff, threshold, priceGapPct, ratios){
       easyMessage: both + (j==='unknown' ? '' : ' 매매만 눌려 있는 상태로 볼 수 있어요.') + toFair(true) };
   }
   if (s==='down' && j==='down'){
-    const jeonseRelative = saleDiff!==0 ? Math.abs(jeonseDiff)/Math.abs(saleDiff) : 1;
-    if (jeonseRelative < WARN_JEONSE_RATIO_THRESHOLD){
+    const relL60 = (BUNDLES.L60 && BUNDLES.L60_REL) ? relDropRatioL60(R) : null;   // 묶음 L60
+    const jeonseRelative = relL60 != null ? relL60 : (saleDiff!==0 ? Math.abs(jeonseDiff)/Math.abs(saleDiff) : 1);
+    if (jeonseRelative < (relL60 != null ? L60_WARN_REL_THRESHOLD : WARN_JEONSE_RATIO_THRESHOLD)){
       return { badge:'저평가', tone:'good',
         message: both + ' 전세도 낮아졌지만 매매보다 덜 빠져, 매매 쪽이 더 눌려 있는 상태로 볼 수 있어요.',
         easyMessage: saleFact + ' 전세도 조금 낮아졌지만 매매보다는 덜 빠졌어요.' + toFair(true) };
     }
     // 묶음 C: 배지 이름만 "주의"→"동반 하락"으로 바꾼다(색·판정 그대로).
     // kind: 적정가 카드·요약 문장이 이 배지에서 "N% 추가 상승" 표현을 쓰지 않게 알려준다(묶음 D1).
-    return { badge: BUNDLES.C ? '동반 하락' : '주의', tone:'warn', kind:'bothDown',
+    // 묶음 L60(L60_WHY): 상세 설명에 쓸 이 단지 값(평균 대비 매매·전세 비율 %, 판정에 쓴 낙폭 비).
+    const whyL60 = (R.refSale > 0 && R.avgJeonse > 0 && R.curSale != null && R.curJeonse != null)
+      ? { salePct: R.curSale / R.refSale * 100, jeonsePct: R.curJeonse / R.avgJeonse * 100, ratio: jeonseRelative, rel: relL60 != null } : null;
+    return { badge: BUNDLES.C ? '동반 하락' : '주의', tone:'warn', kind:'bothDown', whyL60,
       message: both + ' 매매와 전세가 함께 평소보다 낮아진 상태예요. 싸게 보이는 이유는 별도로 확인이 필요해요.',
       easyMessage: both + ' 매매와 전세가 함께 낮아진 이유는 별도로 확인이 필요해요.' };
   }
@@ -2585,9 +2606,9 @@ function seoulHistoricalAvg(){
 // 라이브는 주소 플래그를 읽지 않으므로 이 기본값이 그대로 동작한다.
 const BUNDLES = { A:false, B:false, C:false, D1:false, D2:false, D3:false, D4:false, E1:true, E2:false, E3:true, F1:true, F2:true, F3:true, F4:true, F5:true, F6:true,
   H1:false, H2:true, H3:true, H4:true, H5:true, H6:true, H7:true,
-  L1:true, L2:true, L3:true, L4:true, L5:true, L6:false, L7:true, L8:true, L9:true, L10:true, L11:true, L12:true, L13:true, L14:true, L15:true, L16:true, L17:true, L18:true, L19:true, L19B:true, L20:true, L22:true, L23:true, L24:true, L25:true, L26:true, L27:!!window.POOL_EXCLUDE_ON, L31:!!window.NEW_NAME_RULE_ON, L32:true, L33:true, L34:true, L37:true, L28:true, L38:true, L40:true, L39:true, L41:true, L42:true, L43:true, L44:true, L45:true, L46:true, L47:true, L49:true, L48:true, L50:true, L51:true, L52:true, L53:true, L54:true, L55:true, L56:true, L57:true, L58:true, L59:true, L59_DND:true, L59_INFOCARD:true, L59_STATION:true, L59_SCHOOL:true, L59_FAVSEARCH:true, L35:true, L36:true, L30:true, L29:true, L29R:false, K1:false, K2:true, K4:false };
+  L1:true, L2:true, L3:true, L4:true, L5:true, L6:false, L7:true, L8:true, L9:true, L10:true, L11:true, L12:true, L13:true, L14:true, L15:true, L16:true, L17:true, L18:true, L19:true, L19B:true, L20:true, L22:true, L23:true, L24:true, L25:true, L26:true, L27:!!window.POOL_EXCLUDE_ON, L31:!!window.NEW_NAME_RULE_ON, L32:true, L33:true, L34:true, L37:true, L28:true, L38:true, L40:true, L39:true, L41:true, L42:true, L43:true, L44:true, L45:true, L46:true, L47:true, L49:true, L48:true, L50:true, L51:true, L52:true, L53:true, L54:true, L55:true, L56:true, L57:true, L58:true, L59:true, L59_DND:true, L59_INFOCARD:true, L59_STATION:true, L59_SCHOOL:true, L59_FAVSEARCH:true, L60:true, L60_REL:true, L60_WHY:true, L60_NOTE:true, L35:true, L36:true, L30:true, L29:true, L29R:false, K1:false, K2:true, K4:false };
 const BUNDLE_GROUPS = { D:['D1','D2','D3','D4'], E:['E1','E2','E3'], F:['F1','F2','F3','F4','F5','F6'], H:['H1','H2','H3','H4','H5','H6','H7'],
-  L:['L1','L2','L3','L4','L5','L6','L7','L8','L9','L10','L11','L12','L13','L14','L15','L16','L17','L18','L19','L19B','L20','L22','L23','L24','L25','L26','L27','L29','L30','L31','L32','L33','L34','L37','L35','L36','L28','L38','L40','L39','L41','L42','L43','L44','L45','L46','L47','L49','L48','L50','L51','L52','L53','L54','L55','L56','L57','L58','L59'], K:['K1','K2','K4'] };
+  L:['L1','L2','L3','L4','L5','L6','L7','L8','L9','L10','L11','L12','L13','L14','L15','L16','L17','L18','L19','L19B','L20','L22','L23','L24','L25','L26','L27','L29','L30','L31','L32','L33','L34','L37','L35','L36','L28','L38','L40','L39','L41','L42','L43','L44','L45','L46','L47','L49','L48','L50','L51','L52','L53','L54','L55','L56','L57','L58','L59','L60'], K:['K1','K2','K4'] };
 // 묶음 L46(69단계): 그래프 점선 모양 통일 — 모든 점선을 "선도단지 대비 적정가" 선(FAIR_LINE_STYLE.borderDash)과 같은 긴 점선으로.
 // 촘촘한 점("좁쌀")·점-선 섞인 패턴을 없앤다. 새 점선은 항상 dashL46(예전 값)을 쓴다 — L46을 끄면 예전 값 그대로.
 const DASH_L46 = [5, 4];
@@ -3766,8 +3787,18 @@ function computeSlot(base, comp){
     factorNotStarted: factorProgress!=null && factorProgress < 0,
     curSalePrice: curSale ? curSale.c : null, curJeonsePrice: curJeonse ? curJeonse.c : null,
     curSaleYm: curSale ? curSale.ym : null, curJeonseYm: curJeonse ? curJeonse.ym : null,
-    diag, saleSeries, jeonseSeries
+    diag, saleSeries, jeonseSeries,
+    outsideSeoulL60: outsideSeoulForNoteL60(base, comp)   // 묶음 L60(L60_NOTE)
   };
+}
+// 묶음 L60: 서울 선도단지 기준으로 계산했고, seed에 있는 단지이며 서울이 아니면 true. seed에 없는 단지(직접 넣은 단지)는 false.
+function outsideSeoulForNoteL60(base, comp){
+  try {
+    if (!(base && base.isVirtualBenchmark && base.groupKey === 'seoul' && comp && comp.name)) return false;
+    const nm = stripPyeongSuffix(comp.name);
+    const e = (window.SEED_COMPLEXES || []).find(x => x.name === nm);
+    return !!(e && e.regionCity && e.regionCity !== '서울');
+  } catch (err) { return false; }
 }
 
 // 저점/고점 탐색범위 — 단일 시점이 아니라 "넓게 잡은 하락장 끝자락(저점)
@@ -8860,6 +8891,22 @@ function conclusionPriceLineHtml(r, label){
   return '<span class="concl-prices"><span class="concl-cur">현재 <b>'+esc(pl.cur)+'</b></span>'+
     (pl.fair ? '<span class="concl-sep">/</span><span class="concl-fairv">적정 <b>'+esc(pl.fair)+'</b></span>' : '')+'</span>';
 }
+// 묶음 L60(L60_WHY): "주의"(동반 하락) 상세 설명 — 비싸다는 뜻이 아니라 "매매가 뒤처졌는데 전세도 같이 약해졌으니 한 번 더 확인"이라는 뜻.
+function conclusionWhyHtmlL60(r, label){
+  if (!(BUNDLES.L60 && BUNDLES.L60_WHY) || !r || !r.diag || r.diag.kind !== 'bothDown' || !r.diag.whyL60) return '';
+  const w = r.diag.whyL60;
+  const who = (label === '선도단지' || !label) ? '서울 선도단지' : label;
+  const pct = v => Math.round(v) + '%';
+  return '<div class="concl-why-l60"><b>'+esc(r.diag.badge)+'</b>는 가격이 비싸다는 뜻이 아니에요. '+esc(who)+'와 비교한 가격 비율이 평소의 '+
+    '매매 '+pct(w.salePct)+' · 전세 '+pct(w.jeonsePct)+' 수준으로 함께 내려와 있어요(전세가 빠진 정도가 매매의 '+w.ratio.toFixed(2)+'배). '+
+    '싸 보이는 이유가 \'아직 덜 올라서\'가 아니라 \'수요가 같이 줄어서\'일 수 있으니, 같은 동네 최근 단지 시세·전세가율·입주 물량을 함께 확인해 보세요.</div>';
+}
+// 묶음 L60(L60_NOTE): 서울 밖 + 적정가가 현재가보다 25% 이상 높을 때 안내 한 줄.
+function conclusionNoteHtmlL60(r){
+  if (!(BUNDLES.L60 && BUNDLES.L60_NOTE) || !r || !r.outsideSeoulL60 || r.fairSale == null || !r.curSalePrice) return '';
+  if ((r.fairSale - r.curSalePrice) / r.curSalePrice < L60_NOTE_MIN_GAP) return '';
+  return '<div class="concl-note-l60">'+esc(L60_NOTE_TEXT)+'</div>';
+}
 // 결론 박스. opts: { label, showBadge, detailHtml }
 function buildConclusionBox(r, opts){
   opts = opts || {};
@@ -8869,6 +8916,7 @@ function buildConclusionBox(r, opts){
   return '<div class="concl-box tone-'+p.tone+'">'+
     (BUNDLES.L15 ? ((badgeHtml || priceHtml) ? '<div class="concl-top">'+badgeHtml+priceHtml+'</div>' : '') : badgeHtml)+
     '<div class="concl-main">'+p.mainHtml+'</div>'+
+    conclusionWhyHtmlL60(r, opts.label)+conclusionNoteHtmlL60(r)+   // 묶음 L60
     (p.fairText && !BUNDLES.L15 ? '<div class="concl-fair">'+esc(p.fairText)+'</div>' : '')+
     (p.evidence ? '<div class="concl-evidence">'+esc(p.evidence)+'</div>' : '')+
     wrapConclusionDetail(opts.detailHtml || '')+
