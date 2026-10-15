@@ -885,6 +885,135 @@ body.l44 .tier-seg.current.tier-low, body.l44 .tier-seg.current.tier-veryLow{box
 .favorite-card-title{font-weight:700;font-size:14px;}
 .favorite-card-meta{font-size:12px;color:var(--ink-muted);}
 .favorite-card-actions{display:flex;gap:8px;margin-top:6px;}
+/* 묶음 L59(101·102단계): 단지 즐겨찾기. 선택 카드 색은 급지표 선택표와 같게(기준 파랑 #2563eb·바탕 #eef4ff, 비교 주황 #f97316·바탕 #fff3e8,
+   왼쪽 4px 띠). 하단 바가 보이는 동안만 의견 버튼(L50 왼쪽 아래)을 바 위로 올린다. */
+.fav-star-l59{border:none;background:none;cursor:pointer;font-size:18px;line-height:1;color:var(--ink-faint);padding:2px 4px;flex:none;font-family:inherit;}
+.fav-star-l59.active{color:#e8a33d;}
+.fav-star-l59.labeled{font-size:12.5px;font-weight:700;border:1px solid var(--border);border-radius:999px;padding:4px 10px;margin-top:6px;color:var(--ink-muted);}
+.fav-star-l59.labeled.active{color:#b9771a;border-color:#e8a33d;}
+.fav-star-l59.headstar{font-size:12.5px;font-weight:700;border:1px solid #e8a33d;border-radius:999px;padding:5px 11px;color:#b9771a;white-space:nowrap;}
+.fav-star-l59.headstar.active{background:#fff4dc;}
+#favoritesList.fav-l59{display:block;}
+.fav-help-l59{border:1px solid var(--border);border-radius:12px;background:var(--surface);padding:10px 14px;margin:0 0 12px;font-size:13px;color:var(--ink);}
+.fav-help-l59 summary{cursor:pointer;font-weight:700;min-height:28px;display:list-item;}
+.fav-help-l59 ol{margin:8px 0 2px 20px;padding:0;line-height:1.65;}
+.fav-tools-l59{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-bottom:12px;}
+.fav-tools-l59 .btn{min-height:36px;}
+.fav-note-l59{font-size:12.5px;font-weight:700;color:var(--ink);}
+.fav-group-l59{margin:0 0 14px;border-radius:12px;padding:2px;}
+.fav-group-l59.drop-ok{outline:2px dashed var(--accent);outline-offset:3px;background:var(--surface-alt);}
+.fav-group-head-l59{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:4px 0 8px;}
+.fav-group-head-l59.drop-ok{box-shadow:0 -3px 0 var(--accent);}
+.fav-fold-l59{border:none;background:none;font-weight:800;font-size:15px;cursor:pointer;color:var(--ink);padding:6px 4px;min-height:36px;font-family:inherit;}
+.fav-group-grid-l59{display:grid;grid-template-columns:repeat(auto-fill, minmax(260px, 1fr));gap:12px;}
+.fav-group-empty-l59{font-size:12.5px;color:var(--ink-muted);padding:14px;border:1px dashed var(--border);border-radius:10px;}
+.fav-cx-card-l59{cursor:pointer;user-select:none;-webkit-user-select:none;position:relative;}
+.fav-cx-card-l59:focus-visible{outline:3px solid var(--accent);outline-offset:2px;}
+.fav-cx-card-l59.pick-base{border-color:#2563eb;box-shadow:inset 4px 0 0 #2563eb, 0 0 0 1px #2563eb inset;background:#eef4ff;}
+.fav-cx-card-l59.pick-compare{border-color:#f97316;box-shadow:inset 4px 0 0 #f97316, 0 0 0 1px #f97316 inset;background:#fff3e8;}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]) .fav-cx-card-l59.pick-base{background:#1b2a46;}
+  :root:not([data-theme="light"]) .fav-cx-card-l59.pick-compare{background:#3a2616;}
+}
+:root[data-theme="dark"] .fav-cx-card-l59.pick-base{background:#1b2a46;}
+:root[data-theme="dark"] .fav-cx-card-l59.pick-compare{background:#3a2616;}
+.fav-cx-card-l59.dragging{opacity:.45;}
+.fav-cx-card-l59.drop-before{box-shadow:-5px 0 0 var(--accent);}
+.fav-cx-head-l59{display:flex;align-items:flex-start;gap:8px;}
+.fav-check-l59{width:20px;height:20px;box-sizing:border-box;border:2px solid var(--border-strong);border-radius:5px;display:inline-flex;align-items:center;justify-content:center;flex:none;font-size:13px;font-weight:900;color:#fff;margin-top:1px;}
+.pick-base .fav-check-l59{background:#2563eb;border-color:#2563eb;}
+.pick-compare .fav-check-l59{background:#f97316;border-color:#f97316;}
+.fav-handle-l59{cursor:grab;color:var(--ink-faint);font-size:16px;line-height:20px;padding:0 2px;flex:none;}
+.fav-name-l59{flex:0 1 auto;min-width:0;color:var(--ink);text-decoration:underline;text-decoration-color:var(--border-strong);text-underline-offset:3px;word-break:keep-all;overflow-wrap:anywhere;}
+.fav-role-l59{flex:none;margin-left:auto;font-size:11.5px;font-weight:800;white-space:nowrap;}
+.pick-base .fav-role-l59{color:#2563eb;}
+.pick-compare .fav-role-l59{color:#c2410c;}
+.fav-info-l59{display:grid;grid-template-columns:repeat(2, minmax(0, 1fr));gap:4px 12px;margin:8px 0 0;font-size:12.5px;}
+.fav-info-l59 div{display:flex;gap:6px;min-width:0;align-items:baseline;}
+.fav-info-l59 dt{color:var(--ink-muted);flex:none;}
+.fav-info-l59 dd{margin:0;font-weight:700;color:var(--ink);min-width:0;overflow-wrap:anywhere;}
+.fav-actions-l59{flex-wrap:wrap;}
+.fav-actions-l59 .btn{min-height:44px;min-width:44px;}
+/* 106단계: 즐겨찾기 카드 진단 배지(진단 결론 배지와 같은 색 체계)·기준/비교 표시 아래로, 진단 화면 단지 정보 카드 */
+.fav-verdict-l59{flex:none;margin-left:auto;font-size:11.5px;font-weight:800;padding:3px 9px;border-radius:999px;white-space:nowrap;background:var(--surface);box-shadow:0 0 0 1.5px currentColor inset;}
+.fav-actions-l59{align-items:flex-end;}
+.fav-actions-l59 .fav-role-l59{margin-left:auto;align-self:flex-end;padding:0 2px 2px;}
+.diag-top-l59{display:flex;flex-direction:column;gap:12px;margin:10px 0 14px;}
+.diag-top-l59 > .concl-box{margin:0;}
+.diag-info-l59{border:1px solid var(--border);border-radius:12px;background:var(--surface);padding:12px 14px;min-width:0;}
+.diag-info-head-l59{font-size:13px;font-weight:800;color:var(--ink);margin:0 0 2px;}
+/* 107단계: 정보 카드 접기 — 제목 줄을 눌러 펼침/접힘(누르는 높이 44px) */
+.diag-info-l59 > summary.diag-info-head-l59{cursor:pointer;list-style:none;display:flex;align-items:center;gap:6px;min-height:44px;margin:-12px -14px;padding:0 14px;box-sizing:border-box;}
+.diag-info-l59 > summary.diag-info-head-l59::-webkit-details-marker{display:none;}
+.diag-info-l59 > summary .diag-info-arrow-l59{font-size:11px;color:var(--ink-muted);transition:transform .15s;}
+.diag-info-l59[open] > summary .diag-info-arrow-l59{transform:rotate(90deg);}
+.diag-info-l59[open] > summary.diag-info-head-l59{margin-bottom:-6px;}
+.diag-info-l59 > summary .diag-info-hint-l59{margin-left:auto;font-size:11.5px;font-weight:600;color:var(--ink-muted);}
+.diag-info-l59[open] > summary .diag-info-hint-l59{display:none;}
+.diag-info-l59 .fav-info-l59{margin-top:6px;}
+/* 108단계: 짧은 항목 한 줄 고정(열 최소 폭 = 내용 폭), 긴 항목은 두 칸 전체. 정보 카드는 글자를 키움. */
+.fav-info-l59{grid-template-columns:repeat(2, minmax(max-content, 1fr));}
+.fav-info-l59 > div:not(.fav-info-wide-l59) dd{white-space:nowrap;}
+.diag-info-l59 .fav-info-l59{font-size:13.5px;gap:6px 16px;}
+.diag-info-l59 > summary.diag-info-head-l59{font-size:14px;}
+@media (min-width: 900px){
+  /* 108단계: 결론 카드와 같은 높이의 두 칸으로 나란히(남는 폭을 정보 카드가 채움) */
+  .diag-top-l59{display:grid;grid-template-columns:minmax(0, 1.15fr) minmax(0, 1fr);align-items:stretch;}
+  .diag-info-l59{padding:14px 18px;}
+  .diag-info-l59 > summary.diag-info-head-l59{margin:-14px -18px;padding:0 18px;font-size:15px;}
+  .diag-info-l59 .fav-info-l59{font-size:14.5px;gap:9px 20px;margin-top:10px;}
+}
+/* 109단계: 검색창 "즐겨찾기에서 찾기" 줄과 즐겨찾기 창(넓은 화면 가운데 창, 좁은 화면 아래 시트) */
+/* 109단계: 한 줄 전체 항목(역·초교·위치·임대)은 열 폭 계산에 끼지 않게(긴 역 이름이 두 칸을 넓혀 카드 밖으로 밀던 것) */
+.fav-info-l59 > .fav-info-wide-l59{width:0;min-width:100%;}
+.lib-ac-item.fav-search-l59{font-weight:700;color:var(--accent);border-bottom:1px solid var(--border);min-height:36px;display:flex;align-items:center;}
+.fav-sheet-l59{position:fixed;inset:0;z-index:10000;background:rgba(15,20,25,.45);display:flex;align-items:center;justify-content:center;padding:16px;overscroll-behavior:contain;}
+.fav-sheet-panel-l59{background:var(--surface);border-radius:14px;width:min(440px, 100%);max-height:72vh;display:flex;flex-direction:column;box-shadow:0 10px 30px rgba(0,0,0,.25);}
+.fav-sheet-head-l59{display:flex;align-items:center;gap:8px;padding:6px 6px 6px 16px;border-bottom:1px solid var(--border);font-weight:800;font-size:15px;}
+.fav-sheet-head-l59 .btn{margin-left:auto;min-height:44px;min-width:44px;}
+.fav-sheet-list-l59{overflow-y:auto;overscroll-behavior:contain;padding:6px 8px 10px;}
+.fav-sheet-group-l59{font-size:11.5px;font-weight:700;color:var(--ink-muted);padding:8px 8px 2px;}
+.fav-sheet-item-l59{display:flex;align-items:center;width:100%;min-height:44px;padding:6px 10px;border:0;background:none;text-align:left;font:inherit;font-size:14px;color:var(--ink);border-radius:8px;cursor:pointer;}
+.fav-sheet-item-l59:hover,.fav-sheet-item-l59:focus-visible{background:var(--surface-alt);}
+@media (max-width: 899px){   /* 110단계: 태블릿 폭까지 아래 시트 */
+  .fav-sheet-l59{align-items:flex-end;padding:0;}
+  .fav-sheet-panel-l59{width:100%;max-height:75vh;border-radius:16px 16px 0 0;padding-bottom:env(safe-area-inset-bottom);}
+}
+/* 110단계: 호선 배지 — 재개발 목록표 .dmp-lb / .dmp-lb-na와 같은 모양·색 */
+.fav-lb-l59{display:inline-flex;align-items:center;justify-content:center;min-width:18px;height:18px;padding:0 5px;border-radius:9px;font-size:10.5px;font-weight:700;line-height:1;margin-right:2px;vertical-align:1px;white-space:nowrap;box-sizing:border-box;}
+.fav-lb-na-l59{background:#8A959E;color:#FFFFFF;}
+.fav-info-l59 .fav-st-row-l59 dd{display:flex;flex-wrap:wrap;align-items:center;column-gap:4px;row-gap:2px;}
+.fav-st-badges-l59{display:inline-flex;flex:none;white-space:nowrap;}
+.fav-st-name-l59{white-space:nowrap;}
+/* 112단계: 학교 자료 출처 한 줄(푸터 안, 작은 글씨) — 아래 여백으로 페이지 끝에서도 의견 버튼(아래 20px·높이 44px) 위에 오게 */
+.school-src-l59{display:block;margin:6px auto 76px;font-size:11px;line-height:1.5;color:var(--ink-faint);word-break:keep-all;max-width:640px;padding:0 8px;}
+.fav-load-note-l59{margin:8px 16px 0;display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.fav-info-l59 .fav-info-wide-l59{grid-column:1 / -1;}
+.fav-info-l59 .fav-info-wide-l59 dd{word-break:keep-all;}
+.btn.fav-danger-l59{background:#b91c1c;border-color:#b91c1c;color:#fff;font-weight:700;}
+.btn.fav-danger-l59:hover{background:#991b1b;}
+.fav-modal-l59{position:fixed;inset:0;z-index:9995;background:rgba(15,20,25,.45);display:flex;align-items:center;justify-content:center;padding:16px;}
+.fav-modal-l59[hidden]{display:none;}
+.fav-modal-box-l59{background:var(--surface);color:var(--ink);border-radius:14px;max-width:380px;width:100%;box-sizing:border-box;padding:18px;box-shadow:0 20px 50px rgba(0,0,0,.3);max-height:85vh;overflow:auto;}
+.fav-modal-box-l59 h3{margin:0 0 10px;font-size:16px;}
+.fav-modal-box-l59 input{width:100%;box-sizing:border-box;min-height:44px;border:1px solid var(--border-strong);border-radius:8px;padding:8px 10px;font-size:15px;background:var(--surface);color:var(--ink);font-family:inherit;}
+.fav-chips-l59{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0 4px;}
+.fav-chips-l59 button{border:1px solid var(--border);border-radius:999px;background:var(--surface-alt);padding:6px 12px;min-height:36px;cursor:pointer;color:var(--ink);font-family:inherit;}
+.fav-pick-list-l59 button{display:block;width:100%;text-align:left;min-height:44px;margin-bottom:6px;}
+.fav-err-l59{color:#b91c1c;font-size:12.5px;min-height:18px;margin-top:6px;}
+.fav-modal-actions-l59{display:flex;justify-content:flex-end;gap:8px;margin-top:12px;}
+.fav-modal-actions-l59 .btn{min-height:40px;}
+.fav-bar-l59{position:fixed;left:0;right:0;bottom:0;z-index:9990;display:flex;align-items:center;gap:10px;box-sizing:border-box;
+  padding:10px 16px calc(10px + env(safe-area-inset-bottom, 0px));background:var(--surface);border-top:1px solid var(--border);box-shadow:0 -4px 14px rgba(0,0,0,.1);}
+.fav-bar-l59[hidden]{display:none;}
+.fav-bar-chips-l59{flex:1 1 auto;min-width:0;display:flex;gap:6px;overflow-x:auto;white-space:nowrap;font-size:12.5px;scrollbar-width:none;}
+.fav-bar-chips-l59 span{flex:none;padding:5px 10px;border-radius:999px;background:var(--surface-alt);color:var(--ink);}
+.fav-bar-chips-l59 span.base{font-weight:700;}
+.fav-bar-chips-l59 span.empty{background:none;color:var(--ink-muted);padding-left:0;}
+.fav-bar-btn-l59{flex:none;white-space:nowrap;}
+.fav-bar-btn-l59:disabled{opacity:.5;cursor:default;}
+html body.l59-favbar .fw-fab{bottom:calc(78px + env(safe-area-inset-bottom, 0px)) !important;}
+html body.l59-favbar .wrap{padding-bottom:calc(150px + env(safe-area-inset-bottom, 0px));}
 /* 항목(2026-09-21 세션, "그래프 세로 정렬") — 단일진단 칸1/2 미리보기는
    서로 다른 준거(닮은꼴/괴리) 단지라 헤드 라인 길이가 달라 줄바꿈 여부가
    갈리고, 그만큼 차트가 시작되는 세로 위치가 밀려 두 칸의 차트가 어긋나
@@ -2454,9 +2583,9 @@ function seoulHistoricalAvg(){
 // 라이브는 주소 플래그를 읽지 않으므로 이 기본값이 그대로 동작한다.
 const BUNDLES = { A:false, B:false, C:false, D1:false, D2:false, D3:false, D4:false, E1:true, E2:false, E3:true, F1:true, F2:true, F3:true, F4:true, F5:true, F6:true,
   H1:false, H2:true, H3:true, H4:true, H5:true, H6:true, H7:true,
-  L1:true, L2:true, L3:true, L4:true, L5:true, L6:false, L7:true, L8:true, L9:true, L10:true, L11:true, L12:true, L13:true, L14:true, L15:true, L16:true, L17:true, L18:true, L19:true, L19B:true, L20:true, L22:true, L23:true, L24:true, L25:true, L26:true, L27:!!window.POOL_EXCLUDE_ON, L31:!!window.NEW_NAME_RULE_ON, L32:true, L33:true, L34:true, L37:true, L28:true, L38:true, L40:true, L39:true, L41:true, L42:true, L43:true, L44:true, L45:true, L46:true, L47:true, L49:true, L48:true, L50:true, L51:true, L52:true, L53:true, L54:true, L55:true, L56:true, L57:true, L58:true, L35:true, L36:true, L30:true, L29:true, L29R:false, K1:false, K2:true, K4:false };
+  L1:true, L2:true, L3:true, L4:true, L5:true, L6:false, L7:true, L8:true, L9:true, L10:true, L11:true, L12:true, L13:true, L14:true, L15:true, L16:true, L17:true, L18:true, L19:true, L19B:true, L20:true, L22:true, L23:true, L24:true, L25:true, L26:true, L27:!!window.POOL_EXCLUDE_ON, L31:!!window.NEW_NAME_RULE_ON, L32:true, L33:true, L34:true, L37:true, L28:true, L38:true, L40:true, L39:true, L41:true, L42:true, L43:true, L44:true, L45:true, L46:true, L47:true, L49:true, L48:true, L50:true, L51:true, L52:true, L53:true, L54:true, L55:true, L56:true, L57:true, L58:true, L59:true, L59_DND:true, L59_INFOCARD:true, L59_STATION:true, L59_SCHOOL:true, L59_FAVSEARCH:true, L35:true, L36:true, L30:true, L29:true, L29R:false, K1:false, K2:true, K4:false };
 const BUNDLE_GROUPS = { D:['D1','D2','D3','D4'], E:['E1','E2','E3'], F:['F1','F2','F3','F4','F5','F6'], H:['H1','H2','H3','H4','H5','H6','H7'],
-  L:['L1','L2','L3','L4','L5','L6','L7','L8','L9','L10','L11','L12','L13','L14','L15','L16','L17','L18','L19','L19B','L20','L22','L23','L24','L25','L26','L27','L29','L30','L31','L32','L33','L34','L37','L35','L36','L28','L38','L40','L39','L41','L42','L43','L44','L45','L46','L47','L49','L48','L50','L51','L52','L53','L54','L55','L56','L57','L58'], K:['K1','K2','K4'] };
+  L:['L1','L2','L3','L4','L5','L6','L7','L8','L9','L10','L11','L12','L13','L14','L15','L16','L17','L18','L19','L19B','L20','L22','L23','L24','L25','L26','L27','L29','L30','L31','L32','L33','L34','L37','L35','L36','L28','L38','L40','L39','L41','L42','L43','L44','L45','L46','L47','L49','L48','L50','L51','L52','L53','L54','L55','L56','L57','L58','L59'], K:['K1','K2','K4'] };
 // 묶음 L46(69단계): 그래프 점선 모양 통일 — 모든 점선을 "선도단지 대비 적정가" 선(FAIR_LINE_STYLE.borderDash)과 같은 긴 점선으로.
 // 촘촘한 점("좁쌀")·점-선 섞인 패턴을 없앤다. 새 점선은 항상 dashL46(예전 값)을 쓴다 — L46을 끄면 예전 값 그대로.
 const DASH_L46 = [5, 4];
@@ -2500,6 +2629,13 @@ function applyNavLinksL58(){
 // 묶음 H4는 CSS라 body 클래스로 끈다.
 function applyBundleBodyClasses(){
   try { applyNavLinksL58(); } catch (e) {}   // 묶음 L58
+  try { _favInfoCacheL59.clear(); } catch (e) {}   // 묶음 L59: 묶음이 바뀌면 카드 가격 다시 계산
+  try { if (!BUNDLES.L59) hideFavLoadNoteL59(); } catch (e) {}   // 묶음 L59(104단계): 끄면 불러옴 안내도 지움
+  try { if (!(BUNDLES.L59 && BUNDLES.L59_FAVSEARCH)) closeFavSheetL59(); refreshDiagInfoCardL59(); } catch (e) {}   // 묶음 L59(109단계)
+  try { syncSchoolSrcL59(); } catch (e) {}   // 묶음 L59(112단계): 학교 줄을 끄면 출처 줄도
+  try { const on = diagInfoCardOnL59(); if (on !== _diagInfoOnLastL59){ _diagInfoOnLastL59 = on; const sd = document.getElementById('singleDiagSection');
+    if (sd && sd.hidden === false && state.topMode === 'single' && state.singleTargetName) renderSingleDiag(state.singleTargetName); } } catch (e) {}   // 묶음 L59(106단계)
+  try { const fs = document.getElementById('favoritesSection'); if (fs && fs.hidden === false && typeof renderFavoritesTab === 'function') renderFavoritesTab(); else if (!BUNDLES.L59) document.body.classList.remove('l59-favbar'); } catch (e) {}   // 묶음 L59
   try { if (document && document.body && document.body.classList) document.body.classList.toggle('l58', !!BUNDLES.L58); } catch (e) {}   // 묶음 L58
   try { if (document && document.body && document.body.classList) document.body.classList.toggle('no-h4', !BUNDLES.H4); } catch (e) {}
   try { if (document && document.body && document.body.classList) document.body.classList.toggle('l10', !!BUNDLES.L10); } catch (e) {}
@@ -4732,7 +4868,7 @@ function findTwinCandidates(comp){
           ? historicalGapEpisodes(cand, bench, candBenchOverlapYms, state.threshold)
           : { baseline: null, episodeCount: 0, avgDuration: null, maxDuration: null, episodes: [], ongoingMonths: 0 };
         const ampRms = computeTwinAmpRmsDiff(comp.rowMap, cand.rowMap, overlapYms);
-        scored.push({ name: e.name, complex: cand, corr, ampRms, overlapMonths: overlapYms.length, overlapYms, decoupling, compBenchDecoupling, twinBenchDecoupling, gapStats });
+        scored.push({ name: e.name, seedId: e.id, complex: cand, corr, ampRms, overlapMonths: overlapYms.length, overlapYms, decoupling, compBenchDecoupling, twinBenchDecoupling, gapStats });
       });
       const byCorr = orderTwinsL55(scored, (a,b)=> b.corr - a.corr, compYms.length);   // 묶음 L55
       // 🎯 갭메우기 이력 — "완료"가 아니라 "이력"인 이유: 역사적으로 회복
@@ -5530,6 +5666,100 @@ function buildTwinFavoriteRecord(comp, t){
     savedAt: new Date().toISOString(),
   };
 }
+// ---- 묶음 L59(101·102단계): 단지 즐겨찾기(저장 단위 = 단지 1개, id + 평형) ----
+// 쌍(기준↔쌍둥이) 즐겨찾기 키(TWIN_FAVORITES_KEY)는 지우지도 옮기지도 않는다 — L59를 켜면 화면에서만 숨기고, 끄면 예전 화면이 그대로 돌아온다.
+// seed 파일에는 이름이 같은 단지가 많아(406개) 이름이 아니라 id로 저장한다(비교 칸·최근 본 단지·급지표 연결과 같은 {id, p}).
+// 단지 정보(가격·연식·세대수·임대)는 레코드에 복사하지 않고 그릴 때마다 seed에서 id로 읽는다(seed가 바뀌면 그대로 따라감).
+const COMPLEX_FAV_KEY_L59 = 'benchmarkCalc_complexFavorites_v1';
+const FAV_GROUPS_KEY_L59 = 'benchmarkCalc_favGroups_v1';
+const FAV_FOLD_KEY_L59 = 'benchmarkCalc_favFold_v1';     // 접어 둔 그룹 id 목록('' = 미분류)
+const FAV_HELP_KEY_L59 = 'benchmarkCalc_favHelp_v1';     // 사용법 박스 '0' 접힘 / '1' 펼침(없거나 못 읽으면 펼침)
+const COMPLEX_FAV_MAX_L59 = 50;
+const FAV_GROUP_MAX_L59 = 20;
+const FAV_GROUP_NAME_MAX_L59 = 12;
+const FAV_GROUP_SUGGEST_L59 = ['서울', '경기', '우리동네', '매수단지', '관심단지', '기준단지'];   // 미리 만들지 않고 입력창 빠른 칩으로만
+const FAV_UNGROUPED_L59 = '미분류';
+const FAV_PICK_MAX_L59 = MAX_SLOTS + 1;   // 기준 1 + 비교 10(급지표 MAX_TOTAL_SELECTED와 같음)
+const COMPLEX_FAV_FULL_TEXT_L59 = '즐겨찾기는 '+COMPLEX_FAV_MAX_L59+'개까지예요. 안 쓰는 단지를 지운 뒤 다시 눌러 주세요.';
+const FAV_PICK_FULL_TEXT_L59 = '최대 '+FAV_PICK_MAX_L59+'개(기준 1 + 비교 '+MAX_SLOTS+')까지 고를 수 있어요.';
+function complexFavKeyL59(id, p){ return String(id) + '|' + (p === 25 ? 25 : 34); }
+function loadComplexFavsL59(){
+  try {
+    const raw = localStorage.getItem(COMPLEX_FAV_KEY_L59);
+    const list = raw ? JSON.parse(raw) : [];
+    return Array.isArray(list) ? list.filter(x => x && typeof x.id === 'string' && x.id && (x.p === 25 || x.p === 34)) : [];
+  } catch (e) { return []; }
+}
+function saveComplexFavsL59(list){
+  try { localStorage.setItem(COMPLEX_FAV_KEY_L59, JSON.stringify(list)); return true; } catch (e) { return false; }
+}
+function loadFavGroupsL59(){
+  try {
+    const raw = localStorage.getItem(FAV_GROUPS_KEY_L59);
+    const list = raw ? JSON.parse(raw) : [];
+    if (!Array.isArray(list)) return [];
+    const seen = new Set();
+    return list.filter(g => g && typeof g.groupId === 'string' && g.groupId && typeof g.name === 'string' && g.name && !seen.has(g.groupId) && seen.add(g.groupId))
+      .sort((a, b) => (Number(a.order) || 0) - (Number(b.order) || 0)).slice(0, FAV_GROUP_MAX_L59);
+  } catch (e) { return []; }
+}
+function saveFavGroupsL59(list){
+  try { localStorage.setItem(FAV_GROUPS_KEY_L59, JSON.stringify(list.map((g, i) => ({ groupId: g.groupId, name: g.name, order: i })))); return true; } catch (e) { return false; }
+}
+function isComplexFavL59(id, p){ return !!id && loadComplexFavsL59().some(x => x.id === id && x.p === (p === 25 ? 25 : 34)); }
+// 반환: true(넣음) / false(뺌) / null(상한·저장 실패로 바뀐 것 없음). 새로 담은 단지는 "미분류" 맨 위(순서 값 없음).
+function toggleComplexFavL59(id, p, name){
+  if (!id) return null;
+  p = p === 25 ? 25 : 34;
+  const list = loadComplexFavsL59();
+  const i = list.findIndex(x => x.id === id && x.p === p);
+  let res;
+  if (i >= 0){ list.splice(i, 1); res = saveComplexFavsL59(list) ? false : null; }
+  else if (list.length >= COMPLEX_FAV_MAX_L59){ try { alert(COMPLEX_FAV_FULL_TEXT_L59); } catch (e) {} return null; }
+  else { list.push({ id, p, name: stripPyeongSuffix(String(name || '')), savedAt: new Date().toISOString() }); res = saveComplexFavsL59(list) ? true : null; }
+  syncFavStarsL59();
+  return res;
+}
+// ☆ 버튼. ref = {id, p}. kind: '' 별만 / 'labeled' 기준 칸 글자 버튼 / 'head' 진단 머리("☆ 즐겨찾기 담기").
+function favStarHtmlL59(ref, name, kind){
+  if (!BUNDLES.L59 || !ref || !ref.id) return '';
+  if (kind === true) kind = 'labeled';
+  const p = ref.p === 25 ? 25 : 34, on = isComplexFavL59(ref.id, p), cls = kind === 'labeled' ? ' labeled' : kind === 'head' ? ' headstar' : '';
+  return '<button type="button" class="fav-star-l59'+cls+(on ? ' active' : '')+'" data-fav-l59="'+esc(ref.id)+'" data-fav-l59-p="'+p+'" data-fav-l59-key="'+esc(complexFavKeyL59(ref.id, p))+'"'+
+    ' data-fav-l59-kind="'+(kind || '')+'" data-fav-l59-name="'+esc(stripPyeongSuffix(String(name || '')))+'" title="'+(on ? '즐겨찾기에서 빼기' : '즐겨찾기에 넣기')+'" aria-label="'+(on ? '즐겨찾기에서 빼기' : '즐겨찾기에 넣기')+'" aria-pressed="'+on+'">'+favStarTextL59(on, kind)+'</button>';
+}
+function favStarTextL59(on, kind){
+  if (kind === true || kind === 'labeled') return on ? '★ 즐겨찾기됨' : '☆ 즐겨찾기';
+  if (kind === 'head') return on ? '★ 즐겨찾기에 담김' : '☆ 즐겨찾기 담기';
+  return on ? '★' : '☆';
+}
+// 같은 단지의 ☆이 화면 여러 곳(진단 머리·비교 칸·쌍둥이 카드)에 있어도 한 번에 맞춘다.
+function syncFavStarsL59(){
+  if (typeof document === 'undefined' || !document.querySelectorAll) return;
+  let favs; try { favs = new Set(loadComplexFavsL59().map(x => complexFavKeyL59(x.id, x.p))); } catch (e) { return; }
+  document.querySelectorAll('[data-fav-l59-key]').forEach(b => {
+    const on = favs.has(b.getAttribute('data-fav-l59-key'));
+    const kind = b.getAttribute('data-fav-l59-kind') || (b.classList.contains('labeled') ? 'labeled' : '');
+    b.classList.toggle('active', on);
+    b.textContent = favStarTextL59(on, kind);
+    b.title = on ? '즐겨찾기에서 빼기' : '즐겨찾기에 넣기';
+    if (b.hasAttribute('aria-pressed')) b.setAttribute('aria-pressed', String(on));
+  });
+}
+// 비교 칸(기준·비교)의 단지: 시세 글자로 seed id를 찾는 slotRef를 쓴다(이름이 같은 단지와 섞이지 않음). 직접 넣은 시세는 null(☆ 없음).
+function slotFavRefL59(slot){
+  if (!slot) return null;
+  const r = slotRef(slot, false);
+  return r && r.id ? { id: r.id, p: r.pyeong === 25 ? 25 : 34 } : null;
+}
+try {
+  document.addEventListener('click', (ev)=>{
+    const b = ev.target && ev.target.closest && ev.target.closest('[data-fav-l59]');
+    if (!b || !BUNDLES.L59) return;
+    ev.preventDefault();
+    toggleComplexFavL59(b.getAttribute('data-fav-l59'), Number(b.getAttribute('data-fav-l59-p')), b.getAttribute('data-fav-l59-name'));
+  });
+} catch (e) { /* DOM이 없는 환경(테스트 하네스) */ }
 // 반환값: 토글 후 "지금 즐겨찾기 상태인가"(true=저장됨).
 function toggleTwinFavorite(comp, t){
   const list = loadTwinFavorites();
@@ -5587,8 +5817,9 @@ function buildTwinCardHtml(t, idx, comp, r, bestFairPriceCandidate, iMode, iRang
   // 주석 참고). 상세보기(twinInterpretationText)는 매치타입과 무관하게
   // 항상 정확한 숫자를 유지한다.
   const corrDisplay = t.matchType === 'similar' ? twinSimilarityLabel(t.corr) : '상관계수 '+t.corr.toFixed(2);
-  const favActive = isTwinFavorited(comp.name, t.name);
-  const favBtnHtml = '<button class="twin-fav-btn'+(favActive?' active':'')+'" data-twin-fav="'+idx+'" type="button" aria-label="즐겨찾기">'+(favActive?'★':'☆')+'</button>';
+  const favL59 = !!(BUNDLES.L59 && t.seedId);   // 묶음 L59: 쌍둥이 카드의 ☆ = 이 쌍둥이 단지(34평)를 단지 즐겨찾기에
+  const favActive = favL59 ? isComplexFavL59(t.seedId, 34) : isTwinFavorited(comp.name, t.name);
+  const favBtnHtml = (BUNDLES.L59 && !favL59) ? '' : '<button class="twin-fav-btn'+(favActive?' active':'')+'" data-twin-fav="'+idx+'"'+(favL59 ? ' data-fav-l59-key="'+esc(complexFavKeyL59(t.seedId, 34))+'" title="'+esc(t.name)+' 즐겨찾기"' : '')+' type="button" aria-label="즐겨찾기">'+(favActive?'★':'☆')+'</button>';
   return '<div class="twin-card">'+
     '<div class="twin-card-head">'+twinMatchTypeTag(t)+' '+twinOngoingBadge(t)+' '+esc(t.name)+esc(regionSuffix(t.name))+rentalHeavyChip(t.name)+' <span class="cell-ratio">('+corrDisplay+', 겹치는 구간 '+t.overlapMonths+'개월)</span>'+favBtnHtml+'</div>'+
     itemToggleRowHtml+
@@ -5626,6 +5857,7 @@ function wireOneTwinCard(containerEl, t, idx, comp, r, bestFairPriceCandidate, i
   const favBtn = containerEl.querySelector('[data-twin-fav="'+idx+'"]');
   if (favBtn) favBtn.addEventListener('click', (e) => {
     e.stopPropagation();
+    if (BUNDLES.L59 && t.seedId){ toggleComplexFavL59(t.seedId, 34, t.name); return; }   // 묶음 L59(☆ 모양은 syncFavStarsL59가 맞춤)
     const active = toggleTwinFavorite(comp, t);
     favBtn.classList.toggle('active', active);
     favBtn.textContent = active ? '★' : '☆';
@@ -6965,7 +7197,7 @@ function parseCompareSpec(raw){
 function renderBaseStatus(base){
   const el = document.getElementById('baseStatus');
   const chipsEl = document.getElementById('baseChips');
-  if (chipsEl) chipsEl.innerHTML = base.isVirtualBenchmark ? '' : pyeongChipsHtml(baseSlot(), 'base');
+  if (chipsEl) chipsEl.innerHTML = base.isVirtualBenchmark ? '' : pyeongChipsHtml(baseSlot(), 'base') + (BUNDLES.L59 ? favStarHtmlL59(slotFavRefL59(baseSlot()), state.baseName, 'labeled') : '');   // 묶음 L59
   renderBaseFairSummary(base);
   if (!base.rows.length){
     el.className = 'status-line';
@@ -7017,6 +7249,7 @@ function renderCompareTabs(base){
     panel.innerHTML =
       '<div class="slot-head">'+
         '<input class="textish name-input" data-role="name" placeholder="비교단지 '+(i+1)+' 단지명" value="'+(state.compares[i].name||'').replace(/"/g,'&quot;')+'">'+
+        (BUNDLES.L59 ? favStarHtmlL59(slotFavRefL59(state.compares[i]), state.compares[i].name) : '')+   // 묶음 L59
         '<button class="clear-link" data-role="makeBase" title="이 단지를 기준단지로 전환">⇄ 기준단지로</button>'+
         '<button class="clear-link" data-role="clear">비우기</button>'+
       '</div>'+
@@ -7472,7 +7705,12 @@ function wireLibrarySearch(inputEl, selectEl, renderFn, autocompleteEl, showRent
   const pickerTarget = (opts && opts.recentTarget != null) ? opts.recentTarget : null;   // 묶음 L25: 여러 단지 비교의 칸('base' 또는 슬롯 번호)
   const doRender = renderFn || (()=>renderLibraryOptions(selectEl));
   if (autocompleteEl) autocompleteEl._l39Input = inputEl;   // 묶음 L39: 높이 맞출 때 기준 입력창
+  if (autocompleteEl) autocompleteEl._favCtxL59 = { target: pickerTarget, selectEl, inputEl, doRender };   // 묶음 L59(109단계): 즐겨찾기 창에서 고른 단지를 넣을 칸
   function updateAutocomplete(){
+    updateAutocompleteBase();
+    try { if (typeof favSearchRowL59 === 'function') favSearchRowL59(autocompleteEl, inputEl); } catch (e) {}   // 묶음 L59(109단계): 맨 위 "★ 즐겨찾기에서 찾기"
+  }
+  function updateAutocompleteBase(){
     if (!autocompleteEl) return;
     const filter = inputEl.value.trim();
     autocompleteEl.dataset.mode = '';
@@ -9214,8 +9452,11 @@ function renderSingleDiag(name){
   // #singleChartSection보다 뒤에 오는 별도 컨테이너에 그린다.
   const pyeongNotice = _singlePyeongNotice ? '<div class="pyeong-notice warn">'+esc(_singlePyeongNotice)+'</div>' : '';
   _singlePyeongNotice = '';
+  const infoRefL59 = diagInfoCardOnL59() ? currentSingleRecentRef() : null;   // 묶음 L59(106단계): 정보 카드를 그리면 제목은 이름만
+  const infoOnL59 = !!(infoRefL59 && seedEntryById(infoRefL59.id));
   const headTopHtml =
-    '<div class="single-target-head"><span class="name">'+esc(name)+(BUNDLES.L32 ? '<span class="name-meta">'+esc(complexMetaLabel(name))+'</span>' : esc(complexMetaLabel(name)))+rentalHeavyChip(name)+'</span>'+
+    '<div class="single-target-head"><span class="name">'+esc(name)+(infoOnL59 ? '' : (BUNDLES.L32 ? '<span class="name-meta">'+esc(complexMetaLabel(name))+'</span>' : esc(complexMetaLabel(name))))+rentalHeavyChip(name)+'</span>'+
+      (BUNDLES.L59 ? favStarHtmlL59(currentSingleRecentRef(), name, 'head') : '')+   // 묶음 L59
       pyeongChipsHtml(singleSlot(), 'single')+
       '<span class="bench-tag">'+(groupKey==='rebuild'?'🏗️ 재건축 선도단지':'🏙️ 서울 선도단지')+' 기준</span>'+
       '<button class="btn small single-add-compare-btn" id="singleAddCompareBtn">➕ 비교 단지 추가</button></div>';
@@ -9235,6 +9476,7 @@ function renderSingleDiag(name){
       buildFairPriceSummaryCard(r)+
       buildPrevAthReferenceHtml(r, target);
   document.getElementById('singleAddCompareBtn').addEventListener('click', () => addCompareFromSingleDiag(name));
+  if (infoOnL59){ try { mountDiagInfoCardL59(headEl, infoRefL59); } catch (e) {} }   // 묶음 L59(106단계): 단지 정보 카드
   // 항목(2026-09 세션, "단일진단 레이아웃 재구성" 최종 확정) — 진단분석/
   // 동조율/쌍둥이 단지 3칸이 각자 자기 .card 박스를 갖게 되므로, 이걸 담는
   // 바깥 컨테이너는 더 이상 .card(테두리 박스)가 아니라 순수 레이아웃
@@ -9767,6 +10009,8 @@ function setTopMode(mode){
   document.getElementById('multiCompareShell').hidden = mode !== 'multi';
   document.getElementById('singleDiagSection').hidden = mode !== 'single';
   document.getElementById('favoritesSection').hidden = mode !== 'favorites';
+  if (mode !== 'favorites'){ try { document.body.classList.remove('l59-favbar'); closeFavModalL59(); } catch (e) {} }   // 묶음 L59: 하단 바·그룹 창은 즐겨찾기 탭에서만
+  if (mode !== 'multi'){ try { hideFavLoadNoteL59(); } catch (e) {} }   // 묶음 L59(104단계): 불러옴 안내는 비교 탭에서만
   // 묶음 L26(43단계): 단지를 고르기 전(대상 없음)에는 아래 renderSingleDiag가 불리지 않으므로 여기서도 드롭박스 규칙을 적용한다
   if (mode === 'single' && typeof BUNDLES !== 'undefined' && BUNDLES.L26){ try { hideRedundantSingleBenchSelect(); } catch (e) {} }
   if (mode === 'single' && state.singleTargetName){
@@ -9783,7 +10027,841 @@ function setTopMode(mode){
 function twinFavMatchLabel(matchType){
   return matchType === 'similar' ? '🎯 닮은꼴' : matchType === 'gap' ? '📊 현재괴리' : (matchType || '');
 }
+// ---- 묶음 L59: 탭 화면 ----
+let _favPicksL59 = [];      // 고른 단지 키(id|p), 고른 순서 = 기준·비교 순서(그룹을 가로질러도 같음)
+let _favNoteL59 = '';       // 한 번 보여 줄 안내(상한 등)
+let _favDragL59 = null;     // 끌기 중: { type:'cards', keys } | { type:'group', gid }
+let _favSeed25AskedL59 = false;
+const _favInfoCacheL59 = new Map();   // 단지 정보(가격 등) — 키 id|p, 묶음이 바뀌면 비움
+function setPairFavUiL59(show){
+  ['favCsvBtn', 'favJsonExportBtn', 'favJsonImportBtn'].forEach(id => { const b = document.getElementById(id); if (b) b.hidden = !show; });
+}
+function favEntryL59(f){ return seedEntryById(f.id) || importedLibraryEntryById(f.id) || findLibraryEntryById(f.id); }
+function favLabelL59(f, e){ return stripPyeongSuffix(e ? e.name : (f.name || f.id)) + (f.p === 25 ? PYEONG25_SUFFIX : ''); }
+function favDndOnL59(){
+  if (!BUNDLES.L59 || !BUNDLES.L59_DND) return false;
+  try { return !!(window.matchMedia && window.matchMedia('(pointer: fine)').matches); } catch (e) { return false; }
+}
+function favObjectParticleL59(s){   // 을/를
+  const c = String(s || '').replace(/[\s)\]」』]+$/, '').slice(-1).charCodeAt(0);
+  if (c >= 0xAC00 && c <= 0xD7A3) return (c - 0xAC00) % 28 ? '을' : '를';
+  return '을(를)';
+}
+// 카드 정보: 진단 화면과 같은 계산 — 선도단지(pickBenchGroupForTarget) 대비 computeSlot의 현재가(매매·전세, 선도단지와 겹치는 가장 최근 달),
+// 전세가율은 진단 "전세가율 추이" 카드의 현재값(computeSelfRatioStats). 연식·세대수·임대는 seed 필드(id로 읽음). 25평은 25평 시세로.
+function favInfoL59(f, e){
+  const key = complexFavKeyL59(f.id, f.p);
+  if (_favInfoCacheL59.has(key)) return _favInfoCacheL59.get(key);
+  const out = { sale: null, saleText: null, jeonse: null, jr: null, ym: null, pending: false, verdict: null };
+  if (!e) return out;
+  try {
+    let text = null, name = stripPyeongSuffix(e.name);
+    if (f.p === 25){
+      if (seed25State !== 'loaded'){ out.pending = true; return out; }
+      text = getSeries(f.id, 25); name = name + PYEONG25_SUFFIX;
+    } else text = e.text;
+    if (text){
+      const c = buildComplex(text, name, name); c._pyeong = f.p;
+      if (c.rows.length){
+        const bench = getVirtualBenchmarkComplex(pickBenchGroupForTarget(stripPyeongSuffix(name)).groupKey);
+        const r = computeSlot(bench, c);
+        if (r && !r.error){ out.sale = r.curSalePrice; out.jeonse = r.curJeonsePrice; out.ym = r.curSaleYm;
+          try { const pl = BUNDLES.L15 ? conclusionPriceLine(r, '선도단지') : null; if (pl && pl.cur) out.saleText = pl.cur; } catch (err) {}   // 진단 결론 "현재 X억"과 같은 자릿수
+          try { out.verdict = favVerdictOfL59(r); } catch (err) {} }   // 106단계: 진단 결론 배지와 같은 값
+        const st = computeSelfRatioStats(c); if (st && st.cur != null) out.jr = st.cur;
+      }
+    }
+  } catch (err) {}
+  _favInfoCacheL59.set(key, out);
+  return out;
+}
+// 지하철역(104단계): 별도 보강 파일 station_walk.js — window.STATION_WALK[seed id] = [역명, 호선(쉼표), 도보분, 거리m, 출구, 기준(e·c·far)].
+// seed는 바꾸지 않는다. 즐겨찾기 탭을 처음 열 때 한 번 받고(묶음 L52 버전 표에 있으면 ?v=), 실패하면 줄을 그리지 않는다.
+// 104단계: 파일 미완성이라 null(줄 없음). 완성되면 'station_walk.js' 한 줄로 바꾼다.
+const FAV_STATION_URL_L59 = 'station_walk.js';   // null = 지하철역 줄 안 씀(파일도 안 받음). 109단계: 켬(하위 스위치 L59_STATION)
+let favStationStateL59 = 'idle';   // 'idle' | 'loading' | 'loaded' | 'error'
+function loadFavStationL59(){
+  if (!FAV_STATION_URL_L59 || !BUNDLES.L59_STATION || favStationStateL59 !== 'idle') return;
+  if (window.STATION_WALK && typeof window.STATION_WALK === 'object'){ favStationStateL59 = 'loaded'; return; }
+  favStationStateL59 = 'loading';
+  try {
+    const s = document.createElement('script');
+    s.onload = () => {
+      favStationStateL59 = window.STATION_WALK && typeof window.STATION_WALK === 'object' ? 'loaded' : 'error';
+      try { const fs = document.getElementById('favoritesSection'); if (BUNDLES.L59 && fs && fs.hidden === false) renderComplexFavTabL59(); } catch (err) {}
+      try { refreshDiagInfoCardL59(); } catch (err) {}   // 106단계
+    };
+    s.onerror = () => { favStationStateL59 = 'error'; s.remove(); };
+    s.src = BUNDLES.L52 ? assetUrlL52(FAV_STATION_URL_L59, true) : FAV_STATION_URL_L59;   // 묶음 L52
+    document.head.appendChild(s);
+  } catch (err) { favStationStateL59 = 'error'; }
+}
+// 표시: "n호선 ○○역 · 몇 m · 몇 분"(환승은 "2호선·9호선", 호선이 비면 역명만, 30분 초과는 "30분 넘음")
+// 109단계 표기: "9호선 신반포역 · 도보 약 8분"(추정), 환승은 "2호선·9호선", 호선이 비면 역명만, 30분 초과는 "역 · 도보 30분 넘음", 분이 없으면 역명만
+// 110단계: 역 도보 글자(글자 줄·배지 줄 공용)
+function stationMinTextL59(v){ return v[5] === 'far' ? ' · 도보 30분 넘음' : (v[2] != null ? ' · 도보 약 ' + v[2] + '분' : ''); }
+function favStationFormatL59(v){
+  if (!Array.isArray(v) || !v[0]) return null;
+  const line = v[1] ? String(v[1]).split(',').join('·') + ' ' : '';
+  return line + v[0] + stationMinTextL59(v);
+}
+// 110단계: 호선 배지 — 재개발 목록표(73a6dc9)의 LINE_COLORS·textOn·lineBadge와 같은 값([색, 약칭]). 목록에 없는 호선은 회색 알약에 이름.
+const LINE_COLORS_L59 = {
+  '1호선': ['#0052A4', '1'], '2호선': ['#00A84D', '2'], '3호선': ['#EF7C1C', '3'], '4호선': ['#00A5DE', '4'], '5호선': ['#996CAC', '5'],
+  '6호선': ['#CD7C2F', '6'], '7호선': ['#747F00', '7'], '8호선': ['#E6186C', '8'], '9호선': ['#BDB092', '9'],
+  '경의중앙선': ['#77C4A3', '경의'], '수인분당선': ['#FABE00', '수인'], '신분당선': ['#D4003B', '신분'], '공항철도': ['#0090D2', '공항'],
+  '경춘선': ['#0C8E72', '경춘'], '경강선': ['#003DA5', '경강'], '서해선': ['#8FC31F', '서해'], 'GTX-A': ['#9A6292', 'GTX'],
+  '인천1호선': ['#7CA8D5', '인1'], '인천2호선': ['#ED8B00', '인2'], '우이신설선': ['#B0CE18', '우이'], '신림선': ['#6789CA', '신림'],
+  '김포골드라인': ['#A17800', '김포'], '의정부경전철': ['#FDA600', '의정'], '용인경전철': ['#509F22', '용인']
+};
+function lineTextOnL59(hex){ const n = parseInt(hex.slice(1), 16), r = n >> 16, g = (n >> 8) & 255, b = n & 255; return (0.299 * r + 0.587 * g + 0.114 * b) > 160 ? '#1A1A1A' : '#FFFFFF'; }
+function lineBadgeL59(l){
+  const c = LINE_COLORS_L59[l];
+  if (!c) return '<span class="fav-lb-l59 fav-lb-na-l59" title="'+esc(l)+'">'+esc(l)+'</span>';
+  return '<span class="fav-lb-l59" style="background:'+c[0]+';color:'+lineTextOnL59(c[0])+'" title="'+esc(l)+'">'+esc(c[1])+'</span>';
+}
+// 역 줄 HTML: [배지들] + "역명 · 도보 약 N분"(호선이 비면 배지 없음). 값이 없거나 꺼져 있으면 null.
+function favStationHtmlL59(id){
+  if (!FAV_STATION_URL_L59 || !BUNDLES.L59_STATION) return null;
+  const W = window.STATION_WALK;
+  const v = W && id && id !== '_meta' && Object.prototype.hasOwnProperty.call(W, id) ? W[id] : null;
+  if (!Array.isArray(v) || !v[0]) return null;
+  const lines = v[1] ? String(v[1]).split(',').map(s => s.trim()).filter(Boolean) : [];
+  const min = stationMinTextL59(v);
+  return (lines.length ? '<span class="fav-st-badges-l59">'+lines.map(lineBadgeL59).join('')+'</span>' : '')+
+    '<span class="fav-st-name-l59">'+esc(v[0] + min)+'</span>';
+}
+function favStationTextL59(id){
+  if (!FAV_STATION_URL_L59 || !BUNDLES.L59_STATION) return null;   // 끈 동안은 데이터가 있어도 줄 없음
+  const W = window.STATION_WALK;
+  const v = W && id && id !== '_meta' && Object.prototype.hasOwnProperty.call(W, id) ? W[id] : null;
+  return favStationFormatL59(v);
+}
+const FAV_STATION_TIP_L59 = '가까운 역까지 도보 추정(단지 중심 좌표에서 직선거리×1.32, 분속 67m, OpenStreetMap)';
+// 106단계 C1: 진단 결론 배지(buildConclusionParts의 badge·tone = r.diag)와 결론 문장의 %(conclusionNumbers — 고평가는 F1이면 적정가 기준).
+// 적정가 숫자가 없는 경우(이력 부족·데이터 부족·오류)는 null = 배지 없음.
+function favVerdictOfL59(r){
+  if (!r || r.error || !r.diag || !r.diag.badge) return null;
+  const n = conclusionNumbers(r);
+  if (!n) return null;
+  const pct = r.diag.badge === '고평가' && BUNDLES.F1 ? n.pctFair : n.pct;
+  return { badge: r.diag.badge, tone: r.diag.tone || 'neutral', pct };
+}
+function favVerdictHtmlL59(v){
+  if (!v) return '';
+  const text = v.badge === '적정' ? v.badge : v.badge + ' (' + v.pct + '%)';   // 107단계: 적정은 % 없이
+  return '<span class="badge ' + esc(v.tone) + ' fav-verdict-l59" title="우리 단지 진단 결론과 같은 판정·차이(선도단지 기준)">' + esc(text) + '</span>';
+}
+// 106단계 A: 학교 두 줄 — 자료가 없어 지금은 null(줄 없음). window.SCHOOL_INFO_L59[seed id] = { elem: '○○초 · 도보 약 N분', mid: '○○중 · 학업성취도 …' }
+// 같은 보강 자료가 생기면 이 함수만 그 값을 돌려주면 한 줄씩 나타난다.
+const FAV_SCHOOL_MID_ON_L59 = false;   // 107단계: 배정 중학교 학업성취도 자료 없음 — 진학률 등 대체 지표도 표시하지 않음
+// 109단계: 배정 초등학교 = school_elem.js(window.SCHOOL_ELEM_L59[seed id] = [초교명, 직선거리m]), 정보 카드·즐겨찾기 탭을 처음 그릴 때 지연 로딩.
+const FAV_SCHOOL_URL_L59 = 'school_elem.js';   // null = 초등학교 줄 안 씀(파일도 안 받음)
+let favSchoolStateL59 = 'idle';
+function loadFavSchoolL59(){
+  if (!FAV_SCHOOL_URL_L59 || !BUNDLES.L59_SCHOOL || favSchoolStateL59 !== 'idle') return;
+  if (window.SCHOOL_ELEM_L59 && typeof window.SCHOOL_ELEM_L59 === 'object'){ favSchoolStateL59 = 'loaded'; return; }
+  favSchoolStateL59 = 'loading';
+  try {
+    const s = document.createElement('script');
+    s.onload = () => {
+      favSchoolStateL59 = window.SCHOOL_ELEM_L59 && typeof window.SCHOOL_ELEM_L59 === 'object' ? 'loaded' : 'error';
+      syncSchoolSrcL59();   // 112단계
+      try { const fs = document.getElementById('favoritesSection'); if (BUNDLES.L59 && fs && fs.hidden === false) renderComplexFavTabL59(); } catch (err) {}
+      try { refreshDiagInfoCardL59(); } catch (err) {}
+    };
+    s.onerror = () => { favSchoolStateL59 = 'error'; s.remove(); };
+    s.src = BUNDLES.L52 ? assetUrlL52(FAV_SCHOOL_URL_L59, true) : FAV_SCHOOL_URL_L59;   // 묶음 L52
+    document.head.appendChild(s);
+  } catch (err) { favSchoolStateL59 = 'error'; }
+}
+const FAV_SCHOOL_TIP_L59 = '배정 초등학교(통학구역 기준, 여럿이면 가장 가까운 곳)까지 단지 중심에서 직선거리, 도보 시간은 직선거리×1.32(10m 반올림)÷분속 67m 올림 추정(역 도보와 같은 식, 학교 실경로로는 검증 안 함)';
+// 110단계: 도보 환산 상수 — 급지표 역 도보와 같은 값(역 도보 549곳 실경로 비교로 정한 계수, 학교에는 검증 안 함). 바꿀 때는 이 두 줄만.
+// 111단계: 급지표 역 도보(build_station_walk.py walk())와 같은 식 — 보행거리 = 직선 × 계수를 10m 단위 반올림, 분 = 보행거리 ÷ 분속 올림, 30분 넘으면 "도보 30분 넘음".
+const WALK_COEF_L59 = 1.32;    // 직선거리 → 걷는 거리 계수
+const WALK_ROUND_M_L59 = 10;   // 보행거리 반올림 단위(m)
+const WALK_SPEED_L59 = 67;     // 분속(m)
+const WALK_FAR_MIN_L59 = 30;   // 이 분을 넘으면 "도보 30분 넘음"
+function walkMinL59(m){
+  const d = Number(m);
+  if (!(d >= 0)) return null;
+  const walkM = Math.round(d * WALK_COEF_L59 / WALK_ROUND_M_L59) * WALK_ROUND_M_L59;
+  return Math.ceil(walkM / WALK_SPEED_L59);
+}
+function walkMinTextL59(m){
+  const min = walkMinL59(m);
+  if (min == null) return null;
+  return min > WALK_FAR_MIN_L59 ? '도보 ' + WALK_FAR_MIN_L59 + '분 넘음' : '도보 약 ' + min + '분';   // 학교 줄은 앞에 "학교까지 "(112단계)
+}
+// 112단계: 학교 자료 출처 한 줄 — 학교 파일을 받았고 학교 줄이 켜져 있을 때만(푸터 안). 아니면 지운다.
+const SCHOOL_SRC_TEXT_L59 = '학교 위치·통학구역: 공공데이터포털(data.go.kr) 한국교육시설안전원 전국초중등학교위치표준데이터·학구도 정보';
+function syncSchoolSrcL59(){
+  try {
+    const on = !!(BUNDLES.L59 && BUNDLES.L59_SCHOOL && FAV_SCHOOL_URL_L59 && favSchoolStateL59 === 'loaded');
+    let el = document.getElementById('schoolSrcL59');
+    if (!on){ if (el) el.remove(); return; }
+    if (el) return;
+    const foot = document.querySelector('footer');
+    if (!foot) return;
+    foot.insertAdjacentHTML('beforeend', '<small class="school-src-l59" id="schoolSrcL59">'+esc(SCHOOL_SRC_TEXT_L59)+'</small>');
+  } catch (e) {}
+}
+function favElemSchoolTextL59(id){
+  if (!FAV_SCHOOL_URL_L59 || !BUNDLES.L59_SCHOOL) return null;
+  const S = window.SCHOOL_ELEM_L59;
+  const v = S && id && id !== '_meta' && Object.prototype.hasOwnProperty.call(S, id) ? S[id] : null;
+  if (!Array.isArray(v) || !v[0] || !(Number(v[1]) >= 0)) return null;
+  return String(v[0]).replace(/초등학교$/, '초') + ' · 학교까지 ' + walkMinTextL59(v[1]) + ' (직선 ' + Math.round(Number(v[1])).toLocaleString('ko-KR') + 'm)';   // 110·112단계: 학교 지점 기준
+}
+function favSchoolTextL59(id, kind){
+  if (kind === 'elem') return favElemSchoolTextL59(id);   // 109단계
+  const S = typeof window !== 'undefined' ? window.SCHOOL_INFO_L59 : null;
+  const v = S && id && Object.prototype.hasOwnProperty.call(S, id) ? S[id] : null;
+  return v && v[kind] ? String(v[kind]) : null;
+}
+// 106단계 A1: 제목에서 뺀 지역(구) 정보를 정보 카드 "위치" 한 줄로 — seed의 시·구·동
+function favLocationTextL59(seed){
+  if (!seed) return null;
+  const city = seed.regionCity === '서울' || seed.regionCity === '인천' ? seed.regionCity : (seed.regionCity ? '경기 ' + seed.regionCity : '');
+  const s = [city, seed.district, seed.dong].filter(Boolean).join(' ');
+  return s || null;
+}
+let _diagInfoOnLastL59 = null;
+function diagInfoCardOnL59(){ return !!(BUNDLES.L59 && BUNDLES.L59_INFOCARD); }
+// 진단 화면 정보 카드 — 즐겨찾기 카드와 같은 값(favInfoL59·seed id), 값이 없는 줄은 그리지 않는다.
+function diagInfoCardHtmlL59(ref){
+  const seed = ref && ref.id ? seedEntryById(ref.id) : null;
+  if (!seed) return '';
+  const info = favInfoL59({ id: ref.id, p: ref.p }, seed);
+  const money = v => v == null ? null : fmtEok(v);
+  const age = seed.builtYear != null ? ageText(complexAge(seed.builtYear), seed.builtYear) : null;
+  const rows = [
+    ['매매', info.saleText || money(info.sale), info.ym ? 'KB 시세 '+fmtYm(info.ym)+' 기준(진단 결론 현재가와 같은 기준)' : ''],
+    ['전세', money(info.jeonse)],
+    ['전세가율', info.jr != null ? fmtPct(info.jr, 1) : null],
+    ['연식', age],
+    ['세대수', seed.units ? seed.units.toLocaleString('ko-KR') + '세대' : null],
+    ['임대', favRentalTextL59(seed), '총 세대 중 임대 세대(seed rentalHouseholds)', true],   // 108단계: 길어서 한 줄 전체
+    ['지하철역', favStationTextL59(ref.id), FAV_STATION_TIP_L59, true, favStationHtmlL59(ref.id)],   // 110단계: 호선 배지
+    ['초등학교', favSchoolTextL59(ref.id, 'elem'), FAV_SCHOOL_TIP_L59, true],
+    ['중학교 학업성취도', FAV_SCHOOL_MID_ON_L59 ? favSchoolTextL59(ref.id, 'mid') : null, '', true],   // 107단계: 값 쓰지 않음(자료가 생기면 상수 한 줄)
+    ['위치', favLocationTextL59(seed), '', true],
+  ].filter(x => x[1] != null && x[1] !== '');
+  if (!rows.length) return '';
+  return '<details class="diag-info-l59" id="diagInfoCardL59" aria-label="단지 정보" data-diag-info-ref="'+esc(ref.id+'|'+ref.p)+'"'+(diagInfoStartOpenL59() ? ' open' : '')+'>'+
+    '<summary class="diag-info-head-l59"><span class="diag-info-arrow-l59" aria-hidden="true">▶</span>단지 정보<span class="diag-info-hint-l59">눌러서 펼치기</span></summary>'+
+    '<dl class="fav-info-l59">'+rows.map(x => '<div'+(x[3] ? ' class="fav-info-wide-l59'+(x[4] ? ' fav-st-row-l59' : '')+'"' : '')+(x[2] ? ' title="'+esc(x[4] ? x[1]+' — '+x[2] : x[2])+'"' : '')+'><dt>'+x[0]+'</dt><dd>'+(x[4] || esc(x[1]))+'</dd></div>').join('')+'</dl>'+
+  '</details>';
+}
+// 107단계: 좁은 화면(정보 카드가 결론 아래로 가는 900px 미만)은 접힌 채 시작, 넓은 화면은 펼침. 좁은 화면에서 바꾼 상태는 저장(실패 무시).
+const DIAG_INFO_OPEN_KEY_L59 = 'benchmarkCalc_diagInfoOpen_v1';
+function diagInfoNarrowL59(){ try { return !!(window.matchMedia && window.matchMedia('(max-width: 899px)').matches); } catch (e) { return false; } }
+function diagInfoStartOpenL59(){
+  if (!diagInfoNarrowL59()) return true;
+  try { return localStorage.getItem(DIAG_INFO_OPEN_KEY_L59) === '1'; } catch (e) { return false; }
+}
+function wireDiagInfoToggleL59(){
+  const el = document.getElementById('diagInfoCardL59');
+  if (!el || el._l59Wired) return;
+  el._l59Wired = true;
+  el.addEventListener('toggle', () => { loadDiagInfoDataL59(); if (!diagInfoNarrowL59()) return; try { localStorage.setItem(DIAG_INFO_OPEN_KEY_L59, el.open ? '1' : '0'); } catch (e) {} });
+}
+// 109단계: 정보 카드가 펼쳐져 있을 때만 역·학교 보강 파일을 받는다(이미 받았거나 꺼져 있으면 아무것도 안 함)
+// 110단계: 페이지를 처음 여는 중(load 전)이면 load 뒤 유휴 시점에 받는다 — 첫 화면 요청은 라이브와 같다.
+let _l59DataWaitL59 = false;
+function afterFirstPaintL59(fn){
+  if (document.readyState === 'complete') return fn();
+  if (_l59DataWaitL59) return;
+  _l59DataWaitL59 = true;
+  window.addEventListener('load', () => {
+    const go = () => { _l59DataWaitL59 = false; try { fn(); } catch (e) {} };
+    if (typeof window.requestIdleCallback === 'function') window.requestIdleCallback(go, { timeout: 2000 }); else setTimeout(go, 300);
+  }, { once: true });
+}
+function loadDiagInfoDataL59(){
+  afterFirstPaintL59(() => {
+    const fsec = document.getElementById('favoritesSection');
+    if (BUNDLES.L59 && fsec && fsec.hidden === false){ loadFavStationL59(); loadFavSchoolL59(); }   // 즐겨찾기 탭에서 시작한 경우
+    const el = document.getElementById('diagInfoCardL59');
+    if (!el || !el.open) return;
+    loadFavStationL59(); loadFavSchoolL59();
+  });
+}
+// 진단 머리(#singleDiagHead)의 결론 박스를 정보 카드와 한 줄(넓은 화면)·위아래(좁은 화면)로 묶는다.
+function mountDiagInfoCardL59(headEl, ref){
+  if (!diagInfoCardOnL59() || !headEl) return false;
+  const html = diagInfoCardHtmlL59(ref);
+  if (!html) return false;
+  const box = headEl.querySelector(':scope > .concl-box');
+  const wrap = document.createElement('div');
+  wrap.className = 'diag-top-l59';
+  if (box){ box.parentNode.insertBefore(wrap, box); wrap.appendChild(box); } else headEl.appendChild(wrap);
+  wrap.insertAdjacentHTML('beforeend', html);
+  wireDiagInfoToggleL59();   // 107단계
+  loadDiagInfoDataL59();     // 109단계: 펼쳐져 있으면 역·학교 파일(처음 한 번)
+  return true;
+}
+function refreshDiagInfoCardL59(){
+  const el = document.getElementById('diagInfoCardL59');
+  if (!el || !diagInfoCardOnL59()) return;
+  loadDiagInfoDataL59();   // 109단계: 펼쳐져 있으면 켜진 자료 파일을 받음
+  const k = String(el.getAttribute('data-diag-info-ref') || '').split('|');
+  const wasOpen = !!el.open;
+  const html = diagInfoCardHtmlL59({ id: k[0], p: Number(k[1]) === 25 ? 25 : 34 });
+  if (html){ el.outerHTML = html; const n = document.getElementById('diagInfoCardL59'); if (n) n.open = wasOpen; wireDiagInfoToggleL59(); }   // 107단계: 펼침 상태 유지
+}
+function favRentalTextL59(seed){
+  if (!seed || seed.rentalHouseholds == null || !seed.units || !(seed.rentalHouseholds > 0)) return null;
+  const k = rentalLabelKind(seed.rentalHouseholds, seed.units);
+  return seed.rentalHouseholds.toLocaleString('ko-KR') + '세대(' + k.pct + '%)' + (k.kind === 'heavy' ? ' · 과다' : k.kind === 'caution' ? ' · 주의' : '');
+}
+function favInfoHtmlL59(f, e, infoArg){
+  const seed = e && seedEntryById(f.id) === e ? e : (seedEntryById(f.id) || null);
+  const info = infoArg || favInfoL59(f, e);   // 106단계: 아직 계산 안 한 카드는 { pending:true }로 그린다
+  const dash = v => (v == null || v === '' ? '-' : v);
+  const money = v => v == null ? (info.pending ? '…' : '-') : fmtEok(v);
+  const age = seed && seed.builtYear != null ? ageText(complexAge(seed.builtYear), seed.builtYear) : null;
+  const units = seed && seed.units ? seed.units.toLocaleString('ko-KR') + '세대' : null;
+  const rental = favRentalTextL59(seed);   // 0세대·자료 없음은 "-"(구분하지 않음)
+  const row = (k, v, title) => '<div'+(title ? ' title="'+esc(title)+'"' : '')+'><dt>'+k+'</dt><dd>'+esc(dash(v))+'</dd></div>';
+  const ym = info.ym ? ' ('+fmtYm(info.ym)+')' : '';
+  const station = favStationTextL59(f.id);   // 값이 없으면 줄 자체를 빼고, 자료가 생기면 이 한 줄로 돌아온다
+  const school = favSchoolTextL59(f.id, 'elem');   // 109단계
+  return '<dl class="fav-info-l59">'+
+    row('매매', info.saleText || money(info.sale), info.ym ? 'KB 시세 '+fmtYm(info.ym)+' 기준(진단 화면 현재가와 같은 기준)' : '')+
+    row('전세', money(info.jeonse))+
+    row('전세가율', info.jr != null ? fmtPct(info.jr, 1) : (info.pending ? '…' : null))+
+    row('연식', age)+
+    row('세대수', units)+
+    row('임대', rental, '총 세대 중 임대 세대(seed rentalHouseholds), 0세대·자료 없음은 "-"').replace('<div', '<div class="fav-info-wide-l59"')+   // 108단계: 길어서 한 줄 전체
+    (station ? '<div class="fav-info-wide-l59 fav-st-row-l59" title="'+esc(station+' — '+FAV_STATION_TIP_L59)+'"><dt>지하철역</dt><dd>'+favStationHtmlL59(f.id)+'</dd></div>' : '')+   // 110단계: 호선 배지
+    (school ? row('초등학교', school, FAV_SCHOOL_TIP_L59).replace('<div', '<div class="fav-info-wide-l59"') : '')+   // 109단계
+  '</dl>';
+}
+function favSectionsL59(favs, groups){
+  const valid = new Set(groups.map(g => g.groupId));
+  const secs = [{ gid: '', name: FAV_UNGROUPED_L59, items: [] }].concat(groups.map(g => ({ gid: g.groupId, name: g.name, items: [] })));
+  const byGid = new Map(secs.map(s => [s.gid, s]));
+  favs.forEach(f => byGid.get(f.groupId && valid.has(f.groupId) ? f.groupId : '').items.push(f));
+  secs.forEach(s => s.items.sort(favOrderCmpL59));
+  return secs;
+}
+// 그룹 안 순서: 순서 값이 없는(새로 담은) 단지가 위(최신 먼저), 그다음 순서 값 차례(끌어서 바꾼 순서)
+function favOrderCmpL59(a, b){
+  const ao = typeof a.order === 'number', bo = typeof b.order === 'number';
+  if (ao !== bo) return ao ? 1 : -1;
+  if (ao && a.order !== b.order) return a.order - b.order;
+  return String(b.savedAt || '').localeCompare(String(a.savedAt || ''));
+}
+function favFoldSetL59(){ try { const l = JSON.parse(localStorage.getItem(FAV_FOLD_KEY_L59) || '[]'); return new Set(Array.isArray(l) ? l.map(String) : []); } catch (e) { return new Set(); } }
+function saveFavFoldL59(set){ try { localStorage.setItem(FAV_FOLD_KEY_L59, JSON.stringify([...set])); } catch (e) {} }
+function favHelpOpenL59(){ try { return localStorage.getItem(FAV_HELP_KEY_L59) !== '0'; } catch (e) { return true; } }
+function favHelpHtmlL59(dnd){
+  return '<details class="fav-help-l59" id="favHelpL59"'+(favHelpOpenL59() ? ' open' : '')+'><summary>⭐ 즐겨찾기 쓰는 법</summary><ol>'+
+    '<li>진단 화면에서 단지 이름 옆 <b>☆</b>를 눌러 단지를 담아요.</li>'+
+    '<li>카드를 눌러 골라요. 먼저 고른 단지가 <b>기준</b>이에요.</li>'+
+    '<li>1개면 <b>내 단지 보기</b>, 2개 이상이면 <b>비교하기</b>를 눌러요.</li>'+
+    '<li><b>＋ 그룹 만들기</b>로 서울·매수단지처럼 나눠 두고, <b>📁 그룹 이동</b>으로 옮겨요.</li>'+
+    (dnd ? '<li>PC에서는 카드를 끌어서 그룹을 옮기거나 순서를 바꿀 수 있어요.</li>' : '')+
+  '</ol></details>';
+}
+function favOrderedKeysL59(){
+  const secs = favSectionsL59(loadComplexFavsL59(), loadFavGroupsL59());
+  return [].concat(...secs.map(s => s.items.map(f => complexFavKeyL59(f.id, f.p))));
+}
+function renderComplexFavTabL59(focusKey){
+  setPairFavUiL59(false);
+  loadDiagInfoDataL59();   // 104·109단계: 역·학교 파일(처음 한 번) — 110단계: 페이지 처음 여는 중이면 load 뒤로 미룸
+  const favs = loadComplexFavsL59(), groups = loadFavGroupsL59();
+  const keys = favs.map(f => complexFavKeyL59(f.id, f.p));
+  _favPicksL59 = _favPicksL59.filter(k => keys.indexOf(k) >= 0);
+  const countLabel = document.getElementById('favoritesCountLabel');
+  if (countLabel) countLabel.textContent = '⭐ 즐겨찾기 ('+favs.length+'개 단지)';
+  const listEl = document.getElementById('favoritesList');
+  if (!listEl) return;
+  listEl.classList.add('fav-l59');
+  wireFavListL59(listEl);
+  const note = _favNoteL59; _favNoteL59 = '';
+  const dnd = favDndOnL59();
+  if (favs.some(f => f.p === 25) && seed25State !== 'loaded' && !_favSeed25AskedL59 && typeof loadSeed25 === 'function'){
+    _favSeed25AskedL59 = true;   // 25평 즐겨찾기가 있으면 25평 시세를 한 번 불러와 다시 그린다
+    try { loadSeed25().then(() => { const s = document.getElementById('favoritesSection'); if (s && !s.hidden && BUNDLES.L59) renderComplexFavTabL59(); }, () => {}); } catch (e) {}
+  }
+  if (!favs.length){
+    listEl.innerHTML = favHelpHtmlL59(dnd) + '<div class="empty-state">진단 화면의 ☆를 눌러 단지를 담아 보세요.</div>';
+    wireFavHelpL59(listEl);
+    renderFavBarL59(favs);
+    return;
+  }
+  const fold = favFoldSetL59();
+  const secs = favSectionsL59(favs, groups);
+  const nPick = _favPicksL59.length;
+  const cardHtml = f => {
+    const key = complexFavKeyL59(f.id, f.p), pi = _favPicksL59.indexOf(key), e = favEntryL59(f), label = favLabelL59(f, e);
+    const cls = pi < 0 ? '' : pi === 0 ? ' pick-base' : ' pick-compare';
+    // 106단계 C3: 가격·배지는 화면에 보이는 카드만 계산(이미 계산한 카드는 바로). IntersectionObserver가 없으면 바로 계산.
+    const lazy = favLazyOnL59() && !_favInfoCacheL59.has(key) && !!e;
+    const info = lazy ? null : favInfoL59(f, e);
+    return '<div class="favorite-card fav-cx-card-l59'+cls+'" role="button" tabindex="0" aria-pressed="'+(pi >= 0)+'" aria-label="'+esc(label)+(pi >= 0 ? (pi === 0 ? ' 기준단지로 고름' : ' 비교단지로 고름') : ' 고르기')+'" data-fav-card-l59="'+esc(key)+'"'+(dnd ? ' draggable="true"' : '')+(lazy ? ' data-fav-lazy-l59="1"' : '')+'>'+
+      '<div class="fav-cx-head-l59"><span class="fav-check-l59" aria-hidden="true">'+(pi >= 0 ? '✓' : '')+'</span>'+
+        (dnd ? '<span class="fav-handle-l59" data-fav-noselect="1" title="끌어서 옮기기" aria-hidden="true">⠿</span>' : '')+
+        '<a href="#" class="favorite-card-title fav-name-l59" draggable="false" data-fav-open-l59="'+esc(key)+'" data-fav-noselect="1" title="우리 단지 진단으로 열기">'+esc(label)+'</a>'+
+        (lazy ? '' : favVerdictHtmlL59(info && info.verdict))+'</div>'+   // 106단계: 오른쪽 위 = 진단 배지
+      (e ? '' : '<div class="favorite-card-meta">⚠ '+esc(SAVED_NAME_LOST_L33)+'</div>')+
+      favInfoHtmlL59(f, e, lazy ? { pending: true } : info)+
+      '<div class="favorite-card-actions fav-actions-l59">'+
+        '<button type="button" class="btn small" data-fav-move-l59="'+esc(key)+'" data-fav-noselect="1">📁 그룹 이동</button>'+
+        '<button type="button" class="btn small fav-danger-l59" data-fav-del-l59="'+esc(key)+'" data-fav-noselect="1" aria-label="'+esc(label)+' 즐겨찾기에서 삭제">🗑 삭제</button>'+
+        (pi >= 0 ? '<span class="fav-role-l59">'+(pi === 0 ? '기준단지' : '비교단지 '+pi)+'</span>' : '')+   // 106단계: 오른쪽 아래
+      '</div>'+
+    '</div>';
+  };
+  listEl.innerHTML = favHelpHtmlL59(dnd)+
+    '<div class="fav-tools-l59">'+
+      '<button type="button" class="btn small" data-fav-all-l59="1">전체 선택</button>'+
+      '<button type="button" class="btn small" data-fav-none-l59="1">선택 해제</button>'+
+      '<button type="button" class="btn small" data-fav-gcreate-l59="1">＋ 그룹 만들기</button>'+
+      '<button type="button" class="btn small" data-fav-gmove-l59="1"'+(nPick ? '' : ' disabled')+'>📁 그룹 이동'+(nPick ? ' ('+nPick+')' : '')+'</button>'+
+      '<span class="fav-note-l59" id="favNoteL59" role="status">'+esc(note)+'</span></div>'+
+    secs.filter(s => s.gid || s.items.length || groups.length).map(s => {
+      const folded = fold.has(s.gid);
+      return '<section class="fav-group-l59" data-fav-group-l59="'+esc(s.gid)+'">'+
+        '<div class="fav-group-head-l59" data-fav-ghead-l59="'+esc(s.gid)+'"'+(dnd && s.gid ? ' draggable="true"' : '')+'>'+
+          (dnd && s.gid ? '<span class="fav-handle-l59" title="끌어서 그룹 순서 바꾸기" aria-hidden="true">⠿</span>' : '')+
+          '<button type="button" class="fav-fold-l59" data-fav-fold-l59="'+esc(s.gid)+'" aria-expanded="'+(!folded)+'">'+(folded ? '▸ ' : '▾ ')+esc(s.name)+' ('+s.items.length+')</button>'+
+          (s.items.length ? '<button type="button" class="btn small" data-fav-gall-l59="'+esc(s.gid)+'">그룹 전체 선택</button>' : '')+
+          (s.gid ? '<button type="button" class="btn small" data-fav-grename-l59="'+esc(s.gid)+'">이름 바꾸기</button>'+
+                   '<button type="button" class="btn small fav-danger-l59" data-fav-gdel-l59="'+esc(s.gid)+'">그룹 삭제</button>' : '')+
+        '</div>'+
+        (folded ? '' : '<div class="fav-group-grid-l59">'+(s.items.length ? s.items.map(cardHtml).join('')
+          : '<div class="fav-group-empty-l59">비어 있어요'+(dnd ? ' — 카드를 여기로 끌어 오세요' : ' — 📁 그룹 이동으로 넣어 보세요')+'</div>')+'</div>')+
+      '</section>';
+    }).join('');
+  wireFavHelpL59(listEl);
+  renderFavBarL59(favs);
+  observeFavLazyL59(listEl, favs);   // 106단계: 보이는 카드만 가격·배지 계산
+  if (focusKey){ try { const c = listEl.querySelector('[data-fav-card-l59="'+CSS.escape(focusKey)+'"]'); if (c) c.focus(); } catch (e) {} }
+}
+// 106단계 C3: 보이는 카드만 계산
+let _favLazyIoL59 = null;
+function favLazyOnL59(){ try { return typeof window.IntersectionObserver === 'function'; } catch (e) { return false; } }
+function fillFavCardL59(card, favs){
+  const key = card.getAttribute('data-fav-card-l59');
+  const f = (favs || loadComplexFavsL59()).find(x => complexFavKeyL59(x.id, x.p) === key);
+  card.removeAttribute('data-fav-lazy-l59');
+  if (!f) return;
+  const e = favEntryL59(f), info = favInfoL59(f, e);
+  const dl = card.querySelector('.fav-info-l59');
+  if (dl) dl.outerHTML = favInfoHtmlL59(f, e, info);
+  const head = card.querySelector('.fav-cx-head-l59');
+  if (head && !head.querySelector('.fav-verdict-l59')) head.insertAdjacentHTML('beforeend', favVerdictHtmlL59(info.verdict));
+}
+function observeFavLazyL59(listEl, favs){
+  try { if (_favLazyIoL59) _favLazyIoL59.disconnect(); } catch (e) {}
+  _favLazyIoL59 = null;
+  const cards = listEl.querySelectorAll('[data-fav-lazy-l59]');
+  if (!cards.length) return;
+  _favLazyIoL59 = new IntersectionObserver(entries => {
+    entries.forEach(en => { if (!en.isIntersecting) return; try { _favLazyIoL59.unobserve(en.target); fillFavCardL59(en.target, favs); } catch (e) {} });
+  }, { rootMargin: '200px 0px' });
+  cards.forEach(c => _favLazyIoL59.observe(c));
+}
+function wireFavHelpL59(listEl){
+  const d = listEl.querySelector('#favHelpL59');
+  if (d) d.addEventListener('toggle', () => { try { localStorage.setItem(FAV_HELP_KEY_L59, d.open ? '1' : '0'); } catch (e) {} });
+}
+function favTogglePickL59(key, keepFocus){
+  const i = _favPicksL59.indexOf(key);
+  if (i >= 0) _favPicksL59.splice(i, 1);
+  else if (_favPicksL59.length >= FAV_PICK_MAX_L59) _favNoteL59 = FAV_PICK_FULL_TEXT_L59;
+  else _favPicksL59.push(key);
+  renderComplexFavTabL59(keepFocus ? key : null);
+}
+function favPickManyL59(keys){
+  let cut = false;
+  keys.forEach(k => { if (_favPicksL59.indexOf(k) >= 0) return; if (_favPicksL59.length < FAV_PICK_MAX_L59) _favPicksL59.push(k); else cut = true; });
+  if (cut) _favNoteL59 = '앞에서부터 '+FAV_PICK_MAX_L59+'개까지만 골랐어요(기준 1 + 비교 '+MAX_SLOTS+').';
+  renderComplexFavTabL59();
+}
+function favDeleteL59(key){
+  const favs = loadComplexFavsL59(), f = favs.find(x => complexFavKeyL59(x.id, x.p) === key);
+  if (!f) return false;
+  const label = favLabelL59(f, favEntryL59(f));
+  if (!confirm('「'+label+'」'+favObjectParticleL59(label)+' 즐겨찾기에서 삭제할까요?')) return false;
+  if (!saveComplexFavsL59(favs.filter(x => x !== f))){ _favNoteL59 = '저장하지 못해 지우지 못했어요.'; renderComplexFavTabL59(); return false; }
+  _favPicksL59 = _favPicksL59.filter(x => x !== key);
+  syncFavStarsL59();
+  renderComplexFavTabL59();
+  return true;
+}
+// 그룹 이름 검사: 빈 이름·12자 초과·"미분류"·같은 이름·20개 상한. 문제가 없으면 ''.
+function favGroupNameErrorL59(name, exceptGid){
+  const n = String(name || '').trim();
+  if (!n) return '그룹 이름을 적어 주세요.';
+  if (n.length > FAV_GROUP_NAME_MAX_L59) return '그룹 이름은 '+FAV_GROUP_NAME_MAX_L59+'자까지예요.';
+  if (n === FAV_UNGROUPED_L59) return '“'+FAV_UNGROUPED_L59+'”는 그룹 이름으로 쓸 수 없어요.';
+  const groups = loadFavGroupsL59();
+  if (groups.some(g => g.groupId !== exceptGid && g.name.trim().toLowerCase() === n.toLowerCase())) return '같은 이름의 그룹이 이미 있어요.';
+  if (!exceptGid && groups.length >= FAV_GROUP_MAX_L59) return '그룹은 '+FAV_GROUP_MAX_L59+'개까지 만들 수 있어요.';
+  return '';
+}
+function createFavGroupL59(name){
+  if (favGroupNameErrorL59(name, null)) return null;
+  const groups = loadFavGroupsL59();
+  const gid = 'g' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+  groups.push({ groupId: gid, name: String(name).trim(), order: groups.length });
+  return saveFavGroupsL59(groups) ? gid : null;
+}
+function renameFavGroupL59(gid, name){
+  if (favGroupNameErrorL59(name, gid)) return false;
+  const groups = loadFavGroupsL59(), g = groups.find(x => x.groupId === gid);
+  if (!g) return false;
+  g.name = String(name).trim();
+  return saveFavGroupsL59(groups);
+}
+// 그룹 삭제: 안의 단지는 "미분류"로(단지는 지우지 않음).
+function deleteFavGroupL59(gid, ask){
+  const groups = loadFavGroupsL59(), g = groups.find(x => x.groupId === gid);
+  if (!g) return false;
+  const favs = loadComplexFavsL59(), inside = favs.filter(f => f.groupId === gid);
+  if (ask !== false && !confirm('「'+g.name+'」 그룹을 삭제할까요? 안에 있는 단지 '+inside.length+'개는 「'+FAV_UNGROUPED_L59+'」로 옮겨지고, 단지는 지워지지 않아요.')) return false;
+  inside.forEach(f => { delete f.groupId; delete f.order; });
+  if (!saveComplexFavsL59(favs)) return false;
+  return saveFavGroupsL59(groups.filter(x => x !== g));
+}
+// 단지 옮기기(그룹 이동 버튼·끌기 공용): keys를 gid 그룹의 beforeKey 앞(없으면 끝)에 넣고 그 그룹 순서를 다시 매긴다. 실패하면 false(저장 안 됨).
+function moveFavsL59(keys, gid, beforeKey){
+  gid = gid || '';
+  const favs = loadComplexFavsL59(), groups = loadFavGroupsL59();
+  if (gid && !groups.some(g => g.groupId === gid)) return false;
+  const keyOf = f => complexFavKeyL59(f.id, f.p);
+  const moving = keys.map(k => favs.find(f => keyOf(f) === k)).filter(Boolean);
+  if (!moving.length) return false;
+  const movingSet = new Set(moving.map(keyOf));
+  const target = favSectionsL59(favs, groups).find(s => s.gid === gid);
+  const rest = target.items.filter(f => !movingSet.has(keyOf(f)));
+  let at = beforeKey && !movingSet.has(beforeKey) ? rest.findIndex(f => keyOf(f) === beforeKey) : -1;
+  if (at < 0) at = rest.length;
+  rest.slice(0, at).concat(moving, rest.slice(at)).forEach((f, i) => { if (gid) f.groupId = gid; else delete f.groupId; f.order = i; });
+  return saveComplexFavsL59(favs);
+}
+// 그룹 순서 바꾸기: gid를 beforeGid 앞으로(beforeGid가 없거나 ''(미분류)면 맨 앞).
+function moveFavGroupL59(gid, beforeGid){
+  const groups = loadFavGroupsL59(), g = groups.find(x => x.groupId === gid);
+  if (!g || gid === beforeGid) return !!g;
+  const rest = groups.filter(x => x !== g);
+  let at = beforeGid ? rest.findIndex(x => x.groupId === beforeGid) : 0;
+  if (at < 0) at = rest.length;
+  rest.splice(at, 0, g);
+  return saveFavGroupsL59(rest);
+}
+// ---- 그룹 창(만들기·이름 바꾸기·이동할 그룹 고르기) ----
+function favModalL59(){
+  let m = document.getElementById('favModalL59');
+  if (!m){
+    m = document.createElement('div'); m.id = 'favModalL59'; m.className = 'fav-modal-l59'; m.hidden = true;
+    m.setAttribute('role', 'dialog'); m.setAttribute('aria-modal', 'true');
+    m.addEventListener('click', ev => { if (ev.target === m) closeFavModalL59(); });
+    m.addEventListener('keydown', ev => { if (ev.key === 'Escape') closeFavModalL59(); });
+    (document.getElementById('favoritesSection') || document.body).appendChild(m);
+  }
+  return m;
+}
+function closeFavModalL59(){ const m = document.getElementById('favModalL59'); if (m){ m.hidden = true; m.innerHTML = ''; } }
+// mode 'create' | 'rename'. done(gid)는 만들기·바꾸기에 성공했을 때.
+function openFavGroupEditL59(mode, gid, done){
+  const m = favModalL59(), g = gid ? loadFavGroupsL59().find(x => x.groupId === gid) : null;
+  m.innerHTML = '<div class="fav-modal-box-l59"><h3>'+(mode === 'rename' ? '그룹 이름 바꾸기' : '＋ 그룹 만들기')+'</h3>'+
+    '<input type="text" id="favGroupNameL59" maxlength="'+FAV_GROUP_NAME_MAX_L59+'" placeholder="그룹 이름(12자까지)" value="'+esc(g ? g.name : '')+'">'+
+    (mode === 'rename' ? '' : '<div class="fav-chips-l59" aria-label="빠른 선택">'+FAV_GROUP_SUGGEST_L59.map(n => '<button type="button" data-fav-chip-l59="'+esc(n)+'">'+esc(n)+'</button>').join('')+'</div>')+
+    '<div class="fav-err-l59" id="favGroupErrL59" role="alert"></div>'+
+    '<div class="fav-modal-actions-l59"><button type="button" class="btn" data-fav-cancel-l59="1">취소</button>'+
+    '<button type="button" class="btn fair-cta" data-fav-ok-l59="1">'+(mode === 'rename' ? '바꾸기' : '만들기')+'</button></div></div>';
+  m.hidden = false;
+  const input = m.querySelector('#favGroupNameL59'), err = m.querySelector('#favGroupErrL59');
+  const submit = () => {
+    const name = input.value, e = favGroupNameErrorL59(name, mode === 'rename' ? gid : null);
+    if (e){ err.textContent = e; return; }
+    const res = mode === 'rename' ? (renameFavGroupL59(gid, name) ? gid : null) : createFavGroupL59(name);
+    if (!res){ err.textContent = '저장하지 못했어요. 다시 시도해 주세요.'; return; }
+    closeFavModalL59();
+    if (done) done(res); else renderComplexFavTabL59();
+  };
+  m.querySelectorAll('[data-fav-chip-l59]').forEach(b => b.addEventListener('click', () => { input.value = b.getAttribute('data-fav-chip-l59'); err.textContent = ''; input.focus(); }));
+  m.querySelector('[data-fav-cancel-l59]').addEventListener('click', closeFavModalL59);
+  m.querySelector('[data-fav-ok-l59]').addEventListener('click', submit);
+  input.addEventListener('keydown', ev => { if (ev.key === 'Enter'){ ev.preventDefault(); submit(); } });
+  try { input.focus(); } catch (e) {}
+}
+function openFavGroupPickerL59(keys){
+  if (!keys.length) return;
+  const m = favModalL59(), groups = loadFavGroupsL59();
+  const favs = loadComplexFavsL59(), valid = new Set(groups.map(g => g.groupId));
+  const cur = new Set(keys.map(k => { const f = favs.find(x => complexFavKeyL59(x.id, x.p) === k); return f && f.groupId && valid.has(f.groupId) ? f.groupId : ''; }));
+  const opt = (gid, name) => '<button type="button" class="btn" data-fav-to-l59="'+esc(gid)+'">'+esc(name)+(cur.size === 1 && cur.has(gid) ? ' (지금 그룹)' : '')+'</button>';
+  m.innerHTML = '<div class="fav-modal-box-l59"><h3>📁 그룹 이동 ('+keys.length+'개)</h3><div class="fav-pick-list-l59">'+
+    opt('', FAV_UNGROUPED_L59)+groups.map(g => opt(g.groupId, g.name)).join('')+
+    '<button type="button" class="btn" data-fav-tonew-l59="1"'+(groups.length >= FAV_GROUP_MAX_L59 ? ' disabled title="그룹은 '+FAV_GROUP_MAX_L59+'개까지예요"' : '')+'>＋ 새 그룹 만들고 옮기기</button></div>'+
+    '<div class="fav-modal-actions-l59"><button type="button" class="btn" data-fav-cancel-l59="1">취소</button></div></div>';
+  m.hidden = false;
+  const go = gid => { closeFavModalL59(); if (!moveFavsL59(keys, gid, null)) _favNoteL59 = '저장하지 못해 옮기지 못했어요.'; renderComplexFavTabL59(); };
+  m.querySelectorAll('[data-fav-to-l59]').forEach(b => b.addEventListener('click', () => go(b.getAttribute('data-fav-to-l59'))));
+  m.querySelector('[data-fav-tonew-l59]').addEventListener('click', () => openFavGroupEditL59('create', null, gid => go(gid)));
+  m.querySelector('[data-fav-cancel-l59]').addEventListener('click', closeFavModalL59);
+  try { m.querySelector('[data-fav-to-l59]').focus(); } catch (e) {}
+}
+// ---- 목록 이벤트(한 번만 연결, 목록 안 innerHTML이 바뀌어도 그대로) ----
+function wireFavListL59(listEl){
+  if (listEl._favWiredL59) return;
+  listEl._favWiredL59 = true;
+  const attr = (el, a) => el.getAttribute(a);
+  listEl.addEventListener('click', ev => {
+    if (!BUNDLES.L59) return;
+    const q = s => ev.target && ev.target.closest ? ev.target.closest(s) : null;
+    let b;
+    if ((b = q('[data-fav-open-l59]'))){ ev.preventDefault(); const f = loadComplexFavsL59().find(x => complexFavKeyL59(x.id, x.p) === attr(b, 'data-fav-open-l59')); if (f) openFavOneL59(f); return; }
+    if ((b = q('[data-fav-del-l59]'))){ favDeleteL59(attr(b, 'data-fav-del-l59')); return; }
+    if ((b = q('[data-fav-move-l59]'))){ openFavGroupPickerL59([attr(b, 'data-fav-move-l59')]); return; }
+    if ((b = q('[data-fav-all-l59]'))){ favPickManyL59(favOrderedKeysL59()); return; }
+    if ((b = q('[data-fav-none-l59]'))){ _favPicksL59 = []; renderComplexFavTabL59(); return; }
+    if ((b = q('[data-fav-gcreate-l59]'))){ openFavGroupEditL59('create', null, null); return; }
+    if ((b = q('[data-fav-gmove-l59]'))){ const order = favOrderedKeysL59(); openFavGroupPickerL59(_favPicksL59.slice().sort((x, y) => order.indexOf(x) - order.indexOf(y))); return; }
+    if ((b = q('[data-fav-fold-l59]'))){ const s = favFoldSetL59(), g = attr(b, 'data-fav-fold-l59'); if (s.has(g)) s.delete(g); else s.add(g); saveFavFoldL59(s); renderComplexFavTabL59(); return; }
+    if ((b = q('[data-fav-gall-l59]'))){ const g = attr(b, 'data-fav-gall-l59'); const sec = favSectionsL59(loadComplexFavsL59(), loadFavGroupsL59()).find(s => s.gid === g); if (sec) favPickManyL59(sec.items.map(f => complexFavKeyL59(f.id, f.p))); return; }
+    if ((b = q('[data-fav-grename-l59]'))){ openFavGroupEditL59('rename', attr(b, 'data-fav-grename-l59'), null); return; }
+    if ((b = q('[data-fav-gdel-l59]'))){ if (deleteFavGroupL59(attr(b, 'data-fav-gdel-l59'))) renderComplexFavTabL59(); return; }
+    if (q('[data-fav-noselect]')) return;
+    const card = q('[data-fav-card-l59]');
+    if (card) favTogglePickL59(attr(card, 'data-fav-card-l59'), false);
+  });
+  listEl.addEventListener('keydown', ev => {
+    if (!BUNDLES.L59 || (ev.key !== ' ' && ev.key !== 'Enter')) return;
+    const card = ev.target && ev.target.matches && ev.target.matches('[data-fav-card-l59]') ? ev.target : null;
+    if (!card) return;
+    ev.preventDefault();
+    favTogglePickL59(attr(card, 'data-fav-card-l59'), true);
+  });
+  // 끌어서 옮기기(PC, pointer: fine): 카드 → 그룹(카드 위면 그 앞, 빈 곳이면 끝), 그룹 머리 손잡이 → 그룹 순서. 고른 카드를 끌면 고른 것 전부.
+  const clearMarks = () => listEl.querySelectorAll('.drop-ok, .drop-before, .dragging').forEach(x => x.classList.remove('drop-ok', 'drop-before', 'dragging'));
+  listEl.addEventListener('dragstart', ev => {
+    if (!favDndOnL59()) { _favDragL59 = null; return; }
+    const card = ev.target.closest && ev.target.closest('[data-fav-card-l59]');
+    const head = ev.target.closest && ev.target.closest('[data-fav-ghead-l59]');
+    if (card){
+      const k = attr(card, 'data-fav-card-l59'), order = favOrderedKeysL59();
+      const keys = _favPicksL59.indexOf(k) >= 0 ? _favPicksL59.slice().sort((x, y) => order.indexOf(x) - order.indexOf(y)) : [k];
+      _favDragL59 = { type: 'cards', keys };
+      keys.forEach(x => { const el = listEl.querySelector('[data-fav-card-l59="'+CSS.escape(x)+'"]'); if (el) el.classList.add('dragging'); });
+    } else if (head && attr(head, 'data-fav-ghead-l59')){
+      _favDragL59 = { type: 'group', gid: attr(head, 'data-fav-ghead-l59') };
+    } else { _favDragL59 = null; return; }
+    try { ev.dataTransfer.effectAllowed = 'move'; ev.dataTransfer.setData('text/plain', 'fav-l59'); } catch (e) {}
+  });
+  listEl.addEventListener('dragover', ev => {
+    if (!_favDragL59) return;
+    const sec = ev.target.closest && ev.target.closest('[data-fav-group-l59]');
+    if (!sec) return;
+    ev.preventDefault();
+    try { ev.dataTransfer.dropEffect = 'move'; } catch (e) {}
+    listEl.querySelectorAll('.drop-ok, .drop-before').forEach(x => x.classList.remove('drop-ok', 'drop-before'));
+    if (_favDragL59.type === 'cards'){
+      sec.classList.add('drop-ok');
+      const over = ev.target.closest('[data-fav-card-l59]');
+      if (over && _favDragL59.keys.indexOf(attr(over, 'data-fav-card-l59')) < 0) over.classList.add('drop-before');
+    } else {
+      const h = sec.querySelector('[data-fav-ghead-l59]'); if (h) h.classList.add('drop-ok');
+    }
+  });
+  listEl.addEventListener('drop', ev => {
+    const d = _favDragL59; _favDragL59 = null;
+    if (!d) return;
+    const sec = ev.target.closest && ev.target.closest('[data-fav-group-l59]');
+    ev.preventDefault();
+    clearMarks();
+    if (!sec){ renderComplexFavTabL59(); return; }
+    const gid = attr(sec, 'data-fav-group-l59');
+    let ok;
+    if (d.type === 'cards'){
+      const over = ev.target.closest('[data-fav-card-l59]');
+      ok = moveFavsL59(d.keys, gid, over ? attr(over, 'data-fav-card-l59') : null);
+    } else ok = moveFavGroupL59(d.gid, gid);
+    if (!ok) _favNoteL59 = '저장하지 못해 원래대로 돌렸어요.';
+    renderComplexFavTabL59();
+  });
+  listEl.addEventListener('dragend', () => { if (_favDragL59){ _favDragL59 = null; } clearMarks(); });
+}
+// 109단계: 검색 목록 맨 위 "★ 즐겨찾기에서 찾기 (N개)" — 빈 칸을 눌렀을 때도 보이고, 즐겨찾기가 없거나 꺼져 있으면 없음.
+function favSearchOnL59(){ return !!(BUNDLES.L59 && BUNDLES.L59_FAVSEARCH); }
+function favSearchRowL59(ac, input){
+  if (!ac) return;
+  const old = ac.querySelector(':scope > .fav-search-l59'); if (old) old.remove();
+  if (!favSearchOnL59()) return;
+  const n = loadComplexFavsL59().length;
+  if (!n) return;
+  ac.insertAdjacentHTML('afterbegin', '<div class="lib-ac-item fav-search-l59" role="option" data-fav-search-l59="1">★ 즐겨찾기에서 찾기 ('+n+'개)</div>');
+  ac.hidden = false;
+  try { fitAutocompleteL39(ac, input, true); } catch (e) {}
+  if (!ac._favSearchWiredL59){
+    ac._favSearchWiredL59 = true;
+    ac.addEventListener('mousedown', e => {
+      const row = e.target.closest && e.target.closest('[data-fav-search-l59]');
+      if (!row || !favSearchOnL59()) return;
+      e.preventDefault(); e.stopPropagation();
+      ac.hidden = true;
+      try { if (ac._favCtxL59 && ac._favCtxL59.inputEl) ac._favCtxL59.inputEl.blur(); } catch (err) {}
+      openFavSheetL59(ac._favCtxL59 || {});
+    }, true);
+  }
+}
+let _favSheetCtxL59 = null, _favSheetScrollL59 = null;
+function favSheetKeyL59(e){ if (e.key === 'Escape'){ e.preventDefault(); closeFavSheetL59(); } }
+function openFavSheetL59(ctx){
+  closeFavSheetL59();
+  const favs = loadComplexFavsL59();
+  if (!favs.length) return false;
+  _favSheetCtxL59 = ctx || {};
+  const secs = favSectionsL59(favs, loadFavGroupsL59()).filter(s => s.items.length);
+  const where = _favSheetCtxL59.target == null ? '눌러서 진단하기' : (_favSheetCtxL59.target === 'base' ? '기준 칸에 넣기' : '비교 칸에 넣기');
+  const el = document.createElement('div');
+  el.id = 'favSheetL59'; el.className = 'fav-sheet-l59';
+  el.innerHTML = '<div class="fav-sheet-panel-l59" role="dialog" aria-modal="true" aria-label="즐겨찾기에서 찾기">'+
+    '<div class="fav-sheet-head-l59">★ 즐겨찾기 ('+favs.length+'개) <span class="fav-sheet-hint-l59" style="font-size:12px;font-weight:600;color:var(--ink-muted)">'+where+'</span>'+
+      '<button type="button" class="btn small" data-fav-sheet-close="1" aria-label="닫기">닫기</button></div>'+
+    '<div class="fav-sheet-list-l59">'+secs.map(s => (secs.length > 1 ? '<div class="fav-sheet-group-l59">'+esc(s.name)+'</div>' : '')+
+      s.items.map(f => '<button type="button" class="fav-sheet-item-l59" data-fav-sheet-key="'+esc(complexFavKeyL59(f.id, f.p))+'">'+esc(favLabelL59(f, favEntryL59(f)))+'</button>').join('')).join('')+'</div>'+
+  '</div>';
+  el.addEventListener('click', e => {
+    if (e.target === el || (e.target.closest && e.target.closest('[data-fav-sheet-close]'))){ closeFavSheetL59(); return; }
+    const b = e.target.closest && e.target.closest('[data-fav-sheet-key]');
+    if (b) pickFromFavSheetL59(b.getAttribute('data-fav-sheet-key'));
+  });
+  document.body.appendChild(el);
+  _favSheetScrollL59 = { body: document.body.style.overflow, html: document.documentElement.style.overflow };
+  document.body.style.overflow = 'hidden'; document.documentElement.style.overflow = 'hidden';   // 열린 동안 뒤 화면 스크롤 막기
+  document.addEventListener('keydown', favSheetKeyL59, true);
+  try { const first = el.querySelector('.fav-sheet-item-l59'); if (first) first.focus({ preventScroll: true }); } catch (e) {}
+  return true;
+}
+function closeFavSheetL59(){
+  const el = document.getElementById('favSheetL59');
+  if (el) el.remove();
+  document.removeEventListener('keydown', favSheetKeyL59, true);
+  if (_favSheetScrollL59){ document.body.style.overflow = _favSheetScrollL59.body; document.documentElement.style.overflow = _favSheetScrollL59.html; _favSheetScrollL59 = null; }
+}
+function pickFromFavSheetL59(key){
+  const ctx = _favSheetCtxL59 || {};
+  const f = loadComplexFavsL59().find(x => complexFavKeyL59(x.id, x.p) === key);
+  closeFavSheetL59();
+  if (!f) return false;
+  if (ctx.target == null) return openFavOneL59(f);   // 우리 단지 진단: 그 단지로 이동
+  // 여러 단지 비교: 누른 칸(기준·비교)에 채움. 칸에 이미 단지가 있으면 select에 고를 단지 option이 없을 수 있어 먼저 넣는다.
+  try { const e = state.library.find(x => x && x.id === f.id); const sel = ctx.selectEl;
+    if (e && sel && !Array.prototype.some.call(sel.options || [], o => o.value === e.name)) sel.insertAdjacentHTML('beforeend', libraryOptionHtmlL34(e)); } catch (err) {}
+  return pickRecentInto(ctx.target, f.id, f.p, ctx.selectEl, ctx.inputEl, ctx.doRender);
+}
+function openFavOneL59(f){
+  if (!(seedEntryById(f.id) || importedLibraryEntryById(f.id))){ _favNoteL59 = favLabelL59(f, null)+': '+SAVED_NAME_LOST_L33; renderComplexFavTabL59(); return false; }
+  try { document.body.classList.remove('l59-favbar'); } catch (e) {}
+  openRecentView(f.id, f.p);
+  return true;
+}
+// 하단 바: 고른 단지 칩(첫 번째 = 기준) + 버튼(0개 꺼짐 / 1개 "내 단지 보기" / 2개 이상 "선택한 N개 비교하기").
+function renderFavBarL59(favs){
+  const sec = document.getElementById('favoritesSection');
+  if (!sec) return;
+  let bar = document.getElementById('favBarL59');
+  if (!bar){ bar = document.createElement('div'); bar.id = 'favBarL59'; bar.className = 'fav-bar-l59'; sec.appendChild(bar); }
+  const show = !!(BUNDLES.L59 && favs.length);
+  bar.hidden = !show;
+  try { document.body.classList.toggle('l59-favbar', show && !sec.hidden); } catch (e) {}
+  if (!show){ bar.innerHTML = ''; return; }
+  const picks = _favPicksL59.map(k => favs.find(f => complexFavKeyL59(f.id, f.p) === k)).filter(Boolean);
+  const n = picks.length;
+  const chips = n ? picks.map((f, i) => '<span'+(i ? '' : ' class="base"')+'>'+(i ? '' : '기준: ')+esc(favLabelL59(f, favEntryL59(f)))+'</span>').join('')
+    : '<span class="empty">카드를 눌러 단지를 고르세요</span>';
+  const label = n === 0 ? '비교하기' : n === 1 ? '내 단지 보기' : '선택한 '+n+'개 비교하기';
+  bar.innerHTML = '<div class="fav-bar-chips-l59">'+chips+'</div>'+
+    '<button type="button" class="btn fair-cta fav-bar-btn-l59" id="favGoL59"'+(n ? '' : ' disabled')+'>'+esc(label)+'</button>';
+  const go = document.getElementById('favGoL59');
+  if (go) go.addEventListener('click', goFromFavsL59);
+}
+function goFromFavsL59(){
+  const favs = loadComplexFavsL59();
+  const picks = _favPicksL59.map(k => favs.find(f => complexFavKeyL59(f.id, f.p) === k)).filter(Boolean);
+  if (!picks.length) return false;
+  if (picks.length > FAV_PICK_MAX_L59){ _favNoteL59 = FAV_PICK_FULL_TEXT_L59; renderComplexFavTabL59(); return false; }
+  if (picks.length === 1) return openFavOneL59(picks[0]);   // 1개: 우리 단지 진단으로 열기(최근 본 단지 열기와 같은 함수)
+  return openCompareFromFavsL59(picks);
+}
+// 2개 이상: 급지표 주소 진입(applyUrlParams)과 같은 방식으로 기준·비교 칸을 "대체"해 채운다. 지금 목록이 있으면 L38 확인 창.
+// seed·내 라이브러리에서 id를 못 찾는 단지는 건너뛰고 비교 화면 위에 안내한다.
+function openCompareFromFavsL59(picks){
+  const items = picks.map(f => ({ f, e: findLibraryEntryById(f.id) }));
+  const ok = items.filter(x => x.e && (x.e.text || x.f.p === 25)), missing = items.filter(x => !(x.e && (x.e.text || x.f.p === 25)));
+  if (!ok.length){ _favNoteL59 = '고른 단지를 찾을 수 없어요. 다시 검색해 주세요.'; renderComplexFavTabL59(); return false; }
+  // 104단계: 확인 창 없이 대체한다. 지금 목록에서 빠지는 단지가 있으면 이동 뒤 비교 탭 위에 한 줄 안내.
+  const slotNm = s => s && (s.text || s.pending25) ? String(s.name || '') : null;
+  const prevNames = [slotNm({ text: state.baseText, pending25: state.basePending25, name: state.baseName })].concat(state.compares.map(slotNm)).filter(x => x != null);
+  const want25 = (id, p, name) => {
+    if (p !== 25) return false;
+    if (has25Data(id)) return true;
+    _pyeongNotices.push(stripPyeongSuffix(name)+': 25평 시세가 없어 34평으로 표시합니다.');
+    return false;
+  };
+  const b = ok[0];
+  state.baseText = b.e.text; state.baseName = b.e.name; state.basePreset = 'custom';
+  delete state.baseId; delete state.basePyeong; delete state.basePending25;
+  if (want25(b.f.id, b.f.p, b.e.name)){
+    state.baseText = ''; state.baseName = stripPyeongSuffix(b.e.name) + PYEONG25_SUFFIX;
+    state.baseId = b.f.id; state.basePyeong = 25; state.basePending25 = true;
+  }
+  state.compares = Array.from({length: MAX_SLOTS}, () => ({ text:'', name:'', visible:true }));
+  ok.slice(1, MAX_SLOTS + 1).forEach((x, i) => {
+    state.compares[i] = want25(x.f.id, x.f.p, x.e.name)
+      ? { text:'', name: stripPyeongSuffix(x.e.name) + PYEONG25_SUFFIX, visible: true, id: x.f.id, pyeong: 25, pending25: true }
+      : { text: x.e.text, name: x.e.name, visible: true };
+  });
+  usingSeed = false;
+  state.activeSlot = 0;
+  if (missing.length) _pyeongNotices.push('찾을 수 없는 단지 '+missing.length+'개('+missing.map(x => favLabelL59(x.f, null)).join(', ')+')는 빼고 열었어요.');
+  const newNames = new Set([slotNm({ text: state.baseText, pending25: state.basePending25, name: state.baseName })].concat(state.compares.map(slotNm)).filter(x => x != null));
+  const lost = prevNames.some(nm => !newNames.has(nm));
+  saveState();
+  try { document.body.classList.remove('l59-favbar'); } catch (e) {}
+  setTopMode('multi');
+  render();
+  if (hasPending25()) resumePendingPyeong();
+  showFavLoadNoteL59(lost ? Math.min(ok.length, MAX_SLOTS + 1) : 0);
+  try { window.scrollTo(0, 0); } catch (e) {}
+  return true;
+}
+// 비교 탭 위 한 줄 안내(104단계) — n이 0이면 지우기만. 6초 뒤·닫기·다른 탭으로 가면 사라진다.
+const FAV_LOAD_NOTE_MS_L59 = 6000;
+let _favLoadNoteTimerL59 = null;
+function hideFavLoadNoteL59(){
+  try { clearTimeout(_favLoadNoteTimerL59); } catch (e) {}
+  _favLoadNoteTimerL59 = null;
+  try { const el = document.getElementById('favLoadNoteL59'); if (el) el.remove(); } catch (e) {}
+}
+function showFavLoadNoteL59(n){
+  hideFavLoadNoteL59();
+  if (!n) return;
+  try {
+    const shell = document.getElementById('multiCompareShell');
+    if (!shell || !shell.parentNode) return;
+    const el = document.createElement('div');
+    el.id = 'favLoadNoteL59'; el.className = 'pyeong-notice info fav-load-note-l59'; el.setAttribute('role', 'status');
+    el.innerHTML = '<span>즐겨찾기에서 '+n+'개를 불러왔어요</span><button type="button" class="clear-link" data-fav-load-note-close="1">닫기</button>';
+    el.querySelector('button').addEventListener('click', hideFavLoadNoteL59);
+    shell.parentNode.insertBefore(el, shell);
+    _favLoadNoteTimerL59 = setTimeout(hideFavLoadNoteL59, FAV_LOAD_NOTE_MS_L59);
+  } catch (e) {}
+}
 function renderFavoritesTab(){
+  if (BUNDLES.L59){ renderComplexFavTabL59(); return; }   // 묶음 L59
+  setPairFavUiL59(true);
+  { const le = document.getElementById('favoritesList'); if (le && le.classList && le.classList.contains('fav-l59')){ le.classList.remove('fav-l59'); if (!le.className) le.removeAttribute('class'); } }
+  { const bar = document.getElementById('favBarL59'); if (bar) bar.remove(); const m = document.getElementById('favModalL59'); if (m) m.remove(); try { document.body.classList.remove('l59-favbar'); hideFavLoadNoteL59(); } catch (e) {} }   // 끄면 하단 바·그룹 창을 지워 라이브와 같은 화면
   const list = loadTwinFavorites();
   const countLabel = document.getElementById('favoritesCountLabel');
   if (countLabel) countLabel.textContent = '⭐ 즐겨찾기 ('+list.length+'개 저장됨)';
@@ -12842,7 +13920,7 @@ const GUIDE_HTML =
   '<details><summary>■ 여러 단지 비교</summary>'+
     '<p><b class="ui">📊 여러 단지 비교</b> 탭에서 기준 단지를 정하고, 비교할 단지를 추가하세요. 시세·배율·적정가를 한 그래프와 표에서 겹쳐 볼 수 있어요. '+
     '그래프 위 <b class="ui">📈 적정가</b> 메뉴에서 <b class="ui">선도단지 대비 적정가</b> / <b class="ui">기준단지 대비 적정가</b> / <b class="ui">둘 다 보기</b> / <b class="ui">숨기기</b> 중에서 골라요.{FAIR_TABLE_NOTE}{PERIOD_NOTE}</p>'+
-    '<p>쌍둥이 단지 카드의 ☆을 누르면 <b class="ui">⭐ 즐겨찾기</b> 탭에 모아 두고 엑셀로 내보낼 수 있어요. '+
+    '<p>{FAV_NOTE}'+
     '<b class="ui">📂 엑셀 파일로 단지 넣기</b>로 우리만의 단지를 넣어 비교할 수도 있어요.</p>'+
   '</details>'+
   '<details><summary>■ 꼭 알아 두세요</summary><ul>'+
@@ -12862,6 +13940,9 @@ function guideBodyHtml(){
   // 묶음 L23(43단계): 접이식 섹션을 처음부터 펼쳐 둔다(사용자가 접었다 펼 수는 있다)
   const src = BUNDLES.L23 ? GUIDE_HTML.split('<details>').join('<details open>') : GUIDE_HTML;
   return src.split('{ASOF}').join(esc(guideAsOfText())).split('{N}').join(esc(n))
+    .split('{FAV_NOTE}').join(BUNDLES.L59   // 묶음 L59
+      ? '단지 이름 옆 ☆(우리 단지 진단·여러 단지 비교 칸·쌍둥이 단지 카드)을 누르면 <b class="ui">⭐ 즐겨찾기</b> 탭에 단지가 모여요. 카드를 눌러 고르고 아래 <b class="ui">선택한 단지 비교하기</b>를 누르면 한 번에 비교할 수 있어요(먼저 고른 단지가 기준). 그룹을 만들어 나눠 둘 수도 있어요. '
+      : '쌍둥이 단지 카드의 ☆을 누르면 <b class="ui">⭐ 즐겨찾기</b> 탭에 모아 두고 엑셀로 내보낼 수 있어요. ')
     .split('{FAIR_TABLE_NOTE}').join(BUNDLES.L30 ? ' 고른 기준이 그래프 점선과 옆 표의 "적정" 값에 똑같이 적혀요.' : '')
     .split('{FAB_NOTE}').join(BUNDLES.L32 ? '(폰에서는 💬 동그라미)' : '')
     .split('{L41_FAIR_NOTE}').join(BUNDLES.L41 ? ' 이력 부족 단지는 처음엔 꺼져 있어요.' : '')
