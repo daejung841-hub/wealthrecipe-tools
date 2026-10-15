@@ -601,6 +601,14 @@ button.pyeong-chip{font:inherit;font-size:11.5px;}
 /* 묶음 L60(118단계): "주의" 상세 설명·서울 밖 안내 — 결론 문장 바로 아래, 근거 줄과 같은 크기 */
 .concl-why-l60{font-size:12.5px;line-height:1.6;color:var(--ink-soft, var(--ink));margin:6px 0 2px;padding:6px 10px;border-left:3px solid var(--warn);background:rgba(0,0,0,.03);border-radius:0 6px 6px 0;word-break:keep-all;}
 .concl-why-l60 b{color:var(--warn);}
+/* 묶음 L61(122단계): 보조 배지 "전세 동반 약세" — 중립색(경고색 아님), 메인 배지보다 작게 */
+.badge.sub-badge-l61{background:var(--neutral-bg);color:var(--ink);font-weight:600;font-size:11.5px;padding:2px 9px;border:1px solid var(--line, #D5DDE3);cursor:pointer;font-family:inherit;line-height:1.5;}
+.badge.sub-badge-l61.mini{font-size:10.5px;padding:0 6px;cursor:default;}
+.concl-top .badge.sub-badge-l61{flex:none;align-self:center;}
+.concl-sub-l61{font-size:12.5px;line-height:1.6;color:var(--ink-muted);margin:4px 0 2px;word-break:keep-all;}
+details.sub-why-l61{font-size:12.5px;line-height:1.6;color:var(--ink);margin:2px 0 4px;padding:4px 10px;border-left:3px solid var(--line, #D5DDE3);background:var(--neutral-bg);border-radius:0 6px 6px 0;}
+details.sub-why-l61 > summary{cursor:pointer;word-break:keep-all;}
+details.sub-why-l61 > div{margin-top:4px;word-break:keep-all;}
 .concl-note-l60{font-size:12.5px;line-height:1.6;color:var(--ink-muted);margin:4px 0 2px;word-break:keep-all;}
 .concl-more{margin-top:2px;}
 .concl-toggle{background:none;border:none;padding:6px 0;min-height:32px;font-size:13px;color:var(--ink-muted);cursor:pointer;display:inline-flex;align-items:center;gap:4px;}
@@ -2040,6 +2048,46 @@ function relDropRatioL60(R){
   const rs = 1 - R.curSale / R.refSale, rj = 1 - R.curJeonse / R.avgJeonse;
   return rs > 0 ? rj / rs : null;
 }
+// 묶음 L61(122단계): "주의"(동반 하락)를 화면에서 메인 "저평가" + 보조 "전세 동반 약세"로. 이름은 이 두 상수만 고친다.
+// 내부 판정(diag.badge "주의"·kind 'bothDown')·결론 문장·적정가는 그대로 — 화면 이름·색만 badgeViewL61을 거친다.
+const L61_MAIN_LABEL = '저평가';
+const L61_SUB_LABEL = '전세 동반 약세';
+const L61_SUB_FIRST = '서울 선도단지 대비 매매는 많이 싸졌지만 전세도 함께 약해진 단지예요.';
+const L61_SUB_LINE = '전세도 함께 약해져 있어요. 아래 설명을 확인해 보세요.';
+function badgeViewL61(diag){
+  if (!diag) return { text: '', tone: 'neutral', sub: false };
+  if (BUNDLES.L61 && diag.kind === 'bothDown') return { text: L61_MAIN_LABEL, tone: 'good', sub: true };
+  return { text: diag.badge, tone: diag.tone, sub: false };
+}
+// 상세 문장 안의 "(주의)" 자리 — L61이면 보조 이름
+function badgeWordL61(diag){ return (BUNDLES.L61 && diag && diag.kind === 'bothDown') ? L61_SUB_LABEL : (diag ? diag.badge : ''); }
+// 보조 배지: mini = 카드·표용(탭 동작 없이 설명은 title), 아니면 결론 상자용 버튼(탭하면 아래 설명 펼침)
+function subBadgeHtmlL61(mini){
+  return mini ? '<span class="badge sub-badge-l61 mini" title="'+esc(L61_SUB_FIRST)+'">'+esc(L61_SUB_LABEL)+'</span>'
+    : '<button type="button" class="badge sub-badge-l61" data-sub-l61="1" aria-label="'+esc(L61_SUB_LABEL)+' 설명 펼치기">'+esc(L61_SUB_LABEL)+'</button>';
+}
+// 결론 상자: 결론 문장 아래 한 줄 + 접힌 설명(펼치면 평균 대비 매매·전세 %)
+function subLineHtmlL61(r, label){
+  if (!(BUNDLES.L61 && r && r.diag && r.diag.kind === 'bothDown')) return '';
+  const w = r.diag.whyL60;
+  const who = (label === '선도단지' || !label) ? '서울 선도단지' : label;
+  const first = who === '서울 선도단지' ? L61_SUB_FIRST : L61_SUB_FIRST.replace('서울 선도단지', who);
+  const nums = w ? who+'와 비교한 가격 비율이 평소의 매매 '+Math.round(w.salePct)+'% · 전세 '+Math.round(w.jeonsePct)+'% 수준이에요. 매매가 싸 보이는 이유가 전세 약세와 함께 왔는지, 같은 동네 최근 단지 시세·전세가율·입주 물량을 함께 확인해 보세요.' : '';
+  return '<div class="concl-sub-l61">'+esc(L61_SUB_LINE)+'</div>'+
+    '<details class="sub-why-l61"><summary>'+esc(first)+'</summary>'+(nums ? '<div>'+esc(nums)+'</div>' : '')+'</details>';
+}
+// 보조 배지 탭 → 같은 결론 상자의 설명을 펼친다(한 번만 붙임)
+try {
+  if (typeof document !== 'undefined' && document.addEventListener && !window.__subL61Bound){
+    window.__subL61Bound = true;
+    document.addEventListener('click', ev => {
+      const b = ev.target && ev.target.closest ? ev.target.closest('[data-sub-l61]') : null;
+      if (!b) return;
+      const box = b.closest('.concl-box'); const d = box && box.querySelector('details.sub-why-l61');
+      if (d){ d.open = !d.open; b.setAttribute('aria-expanded', d.open ? 'true' : 'false'); }
+    });
+  }
+} catch (e) {}
 // 서울 밖 안내(L60_NOTE) 기준: (적정가 − 현재가) ÷ 현재가
 const L60_NOTE_MIN_GAP = 0.25;
 const L60_NOTE_TEXT = '서울 선도단지와의 과거 가격 비율로 계산한 값이에요. 서울과 가격 차이가 크게 벌어진 지역은 적정가가 높게 나올 수 있으니, 같은 동네 최근 단지와 함께 비교해 보세요.';
@@ -2606,9 +2654,9 @@ function seoulHistoricalAvg(){
 // 라이브는 주소 플래그를 읽지 않으므로 이 기본값이 그대로 동작한다.
 const BUNDLES = { A:false, B:false, C:false, D1:false, D2:false, D3:false, D4:false, E1:true, E2:false, E3:true, F1:true, F2:true, F3:true, F4:true, F5:true, F6:true,
   H1:false, H2:true, H3:true, H4:true, H5:true, H6:true, H7:true,
-  L1:true, L2:true, L3:true, L4:true, L5:true, L6:false, L7:true, L8:true, L9:true, L10:true, L11:true, L12:true, L13:true, L14:true, L15:true, L16:true, L17:true, L18:true, L19:true, L19B:true, L20:true, L22:true, L23:true, L24:true, L25:true, L26:true, L27:!!window.POOL_EXCLUDE_ON, L31:!!window.NEW_NAME_RULE_ON, L32:true, L33:true, L34:true, L37:true, L28:true, L38:true, L40:true, L39:true, L41:true, L42:true, L43:true, L44:true, L45:true, L46:true, L47:true, L49:true, L48:true, L50:true, L51:true, L52:true, L53:true, L54:true, L55:true, L56:true, L57:true, L58:true, L59:true, L59_DND:true, L59_INFOCARD:true, L59_STATION:true, L59_SCHOOL:true, L59_FAVSEARCH:true, L60:true, L60_REL:false, L60_WHY:false, L60_NOTE:true, L35:true, L36:true, L30:true, L29:true, L29R:false, K1:false, K2:true, K4:false };
+  L1:true, L2:true, L3:true, L4:true, L5:true, L6:false, L7:true, L8:true, L9:true, L10:true, L11:true, L12:true, L13:true, L14:true, L15:true, L16:true, L17:true, L18:true, L19:true, L19B:true, L20:true, L22:true, L23:true, L24:true, L25:true, L26:true, L27:!!window.POOL_EXCLUDE_ON, L31:!!window.NEW_NAME_RULE_ON, L32:true, L33:true, L34:true, L37:true, L28:true, L38:true, L40:true, L39:true, L41:true, L42:true, L43:true, L44:true, L45:true, L46:true, L47:true, L49:true, L48:true, L50:true, L51:true, L52:true, L53:true, L54:true, L55:true, L56:true, L57:true, L58:true, L59:true, L59_DND:true, L59_INFOCARD:true, L59_STATION:true, L59_SCHOOL:true, L59_FAVSEARCH:true, L60:true, L60_REL:false, L60_WHY:false, L60_NOTE:true, L61:true, L35:true, L36:true, L30:true, L29:true, L29R:false, K1:false, K2:true, K4:false };
 const BUNDLE_GROUPS = { D:['D1','D2','D3','D4'], E:['E1','E2','E3'], F:['F1','F2','F3','F4','F5','F6'], H:['H1','H2','H3','H4','H5','H6','H7'],
-  L:['L1','L2','L3','L4','L5','L6','L7','L8','L9','L10','L11','L12','L13','L14','L15','L16','L17','L18','L19','L19B','L20','L22','L23','L24','L25','L26','L27','L29','L30','L31','L32','L33','L34','L37','L35','L36','L28','L38','L40','L39','L41','L42','L43','L44','L45','L46','L47','L49','L48','L50','L51','L52','L53','L54','L55','L56','L57','L58','L59','L60'], K:['K1','K2','K4'] };
+  L:['L1','L2','L3','L4','L5','L6','L7','L8','L9','L10','L11','L12','L13','L14','L15','L16','L17','L18','L19','L19B','L20','L22','L23','L24','L25','L26','L27','L29','L30','L31','L32','L33','L34','L37','L35','L36','L28','L38','L40','L39','L41','L42','L43','L44','L45','L46','L47','L49','L48','L50','L51','L52','L53','L54','L55','L56','L57','L58','L59','L60','L61'], K:['K1','K2','K4'] };
 // 묶음 L46(69단계): 그래프 점선 모양 통일 — 모든 점선을 "선도단지 대비 적정가" 선(FAIR_LINE_STYLE.borderDash)과 같은 긴 점선으로.
 // 촘촘한 점("좁쌀")·점-선 섞인 패턴을 없앤다. 새 점선은 항상 dashL46(예전 값)을 쓴다 — L46을 끄면 예전 값 그대로.
 const DASH_L46 = [5, 4];
@@ -8009,7 +8057,8 @@ function gasPushEntry(entry){
 }
 
 function toneBadge(diag){
-  return '<span class="badge '+diag.tone+(BUNDLES.E1 ? ' concl-badge' : '')+'">'+diag.badge+'</span>';
+  const v = badgeViewL61(diag);   // 묶음 L61
+  return '<span class="badge '+v.tone+(BUNDLES.E1 ? ' concl-badge' : '')+'">'+v.text+'</span>'+(v.sub ? subBadgeHtmlL61(true) : '');
 }
 // 매매배율/매매갭/전세배율/전세갭 설명 툴팁(2026-09 세션) — 기존 시세표
 // 헤더 툴팁(RECENT_TABLE_COL_TOOLTIP_HTML)과 같은 "배지형 키워드 강조"
@@ -8813,7 +8862,8 @@ function buildConclusionParts(r, label){
   const amtHtml = n ? '<strong class="concl-amt">'+esc(n.amtText)+'('+n.pct+'%)</strong>' : '';
   // F1: 고평가는 %를 적정가 기준으로("현재가가 적정가보다 …(금액÷적정가%) 높아요").
   const amtFairHtml = n ? '<strong class="concl-amt">'+esc(n.amtText)+'('+(BUNDLES.F1 ? n.pctFair : n.pct)+'%)</strong>' : '';
-  const out = { badge: diag.badge, tone: diag.tone, mainHtml: '', fairText: '', evidence: conclusionEvidenceLine(r, label) };
+  const viewL61 = badgeViewL61(diag);   // 묶음 L61: 화면 배지 이름·색(문장 고르기는 아래처럼 diag.badge 그대로)
+  const out = { badge: viewL61.text, tone: viewL61.tone, subL61: viewL61.sub, mainHtml: '', fairText: '', evidence: conclusionEvidenceLine(r, label) };
   if (!n){
     // 이력 부족 등 적정가가 없는 경우 — 적정가 없이 사유 한 줄만.
     out.mainHtml = esc(isShortHistoryL28(r) ? r.diag.message : diag.badge === '이력 부족'
@@ -8911,11 +8961,12 @@ function conclusionNoteHtmlL60(r){
 function buildConclusionBox(r, opts){
   opts = opts || {};
   const p = buildConclusionParts(r, opts.label);
-  const badgeHtml = opts.showBadge ? '<span class="badge '+p.tone+' concl-badge">'+esc(p.badge)+'</span>' : '';
+  const badgeHtml = opts.showBadge ? '<span class="badge '+p.tone+' concl-badge">'+esc(p.badge)+'</span>'+(p.subL61 ? subBadgeHtmlL61(false) : '') : '';
   const priceHtml = BUNDLES.L15 ? conclusionPriceLineHtml(r, opts.label) : '';
   return '<div class="concl-box tone-'+p.tone+'">'+
     (BUNDLES.L15 ? ((badgeHtml || priceHtml) ? '<div class="concl-top">'+badgeHtml+priceHtml+'</div>' : '') : badgeHtml)+
     '<div class="concl-main">'+p.mainHtml+'</div>'+
+    subLineHtmlL61(r, opts.label)+   // 묶음 L61
     conclusionWhyHtmlL60(r, opts.label)+conclusionNoteHtmlL60(r)+   // 묶음 L60
     (p.fairText && !BUNDLES.L15 ? '<div class="concl-fair">'+esc(p.fairText)+'</div>' : '')+
     (p.evidence ? '<div class="concl-evidence">'+esc(p.evidence)+'</div>' : '')+
@@ -9034,7 +9085,7 @@ function buildFairPriceSummaryCard(r){
     noteHtml += '<div class="fair-price-note">선도단지와 겹치는 시세가 '+fmtYm(r.histStartYm)+'부터 '+r.histMonths+'개월이에요. 지난 상승장(2013~) 이전 이력이 없어 평균 배율이 짧은 기간의 값이라, 적정가는 참고용으로 봐주세요.</div>';
   }
   return '<div class="fair-price-summary-card tone-'+tone+'">'+
-    '<span class="badge '+tone+'">'+esc(statusWord)+'</span>'+
+    '<span class="badge '+badgeViewL61(r.diag).tone+'">'+esc(badgeViewL61(r.diag).text)+'</span>'+(badgeViewL61(r.diag).sub ? subBadgeHtmlL61(true) : '')+   // 묶음 L61
     '<div class="fair-price-summary-body">'+esc(body)+'</div>'+
     noteHtml+
   '</div>';
@@ -9131,7 +9182,7 @@ function buildUnifiedSummaryText(rVsBench, label){
   // 카드(buildFairPriceSummaryCard)와 같은 실제 가격 %다(2026-09-24 단위 통일 1단계).
   // 묶음 D1: 동반 하락이면 "N% 오를 여지" 대신 가정형으로 쓴다(적정가 카드와 같은 원칙).
   if (BUNDLES.D1 && rVsBench.diag && rVsBench.diag.kind === 'bothDown'){
-    return ratioFact+'전세 배율도 함께 낮은 상태('+rVsBench.diag.badge+')라, 이 배율로 계산한 적정가 '+fmtEok(rVsBench.fairSale)+'은 이 관계가 평소 수준으로 돌아간다고 가정했을 때의 숫자예요.';
+    return ratioFact+'전세 배율도 함께 낮은 상태('+badgeWordL61(rVsBench.diag)+')라, 이 배율로 계산한 적정가 '+fmtEok(rVsBench.fairSale)+'은 이 관계가 평소 수준으로 돌아간다고 가정했을 때의 숫자예요.';
   }
   const diff = rVsBench.saleDiff;
   const nextWord = diff < 0 ? '오를' : '조정될';
@@ -10196,12 +10247,13 @@ function favVerdictOfL59(r){
   const n = conclusionNumbers(r);
   if (!n) return null;
   const pct = r.diag.badge === '고평가' && BUNDLES.F1 ? n.pctFair : n.pct;
-  return { badge: r.diag.badge, tone: r.diag.tone || 'neutral', pct };
+  const vL61 = badgeViewL61(r.diag);   // 묶음 L61
+  return { badge: vL61.text, tone: vL61.tone || 'neutral', pct, subL61: vL61.sub };
 }
 function favVerdictHtmlL59(v){
   if (!v) return '';
   const text = v.badge === '적정' ? v.badge : v.badge + ' (' + v.pct + '%)';   // 107단계: 적정은 % 없이
-  return '<span class="badge ' + esc(v.tone) + ' fav-verdict-l59" title="우리 단지 진단 결론과 같은 판정·차이(선도단지 기준)">' + esc(text) + '</span>';
+  return '<span class="badge ' + esc(v.tone) + ' fav-verdict-l59" title="우리 단지 진단 결론과 같은 판정·차이(선도단지 기준)">' + esc(text) + '</span>' + (v.subL61 ? subBadgeHtmlL61(true) : '');   // 묶음 L61
 }
 // 106단계 A: 학교 두 줄 — 자료가 없어 지금은 null(줄 없음). window.SCHOOL_INFO_L59[seed id] = { elem: '○○초 · 도보 약 N분', mid: '○○중 · 학업성취도 …' }
 // 같은 보강 자료가 생기면 이 함수만 그 값을 돌려주면 한 줄씩 나타난다.
@@ -11315,7 +11367,7 @@ function renderSummaryTable(base){
       '<td class="num'+jeonseCellClass+'">'+priceWithRatioCell(curJeonsePrice, r.currentJeonseRatio)+'</td>'+
       '<td class="num">'+priceWithRatioCell(fairJeonse, r.avgJeonseRatio)+'</td>'+
       '<td class="num">'+fmtPP(r.jeonseDiff)+'</td>'+
-      '<td><button class="diag-toggle'+(isOpen?' open':'')+'" data-diag-toggle="'+i+'"><span class="arrow">▸</span><span class="chip badge '+r.diag.tone+'">'+r.diag.badge+'</span></button></td>';
+      '<td><button class="diag-toggle'+(isOpen?' open':'')+'" data-diag-toggle="'+i+'"><span class="arrow">▸</span><span class="chip badge '+badgeViewL61(r.diag).tone+'">'+badgeViewL61(r.diag).text+'</span>'+(badgeViewL61(r.diag).sub ? subBadgeHtmlL61(true) : '')+'</button></td>';
     tbody.appendChild(tr);
 
     const detailTr = document.createElement('tr');
@@ -12313,7 +12365,7 @@ function fairMenuOutlookNoteL30(base, comps, ratioField, kind){
 // 묶음 K2: 차트 적정가 선 설명을 결론 박스와 같은 문장·같은 기준(금액·%·배지)으로 쓴다. 선 이름(L5 FAIR_BASIS_LABELS)을 앞에 붙인다.
 function fairNoteConclusionText(r){
   const p = buildConclusionParts(r, '선도단지');
-  return '<span class="badge '+p.tone+'" style="font-size:11px;padding:0 6px;">'+esc(p.badge)+'</span> '+p.mainHtml;
+  return '<span class="badge '+p.tone+'" style="font-size:11px;padding:0 6px;">'+esc(p.badge)+'</span> '+(p.subL61 ? subBadgeHtmlL61(true)+' ' : '')+p.mainHtml;   // 묶음 L61
 }
 function buildFairOutlookNoteK2(base, comps, ratioField, benchmarkUsable, bench){
   if (benchmarkUsable){
@@ -12352,7 +12404,7 @@ function buildFairOutlookNote(base, comps, ratioField, showFair, benchmarkUsable
       return '<div class="fair-outlook-row">'+withParticle(base.name, '은', '는')+' 선도단지 대비 평균 범위 안에서 움직이고 있습니다.</div>';
     }
     if (BUNDLES.D1 && rBase.diag && rBase.diag.kind === 'bothDown'){
-      return '<div class="fair-outlook-row">'+withParticle(base.name, '은', '는')+' 선도단지 대비 매매·전세 배율이 함께 평소보다 낮은('+esc(rBase.diag.badge)+') 상태입니다.</div>';
+      return '<div class="fair-outlook-row">'+withParticle(base.name, '은', '는')+' 선도단지 대비 매매·전세 배율이 함께 평소보다 낮은('+esc(badgeWordL61(rBase.diag))+') 상태입니다.</div>';
     }
     const overUnder = rBase.saleDiff < 0 ? '저평가' : '고평가';
     return '<div class="fair-outlook-row">'+withParticle(base.name, '은', '는')+' 선도단지 대비 약 '+Math.abs(rBase.saleDiff).toFixed(0)+'% '+overUnder+' 상태입니다.</div>';
@@ -12368,7 +12420,7 @@ function buildFairOutlookNote(base, comps, ratioField, showFair, benchmarkUsable
       const gap = ratioField==='sale' ? rBench.saleGap : rBench.jeonseGap;
       const curPrice = ratioField==='sale' ? rBench.curSalePrice : rBench.curJeonsePrice;
       if (BUNDLES.D1 && ratioField==='sale' && rBench.diag && rBench.diag.kind === 'bothDown'){
-        sentence += ' 다만 현재 '+withParticle(c.name, '은', '는')+' 선도단지 대비 매매·전세 배율이 함께 낮은('+esc(rBench.diag.badge)+') 상태라, 이 관계가 평소 수준으로 돌아간다고 가정해야 적정가에 가까워져요.';
+        sentence += ' 다만 현재 '+withParticle(c.name, '은', '는')+' 선도단지 대비 매매·전세 배율이 함께 낮은('+esc(badgeWordL61(rBench.diag))+') 상태라, 이 관계가 평소 수준으로 돌아간다고 가정해야 적정가에 가까워져요.';
       } else if (diff!=null && gap!=null && curPrice!=null && Math.abs(diff) >= state.threshold){
         const overUnder = diff > 0 ? '고평가' : '저평가';
         const dir = diff > 0 ? '하락' : '상승';
