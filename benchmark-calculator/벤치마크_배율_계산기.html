@@ -986,7 +986,9 @@ body.l44 .tier-seg.current.tier-low, body.l44 .tier-seg.current.tier-veryLow{box
 .fav-st-badges-l59{display:inline-flex;flex:none;white-space:nowrap;}
 .fav-st-name-l59{white-space:nowrap;}
 /* 112단계: 학교 자료 출처 한 줄(푸터 안, 작은 글씨) — 아래 여백으로 페이지 끝에서도 의견 버튼(아래 20px·높이 44px) 위에 오게 */
-.school-src-l59{display:block;margin:6px auto 76px;font-size:11px;line-height:1.5;color:var(--ink-faint);word-break:keep-all;max-width:640px;padding:0 8px;}
+.school-src-l59{display:block;margin:6px auto 0;font-size:11px;line-height:1.5;color:var(--ink-faint);word-break:keep-all;max-width:640px;padding:0 8px;}
+.school-src-l59 + .school-src-l59{margin-top:2px;}
+.school-src-l59:last-child{margin-bottom:76px;}   /* 114단계: 학교·OSM 출처 줄 중 마지막 줄 아래만 */
 .fav-load-note-l59{margin:8px 16px 0;display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
 .fav-info-l59 .fav-info-wide-l59{grid-column:1 / -1;}
 .fav-info-l59 .fav-info-wide-l59 dd{word-break:keep-all;}
@@ -10088,6 +10090,7 @@ function loadFavStationL59(){
     const s = document.createElement('script');
     s.onload = () => {
       favStationStateL59 = window.STATION_WALK && typeof window.STATION_WALK === 'object' ? 'loaded' : 'error';
+      try { syncSchoolSrcL59(); } catch (err) {}   // 114단계: OSM 출처 줄
       try { const fs = document.getElementById('favoritesSection'); if (BUNDLES.L59 && fs && fs.hidden === false) renderComplexFavTabL59(); } catch (err) {}
       try { refreshDiagInfoCardL59(); } catch (err) {}   // 106단계
     };
@@ -10195,15 +10198,23 @@ function walkMinTextL59(m){
 }
 // 112단계: 학교 자료 출처 한 줄 — 학교 파일을 받았고 학교 줄이 켜져 있을 때만(푸터 안). 아니면 지운다.
 const SCHOOL_SRC_TEXT_L59 = '학교 위치·통학구역: 공공데이터포털(data.go.kr) 한국교육시설안전원 전국초중등학교위치표준데이터·학구도 정보';
+// 114단계: 역 거리 자료 출처(OSM) — 역 파일을 받았고 역 줄이 켜져 있을 때만. 학교 파일과 무관.
+const STATION_SRC_TEXT_L59 = '역 거리 자료: © OpenStreetMap contributors';
 function syncSchoolSrcL59(){
   try {
+    const foot = document.querySelector('footer');
     const on = !!(BUNDLES.L59 && BUNDLES.L59_SCHOOL && FAV_SCHOOL_URL_L59 && favSchoolStateL59 === 'loaded');
     let el = document.getElementById('schoolSrcL59');
-    if (!on){ if (el) el.remove(); return; }
-    if (el) return;
-    const foot = document.querySelector('footer');
-    if (!foot) return;
-    foot.insertAdjacentHTML('beforeend', '<small class="school-src-l59" id="schoolSrcL59">'+esc(SCHOOL_SRC_TEXT_L59)+'</small>');
+    if (!on){ if (el) el.remove(); }
+    else if (!el && foot){
+      const st = document.getElementById('stationSrcL59');   // 순서: 학교 줄 → OSM 줄
+      if (st) st.insertAdjacentHTML('beforebegin', '<small class="school-src-l59" id="schoolSrcL59">'+esc(SCHOOL_SRC_TEXT_L59)+'</small>');
+      else foot.insertAdjacentHTML('beforeend', '<small class="school-src-l59" id="schoolSrcL59">'+esc(SCHOOL_SRC_TEXT_L59)+'</small>');
+    }
+    const onSt = !!(BUNDLES.L59 && BUNDLES.L59_STATION && FAV_STATION_URL_L59 && favStationStateL59 === 'loaded');
+    let es = document.getElementById('stationSrcL59');
+    if (!onSt){ if (es) es.remove(); }
+    else if (!es && foot) foot.insertAdjacentHTML('beforeend', '<small class="school-src-l59" id="stationSrcL59">'+esc(STATION_SRC_TEXT_L59)+'</small>');
   } catch (e) {}
 }
 function favElemSchoolTextL59(id){
