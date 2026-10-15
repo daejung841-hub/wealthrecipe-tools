@@ -173,6 +173,22 @@ td.num{font-family:var(--font-mono);text-align:right;}
 .sbj-line{font-weight:600;line-height:1.55;margin:2px 0 4px;word-break:keep-all;overflow-wrap:anywhere;}
 .sbj-meta{font-size:12.5px;color:var(--ink-muted,#61707D);margin:4px 0;}
 #btnSbjGo{min-height:40px;margin-top:4px;}
+/* 17-8: 시세보정 결론 카드(시세보정 결과 탭과 같은 판정 색) */
+.sbj-card{border:1px solid var(--border,#E2E7EC);border-radius:14px;padding:14px 16px;margin:4px 0 10px;background:var(--surface,#fff);}
+.sbj-c-top{display:flex;flex-wrap:wrap;align-items:center;gap:8px 10px;margin-bottom:8px;}
+.sbj-verdict{display:inline-flex;align-items:center;font-size:26px;font-weight:800;line-height:1.2;padding:8px 22px;border-radius:14px;background:var(--neutral-bg,#EDF1F4);color:var(--ink-muted,#61707D);}
+.sbj-verdict.g4{background:#E5F5EC;color:#1E8E5A;} .sbj-verdict.g3{background:#EAF1FD;color:#2F6FE0;} .sbj-verdict.g2{background:#FBF1DF;color:#A9720E;} .sbj-verdict.g1{background:#FBEAEA;color:#C63F3F;}
+.sbj-chip{display:inline-block;font-size:12.5px;font-weight:600;border-radius:999px;padding:3px 10px;background:var(--neutral-bg,#EDF1F4);color:var(--ink-muted,#61707D);white-space:nowrap;}
+.sbj-c-line{font-weight:700;font-size:15.5px;line-height:1.5;margin:2px 0 10px;word-break:keep-all;overflow-wrap:anywhere;}
+.sbj-c-nums{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-bottom:10px;}
+.sbj-c-nums>div{background:var(--neutral-bg,#EDF1F4);border-radius:10px;padding:8px 12px;min-width:0;}
+.sbj-c-nums span{display:block;font-size:12.5px;color:var(--ink-muted,#61707D);}
+.sbj-c-nums b{display:block;font-size:22px;font-weight:800;line-height:1.25;white-space:nowrap;}
+.sbj-c-comps{font-size:13.5px;margin:2px 0 6px;}
+.sbj-c-comps .h{font-size:12.5px;font-weight:700;color:var(--ink-muted,#61707D);margin-bottom:2px;}
+.sbj-c-comps .r{display:flex;justify-content:space-between;gap:10px;padding:3px 0;border-top:1px dashed var(--border,#E2E7EC);}
+.sbj-c-comps .r:first-of-type{border-top:none;} .sbj-c-comps .r span{min-width:0;overflow-wrap:anywhere;} .sbj-c-comps .r b{white-space:nowrap;font-weight:700;}
+.sbj-c-comps .none{color:var(--ink-muted,#61707D);}
 .est-badge{display:inline-block;font-size:9.5px;font-weight:700;color:var(--warn);background:var(--warn-bg);border-radius:5px;padding:1px 5px;margin-left:4px;vertical-align:1px;}
 .badge{display:inline-flex;align-items:center;gap:4px;border-radius:999px;padding:3px 10px;font-weight:700;font-size:11.5px;white-space:nowrap;}
 .badge.good{background:var(--good-bg);color:var(--good);}
@@ -520,6 +536,22 @@ window.SBJListLink = (function () {
     if (it.mode === 'apt') return (h.준공연도 || '○○○○') + '년 예상 가치 ' + e2(h.적정가치) + ' (' + comp + ')';
     return (h.준공연도 || '○○○○') + '년에 ' + comp + josa(comp, '을', '를') + ' ' + e2(h.총매매가) + '에 사온다, 필요자금 ' + e2(h.실투자금) + ', 안전마진 ' + e2(it.전체마진);
   }
+  // 17-8: 결론 카드 — 문장은 "(준공 연도)년에 (준공 후 적정가치)억짜리 아파트를 (총매매가)억에 사온다". 적정가치가 없는 예전 기록은 총매매가 + 안전마진, 비교단지 시세가 없는 예전 기록은 "비교단지 정보 없음(이전 저장)"
+  const CARD178 = true;
+  function value178(it) { const h = it.headline4 || {}; if (typeof h.적정가치 === 'number') return h.적정가치; return typeof h.총매매가 === 'number' && typeof it.전체마진 === 'number' ? h.총매매가 + it.전체마진 : null; }
+  function cardHtml178(it, stage) {
+    const h = it.headline4 || {}, yr = h.준공연도 || '○○○○', v = value178(it);
+    const line = it.mode === 'apt' ? yr + '년 예상 가치 ' + e2(v) : yr + '년에 ' + e2(v) + '짜리 아파트를 ' + e2(h.총매매가) + '에 사온다';
+    const comps = Array.isArray(it.비교단지시세) ? it.비교단지시세.filter((c) => c && c.이름).slice(0, 3) : null;
+    let ch = '<div class="sbj-c-comps" data-sbj-comps><div class="h">사용한 비교단지</div>';
+    if (comps && comps.length) comps.forEach((c) => { ch += '<div class="r"><span>' + escH(c.이름) + '</span><b>' + (typeof c.시세 === 'number' ? escH(e2(c.시세)) : '시세 없음') + '</b></div>'; });
+    else ch += '<div class="none">' + (comps ? '비교단지 정보 없음' : '비교단지 정보 없음(이전 저장)') + '</div>';
+    ch += '</div>';
+    return '<div class="sbj-card" data-sbj-card><div class="sbj-c-top"><span class="sbj-verdict ' + (GRADE_CLS[it.판정] || '') + '" data-sbj-verdict>' + escH(it.판정 || '판정 없음') + '</span><span class="sbj-chip" data-sbj-stage>' + escH(stage) + '</span></div>' +
+      '<div class="sbj-c-line" data-sbj-line>' + escH(line) + '</div>' +
+      (it.mode === 'apt' ? '' : '<div class="sbj-c-nums"><div><span>필요자금</span><b data-sbj-invest>' + escH(e2(h.실투자금)) + '</b></div><div><span>안전마진</span><b data-sbj-margin>' + escH(e2(it.전체마진)) + '</b></div></div>') +
+      ch + '<div class="sbj-meta" data-sbj-saved>시세보정 결과 · 저장 ' + escH(ago(it.savedAt)) + '</div></div>';
+  }
   function badgeHtml(r) {
     if (!F.LS3) return '';
     const it = itemFor(r); if (!it) return '';
@@ -533,7 +565,7 @@ window.SBJListLink = (function () {
     if (F.LS3) {
       if (it) {
         const stage = it.판정단계 ? it.판정단계 + (it.판정단계 === '후기' ? ' · ' + (it.지역구분 || '서울') + ' 기준' : '') : '진행단계 미선택';
-        body += '<div class="sbj-line">' + escH(resultText(it)) + '</div>' +
+        if (CARD178) body += cardHtml178(it, stage); else body += '<div class="sbj-line">' + escH(resultText(it)) + '</div>' +
           '<div class="sbj-meta">' + (it.판정 ? '<span class="sbj-badge ' + GRADE_CLS[it.판정] + '">' + escH(it.판정) + '</span> ' : '') + escH(stage) + ' · 시세보정 결과 · 저장 ' + escH(ago(it.savedAt)) + '</div>';
       } else body += '<div class="sbj-meta">아직 이 구역의 시세보정 결과가 없어요.</div>';
     }
