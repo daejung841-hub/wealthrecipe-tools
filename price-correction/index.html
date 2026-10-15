@@ -150,6 +150,7 @@ a.btn{display:inline-flex;align-items:center;text-decoration:none;}
 .badge.g2{background:var(--warn-bg);color:var(--warn);}
 .badge.g1{background:var(--bad-bg);color:var(--bad);}
 .badge.neutral{background:var(--neutral-bg);color:var(--ink-muted);}
+.gi-note180{font-size:12.5px;color:var(--ink-faint);line-height:1.45;margin:2px 0 8px;}
 .jline{display:flex;flex-wrap:wrap;gap:4px 8px;align-items:center;font-size:13.5px;color:var(--ink-muted);margin:4px 0;}
 /* 17-7(LS50): 판정 배지 = 결론 표시(글자 약 2배·굵게·넉넉한 여백, 판정별 색 그대로) */
 body.l50 .jline[data-badge]{gap:8px 12px;margin:8px 0 10px;}
@@ -994,6 +995,7 @@ window.SBJ_GUIDE = {
     cardEdited: '사용자 수정', cardAmount: '금액 직접 입력', cardDev: '편차 큼',
     xlsxBasis: '근거 단지', xlsxEdited: '사용자 수정', xlsxAmount: '금액 직접 입력', xlsxDev: '편차 큼', xlsxRent: '임대 영향',
     acHead: '목록표 구역',
+    giResult: '보정값은 서울 사례 중심으로 만든 기준이에요. 경기·인천은 결과를 한 번 더 확인해 주세요.',
     outsideGi: '경기·인천 구역은 주변 추천이 없어요. [단지 추가(검색)]로 비교 아파트를 3곳 이상 고르거나, 목록에 없으면 금액으로 입력해 주세요.',
     pickGuide: '이 구역과 비슷한 입지·생활권이라고 생각하는 단지를 3~5곳 골라 주세요.', need3: '비교대상 아파트를 3곳 이상 골라 주세요', max5: '5곳까지 고를 수 있어요', pickedN: '고른 단지 {N}곳 — 3곳 이상 골라 주세요', confirm: '이대로 확정', clear: '선택 지우기',
     note45: '추천은 거리·연식 등으로 기계적으로 고른 것이라 부정확할 수 있어요. 비교아파트를 어디로 잡느냐에 따라 가격이 크게 달라질 수 있습니다.',
@@ -2428,6 +2430,8 @@ window.SBJ_RENT16 = {"source":"seedComplexes.js@67d3760 (md5 65724010) rentalHou
   const SBJ179 = { LS52: true };
   // 17-8단계 플래그: LS51 결과 색인(sbj_link_index) 항목에 비교단지시세 [{이름, 시세(만원)}](최대 3곳) 추가 — 목록표 결론 카드용. 기존 필드는 이름·형식 그대로(임장 [반영] 배너가 읽음)
   const SBJ178 = { LS51: true };
+  // 17-8 추가 플래그: LS53 경기·인천 구역 결과 칸 회색 안내, LS54 임장 앱 가져오기 지역구분 보정(목록표 키의 시트가 경기인천이면 '인천·경기' — 임장 코드·저장 형식은 그대로, 읽을 때만)
+  const SBJ180 = { LS53: true, LS54: true };
   if (SBJ177.LS50 && document.body) document.body.classList.add('l50');
   const SBJ_PICK_DEV = 1.2;   // 17-5(LS44): 고른 단지 시세 최고 ÷ 최저가 이 값을 넘으면 경고(10억 vs 12억 = 경고 없음)
   const RENT16 = (window.SBJ_RENT16 && window.SBJ_RENT16.ids) || {};
@@ -2497,7 +2501,7 @@ window.SBJ_RENT16 = {"source":"seedComplexes.js@67d3760 (md5 65724010) rentalHou
   // 13단계: 화면에서 쓰는 급지 규칙(LS22 면 6·8억 경계 근처 포함)
   function GRU() { return SBJ13.LS22 ? Object.assign({}, GR.SBJ_GRADE_RULES, { nearAll: true }) : GR.SBJ_GRADE_RULES; }
   // 15단계(LS24): 목록표에서 가져온 구역의 시트가 '경기인천'이면(상자 출처 키 = 시트|이름|부번호) 서울 단지 추천으로 급지를 정하지 않는다
-  function outsideSeoulZone(t) { return SBJ15.LS24 && !!(t && t.source && t.source.tool === 'redevlist' && typeof t.source.key === 'string' && /^경기인천\|/.test(t.source.key)); }
+  function outsideSeoulZone(t) { return SBJ15.LS24 && !!(t && ((t.source && t.source.tool === 'redevlist' && typeof t.source.key === 'string' && /^경기인천\|/.test(t.source.key)) || (SBJ180.LS54 && t.source && t.source.tool === 'imjang' && t.region === 'gi'))); }
   // 17단계(LS28): 사용자가 고친 비교대상 아파트 = options.급지근거 { off: [추천에서 뺀 id], add: [{ id, name, price }], amountOn, amount(억) }
   function pick17(st) {
     const o = SBJ17.LS28 && st && st.options && st.options.급지근거; if (!o || typeof o !== 'object') return { off: [], add: [], on: [], amountOn: false, amount: null, edited: false };
@@ -3115,6 +3119,7 @@ window.SBJ_RENT16 = {"source":"seedComplexes.js@67d3760 (md5 65724010) rentalHou
     if (res.mode === 'redev') {
       top.push('<div class="four" data-four>' + kvPy17(kv('준공 시 적정가치', res.avg ? V.eok2(res.avg.value) : '—')) + kv('총매매가', p ? V.eok2(p.totalPrice) : '—') + kv('필요 투자금', p ? V.eok2(p.invest) : '—', p && isNeg(p.invest)) + kv('안전마진', p && E.isNum(p.totalMargin) ? V.eok2(p.totalMargin) : '—', p && isNeg(p.totalMargin)) + '</div>');
       top.push(judgeHtml(res));
+      if (SBJ180.LS53 && outsideSeoulZone(state.target)) top.push('<div class="gi-note180" data-gi-note>' + esc(G.g17.giResult) + '</div>');   // 17-8 추가
       if (p && E.isNum(p.totalMargin) && !(res.judgement && res.judgement.state === 'excluded')) top.push('<div class="ratios">매수가 대비 마진비율 <b>' + (E.isNum(p.ratioBuy) ? E.fmtPct(p.ratioBuy) : '계산할 수 없음') + '</b> · 실투자금 마진비율 <b>' + (E.isNum(p.ratioInvest) ? E.fmtPct(p.ratioInvest) : '계산할 수 없음') + '</b></div>');
     } else if (res.avg) {
       top.push('<div class="four" data-four>' + kv('예상 가치', V.eok2(res.avg.value)) + kv('기준시세(평균)', V.eok2(res.avg.base)) + kv('보정 합계', E.fmtRate(V.avgPct(res))) + kv('보정액', V.eok2(res.avg.corr), isNeg(res.avg.corr)) + '</div>');
@@ -3473,9 +3478,12 @@ window.SBJ_RENT16 = {"source":"seedComplexes.js@67d3760 (md5 65724010) rentalHou
     renderAll(true); markClean();
     toast(L.TOOLS[inbox.from.tool] + '에서 값을 가져왔어요. 표시된 값을 확인하세요.');
   }
+  // 17-8 추가(LS54): 임장 앱은 목록표 구역이면 지역구분 '서울'을 넣어 보냄 → 목록표 키(시트|구역명|세부)의 시트가 경기인천이면 '인천·경기'로 바로잡음(메모리에서만)
+  function fixImjangGi180(ib) { if (SBJ180.LS54 && ib && ib.from && ib.from.tool === 'imjang' && typeof ib.from.redevKey === 'string' && /^경기인천\|/.test(ib.from.redevKey) && ib.fields && ib.fields['지역구분'] === '서울') ib.fields['지역구분'] = '인천·경기'; return ib; }
   function checkInbox() {
     const r = L.readInbox(ST.s, Date.now());
     if (!r.ok) { if (r.reason !== 'none' && r.reason !== 'storage') L.clearInbox(ST.s); return; }   // 만료·손상·모르는 형식은 조용히 지움
+    fixImjangGi180(r.inbox);
     const ib = r.inbox, tool = L.TOOLS[ib.from.tool];
     const list = document.createElement('ul'); list.style.cssText = 'margin:4px 0 0;padding-left:18px;font-size:14px';
     L.inboxSummary(ib).forEach((s) => { const li = document.createElement('li'); li.textContent = s; list.appendChild(li); });
