@@ -2436,6 +2436,8 @@ window.SBJ_RENT16 = {"source":"seedComplexes.js@67d3760 (md5 65724010) rentalHou
   const SBJ180 = { LS53: true, LS54: true, LS55: true, LS57: true };   // LS57: 결과 색인에 기준마진비율(시기 기준 B)·급지·급지마진비율(그 급지의 적정 B) 추가 — 판정에 쓰는 값 그대로(새 공식 없음)
   // 17-9단계 플래그: LS56 경기·인천 주변 추천 — data/gi_coords_v1.json(2,602곳, 서울 파일과 같은 구조)을 서울 970곳과 합쳐 경기·인천 구역 추천·비교단지 이름 검색에 씀(시·도 경계로 자르지 않음). 서울 구역 추천은 서울 파일만(그대로). 끄면 17-8 동작
   const SBJ179G = { LS56: true };
+  // 17-10 플래그: LS58 [목록표에서 보기]를 같은 탭으로 이동(새 탭은 입장 확인 기록(sessionStorage)이 없어 첫 화면으로 돌아감 — 임장 [시세보정] 버튼과 같은 방식). 끄면 17-9(새 탭)
+  const SBJ1710 = { LS58: true };
   const GI_COORDS_URL = 'data/gi_coords_v1.json';   // LS55: 비교단지 이름 검색(단지 찾기·이름 자동완성)에 좌표 파일에 없는 단지(경기·인천 등, 현재가 인덱스에만 있음)도 보여 줌 — 고르면 현재가 자동, 준공연도·세대수는 직접 입력
   if (SBJ177.LS50 && document.body) document.body.classList.add('l50');
   const SBJ_PICK_DEV = 1.2;   // 17-5(LS44): 고른 단지 시세 최고 ÷ 최저가 이 값을 넘으면 경고(10억 vs 12억 = 경고 없음)
@@ -3861,7 +3863,7 @@ window.SBJ_RENT16 = {"source":"seedComplexes.js@67d3760 (md5 65724010) rentalHou
       (SBJ174.LS39 ? (tl || SBJ_ZC_ETA ? sec('일정·속도', (SBJ_ZC_ETA ? '<div class="zc-grid" data-zc-sched>' + item('예상 준공', '—') + '</div>' : '') + tl) : '') : sec('일정·속도', '<div class="zc-grid" data-zc-sched>' + item('진행단계', stageTxt) + item('단계 진입', zym(r.lastDate) || '—') + item('진행 속도', speed) + item('예상 준공', '—') + '</div>' + tl)) +
       sec('핵심 수치', '<div class="zc-grid" data-zc-core>' + item('예정 세대수', zv(hh)) + item('조합원수', zv(r.union != null ? r.union : r.owners)) + item('일반분양', zv(gen) + zpct(gen, r.union != null ? r.union : r.owners, '조합원 대비')) + item('임대', zv(r.tenant) + zpct(r.tenant, r.households, '전체 세대 대비')) + '</div>') +
       sec('사업성 지표', '<div class="zc-grid" data-zc-biz>' + item('사업성등급', zv(gname)) + item('일반분양비율', ratio ? ratio + '%' : '—') + item('용적률', zv(r.farRatio)) + item('층수', zv(r.floors)) + '</div>') +
-      '<a class="zc-link" data-zc-link href="' + esc(RD.LIST_URL + (SBJ176.LS47 ? '#zone=' + encodeURIComponent(RD.uid(r)) + (r.id !== undefined && r.id !== null ? '&id=' + encodeURIComponent(String(r.id)) : '') : '')) + '" target="_blank" rel="noopener">목록표에서 보기 ↗</a>';   // 17-6(LS47): 목록표가 아직 이 값을 읽지 않으면 지금처럼 첫 화면
+      '<a class="zc-link" data-zc-link href="' + esc(RD.LIST_URL + (SBJ176.LS47 ? '#zone=' + encodeURIComponent(RD.uid(r)) + (r.id !== undefined && r.id !== null ? '&id=' + encodeURIComponent(String(r.id)) : '') : '')) + '"' + (SBJ1710.LS58 ? '>목록표에서 보기</a>' : ' target="_blank" rel="noopener">목록표에서 보기 ↗</a>');   // 17-6(LS47): 목록표가 아직 이 값을 읽지 않으면 지금처럼 첫 화면
   }
   function renderZone17() {
     const el = $('secZone'); if (!el) return;
