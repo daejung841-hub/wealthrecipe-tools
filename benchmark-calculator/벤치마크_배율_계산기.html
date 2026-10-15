@@ -602,8 +602,11 @@ button.pyeong-chip{font:inherit;font-size:11.5px;}
 .concl-why-l60{font-size:12.5px;line-height:1.6;color:var(--ink-soft, var(--ink));margin:6px 0 2px;padding:6px 10px;border-left:3px solid var(--warn);background:rgba(0,0,0,.03);border-radius:0 6px 6px 0;word-break:keep-all;}
 .concl-why-l60 b{color:var(--warn);}
 /* 묶음 L61(122단계): 보조 배지 "전세 동반 약세" — 중립색(경고색 아님), 메인 배지보다 작게 */
-.badge.sub-badge-l61{background:var(--neutral-bg);color:var(--ink);font-weight:600;font-size:11.5px;padding:2px 9px;border:1px solid var(--line, #D5DDE3);cursor:pointer;font-family:inherit;line-height:1.5;}
-.badge.sub-badge-l61.mini{font-size:10.5px;padding:0 6px;cursor:default;}
+:root{--sub-l61-bg:#B45309;--sub-l61-ink:#FFFFFF;}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){--sub-l61-bg:#F2A93B;--sub-l61-ink:#1A1206;} }
+:root[data-theme="dark"]{--sub-l61-bg:#F2A93B;--sub-l61-ink:#1A1206;}
+.badge.sub-badge-l61{background:var(--sub-l61-bg);color:var(--sub-l61-ink);font-weight:700;font-size:12.5px;padding:3px 10px;border:0;cursor:pointer;font-family:inherit;line-height:1.5;}
+.badge.sub-badge-l61.mini{font-size:11px;padding:1px 7px;cursor:default;}
 .concl-top .badge.sub-badge-l61{flex:none;align-self:center;}
 .concl-sub-l61{font-size:12.5px;line-height:1.6;color:var(--ink-muted);margin:4px 0 2px;word-break:keep-all;}
 details.sub-why-l61{font-size:12.5px;line-height:1.6;color:var(--ink);margin:2px 0 4px;padding:4px 10px;border-left:3px solid var(--line, #D5DDE3);background:var(--neutral-bg);border-radius:0 6px 6px 0;}
