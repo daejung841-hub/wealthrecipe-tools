@@ -487,7 +487,7 @@ window.SBJListLink = (function () {
     put('구역명', String(r.name || '') + (r.subCode ? ' ' + r.subCode : ''));
     if (Number.isInteger(r.households) && r.households > 0) put('세대수', r.households);
     put('진행단계', stage4(r.stage));
-    put('지역구분', '서울');
+    put('지역구분', r.sheet === '경기인천' ? '인천·경기' : '서울');   // 경기·인천 구역은 시세보정에 '인천·경기'로 넘김(서울 단지 추천·서울 기준 판정 막음)
     const price = null, init0 = null;   // 공개판에는 가격 값이 없어 계산기에는 구역명·세대수·단계만 넘긴다
     put('실매수가', price !== null && price >= 0 ? price : null);
     if (price !== null && init0 !== null && init0 <= price) put('전세대출', price - init0);

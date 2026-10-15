@@ -994,6 +994,7 @@ window.SBJ_GUIDE = {
     cardEdited: '사용자 수정', cardAmount: '금액 직접 입력', cardDev: '편차 큼',
     xlsxBasis: '근거 단지', xlsxEdited: '사용자 수정', xlsxAmount: '금액 직접 입력', xlsxDev: '편차 큼', xlsxRent: '임대 영향',
     acHead: '목록표 구역',
+    outsideGi: '경기·인천 구역은 주변 추천이 없어요. [단지 추가(검색)]로 비교 아파트를 3곳 이상 고르거나, 목록에 없으면 금액으로 입력해 주세요.',
     pickGuide: '이 구역과 비슷한 입지·생활권이라고 생각하는 단지를 3~5곳 골라 주세요.', need3: '비교대상 아파트를 3곳 이상 골라 주세요', max5: '5곳까지 고를 수 있어요', pickedN: '고른 단지 {N}곳 — 3곳 이상 골라 주세요', confirm: '이대로 확정', clear: '선택 지우기',
     note45: '추천은 거리·연식 등으로 기계적으로 고른 것이라 부정확할 수 있어요. 비교아파트를 어디로 잡느냐에 따라 가격이 크게 달라질 수 있습니다.',
     red17: '이 구역은 주변 시세 차이가 특히 커요. 생활권을 꼼꼼히 따져 골라 주세요.',
@@ -1647,7 +1648,7 @@ window.SBJ_GUIDE = {
       if (v === undefined || v === null || v === '') return;
       if (k === '구역명') { if (typeof v === 'string' && v.trim()) fields[k] = v.trim().slice(0, 80); }
       else if (k === '진행단계') { if (STAGE4[v]) fields[k] = v; }
-      else if (k === '지역구분') { if (v === '서울') fields[k] = v; }
+      else if (k === '지역구분') { if (v === '서울' || v === '인천·경기') fields[k] = v; }   // 17-9a: 경기·인천 구역은 '인천·경기'
       else if (k === '세대수') { if (isInt(v) && v > 0 && v <= 100000) fields[k] = v; }
       else if (k === '준공연도') { if (isInt(v) && v >= 1980 && v <= 2060) fields[k] = v; }
       else if (MONEY.includes(k)) { if (isInt(v) && v >= 0 && v <= 10000000) fields[k] = v; }
@@ -1674,7 +1675,7 @@ window.SBJ_GUIDE = {
       if (k === 'coord' || k === 'gu') { set['target.' + k] = k === 'coord' ? { lat: inbox.fields.coord.lat, lng: inbox.fields.coord.lng } : inbox.fields.gu; return; }   // 표시 없이 위치 정보로만 씀
       const path = FIELD_PATH[k]; let v = inbox.fields[k];
       if (k === '진행단계') v = STAGE4[v];
-      if (k === '지역구분') v = 'seoul';
+      if (k === '지역구분') v = v === '인천·경기' ? 'gi' : 'seoul';
       set[path] = v; imported[path] = inbox.fieldSources[k] || inbox.from.tool;
     });
     if (set['buy.appraisal.publicPrice'] !== undefined) set['buy.appraisal.type'] = 'range';
@@ -1944,7 +1945,7 @@ window.SBJ_GUIDE = {
     put('구역명', String(r.name || '') + (r.subCode ? ' ' + r.subCode : ''));
     if (Number.isInteger(r.households) && r.households > 0) put('세대수', r.households);
     put('진행단계', stage4(r.stage));
-    put('지역구분', '서울');
+    put('지역구분', r.sheet === '경기인천' ? '인천·경기' : '서울');   // 경기·인천 구역은 시세보정에 '인천·경기'로 넘김(서울 단지 추천·서울 기준 판정 막음)
     const price = eokText(r.minPrice), init0 = eokText(r.minInitial);
     put('실매수가', price !== null && price >= 0 ? price : null);
     if (price !== null && init0 !== null && init0 <= price) put('전세대출', price - init0);
@@ -2423,6 +2424,8 @@ window.SBJ_RENT16 = {"source":"seedComplexes.js@67d3760 (md5 65724010) rentalHou
   // LS49: 예시(서계통합)를 연 뒤 목록표·구역명 자동완성으로 다른 구역을 불러오면 예시 상태를 끔(예시가 채운 값은 비우고 사용자가 바꾼 값만 남긴 새 기록에서 시작 → 미리 고르기·예시 안내·예시 금액 없음)
   // LS50: 결과 칸 판정 배지 크게(글자 약 2배·굵게·넉넉한 여백, 색은 그대로) + 카톡 공유 이미지 배지도 키움. 판정 글자·기준·엑셀 그대로
   const SBJ177 = { LS48: true, LS49: true, LS50: true };
+  // 17-9a단계 플래그: LS52 경기·인천 구역 안내(주변 추천 없음 → [단지 추가(검색)]로 3곳 이상 또는 금액). 지역구분 '인천·경기' 주고받기는 연동 형식 확장이라 플래그 없이 항상
+  const SBJ179 = { LS52: true };
   if (SBJ177.LS50 && document.body) document.body.classList.add('l50');
   const SBJ_PICK_DEV = 1.2;   // 17-5(LS44): 고른 단지 시세 최고 ÷ 최저가 이 값을 넘으면 경고(10억 vs 12억 = 경고 없음)
   const RENT16 = (window.SBJ_RENT16 && window.SBJ_RENT16.ids) || {};
@@ -3709,7 +3712,7 @@ window.SBJ_RENT16 = {"source":"seedComplexes.js@67d3760 (md5 65724010) rentalHou
       '<button type="button" class="btn small primary" data-gp-confirm' + (n >= 3 || (amt && ok) ? '' : ' disabled') + '>' + esc(G.g17.confirm) + '</button></div>';
     if (G17.searchOpen) h += '<div class="gp-search" data-gp-search><input type="search" data-gp-q placeholder="' + esc(G.g17.addPh) + '" aria-label="비교대상 아파트 검색" value="' + esc(G17.q) + '"><div class="gp-res" data-gp-res></div></div>';
     if (pk.amountOn) { const a = pk.amount !== null ? GR.amountGrade(pk.amount, GRU()) : null; h += '<div class="gp-amt"><label for="gpAmount">' + esc(G.g17.amountLabel) + '</label><input id="gpAmount" class="txt" data-gp-amount inputmode="decimal" value="' + (pk.amount !== null ? esc(String(pk.amount)) : '') + '"><span data-gp-amount-grade>' + esc(a ? '→ 급지 ' + a.label : G.g17.amountNeed) + '</span></div>'; }
-    if (outsideSeoulZone(state.target) || !base.length) h += '<div class="gp-hint" data-gp-outside>' + esc(G.g17.outsideHint) + '</div>';
+    if (outsideSeoulZone(state.target) || !base.length) h += '<div class="gp-hint" data-gp-outside>' + esc(SBJ179.LS52 && outsideSeoulZone(state.target) ? G.g17.outsideGi : G.g17.outsideHint) + '</div>';
     return h + note + '</div>';
   }
   function pickPopup17(d, reopen) {
