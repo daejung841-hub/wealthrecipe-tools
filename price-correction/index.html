@@ -139,6 +139,7 @@ a.btn{display:inline-flex;align-items:center;text-decoration:none;}
 .res{padding:12px 14px;}
 .res h2{font-size:15.5px;margin-bottom:6px;}
 .headline{font-size:16px;line-height:1.55;font-weight:700;margin:2px 0 8px;word-break:keep-all;overflow-wrap:anywhere;}
+.hc-y{color:#1F5BC4;font-weight:800;} .hc-v{color:#17724A;font-weight:800;} .hc-p{color:#B4530A;font-weight:800;}   /* 17-11: 연도·미래 가치·지금 내는 돈(흰 배경 대비 6.27·5.93·5.02) */
 .four{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;margin:6px 0;}
 .kv{background:var(--surface-alt);border-radius:8px;padding:6px 9px;min-width:0;}
 .kv .k{font-size:12.5px;color:var(--ink-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
@@ -2438,6 +2439,8 @@ window.SBJ_RENT16 = {"source":"seedComplexes.js@67d3760 (md5 65724010) rentalHou
   const SBJ179G = { LS56: true };
   // 17-10 플래그: LS58 [목록표에서 보기]를 같은 탭으로 이동(새 탭은 입장 확인 기록(sessionStorage)이 없어 첫 화면으로 돌아감 — 임장 [시세보정] 버튼과 같은 방식). 끄면 17-9(새 탭)
   const SBJ1710 = { LS58: true };
+  // 17-11 플래그: LS59 결과 색인에 급지단계별마진비율 {초기, 중기, 후기} 추가(급지 규칙 base 300/100/50 × 급지 배수 = judgeBases, 판정에 쓰는 값 그대로) · LS60 결론 문장 숫자 색(연도 파랑·미래 가치 초록·지금 내는 돈 주황, 글자는 그대로). 끄면 17-10
+  const SBJ1711 = { LS59: true, LS60: true };
   const GI_COORDS_URL = 'data/gi_coords_v1.json';   // LS55: 비교단지 이름 검색(단지 찾기·이름 자동완성)에 좌표 파일에 없는 단지(경기·인천 등, 현재가 인덱스에만 있음)도 보여 줌 — 고르면 현재가 자동, 준공연도·세대수는 직접 입력
   if (SBJ177.LS50 && document.body) document.body.classList.add('l50');
   const SBJ_PICK_DEV = 1.2;   // 17-5(LS44): 고른 단지 시세 최고 ÷ 최저가 이 값을 넘으면 경고(10억 vs 12억 = 경고 없음)
@@ -2481,12 +2484,14 @@ window.SBJ_RENT16 = {"source":"seedComplexes.js@67d3760 (md5 65724010) rentalHou
   const L = window.SBJLinkCore;
   function rebuildLinkIndex(override) { if (!ST.persistent) return; const all = store.all(), idx = L.buildLinkIndex(all, Date.now(), override); if (SBJ178.LS51) addComps178(idx, all); if (SBJ180.LS57) addGrade182(idx, all, override); L.writeLinkIndex(ST.s, idx); }
   // 17-8 남은 항목(LS57): 기준마진비율 = 그 시기(초기·중기·후기) 기준 B(급지 판정이면 급지 규칙 base, 아니면 엔진 B) · 급지 = 정한 급지 이름 · 급지마진비율 = 그 급지의 적정 기준(판정에 쓴 B = base × 급지 배수). 추가만
+  function multOf1711(z) { const R = GR.SBJ_GRADE_RULES; if (R.lowSub && (z.label === R.lowSub.label)) return R.lowSub.mult; const b = R.bands.find((x) => (x.label || x.name) === z.label) || R.bands.find((x) => x.name === z.name && !x.label); return b ? b.mult : null; }   // 17-11: 급지 이름 → 규칙 표의 배수(투자 제외 등 없으면 null)
   function addGrade182(idx, all, override) {
     const byId = new Map((all || []).map((r) => [r.id, r]));
     Object.keys(idx.items || {}).forEach((k) => { const it = idx.items[k], rec = byId.get(it.recordId); if (!rec) return; const res = (override && override.recordId === rec.id ? override.result : rec.result) || {}, j = res.judgement || {}, z = j.zone || null, stg = rec.target && rec.target.stage, gb = GR.SBJ_GRADE_RULES.base;
       it.기준마진비율 = z && (stg === 'early' || stg === 'mid' || stg === 'late') ? gb[stg] : (j.state === 'graded' && E.isNum(j.B) ? j.B : null);
       it.급지 = z ? (z.label || z.name || null) : null;
-      it.급지마진비율 = z && j.state === 'graded' && E.isNum(j.B) ? j.B : null; });
+      it.급지마진비율 = z && j.state === 'graded' && E.isNum(j.B) ? j.B : null;
+      if (SBJ1711.LS59 && z && j.state === 'graded') { const m = multOf1711(z), b = m === null ? null : GR.judgeBases(m); if (b && (stg !== 'early' && stg !== 'mid' && stg !== 'late' || b[stg] === j.B)) it.급지단계별마진비율 = { 초기: b.early, 중기: b.mid, 후기: b.late }; } });   // 17-11: 판정에 쓴 B 와 같을 때만
   }
   function addComps178(idx, all) {   // 17-8(LS51): 기록의 비교단지 이름·현재가(만원)를 색인 항목에 덧붙임(추가만)
     const byId = new Map((all || []).map((r) => [r.id, r]));
@@ -3128,7 +3133,7 @@ window.SBJ_RENT16 = {"source":"seedComplexes.js@67d3760 (md5 65724010) rentalHou
     const errs = isFrozen ? [] : res.errors.filter((e) => e.path !== 'target.stage');
     if (errs.length) top.push('<div class="notice bad">입력을 확인해 주세요 (' + errs.length + '곳). ' + esc(msgFix(errs[0].msg)) + '</div>');
     const head = V.headline2(res);
-    if (head) top.push('<div class="headline">' + esc(head) + '</div>');
+    if (head) top.push('<div class="headline">' + (SBJ1711.LS60 ? headColor1711(head) : esc(head)) + '</div>');
     else if (!errs.length) top.push('<div class="small-note">입력하면 결과가 여기에 나와요.</div>');
     const p = res.primary;
     if (res.mode === 'redev') {
@@ -3864,6 +3869,15 @@ window.SBJ_RENT16 = {"source":"seedComplexes.js@67d3760 (md5 65724010) rentalHou
       sec('핵심 수치', '<div class="zc-grid" data-zc-core>' + item('예정 세대수', zv(hh)) + item('조합원수', zv(r.union != null ? r.union : r.owners)) + item('일반분양', zv(gen) + zpct(gen, r.union != null ? r.union : r.owners, '조합원 대비')) + item('임대', zv(r.tenant) + zpct(r.tenant, r.households, '전체 세대 대비')) + '</div>') +
       sec('사업성 지표', '<div class="zc-grid" data-zc-biz>' + item('사업성등급', zv(gname)) + item('일반분양비율', ratio ? ratio + '%' : '—') + item('용적률', zv(r.farRatio)) + item('층수', zv(r.floors)) + '</div>') +
       '<a class="zc-link" data-zc-link href="' + esc(RD.LIST_URL + (SBJ176.LS47 ? '#zone=' + encodeURIComponent(RD.uid(r)) + (r.id !== undefined && r.id !== null ? '&id=' + encodeURIComponent(String(r.id)) : '') : '')) + '"' + (SBJ1710.LS58 ? '>목록표에서 보기</a>' : ' target="_blank" rel="noopener">목록표에서 보기 ↗</a>');   // 17-6(LS47): 목록표가 아직 이 값을 읽지 않으면 지금처럼 첫 화면
+  }
+  // 17-11(LS60): 결론 문장 숫자 3개 색 — 글자는 V.headline2 그대로, 모양이 다르면(빈칸 등) 맞는 부분만 칠함
+  function headColor1711(t) {
+    const s = esc(t), y = '((?:[0-9]{4}|○○○○)년)', n = '([^ ]+억)';
+    let m = new RegExp('^' + y + '에 ' + n + '짜리 아파트를 ' + n + '에 ').exec(s);
+    if (m) return '<b class="hc-y">' + m[1] + '</b>에 <b class="hc-v">' + m[2] + '</b>짜리 아파트를 <b class="hc-p">' + m[3] + '</b>에 ' + s.slice(m[0].length);
+    m = new RegExp('^' + y + ' 예상 가치는 ' + n).exec(s);
+    if (m) return '<b class="hc-y">' + m[1] + '</b> 예상 가치는 <b class="hc-v">' + m[2] + '</b>' + s.slice(m[0].length);
+    return s;
   }
   function renderZone17() {
     const el = $('secZone'); if (!el) return;

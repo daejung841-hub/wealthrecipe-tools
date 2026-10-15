@@ -190,8 +190,9 @@ td.num{font-family:var(--font-mono);text-align:right;}
 .sbj-c-comps{font-size:13.5px;margin:2px 0 6px;}
 /* 17-8 남은 항목: 마진 비율·급지 칸의 ⓘ 설명(마우스 올림·탭하면 보임) */
 .sbj-tip{position:relative;display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;margin-left:4px;border-radius:50%;font-size:12px;font-weight:700;font-style:normal;background:var(--surface,#fff);color:var(--ink-muted,#61707D);border:1px solid var(--border,#E2E7EC);cursor:help;vertical-align:1px;}
-.sbj-tip::after{content:attr(data-tip);position:absolute;left:50%;bottom:calc(100% + 6px);transform:translateX(-50%);width:max-content;max-width:min(240px,80vw);white-space:normal;font-size:12.5px;font-weight:600;line-height:1.4;padding:6px 9px;border-radius:8px;background:#182430;color:#fff;opacity:0;pointer-events:none;transition:opacity .12s;z-index:5;}
-.sbj-tip:hover::after,.sbj-tip:focus::after{opacity:1;} .sbj-c-nums>div:nth-child(odd) .sbj-tip::after{left:0;transform:none;} .sbj-c-nums>div:nth-child(even) .sbj-tip::after{left:auto;right:0;transform:none;}
+.sbj-tip-b{position:absolute;left:50%;bottom:calc(100% + 6px);transform:translateX(-50%);width:max-content;max-width:min(250px,80vw);white-space:normal;text-align:left;font-size:12.5px;font-weight:500;line-height:1.45;padding:6px 9px;border-radius:8px;background:#182430;color:#fff;opacity:0;visibility:hidden;pointer-events:none;transition:opacity .12s;z-index:5;}
+.sbj-tip-b b{font-weight:800;color:#FFD27A;} .sbj-c-nums span.sbj-tip-b{display:block;font-size:12.5px;font-weight:500;color:#fff;} .sbj-c-nums .sbj-tip-b b{display:inline;font-size:inherit;line-height:inherit;white-space:nowrap;color:#FFD27A;font-weight:800;}.sbj-tip:hover .sbj-tip-b,.sbj-tip:focus .sbj-tip-b{opacity:1;visibility:visible;} .sbj-c-nums>div:nth-child(odd) .sbj-tip-b{left:0;transform:none;} .sbj-c-nums>div:nth-child(even) .sbj-tip-b{left:auto;right:0;transform:none;}   /* 17-11: ⓘ 설명을 실제 요소로(현재 단계 굵게) */
+.sbj-c-line .hc-y{color:#1F5BC4;font-weight:800;} .sbj-c-line .hc-v{color:#17724A;font-weight:800;} .sbj-c-line .hc-p{color:#B4530A;font-weight:800;}   /* 17-11: 결론 문장 숫자 — 연도·미래 가치·지금 내는 돈(흰 배경 대비 6.27·5.93·5.02, 시세보정과 같은 색) */
 .sbj-c-comps .h{font-size:12.5px;font-weight:700;color:var(--ink-muted,#61707D);margin-bottom:2px;}
 .sbj-c-comps .r{display:flex;justify-content:space-between;gap:10px;padding:3px 0;border-top:1px dashed var(--border,#E2E7EC);}
 .sbj-c-comps .r:first-of-type{border-top:none;} .sbj-c-comps .r span{min-width:0;overflow-wrap:anywhere;} .sbj-c-comps .r b{white-space:nowrap;font-weight:700;}
@@ -549,24 +550,31 @@ window.SBJListLink = (function () {
   function cardHtml178(it, stage) {
     const h = it.headline4 || {}, yr = h.준공연도 || '○○○○', v = value178(it);
     const line = it.mode === 'apt' ? yr + '년 예상 가치 ' + e2(v) : yr + '년에 ' + e2(v) + '짜리 아파트를 ' + e2(h.총매매가) + '에 사온다';
+    const cY = '<b class="hc-y">' + escH(yr + '년') + '</b>', cV = '<b class="hc-v">' + escH(e2(v)) + '</b>', lineH = it.mode === 'apt' ? cY + ' 예상 가치 ' + cV : cY + '에 ' + cV + '짜리 아파트를 <b class="hc-p">' + escH(e2(h.총매매가)) + '</b>에 사온다';   // 17-11: 글자는 line 과 같음
     const comps = Array.isArray(it.비교단지시세) ? it.비교단지시세.filter((c) => c && c.이름).slice(0, 3) : null;
     let ch = '<div class="sbj-c-comps" data-sbj-comps><div class="h">사용한 비교단지</div>';
     if (comps && comps.length) comps.forEach((c) => { ch += '<div class="r"><span>' + escH(c.이름) + '</span><b>' + (typeof c.시세 === 'number' ? escH(e2(c.시세)) : '시세 없음') + '</b></div>'; });
     else ch += '<div class="none">' + (comps ? '비교단지 정보 없음' : '비교단지 정보 없음(이전 저장)') + '</div>';
     ch += '</div>';
     return '<div class="sbj-card" data-sbj-card><div class="sbj-c-top"><span class="sbj-verdict ' + (GRADE_CLS[it.판정] || '') + '" data-sbj-verdict>' + escH(it.판정 || '판정 없음') + '</span><span class="sbj-chip" data-sbj-stage>' + escH(stage) + '</span></div>' +
-      '<div class="sbj-c-line" data-sbj-line>' + escH(line) + '</div>' +
+      '<div class="sbj-c-line" data-sbj-line>' + (RATIO1711 ? lineH : escH(line)) + '</div>' +
       (it.mode === 'apt' ? '' : '<div class="sbj-c-nums"><div><span>필요자금</span><b data-sbj-invest>' + escH(e2(h.실투자금)) + '</b></div><div><span>안전마진</span><b data-sbj-margin>' + escH(e2(it.전체마진)) + '</b></div>' + (RATIO182 ? nums182(it) : '') + '</div>') +
       ch + '<div class="sbj-meta" data-sbj-saved>시세보정 결과 · 저장 ' + escH(ago(it.savedAt)) + '</div></div>';
   }
   // 17-8 남은 항목: 실투자금 대비 마진 비율(ⓘ 시기 기준 마진 비율) · 급지(ⓘ 그 급지의 적정 마진 비율) — 시세보정 색인 값 그대로(기준마진비율·급지·급지마진비율), 없으면 칸에 —
   const RATIO182 = true;
+  const RATIO1711 = true;   // 17-11: ⓘ 두 곳을 판정 기준으로 · 결론 문장 숫자 색
   const pct182 = (v) => (typeof v === 'number' && Number.isFinite(v) ? (Math.round(v * 1000) / 10).toString().replace('-', '−') + '%' : '—');
-  const tip182 = (t) => (t ? '<i class="sbj-tip" tabindex="0" role="note" aria-label="' + escH(t) + '" title="' + escH(t) + '" data-tip="' + escH(t) + '">i</i>' : '');
+  const tip182 = (t, html) => (t ? '<i class="sbj-tip" tabindex="0" role="note" aria-label="' + escH(t) + '" data-tip="' + escH(t) + '">i<span class="sbj-tip-b" aria-hidden="true">' + (html || escH(t)) + '</span></i>' : '');   // 17-11: 설명은 안쪽 요소(굵게 표시 가능)
   function nums182(it) {
     const st = it.판정단계 || '', b = typeof it.기준마진비율 === 'number' ? it.기준마진비율 : null, gb = typeof it.급지마진비율 === 'number' ? it.급지마진비율 : null;
-    const t1 = b !== null ? (st ? st + ' ' : '') + '기준 마진 비율 ' + b + '%' : '', t2 = it.급지 && gb !== null ? it.급지 + ' 급지 적정 마진 비율 ' + gb + '% 이상' + (st ? '(' + st + ')' : '') : '';
-    return '<div><span>실투자금 대비 마진' + tip182(t1) + '</span><b data-sbj-ratio>' + escH(pct182(it.실투자금마진비율)) + '</b></div><div><span>급지' + tip182(t2) + '</span><b data-sbj-zone>' + escH(it.급지 || '—') + '</b></div>';
+    let t1 = b !== null ? (st ? st + ' ' : '') + '기준 마진 비율 ' + b + '%' : '', t2 = it.급지 && gb !== null ? it.급지 + ' 급지 적정 마진 비율 ' + gb + '% 이상' + (st ? '(' + st + ')' : '') : '', h2 = null;
+    if (RATIO1711) {   // 17-11: 마진 ⓘ = 이 급지·현재 단계의 적정 마진(판정에 쓴 기준) · 급지 ⓘ = 그 급지의 단계별 적정 마진(현재 단계 굵게). 숫자는 시세보정이 저장한 값만
+      t1 = it.급지 && gb !== null ? it.급지 + ' 급지' + (st ? ' · ' + st : '') + ' 적정 마진 ' + gb + '% 이상' : '';
+      const S = it.급지단계별마진비율, K = ['초기', '중기', '후기'];
+      if (it.급지 && S && typeof S === 'object' && K.every((k) => typeof S[k] === 'number')) { t2 = it.급지 + ' 급지 적정 마진 — ' + K.map((k) => k + ' ' + S[k] + '%').join(' / '); h2 = escH(it.급지 + ' 급지 적정 마진 — ') + K.map((k) => (k === st ? '<b>' + escH(k + ' ' + S[k] + '%') + '</b>' : escH(k + ' ' + S[k] + '%'))).join(' / '); }
+    }
+    return '<div><span>실투자금 대비 마진' + tip182(t1) + '</span><b data-sbj-ratio>' + escH(pct182(it.실투자금마진비율)) + '</b></div><div><span>급지' + tip182(t2, h2) + '</span><b data-sbj-zone>' + escH(it.급지 || '—') + '</b></div>';
   }
   const stage182 = (it) => (it.판정단계 ? it.판정단계 + (RATIO182 && it.급지 ? ' · ' + it.급지 + (typeof it.급지마진비율 === 'number' ? ' 급지 기준' : '') : it.판정단계 === '후기' ? ' · ' + (it.지역구분 || '서울') + ' 기준' : '') : '진행단계 미선택');   // 시세보정 화면 표기(급지 판정이면 'X 급지 기준')와 맞춤
   const TOP178 = true;   // 17-8 추가: 시세보정 칸을 상세 맨 위로·버튼을 링크 줄로
