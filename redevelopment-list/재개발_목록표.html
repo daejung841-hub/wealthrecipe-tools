@@ -188,6 +188,10 @@ td.num{font-family:var(--font-mono);text-align:right;}
 .sbj-go{font:inherit;font-size:13px;font-weight:600;cursor:pointer;} #btnSbjGo.sbj-go{min-height:44px;margin-top:0;}   /* 📐 시세 보정하기 = 링크 줄 버튼(.dmp-lk)과 같은 모양 */
 @media (max-width:420px){ .sbj-verdict{font-size:26px;padding:8px 20px;} .sbj-c-line{font-size:18px;} .sbj-c-nums b{font-size:24px;} }
 .sbj-c-comps{font-size:13.5px;margin:2px 0 6px;}
+/* 17-8 남은 항목: 마진 비율·급지 칸의 ⓘ 설명(마우스 올림·탭하면 보임) */
+.sbj-tip{position:relative;display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;margin-left:4px;border-radius:50%;font-size:12px;font-weight:700;font-style:normal;background:var(--surface,#fff);color:var(--ink-muted,#61707D);border:1px solid var(--border,#E2E7EC);cursor:help;vertical-align:1px;}
+.sbj-tip::after{content:attr(data-tip);position:absolute;left:50%;bottom:calc(100% + 6px);transform:translateX(-50%);width:max-content;max-width:min(240px,80vw);white-space:normal;font-size:12.5px;font-weight:600;line-height:1.4;padding:6px 9px;border-radius:8px;background:#182430;color:#fff;opacity:0;pointer-events:none;transition:opacity .12s;z-index:5;}
+.sbj-tip:hover::after,.sbj-tip:focus::after{opacity:1;} .sbj-c-nums>div:nth-child(odd) .sbj-tip::after{left:0;transform:none;} .sbj-c-nums>div:nth-child(even) .sbj-tip::after{left:auto;right:0;transform:none;}
 .sbj-c-comps .h{font-size:12.5px;font-weight:700;color:var(--ink-muted,#61707D);margin-bottom:2px;}
 .sbj-c-comps .r{display:flex;justify-content:space-between;gap:10px;padding:3px 0;border-top:1px dashed var(--border,#E2E7EC);}
 .sbj-c-comps .r:first-of-type{border-top:none;} .sbj-c-comps .r span{min-width:0;overflow-wrap:anywhere;} .sbj-c-comps .r b{white-space:nowrap;font-weight:700;}
@@ -552,9 +556,19 @@ window.SBJListLink = (function () {
     ch += '</div>';
     return '<div class="sbj-card" data-sbj-card><div class="sbj-c-top"><span class="sbj-verdict ' + (GRADE_CLS[it.판정] || '') + '" data-sbj-verdict>' + escH(it.판정 || '판정 없음') + '</span><span class="sbj-chip" data-sbj-stage>' + escH(stage) + '</span></div>' +
       '<div class="sbj-c-line" data-sbj-line>' + escH(line) + '</div>' +
-      (it.mode === 'apt' ? '' : '<div class="sbj-c-nums"><div><span>필요자금</span><b data-sbj-invest>' + escH(e2(h.실투자금)) + '</b></div><div><span>안전마진</span><b data-sbj-margin>' + escH(e2(it.전체마진)) + '</b></div></div>') +
+      (it.mode === 'apt' ? '' : '<div class="sbj-c-nums"><div><span>필요자금</span><b data-sbj-invest>' + escH(e2(h.실투자금)) + '</b></div><div><span>안전마진</span><b data-sbj-margin>' + escH(e2(it.전체마진)) + '</b></div>' + (RATIO182 ? nums182(it) : '') + '</div>') +
       ch + '<div class="sbj-meta" data-sbj-saved>시세보정 결과 · 저장 ' + escH(ago(it.savedAt)) + '</div></div>';
   }
+  // 17-8 남은 항목: 실투자금 대비 마진 비율(ⓘ 시기 기준 마진 비율) · 급지(ⓘ 그 급지의 적정 마진 비율) — 시세보정 색인 값 그대로(기준마진비율·급지·급지마진비율), 없으면 칸에 —
+  const RATIO182 = true;
+  const pct182 = (v) => (typeof v === 'number' && Number.isFinite(v) ? (Math.round(v * 1000) / 10).toString().replace('-', '−') + '%' : '—');
+  const tip182 = (t) => (t ? '<i class="sbj-tip" tabindex="0" role="note" aria-label="' + escH(t) + '" title="' + escH(t) + '" data-tip="' + escH(t) + '">i</i>' : '');
+  function nums182(it) {
+    const st = it.판정단계 || '', b = typeof it.기준마진비율 === 'number' ? it.기준마진비율 : null, gb = typeof it.급지마진비율 === 'number' ? it.급지마진비율 : null;
+    const t1 = b !== null ? (st ? st + ' ' : '') + '기준 마진 비율 ' + b + '%' : '', t2 = it.급지 && gb !== null ? it.급지 + ' 급지 적정 마진 비율 ' + gb + '% 이상' + (st ? '(' + st + ')' : '') : '';
+    return '<div><span>실투자금 대비 마진' + tip182(t1) + '</span><b data-sbj-ratio>' + escH(pct182(it.실투자금마진비율)) + '</b></div><div><span>급지' + tip182(t2) + '</span><b data-sbj-zone>' + escH(it.급지 || '—') + '</b></div>';
+  }
+  const stage182 = (it) => (it.판정단계 ? it.판정단계 + (RATIO182 && it.급지 ? ' · ' + it.급지 + (typeof it.급지마진비율 === 'number' ? ' 급지 기준' : '') : it.판정단계 === '후기' ? ' · ' + (it.지역구분 || '서울') + ' 기준' : '') : '진행단계 미선택');   // 시세보정 화면 표기(급지 판정이면 'X 급지 기준')와 맞춤
   const TOP178 = true;   // 17-8 추가: 시세보정 칸을 상세 맨 위로·버튼을 링크 줄로
   function badgeHtml(r) {
     if (!F.LS3) return '';
@@ -567,7 +581,7 @@ window.SBJListLink = (function () {
     const it = F.LS3 ? itemFor(r) : null;
     let body = '';
     if (TOP178) {   // 17-8 추가: 상세 맨 위 — 📐 버튼(링크 줄로 옮겨짐) + 결과가 있을 때만 결론 카드(구역마다 가장 최근 저장 1건)
-      const stage = it ? (it.판정단계 ? it.판정단계 + (it.판정단계 === '후기' ? ' · ' + (it.지역구분 || '서울') + ' 기준' : '') : '진행단계 미선택') : '';
+      const stage = it ? stage182(it) : '';
       let top = '';
       if (F.LS2) top += bad ? '<div class="sbj-meta">이 구역은 ' + (bad === 'dup' ? '이름이 같은 구역이 있어' : '이름 정보가 없어') + ' 시세보정과 연결할 수 없어요.</div>' : '<div class="dmp-links-row" id="sbjBtnRow"><button type="button" class="dmp-lk sbj-go" id="btnSbjGo" data-sbj-id="' + escH(r.id) + '">📐 시세 보정하기</button></div>';
       if (F.LS3 && it) top += cardHtml178(it, stage);

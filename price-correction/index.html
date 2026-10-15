@@ -995,6 +995,7 @@ window.SBJ_GUIDE = {
     cardEdited: '사용자 수정', cardAmount: '금액 직접 입력', cardDev: '편차 큼',
     xlsxBasis: '근거 단지', xlsxEdited: '사용자 수정', xlsxAmount: '금액 직접 입력', xlsxDev: '편차 큼', xlsxRent: '임대 영향',
     acHead: '목록표 구역',
+    extra181: '이 단지는 준공연도·세대수 정보가 없어요. 비교단지 칸에 직접 입력해 주세요(현재가는 자동).', extra181Tag: '준공연도·세대수 직접 입력',
     giResult: '보정값은 서울 사례 중심으로 만든 기준이에요. 경기·인천은 결과를 한 번 더 확인해 주세요.',
     outsideGi: '경기·인천 구역은 주변 추천이 없어요. [단지 추가(검색)]로 비교 아파트를 3곳 이상 고르거나, 목록에 없으면 금액으로 입력해 주세요.',
     pickGuide: '이 구역과 비슷한 입지·생활권이라고 생각하는 단지를 3~5곳 골라 주세요.', need3: '비교대상 아파트를 3곳 이상 골라 주세요', max5: '5곳까지 고를 수 있어요', pickedN: '고른 단지 {N}곳 — 3곳 이상 골라 주세요', confirm: '이대로 확정', clear: '선택 지우기',
@@ -2431,7 +2432,7 @@ window.SBJ_RENT16 = {"source":"seedComplexes.js@67d3760 (md5 65724010) rentalHou
   // 17-8단계 플래그: LS51 결과 색인(sbj_link_index) 항목에 비교단지시세 [{이름, 시세(만원)}](최대 3곳) 추가 — 목록표 결론 카드용. 기존 필드는 이름·형식 그대로(임장 [반영] 배너가 읽음)
   const SBJ178 = { LS51: true };
   // 17-8 추가 플래그: LS53 경기·인천 구역 결과 칸 회색 안내, LS54 임장 앱 가져오기 지역구분 보정(목록표 키의 시트가 경기인천이면 '인천·경기' — 임장 코드·저장 형식은 그대로, 읽을 때만)
-  const SBJ180 = { LS53: true, LS54: true };
+  const SBJ180 = { LS53: true, LS54: true, LS55: true, LS57: true };   // LS57: 결과 색인에 기준마진비율(시기 기준 B)·급지·급지마진비율(그 급지의 적정 B) 추가 — 판정에 쓰는 값 그대로(새 공식 없음)   // LS55: 비교단지 이름 검색(단지 찾기·이름 자동완성)에 좌표 파일에 없는 단지(경기·인천 등, 현재가 인덱스에만 있음)도 보여 줌 — 고르면 현재가 자동, 준공연도·세대수는 직접 입력
   if (SBJ177.LS50 && document.body) document.body.classList.add('l50');
   const SBJ_PICK_DEV = 1.2;   // 17-5(LS44): 고른 단지 시세 최고 ÷ 최저가 이 값을 넘으면 경고(10억 vs 12억 = 경고 없음)
   const RENT16 = (window.SBJ_RENT16 && window.SBJ_RENT16.ids) || {};
@@ -2472,7 +2473,15 @@ window.SBJ_RENT16 = {"source":"seedComplexes.js@67d3760 (md5 65724010) rentalHou
   const store = S.createStore(ST.s, { ruleVersion: R.version, schemaVersion: R.schemaVersion, limits: R.backup });
   // ───────── 연동(5단계): 결과 색인 갱신 — 저장 블록은 그대로 두고 바깥에서 감싼다 ─────────
   const L = window.SBJLinkCore;
-  function rebuildLinkIndex(override) { if (!ST.persistent) return; const all = store.all(), idx = L.buildLinkIndex(all, Date.now(), override); if (SBJ178.LS51) addComps178(idx, all); L.writeLinkIndex(ST.s, idx); }
+  function rebuildLinkIndex(override) { if (!ST.persistent) return; const all = store.all(), idx = L.buildLinkIndex(all, Date.now(), override); if (SBJ178.LS51) addComps178(idx, all); if (SBJ180.LS57) addGrade182(idx, all, override); L.writeLinkIndex(ST.s, idx); }
+  // 17-8 남은 항목(LS57): 기준마진비율 = 그 시기(초기·중기·후기) 기준 B(급지 판정이면 급지 규칙 base, 아니면 엔진 B) · 급지 = 정한 급지 이름 · 급지마진비율 = 그 급지의 적정 기준(판정에 쓴 B = base × 급지 배수). 추가만
+  function addGrade182(idx, all, override) {
+    const byId = new Map((all || []).map((r) => [r.id, r]));
+    Object.keys(idx.items || {}).forEach((k) => { const it = idx.items[k], rec = byId.get(it.recordId); if (!rec) return; const res = (override && override.recordId === rec.id ? override.result : rec.result) || {}, j = res.judgement || {}, z = j.zone || null, stg = rec.target && rec.target.stage, gb = GR.SBJ_GRADE_RULES.base;
+      it.기준마진비율 = z && (stg === 'early' || stg === 'mid' || stg === 'late') ? gb[stg] : (j.state === 'graded' && E.isNum(j.B) ? j.B : null);
+      it.급지 = z ? (z.label || z.name || null) : null;
+      it.급지마진비율 = z && j.state === 'graded' && E.isNum(j.B) ? j.B : null; });
+  }
   function addComps178(idx, all) {   // 17-8(LS51): 기록의 비교단지 이름·현재가(만원)를 색인 항목에 덧붙임(추가만)
     const byId = new Map((all || []).map((r) => [r.id, r]));
     Object.keys(idx.items || {}).forEach((k) => { const it = idx.items[k], rec = byId.get(it.recordId); if (!rec) return; it.비교단지시세 = (rec.comps || []).filter((c) => c && c.name).slice(0, 3).map((c) => ({ 이름: String(c.name), 시세: E.isNum(c.price) ? c.price : null })); });
@@ -3603,8 +3612,8 @@ window.SBJ_RENT16 = {"source":"seedComplexes.js@67d3760 (md5 65724010) rentalHou
       const head = document.createElement('div'); head.className = 'pick-note'; head.textContent = all.length + '곳' + (all.length > ps.limit ? ' · ' + ps.limit + '곳까지 보여요' : ''); list.appendChild(head);
       all.slice(0, ps.limit).forEach((it) => {
         const b = document.createElement('button'); b.type = 'button'; b.className = 'pick-item'; b.dataset.pickId = it.id;
-        const n = document.createElement('div'); n.className = 'n'; n.textContent = data.label.get(it.id);
-        const m = document.createElement('div'); m.className = 'm'; m.textContent = [[it.gu, it.dong].filter(Boolean).join(' '), it.builtYear ? it.builtYear + '년' : '준공연도 미상', it.units ? it.units.toLocaleString('ko-KR') + '세대' : '세대수 미상', P.fmtKm(it.distKm)].join(' · ');
+        const n = document.createElement('div'); n.className = 'n'; n.textContent = data.label.get(it.id) || it.name;
+        const m = document.createElement('div'); m.className = 'm'; m.textContent = it.extra181 ? [it.gu, G.g17.extra181Tag].filter(Boolean).join(' · ') : [[it.gu, it.dong].filter(Boolean).join(' '), it.builtYear ? it.builtYear + '년' : '준공연도 미상', it.units ? it.units.toLocaleString('ko-KR') + '세대' : '세대수 미상', P.fmtKm(it.distKm)].join(' · ');
         b.appendChild(n); b.appendChild(m); { const o30 = old30El(it); if (o30) b.appendChild(o30); const n3 = new3El(it); if (n3) b.appendChild(n3); } b.onclick = () => applyPick(i, it, data.label.get(it.id));
         list.appendChild(b);
       });
@@ -3617,7 +3626,7 @@ window.SBJ_RENT16 = {"source":"seedComplexes.js@67d3760 (md5 65724010) rentalHou
   }
   function applyPick(i, it, label) {
     const c = state.comps[i]; if (!c) return;
-    Object.assign(c, { name: label, pickedName: label, complexId: it.id, builtYear: it.builtYear, units: it.units, coord: { lat: it.lat, lng: it.lng } });
+    Object.assign(c, { name: label, pickedName: label, complexId: it.id, builtYear: it.builtYear, units: it.units, coord: E.isNum(it.lat) && E.isNum(it.lng) ? { lat: it.lat, lng: it.lng } : null });
     ['name', 'builtYear', 'units'].forEach((k) => clearImported('comps.' + i + '.' + k));
     $('modalRoot').innerHTML = ''; frozen = null;
     renderComps(); renderAdj(); recompute();
@@ -4001,6 +4010,7 @@ window.SBJ_RENT16 = {"source":"seedComplexes.js@67d3760 (md5 65724010) rentalHou
   // ───────── 이름 검색·추천순(LS10) ─────────
   async function openPicker7(i, auto) {
     if (SBJ7.LS11) loadPriceIndex();
+    if (SBJ180.LS55 && !ix181) loadPriceIndex().then((x) => { ix181 = x; }).catch(() => {});   // 17-8 추가(LS55)
     let idx25 = null; if (SBJ13.LS19 && is25p(state.target.pyeong)) { try { idx25 = await loadPriceIndex25(); } catch (e) { idx25 = null; } }   // 13단계: 25평일 때만
     const has25 = (id) => !!(idx25 && idx25.ok && Number.isInteger(idx25.get(id))), est25Mode = SBJ13.LS20 && !!(idx25 && idx25.ok);
     // 13단계: ⭐·[추천 3곳 담기] = 추천 대상(LS17·LS18) → 25평이면 25평 값 있는 단지 먼저(LS20) → 같은 계열 상한(LS21)
@@ -4041,9 +4051,10 @@ window.SBJ_RENT16 = {"source":"seedComplexes.js@67d3760 (md5 65724010) rentalHou
     function drawList() {
       const r = P7.search(data.items, { query: ps.query, center: hasCoord ? t.coord : null, radiusKm: ps.radius, gu: ps.gu, dong: ps.dong, recentOnly: ps.recent, ageInQuery: SBJ11.LS16, thisYear: THIS_YEAR, targetYear: E.isNum(t.builtYear) ? t.builtYear : null, targetUnits: E.isNum(t.units) ? t.units : null, sort: ps.sort }, P);
       if (!P7.norm(ps.query) && (SBJ12.LS17 || SBJ12.LS18)) r.items = r.items.filter(recEligible);   // 12단계: 추천 목록은 준공 3년 이상·34평 단지만
+      const ex181 = P7.norm(ps.query) ? extra181(ps.query, data) : []; if (ex181.length) r.items = r.items.concat(ex181);   // 17-8 추가(LS55)
       last = r.items;
       const t3 = pickTop3R(r.items), top3ids = t3.pick.map((x) => x.id);   // 17단계(LS29): 임대 필터가 켜져 있으면 같은 임대 기준으로 거름
-      where.textContent = P7.norm(ps.query) ? '서울 ' + data.items.length + '곳에서 이름 검색' + (ps.gu ? ' · ' + ps.gu + (ps.dong ? ' ' + ps.dong : '') : '')
+      where.textContent = P7.norm(ps.query) ? '서울 ' + data.items.length + '곳' + (SBJ180.LS55 && ix181 && ix181.ok ? ' + 경기·인천 등' : '') + '에서 이름 검색' + (ps.gu ? ' · ' + ps.gu + (ps.dong ? ' ' + ps.dong : '') : '')
         : hasCoord ? '사업지 좌표 기준 · 반경 ' + ps.radius + 'km' + (P.inSeoulBox(t.coord) ? '' : ' — 사업지 좌표가 서울 밖이에요. 이름으로 찾거나 직접 입력하세요.') : (ps.gu ? ps.gu + (ps.dong ? ' ' + ps.dong : '') + ' 단지(좌표가 없어 거리는 미확인)' : '');
       list.innerHTML = '';
       if (r.need === 'name') { const d = document.createElement('div'); d.className = 'pick-note'; d.textContent = '단지 이름을 입력하세요. 구를 고르면 그 구의 단지를 추천순으로 보여 드려요.'; list.appendChild(d); tools.innerHTML = ''; return; }
@@ -4054,10 +4065,10 @@ window.SBJ_RENT16 = {"source":"seedComplexes.js@67d3760 (md5 65724010) rentalHou
       if (SBJ11.LS16 && r.items.length) { const sn = document.createElement('div'); sn.className = 'pick-note'; sn.dataset.starNote = '1'; sn.textContent = (SBJ175.LS43 ? '⭐ 표시 ' + top3ids.length + '곳은 추천 상위예요. [⭐ 추천 단지에서 고르기]로 추천 6곳 중에서 골라 담을 수 있어요.' : '⭐ 표시 ' + top3ids.length + '곳이 [추천 3곳 담기]로 담겨요.') + (t3.cut ? ' ' + G.g17.top3Rent.replace('{N}', String(t3.cut)) : ''); if (t3.cut) sn.dataset.top3Rent = String(t3.cut); list.appendChild(sn); }
       r.items.slice(0, ps.limit).forEach((it, k) => {
         const b = document.createElement('button'); b.type = 'button'; b.className = 'pick-item'; b.dataset.pickId = it.id;
-        const n = document.createElement('div'); n.className = 'n'; n.textContent = data.label.get(it.id);
+        const n = document.createElement('div'); n.className = 'n'; n.textContent = data.label.get(it.id) || it.name;
         if (SBJ11.LS16 && top3ids.includes(it.id)) { const st = document.createElement('span'); st.className = 'star'; st.textContent = '⭐'; st.setAttribute('aria-label', '추천 3곳'); n.prepend(st); b.dataset.top3 = '1'; }
         const m = document.createElement('div'); m.className = 'm'; m.textContent = [[it.gu, it.dong].filter(Boolean).join(' '), it.builtYear ? it.builtYear + '년' : '준공연도 미상', it.units ? it.units.toLocaleString('ko-KR') + '세대' : '세대수 미상', P.fmtKm(it.distKm)].concat(Object.keys(it.scoreParts || {}).length ? [(SBJ11.LS16 ? '유사도 ' + Math.round(it.score * 100) + '점' : '추천 ' + Math.round(it.score * 100))] : []).join(' · ');
-        b.appendChild(n); b.appendChild(m); { const o30 = old30El(it); if (o30) b.appendChild(o30); const n3 = new3El(it); if (n3) b.appendChild(n3); if (est25Mode && !has25(it.id) && !isNon34(it.id)) { const t = document.createElement('div'); t.className = 'old30'; t.dataset.est25 = '1'; t.textContent = G.g13.estListTag; b.appendChild(t); } } b.onclick = () => { applyPick7(i, it, data.label.get(it.id)); $('modalRoot').innerHTML = ''; };
+        b.appendChild(n); b.appendChild(m); { const o30 = old30El(it); if (o30) b.appendChild(o30); const n3 = new3El(it); if (n3) b.appendChild(n3); if (est25Mode && !has25(it.id) && !isNon34(it.id)) { const t = document.createElement('div'); t.className = 'old30'; t.dataset.est25 = '1'; t.textContent = G.g13.estListTag; b.appendChild(t); } } if (it.extra181) { const t = document.createElement('div'); t.className = 'old30'; t.dataset.extra181 = '1'; t.textContent = G.g17.extra181Tag; b.appendChild(t); } b.onclick = () => { applyPick7(i, it, data.label.get(it.id) || it.name); $('modalRoot').innerHTML = ''; };
         list.appendChild(b);
       });
       if (r.items.length > ps.limit) { const more = document.createElement('button'); more.type = 'button'; more.className = 'btn small'; more.id = 'pkMore'; more.textContent = '더 보기 (' + (r.items.length - ps.limit) + '곳 남음)'; more.onclick = () => { ps.limit += 50; drawList(); }; list.appendChild(more); }
@@ -4100,14 +4111,23 @@ window.SBJ_RENT16 = {"source":"seedComplexes.js@67d3760 (md5 65724010) rentalHou
     box.dataset.picker = String(i); box.dataset.picker7 = '1';
     setTimeout(() => { const q = document.getElementById('pkQ'); if (q) q.focus(); }, 50);
   }
+  // 17-8 추가(LS55): 좌표 파일(서울 970곳)에 없고 현재가 인덱스에만 있는 단지를 이름으로 찾기 — 위치·준공연도·세대수 없음(경기·인천 좌표는 17-9)
+  let ix181 = null;
+  function extra181(q, data, have) {
+    if (!SBJ180.LS55 || !ix181 || !ix181.ok || !ix181.raw) return [];
+    const qn = P7.norm(q || ''); if (qn.length < 2) return [];
+    const inCoords = new Set((data.items || []).map((x) => x.id)), out = [];
+    for (const id of Object.keys(ix181.raw)) { if (id === '_meta' || inCoords.has(id) || (have && have.has(id)) || isNon34(id)) continue; if (!P7.norm(id).includes(qn)) continue; const row = ix181.raw[id], region = Array.isArray(row) && typeof row[row.length - 1] === 'string' ? row[row.length - 1] : ''; out.push({ id, name: id, gu: region, dong: '', builtYear: null, units: null, lat: null, lng: null, distKm: null, rank: 1, score: 0, scoreParts: {}, extra181: true }); if (out.length >= 30) break; }
+    return out;
+  }
   function applyPick7(i, it, label, quiet, opt) {
     const c = state.comps[i]; if (!c) return;
     const old = c.complexId;
-    Object.assign(c, { name: label, pickedName: label, complexId: it.id, builtYear: it.builtYear, units: it.units, coord: { lat: it.lat, lng: it.lng } });
+    Object.assign(c, { name: label, pickedName: label, complexId: it.id, builtYear: it.builtYear, units: it.units, coord: E.isNum(it.lat) && E.isNum(it.lng) ? { lat: it.lat, lng: it.lng } : null });
     if (old !== it.id && c.현재가출처 && c.현재가출처.kind === 'auto') { c.price = null; c.현재가출처 = null; }   // 다른 단지로 바꾸면 이전 자동 현재가는 지움
     ['name', 'builtYear', 'units'].forEach((k) => clearImported('comps.' + i + '.' + k));
     if (!quiet && SBJ174.LS41) G17.compArm = Date.now();
-    if (!quiet) { frozen = null; renderComps(); renderAdj(); recompute(); toast(label + '을(를) 골랐어요.' + (SBJ7.LS11 ? '' : ' 현재가는 직접 입력하세요.')); }
+    if (!quiet) { frozen = null; renderComps(); renderAdj(); recompute(); toast(label + '을(를) 골랐어요.' + (SBJ7.LS11 ? '' : ' 현재가는 직접 입력하세요.') + (it.extra181 ? ' ' + G.g17.extra181 : '')); }
     if (SBJ7.LS11) autoPriceFor(i, it.id, opt);
   }
 
@@ -4120,13 +4140,14 @@ window.SBJ_RENT16 = {"source":"seedComplexes.js@67d3760 (md5 65724010) rentalHou
     loadCoords().then((data) => {
       if (document.activeElement !== el || el.value !== q) return;   // 그사이 입력이 바뀌면 버림
       const r = P7.search(data.items, { query: q, thisYear: THIS_YEAR, targetYear: E.isNum(state.target.builtYear) ? state.target.builtYear : null, targetUnits: E.isNum(state.target.units) ? state.target.units : null, center: state.target.coord && E.isNum(state.target.coord.lat) ? state.target.coord : null, radiusKm: 5 }, P);
-      const items = r.items.filter((x) => x.rank !== null && x.rank <= 2 && x.id && x.name).slice(0, 8);
+      let items = r.items.filter((x) => x.rank !== null && x.rank <= 2 && x.id && x.name).slice(0, 8);
+      if (SBJ180.LS55 && items.length < 8) items = items.concat(extra181(q, data, new Set(items.map((x) => x.id))).slice(0, 8 - items.length));   // 17-8 추가(LS55)
       acClose(); if (!items.length) return;
       const box = document.createElement('div'); box.className = 'ac-list'; box.setAttribute('role', 'listbox'); box.id = 'acList' + i;
       items.forEach((it, k) => {
         const o = document.createElement('div'); o.className = 'ac-item'; o.setAttribute('role', 'option'); o.dataset.acId = it.id; o.dataset.k = k;
-        const n = document.createElement('div'); n.className = 'n'; n.textContent = data.label.get(it.id);
-        const m = document.createElement('div'); m.className = 'm'; m.textContent = [[it.gu, it.dong].filter(Boolean).join(' '), it.builtYear ? it.builtYear + '년' : '준공연도 미상', it.units ? it.units.toLocaleString('ko-KR') + '세대' : '세대수 미상'].join(' · ');
+        const n = document.createElement('div'); n.className = 'n'; n.textContent = data.label.get(it.id) || it.name;
+        const m = document.createElement('div'); m.className = 'm'; m.textContent = it.extra181 ? [it.gu, G.g17.extra181Tag].filter(Boolean).join(' · ') : [[it.gu, it.dong].filter(Boolean).join(' '), it.builtYear ? it.builtYear + '년' : '준공연도 미상', it.units ? it.units.toLocaleString('ko-KR') + '세대' : '세대수 미상'].join(' · ');
         o.appendChild(n); o.appendChild(m); { const o30 = old30El(it); if (o30) o.appendChild(o30); const n3 = new3El(it); if (n3) o.appendChild(n3); }
         o.addEventListener('mousedown', (e) => { e.preventDefault(); acPick(k); });
         box.appendChild(o);
@@ -4137,7 +4158,7 @@ window.SBJ_RENT16 = {"source":"seedComplexes.js@67d3760 (md5 65724010) rentalHou
     }).catch(() => { /* 좌표 파일을 못 읽으면 자동완성 없이 수기 입력 */ });
   }
   function acHi(k) { if (!ac) return; ac.hi = k; ac.box.querySelectorAll('.ac-item').forEach((o, j) => o.classList.toggle('hi', j === k)); }
-  function acPick(k) { if (!ac || !ac.items[k]) return; const it = ac.items[k], i = ac.i, lab = ac.label.get(it.id); acClose(); applyPick7(i, it, lab); }
+  function acPick(k) { if (!ac || !ac.items[k]) return; const it = ac.items[k], i = ac.i, lab = ac.label.get(it.id) || it.name; acClose(); applyPick7(i, it, lab); }
   document.addEventListener('keydown', (e) => {
     if (!ac || e.target !== ac.el) return;
     if (e.key === 'ArrowDown') { e.preventDefault(); acHi(Math.min(ac.items.length - 1, ac.hi + 1)); }
