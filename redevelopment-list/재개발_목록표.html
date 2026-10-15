@@ -176,14 +176,17 @@ td.num{font-family:var(--font-mono);text-align:right;}
 /* 17-8: 시세보정 결론 카드(시세보정 결과 탭과 같은 판정 색) */
 .sbj-card{border:1px solid var(--border,#E2E7EC);border-radius:14px;padding:14px 16px;margin:4px 0 10px;background:var(--surface,#fff);}
 .sbj-c-top{display:flex;flex-wrap:wrap;align-items:center;gap:8px 10px;margin-bottom:8px;}
-.sbj-verdict{display:inline-flex;align-items:center;font-size:26px;font-weight:800;line-height:1.2;padding:8px 22px;border-radius:14px;background:var(--neutral-bg,#EDF1F4);color:var(--ink-muted,#61707D);}
+.sbj-verdict{display:inline-flex;align-items:center;font-size:30px;font-weight:800;line-height:1.2;padding:10px 26px;border-radius:14px;background:var(--neutral-bg,#EDF1F4);color:var(--ink-muted,#61707D);}
 .sbj-verdict.g4{background:#E5F5EC;color:#1E8E5A;} .sbj-verdict.g3{background:#EAF1FD;color:#2F6FE0;} .sbj-verdict.g2{background:#FBF1DF;color:#A9720E;} .sbj-verdict.g1{background:#FBEAEA;color:#C63F3F;}
 .sbj-chip{display:inline-block;font-size:12.5px;font-weight:600;border-radius:999px;padding:3px 10px;background:var(--neutral-bg,#EDF1F4);color:var(--ink-muted,#61707D);white-space:nowrap;}
-.sbj-c-line{font-weight:700;font-size:15.5px;line-height:1.5;margin:2px 0 10px;word-break:keep-all;overflow-wrap:anywhere;}
+.sbj-c-line{font-weight:800;font-size:20px;line-height:1.45;margin:4px 0 12px;word-break:keep-all;overflow-wrap:anywhere;color:var(--ink,#182430);}
 .sbj-c-nums{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-bottom:10px;}
 .sbj-c-nums>div{background:var(--neutral-bg,#EDF1F4);border-radius:10px;padding:8px 12px;min-width:0;}
-.sbj-c-nums span{display:block;font-size:12.5px;color:var(--ink-muted,#61707D);}
-.sbj-c-nums b{display:block;font-size:22px;font-weight:800;line-height:1.25;white-space:nowrap;}
+.sbj-c-nums span{display:block;font-size:13px;font-weight:600;color:var(--ink-muted,#61707D);}
+.sbj-c-nums b{display:block;font-size:28px;font-weight:800;line-height:1.2;white-space:nowrap;}
+.sbj-top{margin:0 0 12px;} .sbj-top .sbj-card{margin:0;} .sbj-top .sbj-meta{margin:6px 0 0;}
+.sbj-go{font:inherit;font-size:13px;font-weight:600;cursor:pointer;} #btnSbjGo.sbj-go{min-height:44px;margin-top:0;}   /* 📐 시세 보정하기 = 링크 줄 버튼(.dmp-lk)과 같은 모양 */
+@media (max-width:420px){ .sbj-verdict{font-size:26px;padding:8px 20px;} .sbj-c-line{font-size:18px;} .sbj-c-nums b{font-size:24px;} }
 .sbj-c-comps{font-size:13.5px;margin:2px 0 6px;}
 .sbj-c-comps .h{font-size:12.5px;font-weight:700;color:var(--ink-muted,#61707D);margin-bottom:2px;}
 .sbj-c-comps .r{display:flex;justify-content:space-between;gap:10px;padding:3px 0;border-top:1px dashed var(--border,#E2E7EC);}
@@ -552,6 +555,7 @@ window.SBJListLink = (function () {
       (it.mode === 'apt' ? '' : '<div class="sbj-c-nums"><div><span>필요자금</span><b data-sbj-invest>' + escH(e2(h.실투자금)) + '</b></div><div><span>안전마진</span><b data-sbj-margin>' + escH(e2(it.전체마진)) + '</b></div></div>') +
       ch + '<div class="sbj-meta" data-sbj-saved>시세보정 결과 · 저장 ' + escH(ago(it.savedAt)) + '</div></div>';
   }
+  const TOP178 = true;   // 17-8 추가: 시세보정 칸을 상세 맨 위로·버튼을 링크 줄로
   function badgeHtml(r) {
     if (!F.LS3) return '';
     const it = itemFor(r); if (!it) return '';
@@ -562,6 +566,13 @@ window.SBJListLink = (function () {
     const bad = dupOrMissing && dupOrMissing.get(r.id);
     const it = F.LS3 ? itemFor(r) : null;
     let body = '';
+    if (TOP178) {   // 17-8 추가: 상세 맨 위 — 📐 버튼(링크 줄로 옮겨짐) + 결과가 있을 때만 결론 카드(구역마다 가장 최근 저장 1건)
+      const stage = it ? (it.판정단계 ? it.판정단계 + (it.판정단계 === '후기' ? ' · ' + (it.지역구분 || '서울') + ' 기준' : '') : '진행단계 미선택') : '';
+      let top = '';
+      if (F.LS2) top += bad ? '<div class="sbj-meta">이 구역은 ' + (bad === 'dup' ? '이름이 같은 구역이 있어' : '이름 정보가 없어') + ' 시세보정과 연결할 수 없어요.</div>' : '<div class="dmp-links-row" id="sbjBtnRow"><button type="button" class="dmp-lk sbj-go" id="btnSbjGo" data-sbj-id="' + escH(r.id) + '">📐 시세 보정하기</button></div>';
+      if (F.LS3 && it) top += cardHtml178(it, stage);
+      return top ? '<div class="sbj-top" id="sbjSection" data-sbj-top>' + top + '</div>' : '';
+    }
     if (F.LS3) {
       if (it) {
         const stage = it.판정단계 ? it.판정단계 + (it.판정단계 === '후기' ? ' · ' + (it.지역구분 || '서울') + ' 기준' : '') : '진행단계 미선택';
@@ -583,7 +594,7 @@ window.SBJListLink = (function () {
   function decorateModal(r, box) {
     const html = sectionHtml(r); if (!html) return;
     const body = box.querySelector('.modal-tab-body'); if (!body) return;
-    body.insertAdjacentHTML('beforeend', html);
+    body.insertAdjacentHTML(TOP178 ? 'afterbegin' : 'beforeend', html);
     const b = box.querySelector('#btnSbjGo'); if (b) b.addEventListener('click', () => go(r));
   }
   return { F, KEYS, uid, stage4, stageKey, STAGE4, eokText, init, uidReport, buildInbox, reload, itemFor, resultText, badgeHtml, sectionHtml, decorateModal, enabled: () => !!(F.LS2 || F.LS3) };
@@ -1900,11 +1911,11 @@ window.SBJListLink = (function () {
   }
   // 시세보정 [목록표에서 보기] 바로 열기: 주소 #zone=<encodeURIComponent(시트|구역명|세부)>&id=<목록표 id>. 키가 같은 행을 먼저 찾고(id 는 데이터를 다시 만들면 밀릴 수 있음) 없으면 id 로. 찾으면 그 시트 탭 + 상세, 못 찾으면 지금처럼 첫 화면
   const zoneFind = () => { try { const h = new URLSearchParams(String(location.hash || '').replace(/^#/, '')), z = h.get('zone'), id = h.get('id'); if (!z && !id) return null; const ku = (r) => [r.sheet || '', r.name || '', r.subCode === null || r.subCode === undefined ? '' : String(r.subCode)].join('|'); return (z && DATA.find((r) => ku(r) === z)) || (id && /^\d+$/.test(id) ? DATA.find((r) => r.id === Number(id)) : null) || null; } catch (e) { return null; } };
-  const zoneOpen = (hit) => { if (!hit) return; openModal(hit.id); const zr = document.querySelector('[data-id="' + hit.id + '"]'); if (zr && zr.scrollIntoView) zr.scrollIntoView({ block: 'center' }); };
+  const zoneOpen = (hit) => { if (!hit) return; const zl = document.getElementById('cardList'); if (zl) { const tmp = document.createElement('div'); tmp.className = 'm-card'; tmp.dataset.id = hit.id; tmp.style.display = 'none'; zl.appendChild(tmp); tmp.click(); tmp.remove(); } else openModal(hit.id);   /* 목록 항목 클릭과 같은 길(링크 줄·역 도보·진행 속도도 붙음) */ const zr = document.querySelector('[data-id="' + hit.id + '"]'); if (zr && zr.scrollIntoView) zr.scrollIntoView({ block: 'center' }); };
   const zoneHit = zoneFind();
   if (zoneHit && SHEETS.includes(zoneHit.sheet)) state.tab = zoneHit.sheet;
   render();
-  zoneOpen(zoneHit);
+  if (zoneHit) { if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', () => zoneOpen(zoneHit)); else zoneOpen(zoneHit); }   // 페이지 끝 스크립트(링크 줄·역 도보)가 준비된 뒤 열기
   window.addEventListener('hashchange', () => { const hit = zoneFind(); if (!hit) return; if (SHEETS.includes(hit.sheet) && state.tab !== hit.sheet) { state.tab = hit.sheet; render(); } zoneOpen(hit); });   // 같은 탭에서 주소의 #zone 만 바뀐 경우
 })();
 </script>
@@ -2375,11 +2386,12 @@ tr.dmp-me td{background:var(--accent-soft);font-weight:600;}
     const r = DATA_ROWS.find(d => d.id === lastId); const tb = box.querySelector('.modal-tab-body');
     if (!r || !tb) return;
     if (!tb.querySelector('#dmpLinks')) tb.insertAdjacentHTML('afterbegin', linksHtml(r));
+    { const sg = tb.querySelector('#sbjBtnRow #btnSbjGo'), row = tb.querySelector('#dmpLinks .dmp-links-row'); if (sg && row) { row.appendChild(sg); const br = tb.querySelector('#sbjBtnRow'); if (br && !br.children.length) br.remove(); } }   // 17-8: 📐 시세 보정하기를 상단 링크 줄로
     const t = walkText(walkOf(r));
     const walkSec = `<div class="modal-section" id="dmpWalkSec"><h4>역까지 도보</h4><div class="dmp-walk">${t.main} ${t.tags}${t.dist?`<div class="dmp-dist">${t.dist} · 보행 4km/h · 지도 © OpenStreetMap contributors · 경로 FOSSGIS</div>`:''}</div></div>`;
     const html = nextHtml(r) + walkSec + periodHtml(r);
     const sbj = tb.querySelector('#sbjSection');
-    if (sbj) sbj.insertAdjacentHTML('beforebegin', html); else tb.insertAdjacentHTML('beforeend', html);
+    if (sbj && !sbj.hasAttribute('data-sbj-top')) sbj.insertAdjacentHTML('beforebegin', html); else tb.insertAdjacentHTML('beforeend', html);   // 17-8: 시세보정 칸이 맨 위면 다른 정보는 끝에
     bindPe(r);
   }
   function bindPe(r){

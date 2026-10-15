@@ -2426,6 +2426,8 @@ window.SBJ_RENT16 = {"source":"seedComplexes.js@67d3760 (md5 65724010) rentalHou
   const SBJ177 = { LS48: true, LS49: true, LS50: true };
   // 17-9a단계 플래그: LS52 경기·인천 구역 안내(주변 추천 없음 → [단지 추가(검색)]로 3곳 이상 또는 금액). 지역구분 '인천·경기' 주고받기는 연동 형식 확장이라 플래그 없이 항상
   const SBJ179 = { LS52: true };
+  // 17-8단계 플래그: LS51 결과 색인(sbj_link_index) 항목에 비교단지시세 [{이름, 시세(만원)}](최대 3곳) 추가 — 목록표 결론 카드용. 기존 필드는 이름·형식 그대로(임장 [반영] 배너가 읽음)
+  const SBJ178 = { LS51: true };
   if (SBJ177.LS50 && document.body) document.body.classList.add('l50');
   const SBJ_PICK_DEV = 1.2;   // 17-5(LS44): 고른 단지 시세 최고 ÷ 최저가 이 값을 넘으면 경고(10억 vs 12억 = 경고 없음)
   const RENT16 = (window.SBJ_RENT16 && window.SBJ_RENT16.ids) || {};
@@ -2466,7 +2468,11 @@ window.SBJ_RENT16 = {"source":"seedComplexes.js@67d3760 (md5 65724010) rentalHou
   const store = S.createStore(ST.s, { ruleVersion: R.version, schemaVersion: R.schemaVersion, limits: R.backup });
   // ───────── 연동(5단계): 결과 색인 갱신 — 저장 블록은 그대로 두고 바깥에서 감싼다 ─────────
   const L = window.SBJLinkCore;
-  function rebuildLinkIndex(override) { if (!ST.persistent) return; L.writeLinkIndex(ST.s, L.buildLinkIndex(store.all(), Date.now(), override)); }
+  function rebuildLinkIndex(override) { if (!ST.persistent) return; const all = store.all(), idx = L.buildLinkIndex(all, Date.now(), override); if (SBJ178.LS51) addComps178(idx, all); L.writeLinkIndex(ST.s, idx); }
+  function addComps178(idx, all) {   // 17-8(LS51): 기록의 비교단지 이름·현재가(만원)를 색인 항목에 덧붙임(추가만)
+    const byId = new Map((all || []).map((r) => [r.id, r]));
+    Object.keys(idx.items || {}).forEach((k) => { const it = idx.items[k], rec = byId.get(it.recordId); if (!rec) return; it.비교단지시세 = (rec.comps || []).filter((c) => c && c.name).slice(0, 3).map((c) => ({ 이름: String(c.name), 시세: E.isNum(c.price) ? c.price : null })); });
+  }
   ['save', 'duplicate', 'remove', 'undoDelete', 'applyImport', 'undoImport'].forEach((m) => { const f = store[m]; store[m] = function () { const r = f.apply(store, arguments); if (r && r.ok) rebuildLinkIndex(); return r; }; });
 
   const blankFactors = () => { const f = {}; R.factors.forEach((fd) => { f[fd.key] = { rate: fd.key === 'age' ? null : 0, suggested: null, memo: '' }; if (SBJ9.LS13 && SC.isKey(fd.key)) f[fd.key].척도 = 0; }); return f; };   // 9단계: 척도 요소는 '비슷'
