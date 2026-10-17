@@ -2444,6 +2444,8 @@ window.SBJ_RENT16 = {"source":"seedComplexes.js@67d3760 (md5 65724010) rentalHou
   const SBJ1711 = { LS59: true, LS60: true };
   // 17-12 플래그: LS61 임장에서 온 구역(좌표·구 없음)은 받은 목록표 키(redevKey)로 목록표 행을 찾아 좌표·구를 채움(목록표 📐 와 같은 5km 추천) — 저장·색인은 임장 쪽 그대로. 못 찾으면 전용 안내. 끄면 17-11
   const SBJ1712 = { LS61: true };
+  // 17-13 플래그: LS62 임장발 구역을 17-12 가 목록표에서 찾았으면 그 행 키를 출처에 같이 기억(target.source.listKey, 추가만) → 구역 요약 카드·[목록표에서 보기]가 뜸 + 임장이 진행단계를 비워 보냈으면 목록표 단계로 채움(확인하세요 표시, 임장 값이 있으면 그대로). 끄면 17-12
+  const SBJ1713 = { LS62: true };
   let LOC1712 = null;   // { key: 임장 구역 id, status: 'loading'|'found'|'none' } — 지금 화면의 임장 구역 위치 찾기 상태(저장하지 않음)
   const GI_COORDS_URL = 'data/gi_coords_v1.json';   // LS55: 비교단지 이름 검색(단지 찾기·이름 자동완성)에 좌표 파일에 없는 단지(경기·인천 등, 현재가 인덱스에만 있음)도 보여 줌 — 고르면 현재가 자동, 준공연도·세대수는 직접 입력
   if (SBJ177.LS50 && document.body) document.body.classList.add('l50');
@@ -3515,11 +3517,17 @@ window.SBJ_RENT16 = {"source":"seedComplexes.js@67d3760 (md5 65724010) rentalHou
     loadList().then((p) => {
       if (!LOC1712 || LOC1712.key !== key || !state.target.source || state.target.source.tool !== 'imjang' || state.target.source.key !== key) return;   // 그사이 다른 구역으로 바뀜
       const m = p && p.ok ? E.matchSource({ key: rk }, p.rows.map((x) => x.row)) : null, r = m && m.ok ? m.row : null;
+      if (SBJ1713.LS62 && r) {   // 17-13(LS62): 출처는 임장 그대로, 목록표 행 키만 덧붙임 · 진행단계는 비어 있을 때만 목록표 값(확인하세요)
+        state.target.source = Object.assign({}, state.target.source, { listKey: RD.uid(r) });
+        const st4 = RD.stage4(r.stage), sk = st4 && L.STAGE4[st4];
+        if (!state.target.stage && sk) { state.target.stage = sk; state.options.imported = Object.assign({}, state.options.imported, { 'target.stage': 'redevlist' }); }
+        Z17.sig = null;
+      }
       const okC = !!r && typeof r.lat === 'number' && typeof r.lng === 'number' && Number.isFinite(r.lat) && Number.isFinite(r.lng), okG = !!r && typeof r.gu === 'string' && !!r.gu;
       if (okC || okG) {   // 목록표 📐(buildInbox)와 같게: 좌표가 있으면 좌표, 구가 있으면 구(목록표에 좌표 없는 구역은 구 기준 추천)
         if (okC) state.target.coord = { lat: r.lat, lng: r.lng }; if (okG) state.target.gu = r.gu;
         LOC1712.status = 'found'; renderAll(true); markClean();
-      } else { LOC1712.status = 'none'; renderAll(); }
+      } else { LOC1712.status = 'none'; if (SBJ1713.LS62 && r) { renderAll(true); markClean(); } else renderAll(); }
     }).catch(() => { if (LOC1712 && LOC1712.key === key) { LOC1712.status = 'none'; renderAll(); } });
   }
   function noLoc1712() { const t = state.target || {}; return SBJ1712.LS61 && !!LOC1712 && LOC1712.status === 'none' && !!t.source && t.source.tool === 'imjang' && t.source.key === LOC1712.key && !(t.coord && E.isNum(t.coord.lat)) && !(typeof t.gu === 'string' && t.gu); }
@@ -3870,6 +3878,7 @@ window.SBJ_RENT16 = {"source":"seedComplexes.js@67d3760 (md5 65724010) rentalHou
   function zoneKey17src() {
     const t = state.target || {};
     if (t.source && t.source.tool === 'redevlist' && typeof t.source.key === 'string') return t.source.key;
+    if (SBJ1713.LS62 && t.source && t.source.tool === 'imjang' && typeof t.source.listKey === 'string' && t.source.listKey) return t.source.listKey;   // 17-13: 임장발 구역도 목록표 행 키로 요약 카드
     if (state.options && state.options.example && SBJ15.LS24) { const z = SBJ16.LS27 ? SBJ_EXAMPLE_ZONE : SBJ_EXAMPLE_ZONE15; return RD.uid({ sheet: z.sheet, name: z.name, subCode: null }); }
     return null;
   }
