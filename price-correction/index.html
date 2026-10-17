@@ -934,6 +934,7 @@ window.SBJ_GUIDE = {
   old30: '준공 30년 이상은 재건축 기대가 시세에 섞여 있을 수 있어요',
   // 12단계: 준공 2년 이하 단지(이름 검색으로 고를 때) 아래 작은 글씨(LS17)
   new3: '준공 3년 미만은 등기 전이라 시세가 낮게 잡힐 수 있어요',
+  new2_1714: '준공 2년 미만은 등기 전이라 시세가 낮게 잡힐 수 있어요',
   // 12단계: 34평 시세가 아닌 단지를 고르면 현재가 칸 아래(LS18)
   non34: '이 단지는 34평 시세 자료가 없어요. 직접 입력해 주세요.',
   // 13단계(LS19·LS20·LS22) 새 문구 — 25평 자동 채움·25평 추정·구 기준 안내
@@ -1037,6 +1038,7 @@ window.SBJ_GUIDE = {
     info: {
       recCoord: '이 구역 반경 5km 안에서', recGu: '구역 위치가 없어 같은 구 안에서',
       age3: '준공 3~15년 단지만 써요(등기 전 신축과 오래된 단지는 빼요).', age2: '준공 3~15년 단지가 5곳이 안 돼 2~15년까지 넓혔어요.',
+      age1_1714: '준공 2~11년 단지를 먼저 써요(2025년 이후 준공·준공 15년 넘은 단지는 빼요).', age2_1714: '비교 단지 부족으로 준공 15년까지 확대',
       selected: '구역 위치가 없어 추천 단지를 쓸 수 없어요. 단지 목록에서 고른 비교단지의 34평 KB 시세 평균으로 급지를 정했어요.',
       excluded: '평균 6억 이하는 투자 제외 급지라 판정하지 않아요. 가격 계산은 그대로 보여 드려요.',
       rates: '급지가 높을수록 기준 마진비율이 낮아져요(후기 기준 최상 25% ~ 최하 100%, 6~8억 112.5%, 초기·중기도 같은 비율로).',
@@ -2042,7 +2044,7 @@ window.SBJ_GUIDE = {
     nearPct: 3,                                  // 급지 경계(10·13·16·20·25·35억) ±3% 안 = "급지 경계 근처"
     nearExcludeUpTo: 6.5,                        // 6~6.5억 = "투자 제외 경계 근처"
     // 추천·급지 평균 단지의 준공 연수(기준 연도 − 준공연도): 3~15년, 5곳이 안 되면 2~15년, 그래도 3곳 미만이면 쓰지 않음(LS17)
-    ageMin: 3, ageMinWide: 2, ageMax: 15, ageMinKeep: 3,
+    ageMin: 3, ageMinWide: 2, ageMax: 15, ageMinKeep: 3,   // 17-14(LS63): 화면이 규칙에 ageMax1(11)을 넣으면 1단계 = ageMinWide~ageMax1(2~11년) → 2단계 ageMinWide~ageMax(2~15년) → 3곳 미만 빈 목록(멈춤·확대 조건은 그대로)
     manual: ['최상', '상', '중상', '중', '중하', '하', '최하(8~10억)', '최하(6~8억)'],   // 직접 선택 8개(투자 제외는 없음)
     exclusionText: '투자 제외 급지(평균 6억 이하)',
     // 13단계(LS21): 같은 이름 계열 상한 — 추천 5곳에 같은 계열은 familyCap 곳까지. 값을 바꾸려면 이 두 줄만(ARCHITECTURE.md 참고)
@@ -2127,8 +2129,9 @@ window.SBJ_GUIDE = {
     const tag = (arr, stage) => Object.assign(arr, { ageStage: stage, basis: ctx.center ? 'coord' : 'gu', capRefilled: arr.capRefilled || 0, capSkipped: arr.capSkipped || 0, capLater });
     if (!o.ageRule) return tag(sel(cand), null);
     const age = (x) => (Number.isInteger(x.builtYear) && isNum(ctx.thisYear) ? ctx.thisYear - x.builtYear : null);
-    const pick = (min) => sel(cand.filter((x) => { const a = age(x); return a !== null && a >= min && a <= R.ageMax; }));
-    const a3 = pick(R.ageMin); if (a3.length >= R.sampleN) return tag(a3, '3~15');
+    const pick = (min, max) => sel(cand.filter((x) => { const a = age(x); return a !== null && a >= min && a <= (max === undefined ? R.ageMax : max); }));
+    if (isNum(R.ageMax1)) { const a1 = pick(R.ageMinWide, R.ageMax1); if (a1.length >= R.sampleN) return tag(a1, R.ageMinWide + '~' + R.ageMax1); }   // 17-14: 1단계 2~11년(필요 수를 채우면 멈춤)
+    else { const a3 = pick(R.ageMin); if (a3.length >= R.sampleN) return tag(a3, '3~15'); }
     const a2 = pick(R.ageMinWide); if (a2.length >= R.ageMinKeep) return tag(a2, '2~15');
     return tag([], 'short');
   }
@@ -2193,8 +2196,9 @@ window.SBJ_GUIDE = {
     const list = recommendList(items.filter((it) => !skipped(it.id)), priceGet, ctx, P7, P, R, opt);
     // 회색: 필터 없이 같은 순위로 늘어놓은 후보(같은 연식 구간) 중 마지막 추천 자리까지 나온 제외 단지(R2m 의 회색 정의)
     const all = recommendList(items, priceGet, ctx, P7, P, Object.assign({}, R, { sampleN: 1e9 }), { non34: opt && opt.non34, ageRule: false, familyCap: null });
-    const lo = list.ageStage === '2~15' ? R.ageMinWide : list.ageStage === '3~15' ? R.ageMin : null;
-    const band = lo === null && list.ageStage !== null ? [] : all.filter((x) => { if (lo === null) return true; const a = Number.isInteger(x.builtYear) && isNum(ctx.thisYear) ? ctx.thisYear - x.builtYear : null; return a !== null && a >= lo && a <= R.ageMax; });
+    const st1 = isNum(R.ageMax1) && list.ageStage === R.ageMinWide + '~' + R.ageMax1;   // 17-14
+    const lo = list.ageStage === '2~15' || st1 ? R.ageMinWide : list.ageStage === '3~15' ? R.ageMin : null, hi = st1 ? R.ageMax1 : R.ageMax;
+    const band = lo === null && list.ageStage !== null ? [] : all.filter((x) => { if (lo === null) return true; const a = Number.isInteger(x.builtYear) && isNum(ctx.thisYear) ? ctx.thisYear - x.builtYear : null; return a !== null && a >= lo && a <= hi; });
     const ids = list.map((x) => x.id), lim = ids.length ? Math.max(...ids.map((id) => band.findIndex((x) => x.id === id))) : band.length - 1;
     const upto = band.slice(0, lim + 1), mk = (x) => Object.assign({ id: x.id, name: x.name, price: x.price }, why.get(x.id));
     return { list, base, baseAvg, gray: upto.filter((x) => skipped(x.id)).map(mk), revived: upto.filter((x) => why.has(x.id) && rv.has(x.id)).map(mk), skip: [...why.keys()].filter((id) => !rv.has(id)) };   // 17단계(LS29): skip = 이 구역 기준 임대 제외 단지 전체(추천 3곳 담기에 같은 기준)
@@ -2446,6 +2450,8 @@ window.SBJ_RENT16 = {"source":"seedComplexes.js@67d3760 (md5 65724010) rentalHou
   const SBJ1712 = { LS61: true };
   // 17-13 플래그: LS62 임장발 구역을 17-12 가 목록표에서 찾았으면 그 행 키를 출처에 같이 기억(target.source.listKey, 추가만) → 구역 요약 카드·[목록표에서 보기]가 뜸 + 임장이 진행단계를 비워 보냈으면 목록표 단계로 채움(확인하세요 표시, 임장 값이 있으면 그대로). 끄면 17-12
   const SBJ1713 = { LS62: true };
+  // 17-14 플래그: LS63 주변 추천 연식 = 1단계 준공 2~11년(2015~2024년식) → 2단계 2~15년 → 3곳 미만 빈 목록(필요 수·3곳 조건·반경 5km·34평·임대·계열·점수 그대로), 2단계로 넓히면 급지 칸에 안내. [단지 찾기] 추천 필터·신축 표시도 2년 기준. 끄면 17-13
+  const SBJ1714 = { LS63: true };
   let LOC1712 = null;   // { key: 임장 구역 id, status: 'loading'|'found'|'none' } — 지금 화면의 임장 구역 위치 찾기 상태(저장하지 않음)
   const GI_COORDS_URL = 'data/gi_coords_v1.json';   // LS55: 비교단지 이름 검색(단지 찾기·이름 자동완성)에 좌표 파일에 없는 단지(경기·인천 등, 현재가 인덱스에만 있음)도 보여 줌 — 고르면 현재가 자동, 준공연도·세대수는 직접 입력
   if (SBJ177.LS50 && document.body) document.body.classList.add('l50');
@@ -2468,6 +2474,11 @@ window.SBJ_RENT16 = {"source":"seedComplexes.js@67d3760 (md5 65724010) rentalHou
   if (SBJ177.LS48 && SBJ175.LS42) {   // 17-7: 첫 방문 안내·도움말 급지표·엑셀 사용법의 급지 설명(GUIDE 원문은 그대로 두고 화면에서만 바꿈)
     const W = G.welcome; if (W && Array.isArray(W.steps) && W.steps.length) W.steps = [G.g17.welcomeStep1].concat(W.steps.slice(1));
     const g12 = G.grade12; if (g12) { g12.welcomeNote = G.g17.welcomeNote175; if (Array.isArray(g12.stages) && g12.stages[0] && g12.stages[0][0] === '급지 정하는 법') g12.stages = [['급지 정하는 법', G.g17.stageRow175]].concat(g12.stages.slice(1)); if (typeof g12.xlsxJudge === 'string') g12.xlsxJudge = g12.xlsxJudge.replace('급지는 구역 주변 추천 5곳(준공 3~15년)의 34평 KB 시세 평균으로 정합니다', G.g17.xlsxJudge175); }
+  }
+  if (SBJ1714.LS63) {   // 17-14: 화면 문구의 연식 설명(준공 3~15년)을 새 기준으로(GUIDE 원문은 그대로)
+    const fix = (o) => { if (!o || typeof o !== 'object') return; Object.keys(o).forEach((k) => { const v = o[k]; if (typeof v === 'string') o[k] = v.split('(준공 3~15년)').join('(준공 2~11년, 부족하면 15년까지)'); else if (v && typeof v === 'object') fix(v); }); };
+    fix(G.g17); fix(G.grade12); fix(G.welcome); fix(G.quick);
+    const I = G.grade12 && G.grade12.info; if (I) { I.age3 = I.age1_1714; I.age2 = I.age2_1714; }
   }
   if (SBJ11.LS15 && G.grade12) { const g12 = G.grade12; G.quick.stagesTitle = g12.stagesTitle; G.quick.stages = g12.stages; G.welcome.notes = (G.welcome.notes || []).map((n) => (/판정은 진행단계별 기준/.test(n) ? g12.welcomeNote : n)); }
   const GR = window.SBJGrade11;
@@ -2525,7 +2536,7 @@ window.SBJ_RENT16 = {"source":"seedComplexes.js@67d3760 (md5 65724010) rentalHou
   const NON34 = new Set((window.SBJ_NON34 && Array.isArray(window.SBJ_NON34.ids)) ? window.SBJ_NON34.ids : []);
   const isNon34 = (id) => !!(SBJ12.LS18 && id && NON34.has(String(id)));
   // 13단계: 화면에서 쓰는 급지 규칙(LS22 면 6·8억 경계 근처 포함)
-  function GRU() { return SBJ13.LS22 ? Object.assign({}, GR.SBJ_GRADE_RULES, { nearAll: true }) : GR.SBJ_GRADE_RULES; }
+  function GRU() { const r = SBJ13.LS22 ? Object.assign({}, GR.SBJ_GRADE_RULES, { nearAll: true }) : GR.SBJ_GRADE_RULES; return SBJ1714.LS63 ? Object.assign({}, r, { ageMax1: 11 }) : r; }   // 17-14: 1단계 2~11년
   // 15단계(LS24): 목록표에서 가져온 구역의 시트가 '경기인천'이면(상자 출처 키 = 시트|이름|부번호) 서울 단지 추천으로 급지를 정하지 않는다
   function outsideSeoulZone(t) { return SBJ15.LS24 && !!(t && ((t.source && t.source.tool === 'redevlist' && typeof t.source.key === 'string' && /^경기인천\|/.test(t.source.key)) || (SBJ180.LS54 && t.source && t.source.tool === 'imjang' && t.region === 'gi'))); }
   // 17단계(LS28): 사용자가 고친 비교대상 아파트 = options.급지근거 { off: [추천에서 뺀 id], add: [{ id, name, price }], amountOn, amount(억) }
@@ -2593,7 +2604,7 @@ window.SBJ_RENT16 = {"source":"seedComplexes.js@67d3760 (md5 65724010) rentalHou
       let rentBoth = null;
       if (fOn) { const a = GR.evaluate(listOff, 'recommend', GRU()), b = GR.evaluate(fOn.list, 'recommend', GRU()); if (a && b) rentBoth = { off: { name: a.name, label: a.label, avgEok: a.avgEok, excluded: !!a.excluded }, on: { name: b.name, label: b.label, avgEok: b.avgEok, excluded: !!b.excluded } }; }
       let base6 = null;   // 17-5(LS42): 카드로 보여 줄 추천 6곳(임대 필터가 켜져 있으면 같은 단지를 뺀 목록에서)
-      if (SBJ175.LS42 && idx && idx.ok) { const R6 = Object.assign({}, GRU(), { sampleN: 6 }), sk6 = rentCfg && fOn ? new Set(fOn.skip) : null; base6 = GR.recommendList(sk6 ? data.items.filter((it) => !sk6.has(it.id)) : data.items, (id) => idx.get(id), ctx, P7, window.SBJPick, R6, ropt).slice(); }
+      if (SBJ175.LS42 && idx && idx.ok) { const R6 = Object.assign({}, GRU(), { sampleN: 6 }), sk6 = rentCfg && fOn ? new Set(fOn.skip) : null; const b6 = GR.recommendList(sk6 ? data.items.filter((it) => !sk6.has(it.id)) : data.items, (id) => idx.get(id), ctx, P7, window.SBJPick, R6, ropt); base6 = b6.slice(); if (SBJ1714.LS63) base6.ageStage = b6.ageStage; }   // 17-14: 카드 6곳의 연식 단계(확대 안내용)
       G11.rec = { info, month: idx && idx.ok ? idx.month : null, ageStage: list.ageStage || null, basis: list.basis || null, base: list.slice(), base6, rentBoth, skip: fOn ? fOn.skip : null }; recompute();
     }).catch(() => { if (G11.sig !== sig) return; G11.rec = { info: null }; recompute(); });
   }
@@ -2881,9 +2892,9 @@ window.SBJ_RENT16 = {"source":"seedComplexes.js@67d3760 (md5 65724010) rentalHou
   function syncStageShow() { const sel = $('tStage'), sh = $('tStageShow'); if (!sel || !sh) return; const o = sel.options[sel.selectedIndex]; sh.textContent = o ? o.text : ''; sh.classList.toggle('empty', !sel.value); }
   // 10단계: 준공 30년 이상 단지면 목록 항목 아래 작은 글씨(계산과 무관)
   // 12단계: 추천 대상(LS17 준공 3년 이상, LS18 34평 시세 단지)
-  function recEligible(it) { return (!SBJ12.LS17 || (Number.isInteger(it.builtYear) && THIS_YEAR - it.builtYear >= GR.SBJ_GRADE_RULES.ageMin)) && !isNon34(it.id); }
+  function recEligible(it) { return (!SBJ12.LS17 || (Number.isInteger(it.builtYear) && THIS_YEAR - it.builtYear >= (SBJ1714.LS63 ? GR.SBJ_GRADE_RULES.ageMinWide : GR.SBJ_GRADE_RULES.ageMin))) && !isNon34(it.id); }
   // 12단계: 준공 2년 이하 단지 아래 작은 글씨(LS17, 계산과 무관)
-  function new3El(it) { if (!SBJ12.LS17 || !it || !Number.isInteger(it.builtYear) || THIS_YEAR - it.builtYear >= GR.SBJ_GRADE_RULES.ageMin || !G.new3) return null; const d = document.createElement('div'); d.className = 'old30'; d.dataset.new3 = '1'; d.textContent = G.new3; return d; }
+  function new3El(it) { if (!SBJ12.LS17 || !it || !Number.isInteger(it.builtYear) || THIS_YEAR - it.builtYear >= (SBJ1714.LS63 ? GR.SBJ_GRADE_RULES.ageMinWide : GR.SBJ_GRADE_RULES.ageMin) || !G.new3) return null; const d = document.createElement('div'); d.className = 'old30'; d.dataset.new3 = '1'; d.textContent = SBJ1714.LS63 ? G.new2_1714 : G.new3; return d; }
   function old30El(it) { if (!SBJ10.LS14 || !it || !Number.isInteger(it.builtYear) || it.builtYear > OLD30_YEAR || !G.old30) return null; const d = document.createElement('div'); d.className = 'old30'; d.textContent = G.old30; return d; }
   // ───────── 고정 입력칸 ─────────
   function fillStatic() {
@@ -3790,6 +3801,7 @@ window.SBJ_RENT16 = {"source":"seedComplexes.js@67d3760 (md5 65724010) rentalHou
       '<button type="button" class="btn small primary" data-gp-confirm' + (n >= 3 || (amt && ok) ? '' : ' disabled') + '>' + esc(G.g17.confirm) + '</button></div>';
     if (G17.searchOpen) h += '<div class="gp-search" data-gp-search><input type="search" data-gp-q placeholder="' + esc(G.g17.addPh) + '" aria-label="비교대상 아파트 검색" value="' + esc(G17.q) + '"><div class="gp-res" data-gp-res></div></div>';
     if (pk.amountOn) { const a = pk.amount !== null ? GR.amountGrade(pk.amount, GRU()) : null; h += '<div class="gp-amt"><label for="gpAmount">' + esc(G.g17.amountLabel) + '</label><input id="gpAmount" class="txt" data-gp-amount inputmode="decimal" value="' + (pk.amount !== null ? esc(String(pk.amount)) : '') + '"><span data-gp-amount-grade>' + esc(a ? '→ 급지 ' + a.label : G.g17.amountNeed) + '</span></div>'; }
+    if (SBJ1714.LS63 && G11.rec && G11.rec.base6 && G11.rec.base6.length && G11.rec.base6.ageStage === '2~15') h += '<div class="gp-hint" data-age-wide>' + esc((G.grade12 && G.grade12.info && G.grade12.info.age2_1714) || '') + '</div>';   // 17-14: 카드 6곳을 준공 15년까지 넓힌 구역
     if (noLoc1712()) h += '<div class="gp-hint" data-gp-noloc>' + esc(G.g17.noLoc1712) + '</div>';   // 17-12(LS61)
     else if ((outsideSeoulZone(state.target) && !SBJ179G.LS56) || !base.length) h += '<div class="gp-hint" data-gp-outside>' + esc(SBJ179.LS52 && outsideSeoulZone(state.target) ? (SBJ179G.LS56 ? G.g17.outsideGiShort : G.g17.outsideGi) : G.g17.outsideHint) + '</div>';
     return h + note + '</div>';
