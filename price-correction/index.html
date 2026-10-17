@@ -979,6 +979,7 @@ window.SBJ_GUIDE = {
     add: '단지 추가(검색)', addPh: '단지 이름으로 찾기 (2글자부터)', addNone: '찾는 단지가 없어요. 목록에 없으면 금액으로 입력해 주세요.', addHas: '이미 들어 있어요',
     remove: '빼기',
     outsideHint: '목록에 없는 단지는 금액으로 입력해 주세요',
+    noLoc1712: '이 구역은 위치 정보가 없어 주변 아파트를 자동 추천하지 못했어요. 아래 [단지 추가(검색)]로 주변 아파트를 3곳 이상 골라 주세요.',
     outside: '서울 밖(경기·인천) 구역은 서울 단지로 급지를 자동으로 정하지 않아요. 비교대상 아파트를 고르거나 금액으로 입력해 주세요.',
     rentNone: '임대 정보 없음',
     amountToggle: '목록에 없으면 금액으로 직접 입력',
@@ -2441,6 +2442,9 @@ window.SBJ_RENT16 = {"source":"seedComplexes.js@67d3760 (md5 65724010) rentalHou
   const SBJ1710 = { LS58: true };
   // 17-11 플래그: LS59 결과 색인에 급지단계별마진비율 {초기, 중기, 후기} 추가(급지 규칙 base 300/100/50 × 급지 배수 = judgeBases, 판정에 쓰는 값 그대로) · LS60 결론 문장 숫자 색(연도 파랑·미래 가치 초록·지금 내는 돈 주황, 글자는 그대로). 끄면 17-10
   const SBJ1711 = { LS59: true, LS60: true };
+  // 17-12 플래그: LS61 임장에서 온 구역(좌표·구 없음)은 받은 목록표 키(redevKey)로 목록표 행을 찾아 좌표·구를 채움(목록표 📐 와 같은 5km 추천) — 저장·색인은 임장 쪽 그대로. 못 찾으면 전용 안내. 끄면 17-11
+  const SBJ1712 = { LS61: true };
+  let LOC1712 = null;   // { key: 임장 구역 id, status: 'loading'|'found'|'none' } — 지금 화면의 임장 구역 위치 찾기 상태(저장하지 않음)
   const GI_COORDS_URL = 'data/gi_coords_v1.json';   // LS55: 비교단지 이름 검색(단지 찾기·이름 자동완성)에 좌표 파일에 없는 단지(경기·인천 등, 현재가 인덱스에만 있음)도 보여 줌 — 고르면 현재가 자동, 준공연도·세대수는 직접 입력
   if (SBJ177.LS50 && document.body) document.body.classList.add('l50');
   const SBJ_PICK_DEV = 1.2;   // 17-5(LS44): 고른 단지 시세 최고 ÷ 최저가 이 값을 넘으면 경고(10억 vs 12억 = 경고 없음)
@@ -3497,7 +3501,28 @@ window.SBJ_RENT16 = {"source":"seedComplexes.js@67d3760 (md5 65724010) rentalHou
     L.clearInbox(ST.s);
     renderAll(true); markClean();
     toast(L.TOOLS[inbox.from.tool] + '에서 값을 가져왔어요. 표시된 값을 확인하세요.');
+    if (SBJ1712.LS61) locate1712(inbox);
   }
+  // 17-12(LS61): 임장 상자에는 좌표·구가 없음(임장 app.js sbjInbox) → 받은 목록표 키(from.redevKey)로 [목록표에서 불러오기]와 같은 목록표 읽기(loadList)·키 매칭(E.matchSource)으로 행을 찾아 좌표·구만 채움
+  //   구역명·단계·지역구분·출처(source = 임장)·저장 대상은 그대로. 키로 한 곳만 찾을 때만(이름이 같은 구역이 여럿이거나 id 만 맞으면 채우지 않음)
+  function locate1712(inbox) {
+    LOC1712 = null;
+    if (!inbox || !inbox.from || inbox.from.tool !== 'imjang') return;
+    const t = state.target; if ((t.coord && E.isNum(t.coord.lat)) || (typeof t.gu === 'string' && t.gu)) return;
+    const key = inbox.from.key, rk = typeof inbox.from.redevKey === 'string' ? inbox.from.redevKey : '';
+    if (!rk) { LOC1712 = { key, status: 'none' }; renderAll(); return; }
+    LOC1712 = { key, status: 'loading' };
+    loadList().then((p) => {
+      if (!LOC1712 || LOC1712.key !== key || !state.target.source || state.target.source.tool !== 'imjang' || state.target.source.key !== key) return;   // 그사이 다른 구역으로 바뀜
+      const m = p && p.ok ? E.matchSource({ key: rk }, p.rows.map((x) => x.row)) : null, r = m && m.ok ? m.row : null;
+      const okC = !!r && typeof r.lat === 'number' && typeof r.lng === 'number' && Number.isFinite(r.lat) && Number.isFinite(r.lng), okG = !!r && typeof r.gu === 'string' && !!r.gu;
+      if (okC || okG) {   // 목록표 📐(buildInbox)와 같게: 좌표가 있으면 좌표, 구가 있으면 구(목록표에 좌표 없는 구역은 구 기준 추천)
+        if (okC) state.target.coord = { lat: r.lat, lng: r.lng }; if (okG) state.target.gu = r.gu;
+        LOC1712.status = 'found'; renderAll(true); markClean();
+      } else { LOC1712.status = 'none'; renderAll(); }
+    }).catch(() => { if (LOC1712 && LOC1712.key === key) { LOC1712.status = 'none'; renderAll(); } });
+  }
+  function noLoc1712() { const t = state.target || {}; return SBJ1712.LS61 && !!LOC1712 && LOC1712.status === 'none' && !!t.source && t.source.tool === 'imjang' && t.source.key === LOC1712.key && !(t.coord && E.isNum(t.coord.lat)) && !(typeof t.gu === 'string' && t.gu); }
   // 17-8 추가(LS54): 임장 앱은 목록표 구역이면 지역구분 '서울'을 넣어 보냄 → 목록표 키(시트|구역명|세부)의 시트가 경기인천이면 '인천·경기'로 바로잡음(메모리에서만)
   function fixImjangGi180(ib) { if (SBJ180.LS54 && ib && ib.from && ib.from.tool === 'imjang' && typeof ib.from.redevKey === 'string' && /^경기인천\|/.test(ib.from.redevKey) && ib.fields && ib.fields['지역구분'] === '서울') ib.fields['지역구분'] = '인천·경기'; return ib; }
   function checkInbox() {
@@ -3757,7 +3782,8 @@ window.SBJ_RENT16 = {"source":"seedComplexes.js@67d3760 (md5 65724010) rentalHou
       '<button type="button" class="btn small primary" data-gp-confirm' + (n >= 3 || (amt && ok) ? '' : ' disabled') + '>' + esc(G.g17.confirm) + '</button></div>';
     if (G17.searchOpen) h += '<div class="gp-search" data-gp-search><input type="search" data-gp-q placeholder="' + esc(G.g17.addPh) + '" aria-label="비교대상 아파트 검색" value="' + esc(G17.q) + '"><div class="gp-res" data-gp-res></div></div>';
     if (pk.amountOn) { const a = pk.amount !== null ? GR.amountGrade(pk.amount, GRU()) : null; h += '<div class="gp-amt"><label for="gpAmount">' + esc(G.g17.amountLabel) + '</label><input id="gpAmount" class="txt" data-gp-amount inputmode="decimal" value="' + (pk.amount !== null ? esc(String(pk.amount)) : '') + '"><span data-gp-amount-grade>' + esc(a ? '→ 급지 ' + a.label : G.g17.amountNeed) + '</span></div>'; }
-    if ((outsideSeoulZone(state.target) && !SBJ179G.LS56) || !base.length) h += '<div class="gp-hint" data-gp-outside>' + esc(SBJ179.LS52 && outsideSeoulZone(state.target) ? (SBJ179G.LS56 ? G.g17.outsideGiShort : G.g17.outsideGi) : G.g17.outsideHint) + '</div>';
+    if (noLoc1712()) h += '<div class="gp-hint" data-gp-noloc>' + esc(G.g17.noLoc1712) + '</div>';   // 17-12(LS61)
+    else if ((outsideSeoulZone(state.target) && !SBJ179G.LS56) || !base.length) h += '<div class="gp-hint" data-gp-outside>' + esc(SBJ179.LS52 && outsideSeoulZone(state.target) ? (SBJ179G.LS56 ? G.g17.outsideGiShort : G.g17.outsideGi) : G.g17.outsideHint) + '</div>';
     return h + note + '</div>';
   }
   function pickPopup17(d, reopen) {
