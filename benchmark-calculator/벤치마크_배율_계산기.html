@@ -5072,12 +5072,12 @@ function findTwinCandidates(comp){
 // - 지역 제한 없음(다른 시·구 쌍은 "다른 지역" 표시). 기준 월 = 두 단지의 공통 최신월(2026.07보다 이르면 제외).
 // - 이탈 시작 달 = 비율이 동조기 평균에서 ±5% 밖으로 나가 기준 월까지 이어진 구간의 첫 달.
 //   동조기 = 이탈 시작 이전의 겹친 달 전부. 둘이 서로를 정하므로 "동조기 평균 → 이탈 구간 → 동조기"를 같아질 때까지 반복한다.
-// - 동조: 동조기 84개월 이상, 12개월 이평 등락률 상관 0.8 이상, 비율 변동계수 5% 이하.
+// - 동조: 동조기 84개월 이상, 12개월 이평 등락률 상관 0.8 이상, 비율 변동계수 6% 이하(132단계에 5%에서 올림).
 // - 괴리: 기준 월 비율이 동조기 평균 대비 ±5% 이상, 최근 3개월 연속(이탈 구간이 3개월 이상).
 // - 기간: 동조 개월 ≥ 이탈 개월 × 2, 이탈 개월 ≤ 60.
 // - 신축 입주 영향·28년 이상은 빼지 않고 작은 참고 배지로만. 시세 갱신 횟수는 보지 않는다(가격 정체와 미갱신을 구분할 수 없음).
 // findTwinCandidates·적정가·배지는 건드리지 않는다. 여기서 고른 쌍은 쌍둥이 [동조] 탭에서 빼고 [괴리] 탭에만 둔다.
-const L64_SYNC_MIN_MONTHS = 84, L64_MA_WINDOW = 12, L64_MIN_CORR = 0.8, L64_MAX_CV = 0.05;
+const L64_SYNC_MIN_MONTHS = 84, L64_MA_WINDOW = 12, L64_MIN_CORR = 0.8, L64_MAX_CV = 0.06;   // 132단계: 5% → 6%(대표님 모범 사례 인덕원 5.22%·동탄역신안 5.04%)
 const L64_DEV = 0.05, L64_RUN_MONTHS = 3, L64_SYNC_PER_DEV = 2, L64_MAX_DEV_MONTHS = 60, L64_MIN_BASE_YM = 202607;
 const L64_NEW_BUILD_YEARS = 3, L64_NEW_BUILD_SHARE = 0.25, L64_SORT_BUCKET_PCT = 1, L64_MAX_ITER = 30;
 const L64_EMPTY_TEXT = '최근 벌어진 쌍둥이가 없어요';
@@ -5198,9 +5198,24 @@ function divergenceTwinsL64(compName){
   return list;
 }
 // 쌍둥이 [동조] 탭(목록·칸1/2 미리보기)에서 빼는 쌍 = 괴리 쌍
+// 132단계: 전체 괴리 목록을 만들지 않고 그 쌍 하나만 판정한다(목록에 드는 조건과 같음 — 풀 단지·시세 있음·같은 판정 함수).
+// 단일 진단을 열 때(칸1/2 미리보기) 전체 목록 계산이 돌지 않게 하려는 것. 결과는 쌍마다 기억한다.
+const _divPairCacheL64 = new Map();
 function divHiddenL64(comp, t){
-  const list = divergenceTwinsL64(comp && comp.name);
-  return !!(list && list.length && t && list.some(d => d.seedId === t.seedId));
+  if (!BUNDLES.L64 || !comp || !t || !t.seedId || isPyeong25Name(comp.name)) return false;
+  const key = comp.name + '||' + t.seedId;
+  if (_divPairCacheL64.has(key)) return _divPairCacheL64.get(key);
+  let hit = false;
+  const e = seedEntryByName(comp.name), c = seedEntryById(t.seedId);
+  if (e && c && e !== c && e.text && c.text){
+    const pool = poolSeedComplexes();
+    if (pool.indexOf(e) >= 0 && pool.indexOf(c) >= 0){
+      const s0 = seriesL64(e), s1 = seriesL64(c);
+      if (s0 && s1 && Math.min(s0.last, s1.last) - Math.max(s0.first, s1.first) + 1 >= L64_SYNC_MIN_MONTHS + L64_RUN_MONTHS) hit = divergencePairL64(e, s0, c, s1).ok;
+    }
+  }
+  _divPairCacheL64.set(key, hit);
+  return hit;
 }
 function legendL64(html){ return BUNDLES.L64 ? html.replace('📊 현재 괴리 =', '📊 최근 차이 =') : html; }
 function divTagsHtmlL64(d){
@@ -5236,7 +5251,7 @@ function divCardHtmlL64(d, idx, comp, iMode, iRangeMode, iShowBench){
   return '<div class="twin-card div-card-l64">'+
     '<div class="twin-card-head">'+divTagsHtmlL64(d)+cxNameHtmlL64(d.name, d.seedId)+esc(regionSuffix(d.name))+rentalHeavyChip(d.name)+favBtnHtml+'</div>'+
     '<div class="div-main-l64">'+withParticle(cheap, '이', '가')+' '+esc(other)+' 대비 평소보다 '+Math.round(d.cheapPct)+'% 싸졌어요</div>'+
-    '<div class="div-why-l64">평소 '+withParticle(d.nameA, '은', '는')+' '+esc(d.nameB)+'의 '+(d.mean*100).toFixed(0)+'% → 지금 '+(d.now*100).toFixed(0)+'% · 동조 '+d.syncMonths+'개월 → 이탈 '+d.devMonths+'개월('+fmtYm(d.onsetYm)+'부터)</div>'+
+    '<div class="div-why-l64">평소 '+withParticle(d.nameA, '은', '는')+' '+esc(d.nameB)+'의 '+(d.mean*100).toFixed(0)+'% → 지금 '+(d.now*100).toFixed(0)+'% · 동조 '+d.syncMonths+'개월 → 이탈 '+d.devMonths+'개월('+fmtYm(d.onsetYm)+'부터) · 평소 변동 '+(d.cv*100).toFixed(1)+'%</div>'+
     toggles+
     '<div class="twin-chart-note">'+note+'</div>'+
     (iMode==='price' ? '' : '<button class="chart-mode-toggle" data-div-reset-l64="'+idx+'" hidden>↺ 기준점 초기화</button>')+
@@ -6010,7 +6025,7 @@ function twinMatchTypeTag(t){
     : t.matchType==='similar' ? (t.similarReason==='amp'
         ? '<span class="twin-match-tag similar-amp">📈 상승폭 유사 1위</span><span class="info-icon" tabindex="0" data-tip="'+esc(SIMILAR_AMP_TAG_TOOLTIP)+'">ⓘ</span>'
         : '<span class="twin-match-tag similar">🎯 동조 1위</span><span class="info-icon" tabindex="0" data-tip="'+esc(SIMILAR_CORR_TAG_TOOLTIP)+'">ⓘ</span>')
-    : t.matchType==='gap' ? '<span class="twin-match-tag gap'+(t.gapSeverity==='strong'?' strong':'')+'">📊 '+(t.gapSeverity==='strong'?(BUNDLES.L64?'뚜렷한 최근 차이':'뚜렷한 괴리'):(BUNDLES.L64?'최근 차이':'괴리'))+'</span>'
+    : t.matchType==='gap' ? '<span class="twin-match-tag gap'+(t.gapSeverity==='strong'?' strong':'')+'">📊 '+(t.gapSeverity==='strong'?(BUNDLES.L64?'최근 차이 큼':'뚜렷한 괴리'):(BUNDLES.L64?'최근 차이':'괴리'))+'</span>'
     : '';
 }
 function twinOngoingBadge(t){
