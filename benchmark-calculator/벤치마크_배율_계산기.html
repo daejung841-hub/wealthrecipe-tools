@@ -898,6 +898,8 @@ body.l44 .tier-seg.current.tier-low, body.l44 .tier-seg.current.tier-veryLow{box
 .twin-inner-l64{display:flex;flex-direction:column;gap:10px;}
 .div-card-l64 .div-main-l64{font-size:14px;font-weight:700;line-height:1.5;margin:2px 0 4px;}
 .div-card-l64 .div-why-l64{font-size:12px;color:var(--ink-muted);line-height:1.55;}
+.div-card-l64 .div-why-l64{margin-bottom:4px;}
+.div-tag-l64{display:inline-block;margin-right:4px;padding:0 5px;border:1px solid var(--border-strong);border-radius:4px;font-size:10.5px;font-weight:600;line-height:16px;color:var(--ink-muted);vertical-align:1px;white-space:nowrap;}
 /* 항목(2026-09-22 세션, "쌍둥이 단지 즐겨찾기") */
 .twin-fav-btn{
   border:none;background:none;cursor:pointer;font-size:15px;line-height:1;
@@ -5065,15 +5067,22 @@ function findTwinCandidates(comp){
   return result;
 }
 
-// ---- 묶음 L64(130단계): 괴리 쌍둥이 — 오래 같이 움직이다 최근 1년 안에 가격 비율이 벌어진 같은 구·시 쌍(34평, 표시 전용) ----
-// 128단계 권장안. 기준 월 = 전체 최신월(데이터 기준월 배지와 같은 값), 그 달 시세가 없는 단지는 빠진다.
-// 동조기 = 기준 월 12개월 전까지의 겹친 달(84개월 이상), 12개월 이평 등락률 상관 0.8 이상, 비율 변동계수 5% 이하.
-// 괴리 = 최근 비율이 동조기 평균 대비 5% 이상, 최근 3개월 연속 같은 방향, 처음 벗어난 달이 최근 12개월 안.
-// 제외 = 최근 12개월 시세 갱신 2번 이하 단지, 준공 후 3년 시세가 동조기의 25% 이상(신축 입주), 28년 이상.
-// findTwinCandidates·적정가·배지는 건드리지 않는다. 여기서 고른 쌍은 쌍둥이 [동조] 탭 목록에서 빼고 [괴리] 탭에만 둔다.
-const L64_SYNC_MIN_MONTHS = 84, L64_RECENT_MONTHS = 12, L64_MA_WINDOW = 12, L64_MIN_CORR = 0.8, L64_MAX_CV = 0.05;
-const L64_DEV = 0.05, L64_RUN_MONTHS = 3, L64_MAX_STALE_CHANGES = 2, L64_NEW_BUILD_YEARS = 3, L64_NEW_BUILD_SHARE = 0.25;
+// ---- 묶음 L64(130·131단계): 괴리 쌍둥이 — 오랫동안 같이 움직이다 최근 벌어진 짝(34평, 표시 전용) ----
+// 131단계 기준(대표님 원칙: 같은 구·시가 같이 움직이는 건 당연 — "예상치 못했는데 늘 같이 움직이던 짝"을 찾는다):
+// - 지역 제한 없음(다른 시·구 쌍은 "다른 지역" 표시). 기준 월 = 두 단지의 공통 최신월(2026.07보다 이르면 제외).
+// - 이탈 시작 달 = 비율이 동조기 평균에서 ±5% 밖으로 나가 기준 월까지 이어진 구간의 첫 달.
+//   동조기 = 이탈 시작 이전의 겹친 달 전부. 둘이 서로를 정하므로 "동조기 평균 → 이탈 구간 → 동조기"를 같아질 때까지 반복한다.
+// - 동조: 동조기 84개월 이상, 12개월 이평 등락률 상관 0.8 이상, 비율 변동계수 5% 이하.
+// - 괴리: 기준 월 비율이 동조기 평균 대비 ±5% 이상, 최근 3개월 연속(이탈 구간이 3개월 이상).
+// - 기간: 동조 개월 ≥ 이탈 개월 × 2, 이탈 개월 ≤ 60.
+// - 신축 입주 영향·28년 이상은 빼지 않고 작은 참고 배지로만. 시세 갱신 횟수는 보지 않는다(가격 정체와 미갱신을 구분할 수 없음).
+// findTwinCandidates·적정가·배지는 건드리지 않는다. 여기서 고른 쌍은 쌍둥이 [동조] 탭에서 빼고 [괴리] 탭에만 둔다.
+const L64_SYNC_MIN_MONTHS = 84, L64_MA_WINDOW = 12, L64_MIN_CORR = 0.8, L64_MAX_CV = 0.05;
+const L64_DEV = 0.05, L64_RUN_MONTHS = 3, L64_SYNC_PER_DEV = 2, L64_MAX_DEV_MONTHS = 60, L64_MIN_BASE_YM = 202607;
+const L64_NEW_BUILD_YEARS = 3, L64_NEW_BUILD_SHARE = 0.25, L64_SORT_BUCKET_PCT = 1, L64_MAX_ITER = 30;
 const L64_EMPTY_TEXT = '최근 벌어진 쌍둥이가 없어요';
+const L64_PAGE_SIZE = 4;   // 괴리 카드는 그래프가 있어 4장씩("더보기"를 누를 때마다 4장 더)
+const divShownL64 = new Map();   // twinKey::단지 이름 -> 지금 보이는 장수
 function areaKeyL64(e){
   if (!e || !e.regionCity) return null;
   return e.regionCity === '서울' ? '서울 ' + (e.district || '') : e.regionCity + (e.district ? ' ' + e.district : '');
@@ -5085,9 +5094,7 @@ function seriesL64(e){
   c.rows.forEach(row => { const v = row.saleMid; if (v != null && isFinite(v) && v > 0) m.set(ymIndex(row.ym), v); });
   let first = Infinity, last = -Infinity;
   m.forEach((v, k) => { if (k < first) first = k; if (k > last) last = k; });
-  let changed = 0;   // 자기 최신월 기준 최근 12개월 중 시세가 바뀐 달
-  for (let k = last - 11; k <= last; k++) if (m.has(k) && m.has(k - 1) && m.get(k) !== m.get(k - 1)) changed++;
-  const out = m.size >= 2 ? { m, first, last, changed } : null;
+  const out = m.size >= 2 ? { m, first, last } : null;
   _seriesCacheL64.set(e.id, out);
   return out;
 }
@@ -5098,54 +5105,76 @@ function maRetL64(m, idx, win){
   for (let i = 1; i < ma.length; i++) r.push(ma[i] / ma[i - 1] - 1);
   return r;
 }
-function newBuildShareL64(built, ovFirstIdx, syncEndYear, syncN){
+function ymOfIndexL64(k){ return Math.floor(k / 12) * 100 + (k % 12) + 1; }
+function newBuildShareL64(built, ovFirstIdx, syncEndIdx, syncN){
   if (built == null) return 0;
-  const from = Math.max(Math.floor(ovFirstIdx / 12), built), to = Math.min(syncEndYear, built + L64_NEW_BUILD_YEARS - 1);
+  const from = Math.max(Math.floor(ovFirstIdx / 12), built), to = Math.min(Math.floor(syncEndIdx / 12), built + L64_NEW_BUILD_YEARS - 1);
   return to >= from ? (to - from + 1) * 12 / syncN : 0;
 }
-// 두 단지 쌍 하나를 판정한다. 통과하면 괴리 정보, 아니면 null. M = 기준 월 인덱스(ymIndex).
-function divergencePairL64(e0, s0, e1, s1, M){
-  const lo = Math.max(s0.first, s1.first), idx = [];
+// 두 단지 쌍 하나를 판정한다. 통과하면 { ok:true, ... }, 아니면 { ok:false, reason } (reason은 집계·시험용 이름).
+function divergencePairL64(e0, s0, e1, s1){
+  const lo = Math.max(s0.first, s1.first);
+  let M = Math.min(s0.last, s1.last);
+  while (M >= lo && !(s0.m.has(M) && s1.m.has(M))) M--;
+  if (M < lo) return { ok: false, reason: '겹침 없음' };
+  if (ymOfIndexL64(M) < L64_MIN_BASE_YM) return { ok: false, reason: '기준 월 2026.07 전' };
+  const idx = [];
   for (let k = lo; k <= M; k++) if (s0.m.has(k) && s1.m.has(k)) idx.push(k);
-  const syncIdx = idx.filter(k => k <= M - L64_RECENT_MONTHS);
-  if (syncIdx.length < L64_SYNC_MIN_MONTHS) return null;
-  let sa = 0, sb = 0; syncIdx.forEach(k => { sa += s0.m.get(k); sb += s1.m.get(k); });
-  const [eA, sA, eB, sB] = sa >= sb ? [e0, s0, e1, s1] : [e1, s1, e0, s0];   // A = 동조기 평균가가 높은 쪽
-  const ratio = k => sA.m.get(k) / sB.m.get(k);
-  const rs = syncIdx.map(ratio), mean = rs.reduce((x, v) => x + v, 0) / rs.length;
-  const cv = Math.sqrt(rs.reduce((x, v) => x + (v - mean) * (v - mean), 0) / (rs.length - 1)) / mean;
-  if (!(cv <= L64_MAX_CV)) return null;
+  const n = idx.length;
+  if (n < L64_SYNC_MIN_MONTHS + L64_RUN_MONTHS) return { ok: false, reason: '겹침 짧음' };
+  let sa = 0, sb = 0; idx.forEach(k => { sa += s0.m.get(k); sb += s1.m.get(k); });
+  const [eA, sA, eB, sB] = sa >= sb ? [e0, s0, e1, s1] : [e1, s1, e0, s0];   // A = 겹친 기간 평균가가 높은 쪽
+  const rr = idx.map(k => sA.m.get(k) / sB.m.get(k));
+  const meanOf = p => { let s = 0; for (let i = 0; i < p; i++) s += rr[i]; return s / p; };
+  // 동조기 평균 ↔ 이탈 시작을 같아질 때까지 맞춘다(처음엔 최근 3개월만 뺀 구간을 동조기로 가정)
+  let onset = n - L64_RUN_MONTHS, mean = 0, dM = 0, converged = false;
+  for (let it = 0; it < L64_MAX_ITER; it++){
+    if (onset < L64_SYNC_MIN_MONTHS) return { ok: false, reason: '동조 짧음' };
+    mean = meanOf(onset); dM = rr[n - 1] / mean - 1;
+    if (Math.abs(dM) < L64_DEV) return { ok: false, reason: '이탈 아님' };
+    let p0 = n - 1;
+    while (p0 - 1 >= 0 && idx[p0 - 1] === idx[p0] - 1){
+      const d = rr[p0 - 1] / mean - 1;
+      if (Math.sign(d) !== Math.sign(dM) || Math.abs(d) < L64_DEV) break;
+      p0--;
+    }
+    if (p0 === onset){ converged = true; break; }
+    onset = p0;
+  }
+  if (!converged) return { ok: false, reason: '이탈 시작 못 정함' };
+  const devMonths = n - onset, syncN = onset;
+  if (devMonths < L64_RUN_MONTHS) return { ok: false, reason: '연속 3개월 아님' };
+  if (devMonths > L64_MAX_DEV_MONTHS) return { ok: false, reason: '이탈 너무 김' };
+  if (syncN < devMonths * L64_SYNC_PER_DEV) return { ok: false, reason: '동조 대비 이탈 김' };
+  let sq = 0; for (let i = 0; i < syncN; i++) sq += (rr[i] - mean) * (rr[i] - mean);
+  const cv = Math.sqrt(sq / (syncN - 1)) / mean;
+  if (!(cv <= L64_MAX_CV)) return { ok: false, reason: '변동계수', cv };
+  const syncIdx = idx.slice(0, syncN);
   const corr = pearsonCorrelation(maRetL64(sA.m, syncIdx, L64_MA_WINDOW), maRetL64(sB.m, syncIdx, L64_MA_WINDOW));
-  if (corr == null || corr < L64_MIN_CORR) return null;
-  const dev = k => ratio(k) / mean - 1, dM = dev(M);
-  if (Math.abs(dM) < L64_DEV) return null;
-  for (let j = 1; j < L64_RUN_MONTHS; j++){
-    const k = M - j;
-    if (!(sA.m.has(k) && sB.m.has(k)) || Math.sign(dev(k)) !== Math.sign(dM) || Math.abs(dev(k)) < L64_DEV) return null;
-  }
-  let onset = M;   // 같은 방향으로 5% 이상 벗어난 연속 구간의 첫 달(빈 달에서 끊김)
-  for (let p = idx.length - 1; p >= 0; p--){
-    const k = idx[p];
-    if (p < idx.length - 1 && idx[p + 1] !== k + 1) break;
-    if (Math.sign(dev(k)) === Math.sign(dM) && Math.abs(dev(k)) >= L64_DEV) onset = k; else break;
-  }
-  if (onset < M - (L64_RECENT_MONTHS - 1)) return null;
-  if (Math.min(sA.changed, sB.changed) <= L64_MAX_STALE_CHANGES) return null;
-  const syncEndYear = Math.floor((M - L64_RECENT_MONTHS) / 12);
-  const ovFirst = Math.max(sA.first, sB.first);
-  if ([eA, eB].some(e => newBuildShareL64(e.builtYear, ovFirst, syncEndYear, syncIdx.length) >= L64_NEW_BUILD_SHARE)) return null;
-  if ([eA, eB].some(e => { const age = complexAge(e.builtYear); return age != null && age >= REBUILD_AGE_THRESHOLD; })) return null;
+  if (corr == null || corr < L64_MIN_CORR) return { ok: false, reason: '상관', corr };
   const cheapIsA = dM < 0;
   const cheapPct = (cheapIsA ? -dM : 1 - 1 / (1 + dM)) * 100;   // 싸진 쪽 기준 "평소보다 N% 싸졌다"
-  const ymOf = k => Math.floor(k / 12) * 100 + (k % 12) + 1;
-  return { idA: eA.id, nameA: eA.name, idB: eB.id, nameB: eB.name, mean, now: ratio(M), dev: dM, cv, corr,
-    syncMonths: syncIdx.length, onsetYm: ymOf(onset), baseYm: ymOf(M), cheapId: cheapIsA ? eA.id : eB.id, cheapPct };
+  const ovFirst = idx[0], syncEnd = idx[syncN - 1];
+  const newBuild = [eA, eB].filter(e => newBuildShareL64(e.builtYear, ovFirst, syncEnd, syncN) >= L64_NEW_BUILD_SHARE).map(e => e.id);
+  const old28 = [eA, eB].filter(e => { const age = complexAge(e.builtYear); return age != null && age >= REBUILD_AGE_THRESHOLD; }).map(e => e.id);
+  return { ok: true, idA: eA.id, nameA: eA.name, idB: eB.id, nameB: eB.name, mean, now: rr[n - 1], dev: dM, cv, corr,
+    syncMonths: syncN, devMonths, onsetYm: ymOfIndexL64(idx[onset]), baseYm: ymOfIndexL64(M), firstYm: ymOfIndexL64(ovFirst),
+    cheapId: cheapIsA ? eA.id : eB.id, cheapPct, otherArea: areaKeyL64(eA) !== areaKeyL64(eB), newBuild, old28 };
+}
+// 정렬: 괴리 % 큰 순. 맨 앞 쌍과 1%p 안으로 가까운 쌍끼리 한 묶음으로 보고, 묶음 안에서는 이탈 시작이 최근인 쌍 → 동조 기간이 긴 쌍 순.
+function divSortL64(a, b){ return (b.onsetYm - a.onsetYm) || (b.syncMonths - a.syncMonths) || (b.cheapPct - a.cheapPct); }
+function sortDivL64(list){
+  const byPct = list.slice().sort((a, b) => (b.cheapPct - a.cheapPct) || divSortL64(a, b));
+  const out = [];
+  for (let i = 0; i < byPct.length;){
+    let j = i + 1;
+    while (j < byPct.length && byPct[i].cheapPct - byPct[j].cheapPct <= L64_SORT_BUCKET_PCT) j++;
+    out.push(...byPct.slice(i, j).sort(divSortL64));
+    i = j;
+  }
+  return out;
 }
 let _divCacheL64 = {};
-function divergenceBaseMonthL64(){
-  const r = computeDataAsOfRange();
-  return r && r.max != null ? ymIndex(r.max) : null;
-}
 // 기준 단지(34평 풀 단지) 하나의 괴리 쌍둥이 목록. 25평·풀 밖 단지·L64 꺼짐은 null(탭 없음).
 function divergenceTwinsL64(compName){
   if (!BUNDLES.L64 || !compName || isPyeong25Name(compName)) return null;
@@ -5155,17 +5184,15 @@ function divergenceTwinsL64(compName){
   const pool = poolSeedComplexes();
   if (e && e.text && pool.indexOf(e) >= 0){
     list = [];
-    const M = divergenceBaseMonthL64(), area = areaKeyL64(e), s0 = seriesL64(e);
-    if (M != null && area && s0 && s0.m.has(M)){
-      pool.forEach(c => {
-        if (c === e || !c.text || areaKeyL64(c) !== area) return;
-        const s1 = seriesL64(c);
-        if (!s1 || !s1.m.has(M)) return;
-        const d = divergencePairL64(e, s0, c, s1, M);
-        if (d) list.push(Object.assign(d, { seedId: c.id, name: c.name }));
-      });
-      list.sort((a, b) => (b.cheapPct - a.cheapPct) || (a.cv - b.cv));
-    }
+    const s0 = seriesL64(e);
+    if (s0) pool.forEach(c => {
+      if (c === e || !c.text) return;
+      const s1 = seriesL64(c);
+      if (!s1 || Math.min(s0.last, s1.last) - Math.max(s0.first, s1.first) + 1 < L64_SYNC_MIN_MONTHS + L64_RUN_MONTHS) return;
+      const d = divergencePairL64(e, s0, c, s1);
+      if (d.ok) list.push(Object.assign(d, { seedId: c.id, name: c.name }));
+    });
+    list = sortDivL64(list);
   }
   _divCacheL64[compName] = list;
   return list;
@@ -5176,23 +5203,75 @@ function divHiddenL64(comp, t){
   return !!(list && list.length && t && list.some(d => d.seedId === t.seedId));
 }
 function legendL64(html){ return BUNDLES.L64 ? html.replace('📊 현재 괴리 =', '📊 최근 차이 =') : html; }
-function divCardHtmlL64(d, idx){
+function divTagsHtmlL64(d){
+  const tag = (txt, tip) => '<span class="div-tag-l64" title="'+esc(tip)+'">'+esc(txt)+'</span>';
+  return (d.otherArea ? tag('다른 지역', '서로 다른 시·구인데도 오랫동안 같이 움직인 짝이에요') : '') +
+    (d.newBuild.length ? tag('신축 입주', '준공 직후 몇 년 시세가 같이 움직인 기간에 많이 들어 있어요(참고)') : '') +
+    (d.old28.length ? tag('28년 이상', '준공 28년 이상 단지가 있어 재건축 기대가 섞였을 수 있어요(참고)') : '');
+}
+function divBenchDetailL64(comp, partner){
+  const bench = getVirtualBenchmarkComplex('seoul');
+  const gapOf = c => { const yms = [...c.rowMap.keys()].filter(ym => c.rowMap.get(ym).saleMid != null).sort((a, b) => a - b); const g = computeFixedWindowGap(c, bench, overlapYmsOf(c.rowMap, bench.rowMap, yms)); return g ? g.gap : null; };
+  const f = g => g == null ? '—' : (g > 0 ? '+' : '') + g.toFixed(1) + '%';
+  return '서울 선도단지 대비 평소 배율과 비교하면 지금 '+esc(comp.name)+' '+f(gapOf(comp))+', '+esc(partner.name)+' '+f(gapOf(partner))+'예요.';
+}
+function divItemL64(comp, d){
+  if (!d._complex){ const e = seedEntryById(d.seedId); d._complex = buildComplex(e.text, e.name, e.name); }
+  const yms = overlapYmsOf(comp.rowMap, d._complex.rowMap).filter(ym => ym <= d.baseYm);
+  const onsetIdx = yms.indexOf(d.onsetYm);
+  return { complex: d._complex, yms, decoupling: { deviated: onsetIdx > 0, onsetIdx, onsetYm: d.onsetYm, duration: d.devMonths } };
+}
+function divCardHtmlL64(d, idx, comp, iMode, iRangeMode, iShowBench){
   const cheap = d.cheapId === d.idA ? d.nameA : d.nameB, other = d.cheapId === d.idA ? d.nameB : d.nameA;
   const favL59 = !!(BUNDLES.L59 && d.seedId);
   const favActive = favL59 ? isComplexFavL59(d.seedId, 34) : false;
   const favBtnHtml = favL59 ? '<button class="twin-fav-btn'+(favActive?' active':'')+'" data-div-fav-l64="'+idx+'" data-fav-l59-key="'+esc(complexFavKeyL59(d.seedId, 34))+'" title="'+esc(d.name)+' 즐겨찾기" type="button" aria-label="즐겨찾기">'+(favActive?'★':'☆')+'</button>' : '';
+  const toggles = '<div class="card-toggle-row">'+
+    '<button class="chart-mode-toggle" data-div-mode-l64="'+idx+'">'+(iMode==='index'?'💰가격':'📈상승률')+'</button>'+
+    '<button class="chart-mode-toggle" data-div-range-l64="'+idx+'">'+(iRangeMode==='overlap'?'🗓️전체기간':'🔗겹침만')+'</button>'+
+    (iMode==='price' ? '' : '<button class="chart-mode-toggle" data-div-bench-l64="'+idx+'">'+(iShowBench?'🏙️선도단지 끄기':'🏙️선도단지 보기')+'</button>')+
+  '</div>';
+  const note = (iMode==='price' ? '실제 가격(억원) · 같은 축 공유' : '양쪽 모두 시작 시점 대비 상승률(%) · 그래프의 지점을 클릭하면 그 지점을 새 기준점으로 다시 계산합니다')+
+    (iRangeMode==='full' ? '' : ' · 빨간 음영='+fmtYm(d.onsetYm)+'부터 벌어진 구간('+d.devMonths+'개월)')+((iShowBench && iMode!=='price') ? ' · 주황 점선=서울 선도단지' : '');
   return '<div class="twin-card div-card-l64">'+
-    '<div class="twin-card-head">'+cxNameHtmlL64(d.name, d.seedId)+esc(regionSuffix(d.name))+rentalHeavyChip(d.name)+favBtnHtml+'</div>'+
+    '<div class="twin-card-head">'+divTagsHtmlL64(d)+cxNameHtmlL64(d.name, d.seedId)+esc(regionSuffix(d.name))+rentalHeavyChip(d.name)+favBtnHtml+'</div>'+
     '<div class="div-main-l64">'+withParticle(cheap, '이', '가')+' '+esc(other)+' 대비 평소보다 '+Math.round(d.cheapPct)+'% 싸졌어요</div>'+
-    '<div class="div-why-l64">평소 '+withParticle(d.nameA, '은', '는')+' '+esc(d.nameB)+'의 '+(d.mean*100).toFixed(0)+'% → 지금 '+(d.now*100).toFixed(0)+'% · '+fmtYm(d.onsetYm)+'부터 벌어짐 · 동조 '+d.syncMonths+'개월</div>'+
+    '<div class="div-why-l64">평소 '+withParticle(d.nameA, '은', '는')+' '+esc(d.nameB)+'의 '+(d.mean*100).toFixed(0)+'% → 지금 '+(d.now*100).toFixed(0)+'% · 동조 '+d.syncMonths+'개월 → 이탈 '+d.devMonths+'개월('+fmtYm(d.onsetYm)+'부터)</div>'+
+    toggles+
+    '<div class="twin-chart-note">'+note+'</div>'+
+    (iMode==='price' ? '' : '<button class="chart-mode-toggle" data-div-reset-l64="'+idx+'" hidden>↺ 기준점 초기화</button>')+
+    '<div class="twin-chart-wrap"><canvas data-div-canvas-l64="'+idx+'"></canvas></div>'+
+    wrapDetail(divBenchDetailL64(comp, d._complex || { name: d.name, rowMap: new Map() }))+
     '<button class="view-multi-btn" data-div-view-l64="'+idx+'">📊 여러 단지 비교에서 보기</button>'+
   '</div>';
 }
-function renderDivListL64(el, comp, list){
-  if (!list.length){ el.innerHTML = '<div class="twin-msg">'+L64_EMPTY_TEXT+'</div>'; return; }
-  el.innerHTML = '<div class="twin-kind-caption"><b>괴리 쌍둥이</b> = 같은 구·시에서 7년 넘게 가격 비율이 거의 같았는데, 최근 1년 안에 그 비율이 5% 넘게 벌어진 단지예요(34평 KB 시세 '+fmtYm(list[0].baseYm)+' 기준).</div>'+
-    list.map((d, idx) => divCardHtmlL64(d, idx)).join('');
+function renderDivListL64(el, comp, allList, key){
+  if (!allList.length){ el.innerHTML = '<div class="twin-msg">'+L64_EMPTY_TEXT+'</div>'; return; }
+  const shown = Math.min(allList.length, Math.max(L64_PAGE_SIZE, divShownL64.get(key + '::' + comp.name) || L64_PAGE_SIZE));
+  const list = allList.slice(0, shown);
+  const bench = getVirtualBenchmarkComplex('seoul');
+  const keyOf = d => itemOverrideKey(key, 'div', d.name);
+  const modeOf = d => cardChartModeOverride.get(keyOf(d)) || 'index';
+  const rangeOf = d => cardRangeModeOverride.get(keyOf(d)) || 'overlap';
+  const benchOf = d => cardBenchLineOverride.has(keyOf(d)) ? cardBenchLineOverride.get(keyOf(d)) : false;
+  const items = list.map(d => divItemL64(comp, d));
+  el.innerHTML = '<div class="twin-kind-caption"><b>괴리 쌍둥이</b> = 7년 넘게 가격 비율이 거의 같았는데, 그 비율이 5% 넘게 벌어져 지금까지 이어지는 단지예요. 같이 움직인 기간이 벌어진 기간의 2배 이상이고 벌어진 지 5년이 안 된 짝만 보여 드려요(34평 KB 시세).</div>'+
+    list.map((d, idx) => divCardHtmlL64(d, idx, comp, modeOf(d), rangeOf(d), benchOf(d))).join('')+
+    (shown < allList.length ? '<button class="twin-more-btn" data-div-more-l64="1">더보기 ('+(allList.length - shown)+'개 더 보기)</button>' : '');
+  const rerender = () => renderDivListL64(el, comp, allList, key);
+  const more = el.querySelector('[data-div-more-l64]');
+  if (more) more.addEventListener('click', () => { divShownL64.set(key + '::' + comp.name, shown + L64_PAGE_SIZE); rerender(); });
   list.forEach((d, idx) => {
+    const it = items[idx], iMode = modeOf(d), iRange = rangeOf(d), iBench = benchOf(d);
+    const canvas = el.querySelector('[data-div-canvas-l64="'+idx+'"]');
+    if (canvas){
+      const chart = newMiniChart(canvas, twinMiniChartConfig(comp, it.complex, d.name, it.yms, iMode, 0, 'neitherDeviated', null, null, it.decoupling, iBench, bench, iRange));
+      if (iMode !== 'price') wireChartRebase(chart, canvas, el.querySelector('[data-div-reset-l64="'+idx+'"]'));
+    }
+    const on = (sel, fn) => { const b = el.querySelector(sel); if (b) b.addEventListener('click', fn); };
+    on('[data-div-mode-l64="'+idx+'"]', () => { cardChartModeOverride.set(keyOf(d), iMode === 'index' ? 'price' : 'index'); rerender(); });
+    on('[data-div-range-l64="'+idx+'"]', () => { cardRangeModeOverride.set(keyOf(d), iRange === 'overlap' ? 'full' : 'overlap'); rerender(); });
+    on('[data-div-bench-l64="'+idx+'"]', () => { cardBenchLineOverride.set(keyOf(d), !iBench); rerender(); });
     const fav = el.querySelector('[data-div-fav-l64="'+idx+'"]');
     if (fav) fav.addEventListener('click', ev => { ev.stopPropagation(); toggleComplexFavL59(d.seedId, 34, d.name); });
     const view = el.querySelector('[data-div-view-l64="'+idx+'"]');
@@ -5209,7 +5288,7 @@ function renderTwinTabsL64(body, comp, r, key, hideTopPreview, list){
   const btn = (k, label) => '<button type="button" class="twin-tab-l64'+(tab===k?' active':'')+'" role="tab" aria-selected="'+(tab===k)+'" data-twin-tab-l64="'+k+'">'+label+'</button>';
   body.innerHTML = '<div class="twin-tabs-l64" role="tablist">'+btn('sync', '동조 ('+syncCountL64(comp)+')')+btn('div', '괴리 ('+list.length+')')+'</div><div class="twin-inner-l64" data-twin-inner-l64="1"></div>';
   const inner = body.querySelector('[data-twin-inner-l64]');
-  if (tab === 'div') renderDivListL64(inner, comp, list); else renderTwinBody(inner, comp, r, key, hideTopPreview);
+  if (tab === 'div') renderDivListL64(inner, comp, list, key); else renderTwinBody(inner, comp, r, key, hideTopPreview);
   body.querySelectorAll('[data-twin-tab-l64]').forEach(b => b.addEventListener('click', () => {
     twinTabStateL64.set(key, b.dataset.twinTabL64);
     renderTwinTabsL64(body, comp, r, key, hideTopPreview, list);
