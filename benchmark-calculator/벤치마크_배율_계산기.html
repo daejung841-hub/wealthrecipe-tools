@@ -5263,7 +5263,9 @@ function divOutReasonL64(comp, t){
   return L64_OUT_REASON[r.reason] || r.reason;
 }
 function divOutLineHtmlL64(comp, t){
-  if (!BUNDLES.L64 || t.matchType !== 'gap' || t.gapSeverity !== 'strong') return '';
+  // 134단계: "최근 차이 큼" 배지 카드만이 아니라 이탈 중인 카드 전부(배지 유무 무관). 이탈 중 = 겹친 기간 로그 배율이 중앙값에서
+  // state.threshold(3%) 이상 벗어난 구간이 최신월까지 3개월 이상 이어지고 그 안 최대 폭이 5% 이상(computeTwinDecoupling).
+  if (!BUNDLES.L64 || !(t.decoupling && t.decoupling.deviated)) return '';
   const why = divOutReasonL64(comp, t);
   return why ? '<div class="twin-out-l64">괴리 탭에 없는 이유: '+esc(why)+'</div>' : '';
 }
