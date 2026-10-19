@@ -143,6 +143,12 @@ table.redev-table td.num{white-space:nowrap;}
 table.redev-table td.num .paren{white-space:normal;}
 table.redev-table td.num .v1{white-space:nowrap;}
 .cap-stage{white-space:normal;}
+.stg-prog{display:block;margin-top:1px;font-size:11px;font-weight:500;line-height:1.35;color:var(--ink-muted);white-space:normal;}   /* 목록-3 20차: 단계 옆 진행 기간(작게) */
+.stg-prog{word-break:keep-all;overflow-wrap:anywhere;}   /* 20차 최종: '27개월째'가 글자 중간에서 끊기지 않게(낱말 단위 줄바꿈) */
+.stg-prog .sp-m{white-space:nowrap;}   /* 20차 최종: 평균은 N개월째 바로 옆(줄이 모자라면 묶음째 다음 줄) */
+.stg-prog.over,.tl-step .tl-current-tag.over,.tl-step .tl-typ.over{color:#C2410C;}   /* 평균보다 오래 걸림: 글자색만 주황 */
+:root[data-theme="dark"] .stg-prog.over,:root[data-theme="dark"] .tl-step .tl-current-tag.over,:root[data-theme="dark"] .tl-step .tl-typ.over{color:#FDBA74;}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) .stg-prog.over,:root:not([data-theme="light"]) .tl-step .tl-current-tag.over,:root:not([data-theme="light"]) .tl-step .tl-typ.over{color:#FDBA74;} }
 .cap-price{margin-left:auto;white-space:normal;}
 .no-type{display:inline-block;font-size:11px;line-height:1.3;font-weight:600;color:var(--ink-muted);text-align:right;word-break:keep-all;}
 
@@ -266,7 +272,7 @@ td.num{font-family:var(--font-mono);text-align:right;}
 .tl-step.todo .tl-label{color:var(--ink-faint);}
 .tl-step .tl-date{margin-left:auto;font-family:var(--font-mono);font-size:11px;color:var(--ink-faint);}
 .tl-step .tl-current-tag{margin-left:auto;font-size:10px;font-weight:700;color:var(--accent);background:var(--accent-soft);border-radius:5px;padding:1px 6px;}
-.tl-step .tl-typ{margin-left:4px;font:inherit;font-size:10px;font-weight:500;color:var(--ink-muted);background:none;border:0;padding:1px 2px;cursor:help;white-space:nowrap;}   /* 목록-3 15차: 통상 소요 기간(작고 연하게) */
+.tl-step .tl-typ{margin-left:4px;font:inherit;font-size:10px;font-weight:500;color:var(--ink-muted);background:none;border:0;padding:1px 2px;cursor:help;white-space:nowrap;}   /* 목록-3 15차: 평균 소요 기간(작고 연하게) */
 
 /* ---- 모바일 카드 목록 (MOBILE_CARDS): 폭 820px 이하에서만 사용, 821px 이상은 기존 표 ---- */
 .m-bar,.m-list{display:none;}
@@ -707,8 +713,8 @@ window.SBJListLink = (function () {
   }
   function cleanStage(r){
     if (!r.stage || isEstText(r.stage)) return '단계 확인불가';
-    // 작업 메모성 괄호(지도 라벨 확인, 정확 날짜 미상 등)는 화면에서 제거
-    return String(r.stage).replace(/\s*\([^)]*(지도|라벨|사이트|정확|날짜|확인|해당)[^)]*\)/g, '').trim() || '단계 확인불가';
+    // 작업 메모성 괄호(지도 라벨 확인, 정확 날짜 미상 등)는 화면에서 제거 · 20차 최종: '(…진행중·N개월째)'도 제거(아래 줄 "[다음 단계]까지 N개월째"와 겹침)
+    return String(r.stage).replace(/\s*\([^)]*(지도|라벨|사이트|정확|날짜|확인|해당|진행중)[^)]*\)/g, '').trim() || '단계 확인불가';
   }
   function stageWithDate(r){
     const stage = cleanStage(r);
@@ -726,7 +732,7 @@ window.SBJListLink = (function () {
   function stageCellHtml(r){
     const stage = cleanStage(r);
     const d = shortDate(r.lastDate);
-    return d ? parenSplitHtml(`${stage} (${d})`) : esc(stage);
+    return (d ? parenSplitHtml(`${stage} (${d})`) : esc(stage)) + progHtml(r);   // 20차: 아래 줄에 진행 기간(표·카드 같이 씀)
   }
   // ---------- 사업성 등급: 일반분양비율(일반분양 ÷ 조합원) 단독 7단계 ----------
   // 경계값은 tools/ratio_grade_core.py 의 BOUNDS 한 곳에서 정하고, export_list_data.py 가 RATIO_GRADE 로 이 화면에 넣어 준다.
@@ -1058,7 +1064,7 @@ window.SBJListLink = (function () {
     } catch(e){ /* 파싱 실패 시 무시하고 추정 체크리스트로 대체 */ }
     return null;
   }
-  // 목록-3 15차: 진행 중 단계 옆 '통상 N개월' — 같은 유형(시트) 구역들의 단계이력에서 '바로 앞 날짜 있는 단계 → 그 단계' 걸린 개월 수 중앙값.
+  // 목록-3 15차: 진행 중 단계 옆 '평균 N개월'(20차에 '통상'→'평균') — 같은 유형(시트) 구역들의 단계이력에서 '출발 단계 → 그 단계' 걸린 개월 수 중앙값.
   //   표본 TL_MIN_N곳 미만이면 표시 안 함. 0개월 이하·날짜 없음은 뺌. 단계 이름 같은 뜻은 하나로(TL_SYN)
   const TL_MIN_N = 10, TL_SYN = {'관리처분계획인가': '관리처분인가', '관리계획 고시': '관리계획고시'};
   let TL_TYP = null;
@@ -1066,28 +1072,51 @@ window.SBJListLink = (function () {
   const tlDate = (s) => { const m = /^(\d{4})[.\-](\d{1,2})(?:[.\-](\d{1,2}))?/.exec(String(s || '')); return m ? {y: +m[1], m: +m[2], d: +(m[3] || 1)} : null; };
   const tlMon = (p, q) => (q.y - p.y) * 12 + (q.m - p.m) + (q.d - p.d) / 30.4375;
   function tlTypical(sheet, prev, stage){
-    if (!TL_TYP) { TL_TYP = {}; (typeof DATA !== 'undefined' ? DATA : []).forEach(r => { const H = parseStageHistory(r); if (!H) return; let pv = null;
+    // 20차: 'X → Y' = X 날짜부터 Y 날짜까지(사이에 다른 단계가 끼어 있어도). '진행중 N개월째'를 센 출발 단계와 같은 기준으로 비교하려고 앞의 모든 날짜 단계와 짝을 지음
+    if (!TL_TYP) { TL_TYP = {}; (typeof DATA !== 'undefined' ? DATA : []).forEach(r => { const H = parseStageHistory(r); if (!H) return; const pvs = [];
       H.forEach(s => { if (s.status === 'current' || s.status === 'todo') return; const d = tlDate(s.date); if (!d) return; const nm = tlName(s.stage);
-        if (pv && pv.nm !== nm) { const v = tlMon(pv.d, d); if (v > 0) { const k = r.sheet + '|' + pv.nm + '→' + nm; (TL_TYP[k] = TL_TYP[k] || []).push(v); } } pv = {nm, d}; }); });
+        pvs.forEach(pv => { if (pv.nm === nm) return; const v = tlMon(pv.d, d); if (v > 0) { const k = r.sheet + '|' + pv.nm + '→' + nm; (TL_TYP[k] = TL_TYP[k] || []).push(v); } }); pvs.push({nm, d}); }); });
       Object.keys(TL_TYP).forEach(k => { const s = TL_TYP[k].sort((a, b) => a - b), n = s.length; TL_TYP[k] = {n, med: n % 2 ? s[(n - 1) / 2] : (s[n / 2 - 1] + s[n / 2]) / 2}; }); }
     const o = TL_TYP[sheet + '|' + tlName(prev) + '→' + tlName(stage)]; return o && o.n >= TL_MIN_N && Math.round(o.med) >= 1 && tlName(prev) !== tlName(stage) ? o : null;
   }
+  // 20차: 진행 중 단계의 'N개월째'(단계이력 months)와 그 출발 단계(자료 기준일에서 N개월 전 날짜인 단계, ±1개월) → 평균 기간도 같은 출발 단계부터
+  const PROG_LONG = 120;   // 20차 최종: 이 개월 수를 넘으면 '장기 정체 후 재추진'(단계 칸·카드·팝업 첫 화면에는 표시 안 함)
+  function tlProg(r){
+    const H = parseStageHistory(r); if (!H) return null;
+    const ci = H.findIndex(h => (h.status || (h.date ? 'done' : 'todo')) === 'current'); if (ci < 0 || !H[ci].months) return null;
+    const c = H[ci], base = tlDate(typeof DATA_AS_OF !== 'undefined' ? DATA_AS_OF : ''); let src = null, t = null;
+    if (base) for (let i = ci - 1; i >= 0; i--) { const h = H[i], d = tlDate(h.date); if ((h.status || (h.date ? 'done' : 'todo')) === 'todo' || !d) continue; if (Math.abs(tlMon(d, base) - c.months) <= 1) { src = h.stage; break; } }
+    try { t = src ? tlTypical(r.sheet, src, c.stage) : null; } catch (e) { t = null; }
+    const dz = H.find(h => /구역지정/.test(h.stage || '') && tlDate(h.date));   // 20차 최종: 장기 정체 구역 안내용 구역지정 연도
+    const m = t ? Math.round(t.med) : null, long = c.months > PROG_LONG;
+    return { n: c.months, stage: c.stage, src, t, m, long, over: !long && m !== null && c.months > m, dzYear: dz ? tlDate(dz.date).y : null };
+  }
+  // 20차 최종: 문구 "[다음 단계]까지 N개월째 · 평균 M개월"(평균은 같은 묶음 안 바로 옆). 평균 없으면 앞부분만, N 없으면 표시 없음. N > M이면 글자색만 주황
+  //   N이 PROG_LONG(120)개월을 넘으면 단계 칸·카드·팝업 첫 화면에는 표시 안 함(아래 '진행 단계' 칸에 '장기 정체 후 재추진')
+  const progText = (p) => `<span class="sp-n">${esc(p.stage)}까지 ${p.n}개월째</span>${p.m !== null ? `<span class="sp-m"> · 평균 ${p.m}개월</span>` : ''}`;
+  function progHtml(r){
+    try { const p = tlProg(r); if (!p || p.long) return '';
+      return `<span class="stg-prog${p.over ? ' over' : ''}" data-prog>${progText(p)}</span>`; } catch (e) { return ''; }
+  }
   function buildTimelineFromHistory(hist, r){
-    let prevDone = null;   // 15차: 진행 중 단계 바로 앞의 날짜 있는 단계
+    let prevDone = null;   // 15차: 진행 중 단계 바로 앞의 날짜 있는 단계(N개월째가 없을 때만 평균 기간 기준으로 씀)
+    let P = null; try { P = r ? tlProg(r) : null; } catch (e) { P = null; }   // 20차: N개월째가 있으면 그 출발 단계 기준(단계 옆 표시와 같은 값)
     const rows = hist.map(h => {
       const status = h.status || (h.date ? 'done' : 'todo');
       const cls = status;
       const mark = status === 'done' ? '✓' : (status === 'current' ? '●' : '○');
       let extra = '';
-      if (status === 'current') { extra = h.months ? `<span class="tl-current-tag">진행중 ${h.months}개월째</span>` : '<span class="tl-current-tag">진행중</span>';
-        try { const t = r && prevDone ? tlTypical(r.sheet, prevDone, h.stage) : null; if (t) { const tip = `같은 유형 ${t.n}곳 기준, ${tlName(prevDone)} → ${tlName(h.stage)}까지 걸린 기간의 중앙값입니다.`;
-          extra += `<button type="button" class="tl-typ" data-tl-typ data-nb3tip="${tip}" aria-label="${tip}">· 통상 ${Math.round(t.med)}개월</button>`; } } catch (e) { /* 통상 기간은 없어도 됨 */ } }
+      if (status === 'current' && P && P.long) extra = `<span class="tl-current-tag" data-tl-long>장기 정체 후 재추진${P.dzYear ? ` (구역지정 ${P.dzYear}년)` : ''}</span>`;   // 20차 최종: 120개월 넘으면 개월 수·평균·주황 없음
+      else if (status === 'current') { extra = P ? `<span class="tl-current-tag${P.over ? ' over' : ''}" data-tl-prog>${esc(P.stage)}까지 ${P.n}개월째</span>` : '<span class="tl-current-tag">진행중</span>';   // 20차 최종: 단계 칸과 같은 문구
+        try { const from = P ? P.src : prevDone, t = P ? P.t : (r && prevDone ? tlTypical(r.sheet, prevDone, h.stage) : null); if (t && from) { const tip = `같은 유형 ${t.n}곳 기준, ${tlName(from)} → ${tlName(h.stage)}까지 걸린 기간의 중앙값입니다.`;
+          extra += `<button type="button" class="tl-typ${P && P.over ? ' over' : ''}" data-tl-typ data-nb3tip="${tip}" aria-label="${tip}">· 평균 ${Math.round(t.med)}개월</button>`; } } catch (e) { /* 평균 기간은 없어도 됨 */ } }
       else if (h.date) extra = `<span class="tl-date">${shortDate(h.date) || h.date}</span>`;
       if (status !== 'current' && status !== 'todo' && tlDate(h.date)) prevDone = h.stage;
       return `<div class="tl-step ${cls}"><span class="tl-mark">${mark}</span><span class="tl-label">${h.stage}</span>${extra}</div>`;
     }).join('');
     const anyDate = hist.some(h => (h.status || (h.date ? 'done' : 'todo')) !== 'current' && h.date && shortDate(h.date));
-    return `<div class="timeline">${rows}</div>${anyDate ? '\n      <div class="modal-note" style="margin-top:8px;">단계별 실제 진행 날짜입니다.</div>' : ''}`;
+    const avgNote = rows.includes('data-tl-typ') ? '\n      <div class="modal-note" data-tl-avgnote style="margin-top:4px;">평균은 같은 유형 구역들이 이 단계까지 걸린 기간의 중앙값이에요(10곳 이상일 때만 표시).</div>' : '';   // 20차 최종
+    return `<div class="timeline">${rows}</div>${anyDate ? '\n      <div class="modal-note" style="margin-top:8px;">단계별 실제 진행 날짜입니다.</div>' : ''}${avgNote}`;
   }
   function buildTimelineHtml(r){
     const hist = parseStageHistory(r);
@@ -1679,7 +1708,7 @@ window.SBJListLink = (function () {
       <div class="modal-header">
         <div>
           <h3>${title}</h3>
-          <div class="modal-sub">${sheetLabel(r.sheet)} · ${regionText(r)} · ${stageWithDate(r)}</div>
+          <div class="modal-sub">${sheetLabel(r.sheet)} · ${regionText(r)} · ${stageWithDate(r)}${progHtml(r)}</div>
         </div>
         <button class="modal-close" id="modalCloseBtn">&times;</button>
       </div>
