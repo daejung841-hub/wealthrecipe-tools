@@ -899,7 +899,10 @@ body.l44 .tier-seg.current.tier-low, body.l44 .tier-seg.current.tier-veryLow{box
 .div-card-l64 .div-main-l64{font-size:14px;font-weight:700;line-height:1.5;margin:2px 0 4px;}
 .div-card-l64 .div-why-l64{font-size:12px;color:var(--ink-muted);line-height:1.55;}
 .div-card-l64 .div-why-l64{margin-bottom:4px;}
-.div-tag-l64{display:inline-block;margin-right:4px;padding:0 5px;border:1px solid var(--border-strong);border-radius:4px;font-size:10.5px;font-weight:600;line-height:16px;color:var(--ink-muted);vertical-align:1px;white-space:nowrap;}
+.div-tag-l64{background:none;font-family:inherit;cursor:pointer;display:inline-block;margin-right:4px;padding:0 5px;border:1px solid var(--border-strong);border-radius:4px;font-size:10.5px;font-weight:600;line-height:16px;color:var(--ink-muted);vertical-align:1px;white-space:nowrap;}
+.div-tag-l64[aria-expanded="true"]{border-color:var(--accent);color:var(--accent);}
+.div-tagnote-l64{font-size:11.5px;color:var(--ink-muted);line-height:1.5;margin:-2px 0 6px;}
+.twin-out-l64{font-size:11.5px;color:var(--ink-muted);line-height:1.5;margin:-2px 0 6px;overflow-wrap:anywhere;}
 /* 항목(2026-09-22 세션, "쌍둥이 단지 즐겨찾기") */
 .twin-fav-btn{
   border:none;background:none;cursor:pointer;font-size:15px;line-height:1;
@@ -5218,11 +5221,51 @@ function divHiddenL64(comp, t){
   return hit;
 }
 function legendL64(html){ return BUNDLES.L64 ? html.replace('📊 현재 괴리 =', '📊 최근 차이 =') : html; }
+// 133단계: 배지 = 누르면 한 줄 설명이 펼쳐지는 버튼. "신축 포함" = 한 단지의 준공 후 3년 시세가 동조기의 25% 이상(newBuildShareL64),
+// "재건축 연한 근접" = 준공 28년 이상(REBUILD_AGE_THRESHOLD). 판정에는 쓰지 않는 참고 표시다.
+const L64_TAGS = {
+  area: { label: '다른 지역', note: '서로 다른 시·구인데도 오랫동안 같이 움직인 짝이에요.' },
+  newBuild: { label: '신축 포함', note: '한 단지가 비교 기간 중 준공돼 초기 시세가 따로 움직였을 수 있어요.' },
+  old: { label: '재건축 연한 근접', note: '재건축 연한이 가까워 가격이 따로 움직일 수 있어요.' },
+};
+function divTagKeysL64(d){ return [d.otherArea ? 'area' : null, d.newBuild.length ? 'newBuild' : null, d.old28.length ? 'old' : null].filter(Boolean); }
 function divTagsHtmlL64(d){
-  const tag = (txt, tip) => '<span class="div-tag-l64" title="'+esc(tip)+'">'+esc(txt)+'</span>';
-  return (d.otherArea ? tag('다른 지역', '서로 다른 시·구인데도 오랫동안 같이 움직인 짝이에요') : '') +
-    (d.newBuild.length ? tag('신축 입주', '준공 직후 몇 년 시세가 같이 움직인 기간에 많이 들어 있어요(참고)') : '') +
-    (d.old28.length ? tag('28년 이상', '준공 28년 이상 단지가 있어 재건축 기대가 섞였을 수 있어요(참고)') : '');
+  return divTagKeysL64(d).map(k => '<button type="button" class="div-tag-l64" data-div-tag-l64="'+k+'" aria-expanded="false">'+esc(L64_TAGS[k].label)+'</button>').join('');
+}
+function divTagNotesHtmlL64(d){
+  return divTagKeysL64(d).map(k => '<div class="div-tagnote-l64" data-div-tagnote-l64="'+k+'" hidden>'+esc(L64_TAGS[k].note)+'</div>').join('');
+}
+try {
+  document.addEventListener('click', (ev) => {
+    const b = ev.target && ev.target.closest && ev.target.closest('[data-div-tag-l64]');
+    if (!b) return;
+    const card = b.closest('.div-card-l64'); if (!card) return;
+    const note = card.querySelector('[data-div-tagnote-l64="'+b.getAttribute('data-div-tag-l64')+'"]'); if (!note) return;
+    const open = note.hidden; note.hidden = !open; b.setAttribute('aria-expanded', String(open));
+  });
+} catch (e) { /* DOM이 없는 환경(테스트 하네스) */ }
+// 133단계: 동조 탭 "최근 차이 큼" 카드 — 괴리 탭에 없는 이유(divergencePairL64가 걸린 첫 이유를 화면 말로)
+const L64_OUT_REASON = { '겹침 없음': '겹친 기간 짧음', '겹침 짧음': '겹친 기간 짧음', '동조 짧음': '동조 기간 7년 미만', '이탈 너무 김': '이탈 5년 초과',
+  '동조 대비 이탈 김': '이탈이 동조 기간의 절반 초과', '연속 3개월 아님': '최근 3개월 연속 아님', '이탈 아님': '평소 평균 기준으로는 5% 안',
+  '기준 월 2026.07 전': '최근 시세 없음(2026.07 전)', '이탈 시작 못 정함': '이탈 시작을 정하지 못함' };
+function divOutReasonL64(comp, t){
+  if (!BUNDLES.L64 || !comp || !t || !t.seedId || isPyeong25Name(comp.name)) return null;
+  const e = seedEntryByName(comp.name), c = seedEntryById(t.seedId);
+  if (!e || !c || e === c || !e.text || !c.text) return null;
+  const pool = poolSeedComplexes();
+  if (pool.indexOf(e) < 0 || pool.indexOf(c) < 0) return null;
+  const s0 = seriesL64(e), s1 = seriesL64(c);
+  if (!s0 || !s1) return null;
+  const r = divergencePairL64(e, s0, c, s1);
+  if (r.ok) return null;
+  if (r.reason === '변동계수') return '평소 변동 큼('+(r.cv*100).toFixed(1)+'%)';
+  if (r.reason === '상관') return '오르내림이 덜 닮음(상관 '+r.corr.toFixed(2)+')';
+  return L64_OUT_REASON[r.reason] || r.reason;
+}
+function divOutLineHtmlL64(comp, t){
+  if (!BUNDLES.L64 || t.matchType !== 'gap' || t.gapSeverity !== 'strong') return '';
+  const why = divOutReasonL64(comp, t);
+  return why ? '<div class="twin-out-l64">괴리 탭에 없는 이유: '+esc(why)+'</div>' : '';
 }
 function divBenchDetailL64(comp, partner){
   const bench = getVirtualBenchmarkComplex('seoul');
@@ -5249,7 +5292,7 @@ function divCardHtmlL64(d, idx, comp, iMode, iRangeMode, iShowBench){
   const note = (iMode==='price' ? '실제 가격(억원) · 같은 축 공유' : '양쪽 모두 시작 시점 대비 상승률(%) · 그래프의 지점을 클릭하면 그 지점을 새 기준점으로 다시 계산합니다')+
     (iRangeMode==='full' ? '' : ' · 빨간 음영='+fmtYm(d.onsetYm)+'부터 벌어진 구간('+d.devMonths+'개월)')+((iShowBench && iMode!=='price') ? ' · 주황 점선=서울 선도단지' : '');
   return '<div class="twin-card div-card-l64">'+
-    '<div class="twin-card-head">'+divTagsHtmlL64(d)+cxNameHtmlL64(d.name, d.seedId)+esc(regionSuffix(d.name))+rentalHeavyChip(d.name)+favBtnHtml+'</div>'+
+    '<div class="twin-card-head">'+divTagsHtmlL64(d)+cxNameHtmlL64(d.name, d.seedId)+esc(regionSuffix(d.name))+rentalHeavyChip(d.name)+favBtnHtml+'</div>'+divTagNotesHtmlL64(d)+
     '<div class="div-main-l64">'+withParticle(cheap, '이', '가')+' '+esc(other)+' 대비 평소보다 '+Math.round(d.cheapPct)+'% 싸졌어요</div>'+
     '<div class="div-why-l64">평소 '+withParticle(d.nameA, '은', '는')+' '+esc(d.nameB)+'의 '+(d.mean*100).toFixed(0)+'% → 지금 '+(d.now*100).toFixed(0)+'% · 동조 '+d.syncMonths+'개월 → 이탈 '+d.devMonths+'개월('+fmtYm(d.onsetYm)+'부터) · 평소 변동 '+(d.cv*100).toFixed(1)+'%</div>'+
     toggles+
@@ -6254,7 +6297,7 @@ function buildTwinCardHtml(t, idx, comp, r, bestFairPriceCandidate, iMode, iRang
   const favActive = favL59 ? isComplexFavL59(t.seedId, 34) : isTwinFavorited(comp.name, t.name);
   const favBtnHtml = (BUNDLES.L59 && !favL59) ? '' : '<button class="twin-fav-btn'+(favActive?' active':'')+'" data-twin-fav="'+idx+'"'+(favL59 ? ' data-fav-l59-key="'+esc(complexFavKeyL59(t.seedId, 34))+'" title="'+esc(t.name)+' 즐겨찾기"' : '')+' type="button" aria-label="즐겨찾기">'+(favActive?'★':'☆')+'</button>';
   return '<div class="twin-card">'+
-    '<div class="twin-card-head">'+twinMatchTypeTag(t)+' '+twinOngoingBadge(t)+' '+cxNameHtmlL64(t.name, t.seedId)+esc(regionSuffix(t.name))+rentalHeavyChip(t.name)+' <span class="cell-ratio">('+corrDisplay+', 겹치는 구간 '+t.overlapMonths+'개월)</span>'+favBtnHtml+'</div>'+
+    '<div class="twin-card-head">'+twinMatchTypeTag(t)+' '+twinOngoingBadge(t)+' '+cxNameHtmlL64(t.name, t.seedId)+esc(regionSuffix(t.name))+rentalHeavyChip(t.name)+' <span class="cell-ratio">('+corrDisplay+', 겹치는 구간 '+t.overlapMonths+'개월)</span>'+favBtnHtml+'</div>'+divOutLineHtmlL64(comp, t)+   // 묶음 L64(133단계)
     itemToggleRowHtml+
     '<div class="twin-chart-note">'+(iMode==='price'?'실제 가격(억원) · 같은 축 공유':'양쪽 모두 시작 시점 대비 상승률(%) · 그래프의 지점을 클릭하면 그 지점을 새 기준점으로 다시 계산합니다')+(iRangeMode==='full' ? '' : decoupleNoteHtml+(hasDrawableEpisodes?' · 파란 음영=과거 완결된 갭메우기 에피소드':''))+benchLineNoteHtml+rangeNoteHtml+'</div>'+
     predictionNoteHtml+
