@@ -1080,19 +1080,19 @@ window.SBJListLink = (function () {
     const o = TL_TYP[sheet + '|' + tlName(prev) + '→' + tlName(stage)]; return o && o.n >= TL_MIN_N && Math.round(o.med) >= 1 && tlName(prev) !== tlName(stage) ? o : null;
   }
   // 20차: 진행 중 단계의 'N개월째'(단계이력 months)와 그 출발 단계(자료 기준일에서 N개월 전 날짜인 단계, ±1개월) → 평균 기간도 같은 출발 단계부터
-  const PROG_LONG = 120;   // 20차 최종: 이 개월 수를 넘으면 '장기 정체 후 재추진'(단계 칸·카드·팝업 첫 화면에는 표시 안 함)
+  const PROG_LONG = 120;   // 20차 최종: 이 개월 수를 넘으면 '장기 진행 구역'(단계 칸·카드·팝업 첫 화면에는 표시 안 함)
   function tlProg(r){
     const H = parseStageHistory(r); if (!H) return null;
     const ci = H.findIndex(h => (h.status || (h.date ? 'done' : 'todo')) === 'current'); if (ci < 0 || !H[ci].months) return null;
     const c = H[ci], base = tlDate(typeof DATA_AS_OF !== 'undefined' ? DATA_AS_OF : ''); let src = null, t = null;
     if (base) for (let i = ci - 1; i >= 0; i--) { const h = H[i], d = tlDate(h.date); if ((h.status || (h.date ? 'done' : 'todo')) === 'todo' || !d) continue; if (Math.abs(tlMon(d, base) - c.months) <= 1) { src = h.stage; break; } }
     try { t = src ? tlTypical(r.sheet, src, c.stage) : null; } catch (e) { t = null; }
-    const dz = H.find(h => /구역지정/.test(h.stage || '') && tlDate(h.date));   // 20차 최종: 장기 정체 구역 안내용 구역지정 연도
+    const dz = H.find(h => /구역지정/.test(h.stage || '') && tlDate(h.date));   // 20차 최종: 장기 진행 구역 안내용 구역지정 연도
     const m = t ? Math.round(t.med) : null, long = c.months > PROG_LONG;
     return { n: c.months, stage: c.stage, src, t, m, long, over: !long && m !== null && c.months > m, dzYear: dz ? tlDate(dz.date).y : null };
   }
   // 20차 최종: 문구 "[다음 단계]까지 N개월째 · 평균 M개월"(평균은 같은 묶음 안 바로 옆). 평균 없으면 앞부분만, N 없으면 표시 없음. N > M이면 글자색만 주황
-  //   N이 PROG_LONG(120)개월을 넘으면 단계 칸·카드·팝업 첫 화면에는 표시 안 함(아래 '진행 단계' 칸에 '장기 정체 후 재추진')
+  //   N이 PROG_LONG(120)개월을 넘으면 단계 칸·카드·팝업 첫 화면에는 표시 안 함(아래 '진행 단계' 칸에 '구역지정 OOOO년 · 장기 진행 구역')
   const progText = (p) => `<span class="sp-n">${esc(p.stage)}까지 ${p.n}개월째</span>${p.m !== null ? `<span class="sp-m"> · 평균 ${p.m}개월</span>` : ''}`;
   function progHtml(r){
     try { const p = tlProg(r); if (!p || p.long) return '';
@@ -1106,7 +1106,7 @@ window.SBJListLink = (function () {
       const cls = status;
       const mark = status === 'done' ? '✓' : (status === 'current' ? '●' : '○');
       let extra = '';
-      if (status === 'current' && P && P.long) extra = `<span class="tl-current-tag" data-tl-long>장기 정체 후 재추진${P.dzYear ? ` (구역지정 ${P.dzYear}년)` : ''}</span>`;   // 20차 최종: 120개월 넘으면 개월 수·평균·주황 없음
+      if (status === 'current' && P && P.long) extra = `<span class="tl-current-tag" data-tl-long>${P.dzYear ? `구역지정 ${P.dzYear}년 · ` : ''}장기 진행 구역</span>`;   // 20차 문구 보완: 120개월 넘으면 개월 수·평균·주황 없음(중립 표현)
       else if (status === 'current') { extra = P ? `<span class="tl-current-tag${P.over ? ' over' : ''}" data-tl-prog>${esc(P.stage)}까지 ${P.n}개월째</span>` : '<span class="tl-current-tag">진행중</span>';   // 20차 최종: 단계 칸과 같은 문구
         try { const from = P ? P.src : prevDone, t = P ? P.t : (r && prevDone ? tlTypical(r.sheet, prevDone, h.stage) : null); if (t && from) { const tip = `같은 유형 ${t.n}곳 기준, ${tlName(from)} → ${tlName(h.stage)}까지 걸린 기간의 중앙값입니다.`;
           extra += `<button type="button" class="tl-typ${P && P.over ? ' over' : ''}" data-tl-typ data-nb3tip="${tip}" aria-label="${tip}">· 평균 ${Math.round(t.med)}개월</button>`; } } catch (e) { /* 평균 기간은 없어도 됨 */ } }
