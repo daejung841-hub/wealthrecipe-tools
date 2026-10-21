@@ -8,7 +8,7 @@
 // 묶음 L52·L53(83단계): 아래 정적 스크립트 주소의 ?v=와 이 표는 build_l52_versions.py가 빌드 때 실제 파일 해시로 채운다(손으로 쓰지 않음).
 // 표는 25평 seed 지연 로딩(loadSeed25)이 실행 중에 쓴다. EARLY_FLAGS_L52는 xlsx 태그(L53)를 쓸지 정하려고 주소 플래그를 먼저 읽는다
 // (applyBundlesFromUrl과 같은 규칙, 로컬 주소에서만: 값이 없으면 모두 켬, 있으면 적힌 묶음만 — 묶음 이름 'L' 포함).
-var ASSET_VERSIONS_L52 = /*L52_VERSIONS*/{"shared.js":"8e8ee813","seedComplexes.js":"75ba1f54","seedChips.js":"f3cdd765","m2Series.js":"acc3bcaa","seedComplexes25.js":"d98579b3","feedback-widget.js":"52cf1fae","station_walk.js":"d1744c95","school_elem.js":"e368c3b0"}/*END_L52_VERSIONS*/;
+var ASSET_VERSIONS_L52 = /*L52_VERSIONS*/{"shared.js":"8e8ee813","seedComplexes.js":"75ba1f54","seedChips.js":"1145ea5a","m2Series.js":"acc3bcaa","seedComplexes25.js":"771eef2b","feedback-widget.js":"52cf1fae","station_walk.js":"d1744c95","school_elem.js":"e368c3b0"}/*END_L52_VERSIONS*/;
 var EARLY_FLAGS_L52 = (function(){
   var on = { L52: true, L53: true };
   try {
@@ -38,7 +38,7 @@ function assetUrlL52(path, enabled){
 <script>if (!EARLY_FLAGS_L52.L53) document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"><\/script>');   // 묶음 L53: 켜면 엑셀 기능을 처음 쓸 때 받음</script>
 <script src="shared.js?v=8e8ee813"></script>
 <script src="seedComplexes.js?v=75ba1f54"></script>
-<script src="seedChips.js?v=f3cdd765"></script>
+<script src="seedChips.js?v=1145ea5a"></script>
 <script src="m2Series.js?v=acc3bcaa"></script>
 <style>
 :root{
@@ -897,6 +897,8 @@ body.l44 .tier-seg.current.tier-low, body.l44 .tier-seg.current.tier-veryLow{box
 /* 묶음 L64(130단계): 단지 이름 링크·쌍둥이 [동조][괴리] 탭·괴리 카드 */
 .cx-link-l64{color:inherit;text-decoration:underline;text-decoration-thickness:1px;text-decoration-color:var(--ink-muted);text-underline-offset:2px;overflow-wrap:anywhere;cursor:pointer;}
 .cx-link-l64:hover,.cx-link-l64:focus-visible{text-decoration-color:currentColor;}
+/* 묶음 L69(146단계): 칸 기준과 다른 실제 면적 표기 */
+.slot-area-l69{display:inline-block;margin-left:4px;font-size:.88em;font-weight:500;color:var(--ink-muted);white-space:nowrap;}
 .cx-note-l64{margin:0 0 8px;padding:7px 10px;border-radius:8px;background:var(--info-bg);color:var(--ink);font-size:12.5px;line-height:1.5;}
 .twin-tabs-l64{display:flex;gap:6px;}
 .twin-tab-l64{flex:1 1 0;min-width:0;padding:7px 6px;border:1px solid var(--border);border-radius:8px;background:var(--surface);color:var(--ink-muted);font:inherit;font-size:13px;font-weight:700;cursor:pointer;}
@@ -2680,9 +2682,9 @@ function seoulHistoricalAvg(){
 // 라이브는 주소 플래그를 읽지 않으므로 이 기본값이 그대로 동작한다.
 const BUNDLES = { A:false, B:false, C:false, D1:false, D2:false, D3:false, D4:false, E1:true, E2:false, E3:true, F1:true, F2:true, F3:true, F4:true, F5:true, F6:true,
   H1:false, H2:true, H3:true, H4:true, H5:true, H6:true, H7:true,
-  L1:true, L2:true, L3:true, L4:true, L5:true, L6:false, L7:true, L8:true, L9:true, L10:true, L11:true, L12:true, L13:true, L14:true, L15:true, L16:true, L17:true, L18:true, L19:true, L19B:true, L20:true, L22:true, L23:true, L24:true, L25:true, L26:true, L27:!!window.POOL_EXCLUDE_ON, L31:!!window.NEW_NAME_RULE_ON, L32:true, L33:true, L34:true, L37:true, L28:true, L38:true, L40:true, L39:true, L41:true, L42:true, L43:true, L44:true, L45:true, L46:true, L47:true, L49:true, L48:true, L50:true, L51:true, L52:true, L53:true, L54:true, L55:true, L56:true, L57:true, L58:true, L59:true, L59_DND:true, L59_INFOCARD:true, L59_STATION:true, L59_SCHOOL:true, L59_FAVSEARCH:true, L60:true, L60_REL:false, L60_WHY:false, L60_NOTE:true, L61:true, L64:true, L64_LINK:true, L64_NEWBUILD:false, L65:true, L35:true, L36:true, L30:true, L29:true, L29R:false, K1:false, K2:true, K4:false };
+  L1:true, L2:true, L3:true, L4:true, L5:true, L6:false, L7:true, L8:true, L9:true, L10:true, L11:true, L12:true, L13:true, L14:true, L15:true, L16:true, L17:true, L18:true, L19:true, L19B:true, L20:true, L22:true, L23:true, L24:true, L25:true, L26:true, L27:!!window.POOL_EXCLUDE_ON, L31:!!window.NEW_NAME_RULE_ON, L32:true, L33:true, L34:true, L37:true, L28:true, L38:true, L40:true, L39:true, L41:true, L42:true, L43:true, L44:true, L45:true, L46:true, L47:true, L49:true, L48:true, L50:true, L51:true, L52:true, L53:true, L54:true, L55:true, L56:true, L57:true, L58:true, L59:true, L59_DND:true, L59_INFOCARD:true, L59_STATION:true, L59_SCHOOL:true, L59_FAVSEARCH:true, L60:true, L60_REL:false, L60_WHY:false, L60_NOTE:true, L61:true, L64:true, L64_LINK:true, L64_NEWBUILD:false, L65:true, L69:true, L35:true, L36:true, L30:true, L29:true, L29R:false, K1:false, K2:true, K4:false };
 const BUNDLE_GROUPS = { D:['D1','D2','D3','D4'], E:['E1','E2','E3'], F:['F1','F2','F3','F4','F5','F6'], H:['H1','H2','H3','H4','H5','H6','H7'],
-  L:['L1','L2','L3','L4','L5','L6','L7','L8','L9','L10','L11','L12','L13','L14','L15','L16','L17','L18','L19','L19B','L20','L22','L23','L24','L25','L26','L27','L29','L30','L31','L32','L33','L34','L37','L35','L36','L28','L38','L40','L39','L41','L42','L43','L44','L45','L46','L47','L49','L48','L50','L51','L52','L53','L54','L55','L56','L57','L58','L59','L60','L61','L64','L65'], K:['K1','K2','K4'] };
+  L:['L1','L2','L3','L4','L5','L6','L7','L8','L9','L10','L11','L12','L13','L14','L15','L16','L17','L18','L19','L19B','L20','L22','L23','L24','L25','L26','L27','L29','L30','L31','L32','L33','L34','L37','L35','L36','L28','L38','L40','L39','L41','L42','L43','L44','L45','L46','L47','L49','L48','L50','L51','L52','L53','L54','L55','L56','L57','L58','L59','L60','L61','L64','L65','L69'], K:['K1','K2','K4'] };
 // 묶음 L46(69단계): 그래프 점선 모양 통일 — 모든 점선을 "선도단지 대비 적정가" 선(FAIR_LINE_STYLE.borderDash)과 같은 긴 점선으로.
 // 촘촘한 점("좁쌀")·점-선 섞인 패턴을 없앤다. 새 점선은 항상 dashL46(예전 값)을 쓴다 — L46을 끄면 예전 값 그대로.
 const DASH_L46 = [5, 4];
@@ -5303,7 +5305,7 @@ function divCardHtmlL64(d, idx, comp, iMode, iRangeMode, iShowBench){
   const note = (iMode==='price' ? '실제 가격(억원) · 같은 축 공유' : '양쪽 모두 시작 시점 대비 상승률(%) · 그래프의 지점을 클릭하면 그 지점을 새 기준점으로 다시 계산합니다')+
     (iRangeMode==='full' ? '' : ' · 빨간 음영='+fmtYm(d.onsetYm)+'부터 벌어진 구간('+d.devMonths+'개월)')+((iShowBench && iMode!=='price') ? ' · 주황 점선=서울 선도단지' : '');
   return '<div class="twin-card div-card-l64">'+
-    '<div class="twin-card-head">'+divTagsHtmlL64(d)+cxNameHtmlL64(d.name, d.seedId)+esc(regionSuffix(d.name))+rentalHeavyChip(d.name)+favBtnHtml+'</div>'+divTagNotesHtmlL64(d)+
+    '<div class="twin-card-head">'+divTagsHtmlL64(d)+cxNameHtmlL64(d.name, d.seedId)+esc(regionSuffix(d.name))+areaTagHtmlL69(d.seedId)+rentalHeavyChip(d.name)+favBtnHtml+'</div>'+divTagNotesHtmlL64(d)+
     '<div class="div-main-l64">'+withParticle(cheap, '이', '가')+' '+esc(other)+' 대비 평소보다 '+Math.round(d.cheapPct)+'% 싸졌어요</div>'+
     '<div class="div-why-l64">평소 '+withParticle(d.nameA, '은', '는')+' '+esc(d.nameB)+'의 '+(d.mean*100).toFixed(0)+'% → 지금 '+(d.now*100).toFixed(0)+'% · 동조 '+d.syncMonths+'개월 → 이탈 '+d.devMonths+'개월('+fmtYm(d.onsetYm)+'부터) · 평소 변동 '+(d.cv*100).toFixed(1)+'%</div>'+
     toggles+
@@ -6320,7 +6322,7 @@ function buildTwinCardHtml(t, idx, comp, r, bestFairPriceCandidate, iMode, iRang
   const favActive = favL59 ? isComplexFavL59(t.seedId, 34) : isTwinFavorited(comp.name, t.name);
   const favBtnHtml = (BUNDLES.L59 && !favL59) ? '' : '<button class="twin-fav-btn'+(favActive?' active':'')+'" data-twin-fav="'+idx+'"'+(favL59 ? ' data-fav-l59-key="'+esc(complexFavKeyL59(t.seedId, 34))+'" title="'+esc(t.name)+' 즐겨찾기"' : '')+' type="button" aria-label="즐겨찾기">'+(favActive?'★':'☆')+'</button>';
   return '<div class="twin-card">'+
-    '<div class="twin-card-head">'+twinMatchTypeTag(t)+' '+twinOngoingBadge(t)+' '+cxNameHtmlL64(t.name, t.seedId)+esc(regionSuffix(t.name))+rentalHeavyChip(t.name)+' <span class="cell-ratio">('+corrDisplay+', 겹치는 구간 '+t.overlapMonths+'개월)</span>'+favBtnHtml+'</div>'+divOutLineHtmlL64(comp, t)+   // 묶음 L64(133단계)
+    '<div class="twin-card-head">'+twinMatchTypeTag(t)+' '+twinOngoingBadge(t)+' '+cxNameHtmlL64(t.name, t.seedId)+esc(regionSuffix(t.name))+areaTagHtmlL69(t.seedId)+rentalHeavyChip(t.name)+' <span class="cell-ratio">('+corrDisplay+', 겹치는 구간 '+t.overlapMonths+'개월)</span>'+favBtnHtml+'</div>'+divOutLineHtmlL64(comp, t)+   // 묶음 L64(133단계)
     itemToggleRowHtml+
     '<div class="twin-chart-note">'+(iMode==='price'?'실제 가격(억원) · 같은 축 공유':'양쪽 모두 시작 시점 대비 상승률(%) · 그래프의 지점을 클릭하면 그 지점을 새 기준점으로 다시 계산합니다')+(iRangeMode==='full' ? '' : decoupleNoteHtml+(hasDrawableEpisodes?' · 파란 음영=과거 완결된 갭메우기 에피소드':''))+benchLineNoteHtml+rangeNoteHtml+'</div>'+
     predictionNoteHtml+
@@ -6672,7 +6674,7 @@ function buildEstRefCardHtml(r, idx, usedInAvg, mode, namePrefix, rangeMode, sho
     (mode==='price' ? '' : '<button class="chart-mode-toggle" data-'+namePrefix+'-item-bench-toggle="'+idx+'">'+(showBenchLine?'🏙️선도단지 끄기':'🏙️선도단지 보기')+'</button>')+
   '</div>';
   return '<div class="twin-card">'+
-    '<div class="twin-card-head">'+(usedInAvg?'<span class="twin-match-tag similar">평균 반영</span> ':'<span class="twin-match-tag">참고</span> ')+lowConfTag+cxNameHtmlL64(r.referenceName, r.referenceId)+esc(regionSuffix(r.referenceName))+rentalHeavyChip(r.referenceName)+' <span class="cell-ratio">(상관계수 '+r.correlation.toFixed(2)+', 겹치는 구간 '+r.overlapMonths+'개월'+(r.tier?', '+syncTierLabelL42(r.tier):'')+')</span></div>'+
+    '<div class="twin-card-head">'+(usedInAvg?'<span class="twin-match-tag similar">평균 반영</span> ':'<span class="twin-match-tag">참고</span> ')+lowConfTag+cxNameHtmlL64(r.referenceName, r.referenceId)+esc(regionSuffix(r.referenceName))+areaTagHtmlL69(r.referenceId)+rentalHeavyChip(r.referenceName)+' <span class="cell-ratio">(상관계수 '+r.correlation.toFixed(2)+', 겹치는 구간 '+r.overlapMonths+'개월'+(r.tier?', '+syncTierLabelL42(r.tier):'')+')</span></div>'+
     selectReasonHtml+
     itemToggleRowHtml+
     '<div class="twin-chart-note">'+(mode==='price'?'실제 가격(억원) · 같은 축 공유':'양쪽 모두 겹치는 구간 첫 달 대비 상승률(%) · 그래프의 지점을 클릭하면 그 지점을 새 기준점으로 다시 계산합니다')+benchLineNoteHtml+rangeNoteHtml+'</div>'+
@@ -7227,6 +7229,7 @@ function getBaseComplex(){
   const c = buildComplex(state.baseText, state.baseName, fallback);
   c._pyeong = pyeongOfSlot(baseSlot()); // 34 | 25 | null(직접 넣은 데이터) — 표기·25평 진단 분기에만 쓴다
   c._pyeongTag = pyeongTagOfSlot(baseSlot());
+  c._areaL69 = slotAreaTextOfSlotL69(baseSlot());   // 묶음 L69
   return c;
 }
 function getCompareComplex(i){
@@ -7234,6 +7237,7 @@ function getCompareComplex(i){
   const c = buildComplex(s.text, s.name, '비교단지 '+(i+1));
   c._pyeong = pyeongOfSlot(s);
   c._pyeongTag = pyeongTagOfSlot(s);
+  c._areaL69 = slotAreaTextOfSlotL69(s);   // 묶음 L69
   return c;
 }
 
@@ -7454,6 +7458,21 @@ function getSeries(id, pyeong){
 }
 function chipDataOf(id){ return (id && window.SEED_CHIPS) ? (window.SEED_CHIPS[id] || null) : null; }
 function has25Data(id){ const c = chipDataOf(id); return !!(c && c[5]) || SEED25_BY_ID.has(id); }
+// ---- 묶음 L69(146단계): 평형 칸 예외 — 칸 기준(34평 칸 전용 81~86㎡, 25평 칸 56~62㎡)과 실제 면적이 다른 칸은 실제 면적을 쓴다 ----
+// 자료: seedChips.js의 window.SLOT_AREA_L69 = { seed id: { '34': [평형, 전용㎡], '25': [평형, 전용㎡] } } — 칸 기준과 다른 칸만 있다.
+// 평형은 KB 공급면적 ÷ 3.3058 반올림, 공급면적이 없으면 null(전용㎡만 쓴다). 전용㎡는 소수점 아래를 버린 값. 계산·캐시 키(이름)는 바꾸지 않는다.
+function slotAreaL69(id, p){
+  if (!BUNDLES.L69 || !id) return null;
+  const m = window.SLOT_AREA_L69;
+  const v = m && Object.prototype.hasOwnProperty.call(m, id) ? m[id] : null;
+  const a = v ? v[p === 25 ? '25' : '34'] : null;
+  return Array.isArray(a) && a[1] > 0 ? a : null;
+}
+function slotAreaTextL69(id, p){ const a = slotAreaL69(id, p); return a ? (a[0] ? a[0] + '평형(전용 ' + a[1] + '㎡)' : '전용 ' + a[1] + '㎡') : ''; }
+function areaChipLabelL69(a){ return a[0] ? '<b>' + a[0] + '평형</b>(전용 ' + a[1] + '㎡)' : '<b>전용</b>' + a[1] + '㎡'; }
+// 쌍둥이·괴리·준거 카드의 상대 단지(34평 칸) 이름 뒤에 붙인다
+function areaTagHtmlL69(id){ const t = slotAreaTextL69(id, 34); return t ? '<span class="slot-area-l69">' + esc(t) + '</span>' : ''; }
+function slotAreaTextOfSlotL69(slot){ if (!BUNDLES.L69) return ''; const ref = slotRef(slot, false); return ref ? slotAreaTextL69(ref.id, ref.pyeong) : ''; }
 
 // 슬롯이 어느 단지의 어느 평형인지. { id, pyeong, pending? } 또는 null(직접 넣은 데이터 등).
 // allowNameFallback: 칩 표시에만 쓴다 — text가 예전 seed 스냅샷이라 맞지 않아도 이름이 하나뿐이면 그 단지로 본다.
@@ -7643,6 +7662,7 @@ function pyeongTagOfSlot(slot){
 // 화면 표기용 이름 — 두 평형이 섞였을 때만 25평이 아닌 슬롯에도 평형을 붙인다(이름 자체·캐시 키는 그대로).
 function pyeongDisplayName(comp){
   if (!comp) return '';
+  if (BUNDLES.L69 && comp._areaL69) return stripPyeongSuffix(comp.name) + ' ' + comp._areaL69;   // 묶음 L69: 칸 기준과 다른 실제 면적
   return (_pyeongMixed && comp._pyeongTag) ? stripPyeongSuffix(comp.name) + '(' + comp._pyeongTag + ')' : comp.name;
 }
 function renderPyeongNotice(){
@@ -7697,8 +7717,9 @@ function pyeongChipsHtml(slot, target){
   const btnAttrs = (p) => ' data-pyeong-switch="'+p+'" data-pyeong-target="'+target+'" data-pyeong-id="'+esc(ref.id)+'"';
   const out = [];
   if (has25){
-    const tip = (b ? '25평대(전용 '+fmtM2Range(b[1], b[2])+') 전체 '+b[0]+'세대\n' : '') + basis25Text;
-    const label = '<b>25평</b>'+(b ? b[0]+'세대' : '');
+    const a25 = slotAreaL69(ref.id, 25);   // 묶음 L69: 25평 칸 기준에 맞는 타입이 없어 가장 가까운 평형을 넣은 단지
+    const tip = (a25 ? '25평 칸 기준(전용 56~62㎡)에 맞는 타입이 없어 가장 가까운 '+slotAreaTextL69(ref.id, 25)+' 시세를 넣었어요\n' : '') + (b ? '25평대(전용 '+fmtM2Range(b[1], b[2])+') 전체 '+b[0]+'세대\n' : '') + basis25Text;
+    const label = a25 ? areaChipLabelL69(a25) : '<b>25평</b>'+(b ? b[0]+'세대' : '');
     if (cur === 25 && ref.pending && seed25FailedL43()) out.push('<button type="button" class="pyeong-chip current" data-pyeong-retry="1" title="25평 시세를 불러오지 못했어요. 누르면 다시 불러와요"><b>25평</b>다시 시도</button>');   // 묶음 L43(P10)
     else if (cur === 25 && ref.pending) out.push('<span class="pyeong-chip current" title="'+esc(tip)+'"><b>25평</b>불러오는 중…</span>');
     else if (cur === 25) out.push('<span class="pyeong-chip current" title="'+esc(tip)+'">'+label+'</span>');
@@ -7716,7 +7737,8 @@ function pyeongChipsHtml(slot, target){
     // seed 시세가 34평대가 아닌 타입("기타"·"기본") — 지금 그 시세면 표시만 하고, 25평으로 바꾼 상태면 눌러서
     // 원래 seed 시세로 되돌릴 수 있다(2026-09-30). 이 칩으로 다른 평형으로 가지는 않는다.
     const tag = s === 25 ? '기본' : '기타';
-    const label = '<b>'+tag+'</b>'+Math.floor(x[0])+'㎡';
+    const a34 = slotAreaL69(ref.id, 34);   // 묶음 L69: KB 공급면적 평형 + 전용(공급면적이 없으면 전용만)
+    const label = a34 ? (a34[0] ? areaChipLabelL69(a34) : '<b>'+tag+'</b>전용 '+a34[1]+'㎡') : '<b>'+tag+'</b>'+Math.floor(x[0])+'㎡';
     if (cur === null){
       const tip = seedBasisText + (s === 25 ? '\n(25평 칩을 누르면 25평 대표 타입 시세로 바뀝니다)' : '');
       out.push('<span class="pyeong-chip other current" title="'+esc(tip)+'">'+label+'</span>');
@@ -10822,6 +10844,7 @@ function diagInfoCardHtmlL59(ref){
     ['전세가율', info.jr != null ? fmtPct(info.jr, 1) : null],
     ['연식', age],
     ['세대수', seed.units ? seed.units.toLocaleString('ko-KR') + '세대' : null],
+    ['면적', slotAreaTextL69(ref.id, ref.p === 25 ? 25 : 34) || null, (ref.p === 25 ? '25평 칸 기준(전용 56~62㎡)' : '34평 칸 기준(전용 81~86㎡)') + '과 다른 실제 면적 — 평형은 KB 공급면적 기준'],   // 묶음 L69
     ['임대', favRentalTextL59(seed), '총 세대 중 임대 세대(seed rentalHouseholds)', true],   // 108단계: 길어서 한 줄 전체
     ['지하철역', favStationTextL59(ref.id), FAV_STATION_TIP_L59, true, favStationHtmlL59(ref.id)],   // 110단계: 호선 배지
     ['초등학교', favSchoolTextL59(ref.id, 'elem'), FAV_SCHOOL_TIP_L59, true],
