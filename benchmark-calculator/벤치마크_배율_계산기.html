@@ -5185,14 +5185,15 @@ function sortDivL64(list){
   return out;
 }
 let _divCacheL64 = {};
-// 기준 단지(34평 풀 단지) 하나의 괴리 쌍둥이 목록. 25평·풀 밖 단지·L64 꺼짐은 null(탭 없음).
+// 기준 단지(34평 seed 단지, 141단계부터 풀 밖 포함) 하나의 괴리 쌍둥이 목록. 25평·seed 아님(엑셀 등)·L64 꺼짐은 null(탭 없음).
 function divergenceTwinsL64(compName){
   if (!BUNDLES.L64 || !compName || isPyeong25Name(compName)) return null;
   if (Object.prototype.hasOwnProperty.call(_divCacheL64, compName)) return _divCacheL64[compName];
   let list = null;
   const e = seedEntryByName(compName);
   const pool = poolSeedComplexes();
-  if (e && e.text && pool.indexOf(e) >= 0){
+  // 141단계: 대상은 풀 밖 seed 단지도 된다(쌍둥이 findTwinCandidates와 같은 구조 — 대상은 아무 seed, 상대 후보는 풀). 풀 밖 단지의 목록에 나온 풀 단지 B의 목록에는 그 단지가 나오지 않는다.
+  if (e && e.text){
     list = [];
     const s0 = seriesL64(e);
     if (s0) pool.forEach(c => {
@@ -5219,7 +5220,7 @@ function divHiddenL64(comp, t){
   const e = seedEntryByName(comp.name), c = seedEntryById(t.seedId);
   if (e && c && e !== c && e.text && c.text){
     const pool = poolSeedComplexes();
-    if (pool.indexOf(e) >= 0 && pool.indexOf(c) >= 0){
+    if (pool.indexOf(c) >= 0){   // 141단계: 상대만 풀 단지면 된다(대상은 풀 밖이어도)
       const s0 = seriesL64(e), s1 = seriesL64(c);
       if (s0 && s1 && Math.min(s0.last, s1.last) - Math.max(s0.first, s1.first) + 1 >= L64_SYNC_MIN_MONTHS + L64_RUN_MONTHS) hit = divergencePairL64(e, s0, c, s1).ok;
     }
@@ -5260,7 +5261,7 @@ function divOutReasonL64(comp, t){
   const e = seedEntryByName(comp.name), c = seedEntryById(t.seedId);
   if (!e || !c || e === c || !e.text || !c.text) return null;
   const pool = poolSeedComplexes();
-  if (pool.indexOf(e) < 0 || pool.indexOf(c) < 0) return null;
+  if (pool.indexOf(c) < 0) return null;   // 141단계: 상대만 풀 단지면 된다
   const s0 = seriesL64(e), s1 = seriesL64(c);
   if (!s0 || !s1) return null;
   const r = divergencePairL64(e, s0, c, s1);
