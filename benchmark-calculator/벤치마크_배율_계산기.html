@@ -887,6 +887,13 @@ body.l44 .tier-seg.current.tier-low, body.l44 .tier-seg.current.tier-veryLow{box
 .twin-body{margin-top:8px;display:flex;flex-direction:column;gap:10px;}
 .twin-card{border:1px solid var(--border);border-radius:8px;padding:8px;}
 .twin-card-head{font-size:12.5px;font-weight:700;margin-bottom:6px;}
+/* 묶음 L65(136단계): 단지 이름 칸 = 표시용(입력칸 모양 없음). ✎는 직접 넣은 데이터 슬롯에만 */
+.name-input.name-ro-l65{border-color:transparent;background:transparent;box-shadow:none;cursor:pointer;caret-color:transparent;padding-left:2px;padding-right:2px;font-weight:700;color:var(--ink);text-overflow:ellipsis;}
+.name-input.name-ro-l65::placeholder{color:var(--ink-faint);font-weight:400;}
+.name-input.name-ro-l65.name-ph-on-l65::placeholder{color:var(--ink);font-weight:700;opacity:1;}
+.name-input.name-ro-l65:focus{outline:none;box-shadow:none;}
+.name-edit-l65{flex:none;border:1px solid var(--border);background:var(--surface);border-radius:6px;cursor:pointer;color:var(--ink-muted);font-size:13px;line-height:1;padding:4px 7px;}
+#baseName + .name-edit-l65{margin-top:4px;}
 /* 묶음 L64(130단계): 단지 이름 링크·쌍둥이 [동조][괴리] 탭·괴리 카드 */
 .cx-link-l64{color:inherit;text-decoration:underline;text-decoration-thickness:1px;text-decoration-color:var(--ink-muted);text-underline-offset:2px;overflow-wrap:anywhere;cursor:pointer;}
 .cx-link-l64:hover,.cx-link-l64:focus-visible{text-decoration-color:currentColor;}
@@ -2673,9 +2680,9 @@ function seoulHistoricalAvg(){
 // 라이브는 주소 플래그를 읽지 않으므로 이 기본값이 그대로 동작한다.
 const BUNDLES = { A:false, B:false, C:false, D1:false, D2:false, D3:false, D4:false, E1:true, E2:false, E3:true, F1:true, F2:true, F3:true, F4:true, F5:true, F6:true,
   H1:false, H2:true, H3:true, H4:true, H5:true, H6:true, H7:true,
-  L1:true, L2:true, L3:true, L4:true, L5:true, L6:false, L7:true, L8:true, L9:true, L10:true, L11:true, L12:true, L13:true, L14:true, L15:true, L16:true, L17:true, L18:true, L19:true, L19B:true, L20:true, L22:true, L23:true, L24:true, L25:true, L26:true, L27:!!window.POOL_EXCLUDE_ON, L31:!!window.NEW_NAME_RULE_ON, L32:true, L33:true, L34:true, L37:true, L28:true, L38:true, L40:true, L39:true, L41:true, L42:true, L43:true, L44:true, L45:true, L46:true, L47:true, L49:true, L48:true, L50:true, L51:true, L52:true, L53:true, L54:true, L55:true, L56:true, L57:true, L58:true, L59:true, L59_DND:true, L59_INFOCARD:true, L59_STATION:true, L59_SCHOOL:true, L59_FAVSEARCH:true, L60:true, L60_REL:false, L60_WHY:false, L60_NOTE:true, L61:true, L64:true, L64_LINK:true, L35:true, L36:true, L30:true, L29:true, L29R:false, K1:false, K2:true, K4:false };
+  L1:true, L2:true, L3:true, L4:true, L5:true, L6:false, L7:true, L8:true, L9:true, L10:true, L11:true, L12:true, L13:true, L14:true, L15:true, L16:true, L17:true, L18:true, L19:true, L19B:true, L20:true, L22:true, L23:true, L24:true, L25:true, L26:true, L27:!!window.POOL_EXCLUDE_ON, L31:!!window.NEW_NAME_RULE_ON, L32:true, L33:true, L34:true, L37:true, L28:true, L38:true, L40:true, L39:true, L41:true, L42:true, L43:true, L44:true, L45:true, L46:true, L47:true, L49:true, L48:true, L50:true, L51:true, L52:true, L53:true, L54:true, L55:true, L56:true, L57:true, L58:true, L59:true, L59_DND:true, L59_INFOCARD:true, L59_STATION:true, L59_SCHOOL:true, L59_FAVSEARCH:true, L60:true, L60_REL:false, L60_WHY:false, L60_NOTE:true, L61:true, L64:true, L64_LINK:true, L65:true, L35:true, L36:true, L30:true, L29:true, L29R:false, K1:false, K2:true, K4:false };
 const BUNDLE_GROUPS = { D:['D1','D2','D3','D4'], E:['E1','E2','E3'], F:['F1','F2','F3','F4','F5','F6'], H:['H1','H2','H3','H4','H5','H6','H7'],
-  L:['L1','L2','L3','L4','L5','L6','L7','L8','L9','L10','L11','L12','L13','L14','L15','L16','L17','L18','L19','L19B','L20','L22','L23','L24','L25','L26','L27','L29','L30','L31','L32','L33','L34','L37','L35','L36','L28','L38','L40','L39','L41','L42','L43','L44','L45','L46','L47','L49','L48','L50','L51','L52','L53','L54','L55','L56','L57','L58','L59','L60','L61','L64'], K:['K1','K2','K4'] };
+  L:['L1','L2','L3','L4','L5','L6','L7','L8','L9','L10','L11','L12','L13','L14','L15','L16','L17','L18','L19','L19B','L20','L22','L23','L24','L25','L26','L27','L29','L30','L31','L32','L33','L34','L37','L35','L36','L28','L38','L40','L39','L41','L42','L43','L44','L45','L46','L47','L49','L48','L50','L51','L52','L53','L54','L55','L56','L57','L58','L59','L60','L61','L64','L65'], K:['K1','K2','K4'] };
 // 묶음 L46(69단계): 그래프 점선 모양 통일 — 모든 점선을 "선도단지 대비 적정가" 선(FAIR_LINE_STYLE.borderDash)과 같은 긴 점선으로.
 // 촘촘한 점("좁쌀")·점-선 섞인 패턴을 없앤다. 새 점선은 항상 dashL46(예전 값)을 쓴다 — L46을 끄면 예전 값 그대로.
 const DASH_L46 = [5, 4];
@@ -5369,7 +5376,10 @@ function cxSnapshotL64(){
   let y = 0;
   try { y = window.scrollY || window.pageYOffset || 0; } catch (e) {}
   const p = isPyeong25Name(state.singleTargetName) ? 25 : 34;
-  return { mode: state.topMode || 'single', id: state.singleTargetId || null, p, y };
+  // 묶음 L65(136단계): 넓은 화면에서 쌍둥이 패널이 열려 있었으면 그 칸 키와 패널 안 스크롤도 기록한다
+  let panel = null;
+  try { if (BUNDLES.L65 && _panelActiveBtn && _panelActiveBtn.dataset && _panelActiveBtn.dataset.twinToggle){ const pb = document.getElementById('sidePanelBody'); panel = { key: _panelActiveBtn.dataset.twinToggle, scroll: pb ? pb.scrollTop : 0 }; } } catch (e) {}
+  return { mode: state.topMode || 'single', id: state.singleTargetId || null, p, y, panel };
 }
 let _cxNoteL64 = '';
 function showCxNoteL64(){
@@ -5413,6 +5423,15 @@ function restoreCxL64(s){
     }
   } else if (s.mode && s.mode !== state.topMode) setTopMode(s.mode);
   showCxNoteL64();
+  // 묶음 L65(136단계): 넓은 화면이면 쌍둥이 패널을 다시 열고(탭은 twinTabStateL64에 남아 있음) 패널 안 스크롤을 되돌린다
+  if (BUNDLES.L65 && s.panel && s.panel.key && isPanelMode()){
+    try {
+      const btn = document.querySelector('#singleDiagSection [data-twin-toggle="'+CSS.escape(s.panel.key)+'"]');
+      if (btn && _panelActiveBtn !== btn) btn.click();
+      const ps = s.panel.scroll || 0;
+      [0, 350, 900].forEach(t => setTimeout(() => { try { const pb = document.getElementById('sidePanelBody'); if (pb) pb.scrollTop = ps; } catch (e) {} }, t));
+    } catch (e) {}
+  }
   const y = s.y || 0;
   [0, 350, 900].forEach(t => setTimeout(() => { try { window.scrollTo(0, y); } catch (e) {} }, t));
 }
@@ -7238,10 +7257,57 @@ function newMiniChart(canvas, config){
   return new Chart(canvas, config);
 }
 
+// ---- 묶음 L65(136단계): 단지 이름 칸 = 표시용 ----
+// 이 칸의 값(state.baseName / state.compares[i].name)은 buildComplex의 이름으로 들어가 그래프 범례·탭 이름뿐 아니라
+// 이름으로 seed 단지를 찾는 기능(지역·준공·25평·쌍둥이·괴리)에도 쓰여, seed 단지 이름을 고치면 다른 단지처럼 된다.
+// 그래서 기본은 읽기 전용 표시이고 누르면 아래 🔍 검색창으로 간다. 엑셀·붙여넣기처럼 seed 단지가 아닌 데이터만 ✎로 고친다.
+const L65_NAME_PLACEHOLDER = '아래에서 단지를 검색하세요';
+function nameEditableL65(slot, isBase){
+  if (!slot || !slot.text || slot.pending25) return false;
+  if (isBase && baseIsVirtualPreset()) return false;
+  return !slotRef(slot, false);
+}
+function setupNameFieldL65(input, searchEl, editable, shownName){
+  if (!input || !BUNDLES.L65) return;
+  input._l65Editable = editable;
+  let pen = input._l65Pen;
+  if (editable && !pen){
+    pen = document.createElement('button'); pen.type = 'button'; pen.className = 'name-edit-l65'; pen.textContent = '✎';
+    pen.title = '이 단지 이름 고치기(직접 넣은 데이터만)'; pen.setAttribute('aria-label', '단지 이름 고치기');
+    pen.addEventListener('click', ev => { ev.preventDefault();
+      input.dataset.l65Editing = '1'; input.readOnly = false; input.removeAttribute('inputmode'); input.tabIndex = 0; input.classList.remove('name-ro-l65');
+      input.focus(); try { input.select(); } catch (e) {} });
+    input.after(pen); input._l65Pen = pen;
+  }
+  if (pen) pen.hidden = !editable;
+  if (input.dataset.l65Editing === '1') return;   // 고치는 중이면 그대로 둔다
+  input.readOnly = true; input.setAttribute('inputmode', 'none'); input.tabIndex = -1;
+  // 저장된 이름이 없어도 단지가 들어 있으면(기본 기준단지 잠실엘스 등) 그 이름을 진하게, 비어 있으면 안내를 흐리게
+  const fill = !input.value && shownName ? shownName : '';
+  input.classList.add('name-ro-l65'); input.classList.toggle('name-ph-on-l65', !!fill); input.placeholder = fill || L65_NAME_PLACEHOLDER;
+  input.setAttribute('aria-label', (input.value || fill ? (input.value || fill) + ' — ' : '') + '단지는 아래 검색창에서 고르세요');
+  if (!input._l65){
+    input._l65 = true;
+    const toSearch = () => { try { searchEl.focus(); } catch (e) {} };
+    const go = ev => { if (input.dataset.l65Editing === '1') return; ev.preventDefault(); toSearch(); };
+    input.addEventListener('pointerdown', go);
+    input.addEventListener('mousedown', go);
+    input.addEventListener('focus', () => { if (input.dataset.l65Editing !== '1'){ input.blur(); toSearch(); } });
+    input.addEventListener('keydown', ev => { if (ev.key === 'Enter' && input.dataset.l65Editing === '1'){ ev.preventDefault(); input.blur(); } });
+    input.addEventListener('blur', () => {
+      if (input.dataset.l65Editing !== '1') return;
+      delete input.dataset.l65Editing;
+      setupNameFieldL65(input, searchEl, input._l65Editable);
+      debounceRender();   // 고치는 동안은 다시 그리지 않고, 다 고친 뒤 한 번 그린다
+    });
+  }
+}
+
 function render(){
   renderPyeongNotice(); // 평형 혼합 여부(_pyeongMixed)를 먼저 갱신한다 — 아래 표기가 이 값을 쓴다
   const base = getBaseComplex();
   document.getElementById('baseName').value = state.baseName;
+  setupNameFieldL65(document.getElementById('baseName'), document.getElementById('baseLibSearch'), nameEditableL65(baseSlot(), true), base.rows.length ? base.name : '');   // 묶음 L65
   document.getElementById('basePreset').value = state.basePreset;
   document.getElementById('thresholdInput').value = state.threshold;
   document.getElementById('gasUrlInput').value = state.gasUrl || '';
@@ -7756,6 +7822,7 @@ function renderCompareTabs(base){
       '</div>'+
       '<div class="common-range" data-role="common"></div>';
     slotsEl.appendChild(panel);
+    setupNameFieldL65(panel.querySelector('[data-role=name]'), panel.querySelector('[data-role=libSearch]'), nameEditableL65(state.compares[i], false), comp.rows.length ? comp.name : '');   // 묶음 L65
     renderLibraryOptions(panel.querySelector('[data-role=lib]'));
     wireLibrarySearch(panel.querySelector('[data-role=libSearch]'), panel.querySelector('[data-role=lib]'), null, panel.querySelector('[data-role=libAutocomplete]'), false, { recentTarget: i });
 
@@ -7768,7 +7835,7 @@ function renderCompareTabs(base){
     }
 
     panel.querySelector('[data-role=name]').addEventListener('input', (e)=>{
-      state.compares[i].name = e.target.value; saveState(); debounceRender();
+      state.compares[i].name = e.target.value; saveState(); if (!(BUNDLES.L65 && e.target.dataset.l65Editing === '1')) debounceRender();   // 묶음 L65: 고치는 중엔 다시 그리지 않음
     });
     panel.querySelector('[data-role=makeBase]').addEventListener('click', ()=>{
       if (!state.compares[i].text){ alert('먼저 비교단지 데이터를 입력하세요.'); return; }
@@ -13907,7 +13974,7 @@ function wireStaticEvents(){
     else { state.baseText=''; state.baseName=label; }
     saveState(); render();
   });
-  document.getElementById('baseName').addEventListener('input', (e)=>{ state.baseName = e.target.value; saveState(); debounceRender(); });
+  document.getElementById('baseName').addEventListener('input', (e)=>{ state.baseName = e.target.value; saveState(); if (!(BUNDLES.L65 && e.target.dataset.l65Editing === '1')) debounceRender(); });   // 묶음 L65
   document.getElementById('thresholdInput').addEventListener('input', (e)=>{
     const v = parseFloat(e.target.value); state.threshold = Number.isFinite(v) && v>0 ? v : 3; saveState(); render();
   });
