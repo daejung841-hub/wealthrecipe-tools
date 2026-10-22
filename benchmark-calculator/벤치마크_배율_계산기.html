@@ -2682,9 +2682,9 @@ function seoulHistoricalAvg(){
 // 라이브는 주소 플래그를 읽지 않으므로 이 기본값이 그대로 동작한다.
 const BUNDLES = { A:false, B:false, C:false, D1:false, D2:false, D3:false, D4:false, E1:true, E2:false, E3:true, F1:true, F2:true, F3:true, F4:true, F5:true, F6:true,
   H1:false, H2:true, H3:true, H4:true, H5:true, H6:true, H7:true,
-  L1:true, L2:true, L3:true, L4:true, L5:true, L6:false, L7:true, L8:true, L9:true, L10:true, L11:true, L12:true, L13:true, L14:true, L15:true, L16:true, L17:true, L18:true, L19:true, L19B:true, L20:true, L22:true, L23:true, L24:true, L25:true, L26:true, L27:!!window.POOL_EXCLUDE_ON, L31:!!window.NEW_NAME_RULE_ON, L32:true, L33:true, L34:true, L37:true, L28:true, L38:true, L40:true, L39:true, L41:true, L42:true, L43:true, L44:true, L45:true, L46:true, L47:true, L49:true, L48:true, L50:true, L51:true, L52:true, L53:true, L54:true, L55:true, L56:true, L57:true, L58:true, L59:true, L59_DND:true, L59_INFOCARD:true, L59_STATION:true, L59_SCHOOL:true, L59_FAVSEARCH:true, L60:true, L60_REL:false, L60_WHY:false, L60_NOTE:true, L61:true, L64:true, L64_LINK:true, L64_NEWBUILD:false, L65:true, L69:true, L35:true, L36:true, L30:true, L29:true, L29R:false, K1:false, K2:true, K4:false };
+  L1:true, L2:true, L3:true, L4:true, L5:true, L6:false, L7:true, L8:true, L9:true, L10:true, L11:true, L12:true, L13:true, L14:true, L15:true, L16:true, L17:true, L18:true, L19:true, L19B:true, L20:true, L22:true, L23:true, L24:true, L25:true, L26:true, L27:!!window.POOL_EXCLUDE_ON, L31:!!window.NEW_NAME_RULE_ON, L32:true, L33:true, L34:true, L37:true, L28:true, L38:true, L40:true, L39:true, L41:true, L42:true, L43:true, L44:true, L45:true, L46:true, L47:true, L49:true, L48:true, L50:true, L51:true, L52:true, L53:true, L54:true, L55:true, L56:true, L57:true, L58:true, L59:true, L59_DND:true, L59_INFOCARD:true, L59_STATION:true, L59_SCHOOL:true, L59_FAVSEARCH:true, L60:true, L60_REL:false, L60_WHY:false, L60_NOTE:true, L61:true, L64:true, L64_LINK:true, L64_NEWBUILD:false, L65:true, L69:true, L70:true, L35:true, L36:true, L30:true, L29:true, L29R:false, K1:false, K2:true, K4:false };
 const BUNDLE_GROUPS = { D:['D1','D2','D3','D4'], E:['E1','E2','E3'], F:['F1','F2','F3','F4','F5','F6'], H:['H1','H2','H3','H4','H5','H6','H7'],
-  L:['L1','L2','L3','L4','L5','L6','L7','L8','L9','L10','L11','L12','L13','L14','L15','L16','L17','L18','L19','L19B','L20','L22','L23','L24','L25','L26','L27','L29','L30','L31','L32','L33','L34','L37','L35','L36','L28','L38','L40','L39','L41','L42','L43','L44','L45','L46','L47','L49','L48','L50','L51','L52','L53','L54','L55','L56','L57','L58','L59','L60','L61','L64','L65','L69'], K:['K1','K2','K4'] };
+  L:['L1','L2','L3','L4','L5','L6','L7','L8','L9','L10','L11','L12','L13','L14','L15','L16','L17','L18','L19','L19B','L20','L22','L23','L24','L25','L26','L27','L29','L30','L31','L32','L33','L34','L37','L35','L36','L28','L38','L40','L39','L41','L42','L43','L44','L45','L46','L47','L49','L48','L50','L51','L52','L53','L54','L55','L56','L57','L58','L59','L60','L61','L64','L65','L69','L70'], K:['K1','K2','K4'] };
 // 묶음 L46(69단계): 그래프 점선 모양 통일 — 모든 점선을 "선도단지 대비 적정가" 선(FAIR_LINE_STYLE.borderDash)과 같은 긴 점선으로.
 // 촘촘한 점("좁쌀")·점-선 섞인 패턴을 없앤다. 새 점선은 항상 dashL46(예전 값)을 쓴다 — L46을 끄면 예전 값 그대로.
 const DASH_L46 = [5, 4];
@@ -4938,18 +4938,19 @@ function twinShapeOkL56(comp, cand, overlapYms){
   return true;
 }
 function findTwinCandidates(comp){
-  if (isPyeong25Name(comp.name)) return { curated: [], rest: [], bestFairPriceCandidate: null }; // 25평 쌍둥이 풀은 다음 단계(2026-09-30)
+  const is25L70 = isPyeong25Name(comp.name);   // 묶음 L70(147단계): 25평 대상은 25평 풀의 25평 시세끼리
+  if (is25L70 && !on25L70()) return { curated: [], rest: [], bestFairPriceCandidate: null }; // L70 꺼짐·25평 파일 전: 예전처럼 빈 목록(캐시하지 않음)
   if (_twinCandidatesCache[comp.name]) return _twinCandidatesCache[comp.name];
   const rebuildMembers = new Set(BENCHMARK_GROUPS.rebuild.members);
   let result = { curated: [], rest: [], bestFairPriceCandidate: null, compMonthsL55: 0 };
-  if (!rebuildMembers.has(comp.name)){
+  if (!rebuildMembers.has(stripPyeongSuffix(comp.name))){
     const compYms = [...comp.rowMap.keys()].filter(ym => comp.rowMap.get(ym).saleMid!=null).sort((a,b)=>a-b);
     const minOverlap = TWIN_MIN_OVERLAP_MONTHS;
     if (compYms.length >= minOverlap){
       const bench = getVirtualBenchmarkComplex('seoul');
       const compBenchDecoupling = computeFixedWindowGap(comp, bench, overlapYmsOf(comp.rowMap, bench.rowMap, compYms));
       const scored = [];
-      poolSeedComplexes().forEach(e => { // 묶음 L27
+      (is25L70 ? pool25L70() : poolSeedComplexes()).forEach(e => { // 묶음 L27 · L70(25평 풀)
         if (!e.text || e.name === comp.name || rebuildMembers.has(e.name)) return;
         // estimateReferenceCandidates()와 동일한 28년 재건축 연한 필터를 쌍둥이
         // 단지 후보 풀에도 적용한다 — 이 필터는 여태 여기엔 전혀 없었다.
@@ -4958,7 +4959,7 @@ function findTwinCandidates(comp){
         // null을 무조건 제외하면 신축 커버리지가 크게 깎인다(2026-09 세션
         // 실측: 서울 일반 후보의 32.7%가 null age, 그중 대다수가 신축).
         const age = complexAge(e.builtYear);
-        if (age != null && age >= REBUILD_AGE_THRESHOLD && !isRebuildAgeExempt(e.name) && !twinCohortAllowed(e)) return;
+        if (!is25L70 && age != null && age >= REBUILD_AGE_THRESHOLD && !isRebuildAgeExempt(e.name) && !twinCohortAllowed(e)) return;   // L70: 25평 풀은 이미 걸렀다(소형 재건축 주력은 남김)
         const cand = buildComplex(e.text, e.name, e.name);
         if (!cand.rows.length) return;
         const overlapYms = compYms.filter(ym => cand.rowMap.has(ym) && cand.rowMap.get(ym).saleMid!=null);
@@ -5101,13 +5102,14 @@ function areaKeyL64(e){
 }
 const _seriesCacheL64 = new Map();
 function seriesL64(e){
-  if (_seriesCacheL64.has(e.id)) return _seriesCacheL64.get(e.id);
+  const ck = (e.p25L70 ? '25|' : '') + e.id;   // 묶음 L70: 25평 항목은 같은 id라도 다른 시세
+  if (_seriesCacheL64.has(ck)) return _seriesCacheL64.get(ck);
   const c = buildComplex(e.text, e.name, e.name), m = new Map();
   c.rows.forEach(row => { const v = row.saleMid; if (v != null && isFinite(v) && v > 0) m.set(ymIndex(row.ym), v); });
   let first = Infinity, last = -Infinity;
   m.forEach((v, k) => { if (k < first) first = k; if (k > last) last = k; });
   const out = m.size >= 2 ? { m, first, last } : null;
-  _seriesCacheL64.set(e.id, out);
+  _seriesCacheL64.set(ck, out);
   return out;
 }
 function maRetL64(m, idx, win){
@@ -5189,21 +5191,23 @@ function sortDivL64(list){
 let _divCacheL64 = {};
 // 기준 단지(34평 seed 단지, 141단계부터 풀 밖 포함) 하나의 괴리 쌍둥이 목록. 25평·seed 아님(엑셀 등)·L64 꺼짐은 null(탭 없음).
 function divergenceTwinsL64(compName){
-  if (!BUNDLES.L64 || !compName || isPyeong25Name(compName)) return null;
+  if (!BUNDLES.L64 || !compName) return null;
+  const is25 = isPyeong25Name(compName);   // 묶음 L70(147단계)
+  if (is25 && !on25L70()) return null;
   if (Object.prototype.hasOwnProperty.call(_divCacheL64, compName)) return _divCacheL64[compName];
   let list = null;
-  const e = seedEntryByName(compName);
-  const pool = poolSeedComplexes();
+  const e = is25 ? seed25EntryOfNameL70(compName) : seedEntryByName(compName);
+  const pool = is25 ? pool25L70() : poolSeedComplexes();
   // 141단계: 대상은 풀 밖 seed 단지도 된다(쌍둥이 findTwinCandidates와 같은 구조 — 대상은 아무 seed, 상대 후보는 풀). 풀 밖 단지의 목록에 나온 풀 단지 B의 목록에는 그 단지가 나오지 않는다.
   if (e && e.text){
     list = [];
     const s0 = seriesL64(e);
     if (s0) pool.forEach(c => {
-      if (c === e || !c.text) return;
+      if (c === e || c.id === e.id || !c.text) return;
       const s1 = seriesL64(c);
       if (!s1 || Math.min(s0.last, s1.last) - Math.max(s0.first, s1.first) + 1 < L64_SYNC_MIN_MONTHS + L64_RUN_MONTHS) return;
       const d = divergencePairL64(e, s0, c, s1);
-      if (d.ok) list.push(Object.assign(d, { seedId: c.id, name: c.name }));
+      if (d.ok) list.push(Object.assign(d, { seedId: c.id, name: c.name }, is25 ? { p25L70: true } : {}));
     });
     list = sortDivL64(list);
   }
@@ -5215,14 +5219,16 @@ function divergenceTwinsL64(compName){
 // 단일 진단을 열 때(칸1/2 미리보기) 전체 목록 계산이 돌지 않게 하려는 것. 결과는 쌍마다 기억한다.
 const _divPairCacheL64 = new Map();
 function divHiddenL64(comp, t){
-  if (!BUNDLES.L64 || !comp || !t || !t.seedId || isPyeong25Name(comp.name)) return false;
+  if (!BUNDLES.L64 || !comp || !t || !t.seedId) return false;
+  const is25 = isPyeong25Name(comp.name);   // 묶음 L70
+  if (is25 && !on25L70()) return false;
   const key = comp.name + '||' + t.seedId;
   if (_divPairCacheL64.has(key)) return _divPairCacheL64.get(key);
   let hit = false;
-  const e = seedEntryByName(comp.name), c = seedEntryById(t.seedId);
-  if (e && c && e !== c && e.text && c.text){
+  const e = is25 ? seed25EntryOfNameL70(comp.name) : seedEntryByName(comp.name), c = is25 ? pool25ByIdL70(t.seedId) : seedEntryById(t.seedId);
+  if (e && c && e !== c && e.id !== c.id && e.text && c.text){
     const pool = poolSeedComplexes();
-    if (pool.indexOf(c) >= 0){   // 141단계: 상대만 풀 단지면 된다(대상은 풀 밖이어도)
+    if (is25 || pool.indexOf(c) >= 0){   // L70: 25평 상대는 pool25ByIdL70가 풀 안일 때만 준다   // 141단계: 상대만 풀 단지면 된다(대상은 풀 밖이어도)
       const s0 = seriesL64(e), s1 = seriesL64(c);
       if (s0 && s1 && Math.min(s0.last, s1.last) - Math.max(s0.first, s1.first) + 1 >= L64_SYNC_MIN_MONTHS + L64_RUN_MONTHS) hit = divergencePairL64(e, s0, c, s1).ok;
     }
@@ -5260,11 +5266,13 @@ const L64_OUT_REASON = { '겹침 없음': '겹친 기간 짧음', '겹침 짧음
   '동조 대비 이탈 김': '이탈이 동조 기간의 절반 초과', '연속 3개월 아님': '최근 3개월 연속 아님', '이탈 아님': '평소 평균 기준으로는 5% 안',
   '기준 월 2026.07 전': '최근 시세 없음(2026.07 전)', '이탈 시작 못 정함': '이탈 시작을 정하지 못함' };
 function divOutReasonL64(comp, t){
-  if (!BUNDLES.L64 || !comp || !t || !t.seedId || isPyeong25Name(comp.name)) return null;
-  const e = seedEntryByName(comp.name), c = seedEntryById(t.seedId);
-  if (!e || !c || e === c || !e.text || !c.text) return null;
+  if (!BUNDLES.L64 || !comp || !t || !t.seedId) return null;
+  const is25 = isPyeong25Name(comp.name);   // 묶음 L70
+  if (is25 && !on25L70()) return null;
+  const e = is25 ? seed25EntryOfNameL70(comp.name) : seedEntryByName(comp.name), c = is25 ? pool25ByIdL70(t.seedId) : seedEntryById(t.seedId);
+  if (!e || !c || e === c || e.id === c.id || !e.text || !c.text) return null;
   const pool = poolSeedComplexes();
-  if (pool.indexOf(c) < 0) return null;   // 141단계: 상대만 풀 단지면 된다
+  if (!is25 && pool.indexOf(c) < 0) return null;   // 141단계: 상대만 풀 단지면 된다
   const s0 = seriesL64(e), s1 = seriesL64(c);
   if (!s0 || !s1) return null;
   const r = divergencePairL64(e, s0, c, s1);
@@ -5287,7 +5295,7 @@ function divBenchDetailL64(comp, partner){
   return '서울 선도단지 대비 평소 배율과 비교하면 지금 '+esc(comp.name)+' '+f(gapOf(comp))+', '+esc(partner.name)+' '+f(gapOf(partner))+'예요.';
 }
 function divItemL64(comp, d){
-  if (!d._complex){ const e = seedEntryById(d.seedId); d._complex = buildComplex(e.text, e.name, e.name); }
+  if (!d._complex){ const e = d.p25L70 ? pool25ByIdL70(d.seedId) : seedEntryById(d.seedId); d._complex = buildComplex(e.text, e.name, e.name); }   // L70: 25평 상대는 25평 시세
   const yms = overlapYmsOf(comp.rowMap, d._complex.rowMap).filter(ym => ym <= d.baseYm);
   const onsetIdx = yms.indexOf(d.onsetYm);
   return { complex: d._complex, yms, decoupling: { deviated: onsetIdx > 0, onsetIdx, onsetYm: d.onsetYm, duration: d.devMonths } };
@@ -5295,8 +5303,9 @@ function divItemL64(comp, d){
 function divCardHtmlL64(d, idx, comp, iMode, iRangeMode, iShowBench){
   const cheap = d.cheapId === d.idA ? d.nameA : d.nameB, other = d.cheapId === d.idA ? d.nameB : d.nameA;
   const favL59 = !!(BUNDLES.L59 && d.seedId);
-  const favActive = favL59 ? isComplexFavL59(d.seedId, 34) : false;
-  const favBtnHtml = favL59 ? '<button class="twin-fav-btn'+(favActive?' active':'')+'" data-div-fav-l64="'+idx+'" data-fav-l59-key="'+esc(complexFavKeyL59(d.seedId, 34))+'" title="'+esc(d.name)+' 즐겨찾기" type="button" aria-label="즐겨찾기">'+(favActive?'★':'☆')+'</button>' : '';
+  const dP = d.p25L70 ? 25 : 34;   // 묶음 L70
+  const favActive = favL59 ? isComplexFavL59(d.seedId, dP) : false;
+  const favBtnHtml = favL59 ? '<button class="twin-fav-btn'+(favActive?' active':'')+'" data-div-fav-l64="'+idx+'" data-fav-l59-key="'+esc(complexFavKeyL59(d.seedId, dP))+'" title="'+esc(d.name)+' 즐겨찾기" type="button" aria-label="즐겨찾기">'+(favActive?'★':'☆')+'</button>' : '';
   const toggles = '<div class="card-toggle-row">'+
     '<button class="chart-mode-toggle" data-div-mode-l64="'+idx+'">'+(iMode==='index'?'💰가격':'📈상승률')+'</button>'+
     '<button class="chart-mode-toggle" data-div-range-l64="'+idx+'">'+(iRangeMode==='overlap'?'🗓️전체기간':'🔗겹침만')+'</button>'+
@@ -5305,7 +5314,7 @@ function divCardHtmlL64(d, idx, comp, iMode, iRangeMode, iShowBench){
   const note = (iMode==='price' ? '실제 가격(억원) · 같은 축 공유' : '양쪽 모두 시작 시점 대비 상승률(%) · 그래프의 지점을 클릭하면 그 지점을 새 기준점으로 다시 계산합니다')+
     (iRangeMode==='full' ? '' : ' · 빨간 음영='+fmtYm(d.onsetYm)+'부터 벌어진 구간('+d.devMonths+'개월)')+((iShowBench && iMode!=='price') ? ' · 주황 점선=서울 선도단지' : '');
   return '<div class="twin-card div-card-l64">'+
-    '<div class="twin-card-head">'+divTagsHtmlL64(d)+cxNameHtmlL64(d.name, d.seedId)+esc(regionSuffix(d.name))+areaTagHtmlL69(d.seedId)+rentalHeavyChip(d.name)+favBtnHtml+'</div>'+divTagNotesHtmlL64(d)+
+    '<div class="twin-card-head">'+divTagsHtmlL64(d)+cxNameHtmlL64(d.name, d.seedId)+esc(regionSuffix(d.name))+areaTagHtmlL69(d.seedId, dP)+rentalHeavyChip(d.name)+favBtnHtml+'</div>'+divTagNotesHtmlL64(d)+
     '<div class="div-main-l64">'+withParticle(cheap, '이', '가')+' '+esc(other)+' 대비 평소보다 '+Math.round(d.cheapPct)+'% 싸졌어요</div>'+
     '<div class="div-why-l64">평소 '+withParticle(d.nameA, '은', '는')+' '+esc(d.nameB)+'의 '+(d.mean*100).toFixed(0)+'% → 지금 '+(d.now*100).toFixed(0)+'% · 동조 '+d.syncMonths+'개월 → 이탈 '+d.devMonths+'개월('+fmtYm(d.onsetYm)+'부터) · 평소 변동 '+(d.cv*100).toFixed(1)+'%</div>'+
     toggles+
@@ -5326,7 +5335,7 @@ function renderDivListL64(el, comp, allList, key){
   const rangeOf = d => cardRangeModeOverride.get(keyOf(d)) || 'overlap';
   const benchOf = d => cardBenchLineOverride.has(keyOf(d)) ? cardBenchLineOverride.get(keyOf(d)) : false;
   const items = list.map(d => divItemL64(comp, d));
-  el.innerHTML = '<div class="twin-kind-caption"><b>괴리 쌍둥이</b> = 7년 넘게 가격 비율이 거의 같았는데, 그 비율이 5% 넘게 벌어져 지금까지 이어지는 단지예요. 같이 움직인 기간이 벌어진 기간의 2배 이상이고 벌어진 지 5년이 안 된 짝만 보여 드려요(34평 KB 시세).</div>'+
+  el.innerHTML = '<div class="twin-kind-caption"><b>괴리 쌍둥이</b> = 7년 넘게 가격 비율이 거의 같았는데, 그 비율이 5% 넘게 벌어져 지금까지 이어지는 단지예요. 같이 움직인 기간이 벌어진 기간의 2배 이상이고 벌어진 지 5년이 안 된 짝만 보여 드려요('+(isPyeong25Name(comp.name) && BUNDLES.L70 ? '25평 KB 시세 — 상대도 25평 칸' : '34평 KB 시세')+').</div>'+
     list.map((d, idx) => divCardHtmlL64(d, idx, comp, modeOf(d), rangeOf(d), benchOf(d))).join('')+
     (shown < allList.length ? '<button class="twin-more-btn" data-div-more-l64="1">더보기 ('+(allList.length - shown)+'개 더 보기)</button>' : '');
   const rerender = () => renderDivListL64(el, comp, allList, key);
@@ -5344,7 +5353,7 @@ function renderDivListL64(el, comp, allList, key){
     on('[data-div-range-l64="'+idx+'"]', () => { cardRangeModeOverride.set(keyOf(d), iRange === 'overlap' ? 'full' : 'overlap'); rerender(); });
     on('[data-div-bench-l64="'+idx+'"]', () => { cardBenchLineOverride.set(keyOf(d), !iBench); rerender(); });
     const fav = el.querySelector('[data-div-fav-l64="'+idx+'"]');
-    if (fav) fav.addEventListener('click', ev => { ev.stopPropagation(); toggleComplexFavL59(d.seedId, 34, d.name); });
+    if (fav) fav.addEventListener('click', ev => { ev.stopPropagation(); toggleComplexFavL59(d.seedId, d.p25L70 ? 25 : 34, d.name); });
     const view = el.querySelector('[data-div-view-l64="'+idx+'"]');
     if (view) view.addEventListener('click', () => handleViewMultiClick(comp.name, d.name, view));
   });
@@ -5373,8 +5382,10 @@ function cxUrlL64(id, p){
   return base + '?' + CX_URL_ID_L64 + '=' + encodeURIComponent(id) + (p === 25 ? '&' + CX_URL_P_L64 + '=25' : '');
 }
 function cxNameHtmlL64(name, id){
+  const p25 = !!(BUNDLES.L70 && isPyeong25Name(name));   // 묶음 L70
+  if (p25 && slotAreaL69(id, 25)) name = stripPyeongSuffix(name);   // 146 예외 칸: 뒤의 "22평형(전용 52㎡)" 꼬리표가 평형을 대신한다
   if (!BUNDLES.L64_LINK || !id || !seedEntryById(id)) return esc(name);
-  return '<a href="'+esc(cxUrlL64(id, 34))+'" class="cx-link-l64" data-cx-open-l64="'+esc(id)+'" title="'+esc(name)+' 단지 보기">'+esc(name)+'</a>';
+  return '<a href="'+esc(cxUrlL64(id, p25 ? 25 : 34))+'" class="cx-link-l64" data-cx-open-l64="'+esc(id)+'" title="'+esc(name)+' 단지 보기">'+esc(name)+'</a>';
 }
 function cxSnapshotL64(){
   let y = 0;
@@ -6319,10 +6330,11 @@ function buildTwinCardHtml(t, idx, comp, r, bestFairPriceCandidate, iMode, iRang
   // 항상 정확한 숫자를 유지한다.
   const corrDisplay = t.matchType === 'similar' ? twinSimilarityLabel(t.corr) : '상관계수 '+t.corr.toFixed(2);
   const favL59 = !!(BUNDLES.L59 && t.seedId);   // 묶음 L59: 쌍둥이 카드의 ☆ = 이 쌍둥이 단지(34평)를 단지 즐겨찾기에
-  const favActive = favL59 ? isComplexFavL59(t.seedId, 34) : isTwinFavorited(comp.name, t.name);
-  const favBtnHtml = (BUNDLES.L59 && !favL59) ? '' : '<button class="twin-fav-btn'+(favActive?' active':'')+'" data-twin-fav="'+idx+'"'+(favL59 ? ' data-fav-l59-key="'+esc(complexFavKeyL59(t.seedId, 34))+'" title="'+esc(t.name)+' 즐겨찾기"' : '')+' type="button" aria-label="즐겨찾기">'+(favActive?'★':'☆')+'</button>';
+  const tP = (BUNDLES.L70 && isPyeong25Name(t.name)) ? 25 : 34;   // 묶음 L70: 25평 쌍둥이는 25평으로
+  const favActive = favL59 ? isComplexFavL59(t.seedId, tP) : isTwinFavorited(comp.name, t.name);
+  const favBtnHtml = (BUNDLES.L59 && !favL59) ? '' : '<button class="twin-fav-btn'+(favActive?' active':'')+'" data-twin-fav="'+idx+'"'+(favL59 ? ' data-fav-l59-key="'+esc(complexFavKeyL59(t.seedId, tP))+'" title="'+esc(t.name)+' 즐겨찾기"' : '')+' type="button" aria-label="즐겨찾기">'+(favActive?'★':'☆')+'</button>';
   return '<div class="twin-card">'+
-    '<div class="twin-card-head">'+twinMatchTypeTag(t)+' '+twinOngoingBadge(t)+' '+cxNameHtmlL64(t.name, t.seedId)+esc(regionSuffix(t.name))+areaTagHtmlL69(t.seedId)+rentalHeavyChip(t.name)+' <span class="cell-ratio">('+corrDisplay+', 겹치는 구간 '+t.overlapMonths+'개월)</span>'+favBtnHtml+'</div>'+divOutLineHtmlL64(comp, t)+   // 묶음 L64(133단계)
+    '<div class="twin-card-head">'+twinMatchTypeTag(t)+' '+twinOngoingBadge(t)+' '+cxNameHtmlL64(t.name, t.seedId)+esc(regionSuffix(t.name))+areaTagHtmlL69(t.seedId, tP)+rentalHeavyChip(t.name)+' <span class="cell-ratio">('+corrDisplay+', 겹치는 구간 '+t.overlapMonths+'개월)</span>'+favBtnHtml+'</div>'+divOutLineHtmlL64(comp, t)+   // 묶음 L64(133단계)
     itemToggleRowHtml+
     '<div class="twin-chart-note">'+(iMode==='price'?'실제 가격(억원) · 같은 축 공유':'양쪽 모두 시작 시점 대비 상승률(%) · 그래프의 지점을 클릭하면 그 지점을 새 기준점으로 다시 계산합니다')+(iRangeMode==='full' ? '' : decoupleNoteHtml+(hasDrawableEpisodes?' · 파란 음영=과거 완결된 갭메우기 에피소드':''))+benchLineNoteHtml+rangeNoteHtml+'</div>'+
     predictionNoteHtml+
@@ -6358,7 +6370,7 @@ function wireOneTwinCard(containerEl, t, idx, comp, r, bestFairPriceCandidate, i
   const favBtn = containerEl.querySelector('[data-twin-fav="'+idx+'"]');
   if (favBtn) favBtn.addEventListener('click', (e) => {
     e.stopPropagation();
-    if (BUNDLES.L59 && t.seedId){ toggleComplexFavL59(t.seedId, 34, t.name); return; }   // 묶음 L59(☆ 모양은 syncFavStarsL59가 맞춤)
+    if (BUNDLES.L59 && t.seedId){ toggleComplexFavL59(t.seedId, (BUNDLES.L70 && isPyeong25Name(t.name)) ? 25 : 34, t.name); return; }   // 묶음 L59(☆ 모양은 syncFavStarsL59가 맞춤)
     const active = toggleTwinFavorite(comp, t);
     favBtn.classList.toggle('active', active);
     favBtn.textContent = active ? '★' : '☆';
@@ -7471,7 +7483,42 @@ function slotAreaL69(id, p){
 function slotAreaTextL69(id, p){ const a = slotAreaL69(id, p); return a ? (a[0] ? a[0] + '평형(전용 ' + a[1] + '㎡)' : '전용 ' + a[1] + '㎡') : ''; }
 function areaChipLabelL69(a){ return a[0] ? '<b>' + a[0] + '평형</b>(전용 ' + a[1] + '㎡)' : '<b>전용</b>' + a[1] + '㎡'; }
 // 쌍둥이·괴리·준거 카드의 상대 단지(34평 칸) 이름 뒤에 붙인다
-function areaTagHtmlL69(id){ const t = slotAreaTextL69(id, 34); return t ? '<span class="slot-area-l69">' + esc(t) + '</span>' : ''; }
+function areaTagHtmlL69(id, p){ const t = slotAreaTextL69(id, p === 25 ? 25 : 34); return t ? '<span class="slot-area-l69">' + esc(t) + '</span>' : ''; }
+// ---- 묶음 L70(147단계): 25평 쌍둥이·괴리 — 25평 대상이면 짝 후보도 25평 칸 시세끼리 ----
+// 25평 짝 후보 풀(144단계 B안): 34평 쌍둥이 후보와 같은 거름(풀 제외 단지·재건축 선도 멤버·28년 이상(선도 예외·코호트 제외) 빼기)
+// + 소형 재건축 주력 단지(138단계 65곳 중 25평 칸이 있는 곳). 146 예외 칸(56~62㎡ 밖)도 넣는다. 대상은 25평 칸이 있는 단지 전부(141과 같은 구조).
+// 25평 항목 = 34평 seed 항목 복사본에 25평 시세·"(25평)" 이름만 얹은 것(id·연식·지역은 그대로 — 배지·링크·즐겨찾기가 같은 id를 쓴다).
+const SMALL_REBUILD_IDS_L70 = new Set(["거여1단지-도시개발-_60", "늘푸른마을_60", "동부삼환_60", "럭키-안양시만안구", "럭키호계", "매화마을공무원-2단지-_59", "미륭-안양시동안구", "벽적골8단지-두산-우성-한신-_60", "벽적골9단지주공_59", "벽적골주공-8단지-_60", "부영-1차-_60", "부영_60", "부천한신", "삼익-3차-부천시소사구", "삼익세라믹-부천시소사구", "상계주공-10단지-_58", "상계주공-11단지-_58", "상계주공-16단지-_59", "상계주공-9단지-_58", "샛별마을-동성", "샛별마을-라이프", "샛별마을-삼부", "샛별마을-우방", "서원_60", "성포주공-11단지-_58", "숲속마을-1단지-_60", "신나무실주공_60", "신내-4단지-_60", "신내-6단지-_60", "신성-신안-쌍용-진흥_60", "신세계", "신월시영_59", "양지마을-2단지청구", "양지마을-5단지한양", "영통센트럴파크뷰_60", "영통포레파크원_60", "오산운암5단지주공_60", "우성-성남시분당구", "원천주공_62", "율곡_58", "은빛-1단지-_60", "은빛-2단지-_60", "이천안흥주공_60", "이충부영-1-2-3단지-_60", "장미-서울-노원구-_59", "장암2단지주공_60", "주공-12단지-광명시", "주공-13단지-광명시", "주공-1단지-부천시소사구-_58", "주공-2단지-군포시-_60", "주공-4단지-안산시상록구", "주공-9단지-과천시", "주공-평택군문2단지-_60", "주공4단지-한라-_59", "중계무지개_59", "청솔_59", "태강-10단지-_59", "학마을서해_60", "학마을한진_60", "한성-구리시", "한솔마을-6단지-_59", "현대-성남시분당구", "현대-수원시팔달구", "현대전자산업주식회사사원아파트_59", "화서4단지주공_60"]);
+let _pool25L70 = null, _pool25ByIdL70 = null, _pool25SrcL70 = null;
+function seed25EntryL70(id){
+  const e = seedEntryById(id), x = SEED25_BY_ID.get(id);
+  return (e && x && x.text) ? Object.assign({}, e, { name: e.name + PYEONG25_SUFFIX, text: x.text, p25L70: true }) : null;
+}
+function pool25L70(){
+  if (seed25State !== 'loaded') return [];
+  if (_pool25L70 && _pool25SrcL70 === SEED25_BY_ID) return _pool25L70;
+  const rebuild = new Set(BENCHMARK_GROUPS.rebuild.members);
+  _pool25L70 = []; _pool25ByIdL70 = new Map(); _pool25SrcL70 = SEED25_BY_ID;
+  (window.SEED_COMPLEXES_25 || []).forEach(x => {
+    const e = seedEntryById(x.id); if (!e || !x.text) return;
+    const age = complexAge(e.builtYear);
+    const normal = !isPoolExcludedSeed(e) && !rebuild.has(e.name) && !(age != null && age >= REBUILD_AGE_THRESHOLD && !isRebuildAgeExempt(e.name) && !twinCohortAllowed(e));
+    if (!normal && !SMALL_REBUILD_IDS_L70.has(e.id)) return;
+    const c = seed25EntryL70(e.id); if (!c) return;
+    _pool25L70.push(c); _pool25ByIdL70.set(c.id, c);
+  });
+  return _pool25L70;
+}
+function pool25ByIdL70(id){ pool25L70(); return (_pool25ByIdL70 && _pool25ByIdL70.get(id)) || null; }
+function on25L70(){ return !!(BUNDLES.L70 && seed25State === 'loaded'); }
+// 25평 대상 이름("○○(25평)") → 25평 항목. 진단 중인 단지는 저장된 id로(같은 이름 단지와 섞이지 않게), 아니면 이름이 같은 첫 seed 단지.
+function seed25EntryOfNameL70(name){
+  const plain = stripPyeongSuffix(name);
+  let id = '';
+  try { if (name === state.singleTargetName && state.singleTargetId && (seedEntryById(state.singleTargetId) || {}).name === plain) id = state.singleTargetId; } catch (e) {}
+  if (!id){ const e = seedEntryByName(plain); id = e ? e.id : ''; }
+  return id ? (pool25ByIdL70(id) || seed25EntryL70(id)) : null;
+}
 function slotAreaTextOfSlotL69(slot){ if (!BUNDLES.L69) return ''; const ref = slotRef(slot, false); return ref ? slotAreaTextL69(ref.id, ref.pyeong) : ''; }
 
 // 슬롯이 어느 단지의 어느 평형인지. { id, pyeong, pending? } 또는 null(직접 넣은 데이터 등).
@@ -7688,17 +7735,28 @@ const PYEONG25_CALIB_BADGE = '<span class="pyeong-calib-badge" title="동조율 
 const PYEONG25_NOTE_TEXT = '25평은 34평 단지들의 흐름으로 만든 참고용 계산이에요. 평형별 가격 격차가 달라지면 결과도 달라질 수 있어요.';
 function pyeong25NoteHtml(){ return BUNDLES.L8 ? '<div class="pyeong25-note">'+esc(PYEONG25_NOTE_TEXT)+'</div>' : ''; }
 const PYEONG25_PENDING_NOTE = '<div class="pyeong-pending-note">🧑‍🤝‍🧑 쌍둥이·준거 단지: 25평 풀은 다음 단계에서 지원합니다.</div>';
+const PYEONG25_PENDING_NOTE_L70 = '<div class="pyeong-pending-note">🧑‍🤝‍🧑 쌍둥이 단지는 25평 시세끼리 비교해요(상대도 25평 칸). 준거 단지는 25평 풀을 다음 단계에서 지원합니다.</div>';   // 묶음 L70
 function decorateDiagCardPyeong(card, comp){
   if (comp._pyeong !== 25) return false;
   const head = card.querySelector('.card-head');
   if (head){ head.insertAdjacentHTML('beforeend', PYEONG25_CALIB_BADGE); head.insertAdjacentHTML('afterend', pyeong25NoteHtml()); }
   card.querySelectorAll('.sync-badge').forEach(b => b.insertAdjacentHTML('afterend', PYEONG25_CALIB_BADGE));
+  if (on25L70()){ card.insertAdjacentHTML('beforeend', PYEONG25_PENDING_NOTE_L70); return true; }   // 묶음 L70(147단계): 쌍둥이 칸은 남긴다 — 부른 쪽이 wireTwin25L70으로 연결
   const twin = card.querySelectorAll('.twin-section');
   if (twin.length) twin.forEach(el => { el.outerHTML = PYEONG25_PENDING_NOTE; });
   else card.insertAdjacentHTML('beforeend', PYEONG25_PENDING_NOTE);
   return true;
 }
 
+// 묶음 L70: 25평 카드의 쌍둥이 버튼 연결 + (단일 보기) 칸1/2 미리보기 — 34평 경로와 같은 함수
+function wireTwin25L70(card, comp, r, withPreview){
+  if (comp._pyeong !== 25 || !on25L70()) return;
+  wireTwinToggle(card, comp, r);
+  if (!withPreview) return;
+  const dp = card.querySelector('[data-twin-diag-preview]'), sp = card.querySelector('[data-twin-sync-preview]');
+  const tb = card.querySelector('[data-twin-toggle]');
+  if ((dp || sp) && tb) renderTwinSplitPreview(dp, sp, comp, r, tb.dataset.twinToggle);
+}
 function fmtM2Range(lo, hi){ return lo === hi ? lo+'㎡' : lo+'~'+hi+'㎡'; }
 // 칩: 지금 슬롯 평형을 강조하고, 다른 평형 칩(25평·34평)만 눌러서 전환할 수 있다. "기타"·"기본"(seed 시세가
 // 25·34평대가 아닌 타입이거나 xlsx가 고른 25평대 타입) 표시는 전환 대상이 아니다.
@@ -10088,6 +10146,7 @@ function renderSingleDiag(name){
   if (is25){
     // 25평은 쌍둥이·준거를 계산하지 않는다(다음 단계에서 25평 풀 지원) — 다단지 화면과 같은 안내·배지
     decorateDiagCardPyeong(card, target);
+    wireTwin25L70(card, target, r, true);   // 묶음 L70
     wireBenchStatusCharts(card, bench, target);
     if (chartSectionEl) chartSectionEl.style.display = '';
     renderSingleActiveChart(bench, target);
@@ -11743,7 +11802,7 @@ function renderSummaryCards(base){
       if (!decorateDiagCardPyeong(card, base)){ // 25평 카드는 쌍둥이·준거를 계산하지 않는다
         wireTwinToggle(card, base, rBase);
         wireEstDetailToggle(card, base, baseEstimate);
-      }
+      } else wireTwin25L70(card, base, rBase, false);   // 묶음 L70: 25평 카드도 쌍둥이(25평 풀)
       wireBenchStatusCharts(card, baseBench, base);
     }
   }
@@ -11798,7 +11857,7 @@ function renderSummaryCards(base){
     if (!decorateDiagCardPyeong(card, comp)){ // 25평 카드는 쌍둥이·준거를 계산하지 않는다
       wireTwinToggle(card, comp, r);
       wireEstDetailToggle(card, comp, estimate);
-    }
+    } else wireTwin25L70(card, comp, r, false);   // 묶음 L70: 25평 카드도 쌍둥이(25평 풀)
     wireBenchStatusCharts(card, compBench, comp);
   }
   if (!any){
