@@ -114,6 +114,8 @@
   .region-group.collapsed .region-children{ display:none; }
   .region-children label{ display:flex; align-items:center; gap:5px; padding:2px 0; cursor:pointer; font-weight:400; }
   .region-children label.unchecked{ color:var(--muted); }
+  .region-children label.region-city-head{ font-weight:600; } /* 경기도 안 구가 있는 시 줄(시 → 구 3단) */
+  .region-city-children{ margin-left:16px; }
   .region-count{ color:var(--muted); font-size:10px; margin-left:auto; }
   .region-panel input[type=checkbox]{ margin:0; cursor:pointer; }
   /* 지역 패널 접기/펴기 버튼(2026-10): 패널 오른쪽 가장자리(스크롤바 바로 옆)에 붙는 22×56px ◀/▶ 하나(기준 파란색 배경·흰 글자). 폭 0짜리 sticky 래퍼라 자리를 차지하지 않고,
@@ -270,6 +272,7 @@
   .m-sheet .region-group-head label{ min-height:44px; font-size:15px; }
   .m-sheet .region-children{ margin-left:44px; }
   .m-sheet .region-children label{ min-height:44px; padding:0 4px; font-size:15px; gap:10px; }
+  .m-sheet .region-city-children{ margin-left:28px; }
   .m-sheet .region-panel input[type=checkbox]{ width:22px; height:22px; flex:none; }
   .m-sheet .region-count{ font-size:13px; }
 </style>
@@ -396,7 +399,7 @@ const VALID_DISTRICT = new Set([
   ...SEOUL_ORDER,
   '분당구','수정구','중원구', '동안구','만안구', '영통구','권선구','장안구','팔달구',
   '기흥구','수지구','처인구', '단원구','상록구', '일산동구','일산서구','덕양구',
-  '소사구','원미구', '동탄구','병점구','만세구','효행구',
+  '소사구','오정구','원미구', '동탄구','병점구','만세구','효행구',
   '연수구','부평구','서해구','남동구','계양구','중구','미추홀구','강화군','영종구','검단구','제물포구'
 ]);
 function validDistrict(c){ return (c.district && VALID_DISTRICT.has(c.district)) ? c.district : null; }
@@ -803,6 +806,32 @@ function regionTreeData(){
   return REGION_GROUP_ORDER.filter(r => groups.has(r)).map(r => ({ region: r, cols: groups.get(r) }));
 }
 
+// 시 → 구 3단(2026-10): 경기도 안에서 구가 있는 시(부천·안산·화성 등)는 시 줄 아래에 구 줄을 둔다. 시 체크박스는 그 시의 구 키(시::구)를
+// hiddenCols에서 한꺼번에 넣고 뺄 뿐이라 키 형식·hiddenCols·collapsedGroups는 그대로다(시 단위 접힘은 없음). 구가 없는 시·서울·인천은 예전처럼 한 줄.
+function cityOfColKey(key){ const i = key.indexOf('::'); return i > 0 ? key.slice(0, i) : null; }
+function regionColItems(g){
+  if (g.region !== 'gyeonggi') return g.cols.map(c => ({ col: c }));
+  const out = [], byCity = new Map();
+  g.cols.forEach(c => {
+    const city = cityOfColKey(c.key);
+    const hasGu = city && g.cols.some(x => cityOfColKey(x.key) === city && x.key !== city + '::' + city);
+    if (!hasGu){ out.push({ col: c }); return; }
+    if (!byCity.has(city)){ const item = { city: city, cols: [] }; byCity.set(city, item); out.push(item); }
+    byCity.get(city).cols.push(c);
+  });
+  return out;
+}
+function regionColLabelHtml(c, label){
+  return '<label class="'+(hiddenCols.has(c.key) ? 'unchecked' : '')+'"><input type="checkbox" data-col="'+esc(c.key)+'"'+(hiddenCols.has(c.key) ? '' : ' checked')+'> '+esc(label)+'<span class="region-count">'+c.count+'</span></label>';
+}
+function regionItemHtml(it){
+  if (!it.city) return regionColLabelHtml(it.col, it.col.label);
+  const on = it.cols.filter(c => !hiddenCols.has(c.key)).length;
+  const sum = it.cols.reduce((s, c) => s + c.count, 0);
+  return '<div class="region-city"><label class="region-city-head'+(on ? '' : ' unchecked')+'"><input type="checkbox" data-city="'+esc(it.city)+'"'+(on === it.cols.length ? ' checked' : '')+'> '+esc(it.city)+'<span class="region-count">'+sum+'</span></label>' +
+    '<div class="region-city-children">' + it.cols.map(c => regionColLabelHtml(c, c.key === it.city + '::' + it.city ? '구 없음' : c.key.slice(it.city.length + 2))).join('') + '</div></div>';
+}
+
 function renderRegionPanel(){
   const el = document.getElementById('regionPanel');
   if (!el) return;
@@ -818,7 +847,7 @@ function renderRegionPanel(){
       '<label><input type="checkbox" data-group="'+g.region+'"'+(on === total ? ' checked' : '')+'> '+esc(REGION_GROUP_LABEL[g.region])+
       '<span class="region-count">'+groupCount+'</span></label></div>' +
       '<div class="region-children">' +
-      g.cols.map(c => '<label class="'+(hiddenCols.has(c.key) ? 'unchecked' : '')+'"><input type="checkbox" data-col="'+esc(c.key)+'"'+(hiddenCols.has(c.key) ? '' : ' checked')+'> '+esc(c.label)+'<span class="region-count">'+c.count+'</span></label>').join('') +
+      regionColItems(g).map(regionItemHtml).join('') +
       '</div></div>';
   });
   el.innerHTML = html;
@@ -827,6 +856,11 @@ function renderRegionPanel(){
     const on = g.cols.filter(c => !hiddenCols.has(c.key)).length;
     const box = el.querySelector('input[data-group="'+g.region+'"]');
     if (box) box.indeterminate = on > 0 && on < g.cols.length;
+    regionColItems(g).filter(it => it.city).forEach(it => {   // 시 줄도 일부 구만 켜져 있으면 부분 선택 표시
+      const cb = el.querySelector('input[data-city="'+CSS.escape(it.city)+'"]');
+      const onC = it.cols.filter(c => !hiddenCols.has(c.key)).length;
+      if (cb) cb.indeterminate = onC > 0 && onC < it.cols.length;
+    });
   });
   el.scrollTop = savedTop;
 
@@ -841,6 +875,14 @@ function renderRegionPanel(){
       const g = tree.find(t => t.region === box.dataset.group);
       if (!g) return;
       g.cols.forEach(c => { if (box.checked) hiddenCols.delete(c.key); else hiddenCols.add(c.key); });
+      renderRegionPanel(); renderBandContent();
+    });
+  });
+  el.querySelectorAll('input[data-city]').forEach(box => {
+    box.addEventListener('change', () => {
+      const g = tree.find(t => t.region === 'gyeonggi');
+      if (!g) return;
+      g.cols.forEach(c => { if (cityOfColKey(c.key) !== box.dataset.city) return; if (box.checked) hiddenCols.delete(c.key); else hiddenCols.add(c.key); });
       renderRegionPanel(); renderBandContent();
     });
   });
