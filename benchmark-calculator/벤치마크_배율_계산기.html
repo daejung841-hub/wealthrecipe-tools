@@ -5288,11 +5288,21 @@ function divOutLineHtmlL64(comp, t){
   const why = divOutReasonL64(comp, t);
   return why ? '<div class="twin-out-l64">괴리 탭에 없는 이유: '+esc(why)+'</div>' : '';
 }
+// 148단계: 괴리 카드 문장용 — 이름 뒤 "(25평)"은 빼고(평형은 카드 머리 이름·146 면적 표기에만), 조사는 이름 끝 글자 받침으로 고른다.
+// 끝의 괄호·공백은 건너뛰고("역북동 우미린센트럴파크(처인)" → 인), 숫자는 읽는 소리로(0 영·1 일·3 삼·6 육·7 칠·8 팔은 받침), 그 밖의 글자(영문 등)는 받침 없음.
+function divSentNameL64(name){ return BUNDLES.L70 ? stripPyeongSuffix(name) : name; }
+function hasBatchimNameL64(word){
+  const s = String(word || '').replace(/[\s)\]]+$/, '');
+  const last = s.slice(-1);
+  if (/[0-9]/.test(last)) return '013678'.indexOf(last) >= 0;
+  return hasBatchim(last);
+}
+function withParticleNameL64(word, withBatchim, withoutBatchim){ return esc(word) + (hasBatchimNameL64(word) ? withBatchim : withoutBatchim); }
 function divBenchDetailL64(comp, partner){
   const bench = getVirtualBenchmarkComplex('seoul');
   const gapOf = c => { const yms = [...c.rowMap.keys()].filter(ym => c.rowMap.get(ym).saleMid != null).sort((a, b) => a - b); const g = computeFixedWindowGap(c, bench, overlapYmsOf(c.rowMap, bench.rowMap, yms)); return g ? g.gap : null; };
   const f = g => g == null ? '—' : (g > 0 ? '+' : '') + g.toFixed(1) + '%';
-  return '서울 선도단지 대비 평소 배율과 비교하면 지금 '+esc(comp.name)+' '+f(gapOf(comp))+', '+esc(partner.name)+' '+f(gapOf(partner))+'예요.';
+  return '서울 선도단지 대비 평소 배율과 비교하면 지금 '+esc(divSentNameL64(comp.name))+' '+f(gapOf(comp))+', '+esc(divSentNameL64(partner.name))+' '+f(gapOf(partner))+'예요.';
 }
 function divItemL64(comp, d){
   if (!d._complex){ const e = d.p25L70 ? pool25ByIdL70(d.seedId) : seedEntryById(d.seedId); d._complex = buildComplex(e.text, e.name, e.name); }   // L70: 25평 상대는 25평 시세
@@ -5301,7 +5311,7 @@ function divItemL64(comp, d){
   return { complex: d._complex, yms, decoupling: { deviated: onsetIdx > 0, onsetIdx, onsetYm: d.onsetYm, duration: d.devMonths } };
 }
 function divCardHtmlL64(d, idx, comp, iMode, iRangeMode, iShowBench){
-  const cheap = d.cheapId === d.idA ? d.nameA : d.nameB, other = d.cheapId === d.idA ? d.nameB : d.nameA;
+  const cheap = divSentNameL64(d.cheapId === d.idA ? d.nameA : d.nameB), other = divSentNameL64(d.cheapId === d.idA ? d.nameB : d.nameA);   // 148단계: 문장에는 평형 없이
   const favL59 = !!(BUNDLES.L59 && d.seedId);
   const dP = d.p25L70 ? 25 : 34;   // 묶음 L70
   const favActive = favL59 ? isComplexFavL59(d.seedId, dP) : false;
@@ -5315,8 +5325,8 @@ function divCardHtmlL64(d, idx, comp, iMode, iRangeMode, iShowBench){
     (iRangeMode==='full' ? '' : ' · 빨간 음영='+fmtYm(d.onsetYm)+'부터 벌어진 구간('+d.devMonths+'개월)')+((iShowBench && iMode!=='price') ? ' · 주황 점선=서울 선도단지' : '');
   return '<div class="twin-card div-card-l64">'+
     '<div class="twin-card-head">'+divTagsHtmlL64(d)+cxNameHtmlL64(d.name, d.seedId)+esc(regionSuffix(d.name))+areaTagHtmlL69(d.seedId, dP)+rentalHeavyChip(d.name)+favBtnHtml+'</div>'+divTagNotesHtmlL64(d)+
-    '<div class="div-main-l64">'+withParticle(cheap, '이', '가')+' '+esc(other)+' 대비 평소보다 '+Math.round(d.cheapPct)+'% 싸졌어요</div>'+
-    '<div class="div-why-l64">평소 '+withParticle(d.nameA, '은', '는')+' '+esc(d.nameB)+'의 '+(d.mean*100).toFixed(0)+'% → 지금 '+(d.now*100).toFixed(0)+'% · 동조 '+d.syncMonths+'개월 → 이탈 '+d.devMonths+'개월('+fmtYm(d.onsetYm)+'부터) · 평소 변동 '+(d.cv*100).toFixed(1)+'%</div>'+
+    '<div class="div-main-l64">'+withParticleNameL64(cheap, '이', '가')+' '+esc(other)+' 대비 평소보다 '+Math.round(d.cheapPct)+'% 싸졌어요</div>'+
+    '<div class="div-why-l64">평소 '+withParticleNameL64(divSentNameL64(d.nameA), '은', '는')+' '+esc(divSentNameL64(d.nameB))+'의 '+(d.mean*100).toFixed(0)+'% → 지금 '+(d.now*100).toFixed(0)+'% · 동조 '+d.syncMonths+'개월 → 이탈 '+d.devMonths+'개월('+fmtYm(d.onsetYm)+'부터) · 평소 변동 '+(d.cv*100).toFixed(1)+'%</div>'+
     toggles+
     '<div class="twin-chart-note">'+note+'</div>'+
     (iMode==='price' ? '' : '<button class="chart-mode-toggle" data-div-reset-l64="'+idx+'" hidden>↺ 기준점 초기화</button>')+
@@ -7755,7 +7765,11 @@ function wireTwin25L70(card, comp, r, withPreview){
   if (!withPreview) return;
   const dp = card.querySelector('[data-twin-diag-preview]'), sp = card.querySelector('[data-twin-sync-preview]');
   const tb = card.querySelector('[data-twin-toggle]');
-  if ((dp || sp) && tb) renderTwinSplitPreview(dp, sp, comp, r, tb.dataset.twinToggle);
+  if (!(dp || sp) || !tb) return;
+  // 148단계: 페이지를 열 때가 아니라 "쌍둥이 단지 보기"를 처음 열 때 계산한다(25평 풀·시세 묶음 만들기가 첫 열기를 늦추지 않게)
+  let done = false;
+  const go = () => { if (done) return; done = true; renderTwinSplitPreview(dp, sp, comp, r, tb.dataset.twinToggle); };
+  if (tb.classList.contains('open')) go(); else tb.addEventListener('click', go);   // 이미 펼쳐 둔 채 다른 단지를 열면(좁은 화면) 바로
 }
 function fmtM2Range(lo, hi){ return lo === hi ? lo+'㎡' : lo+'~'+hi+'㎡'; }
 // 칩: 지금 슬롯 평형을 강조하고, 다른 평형 칩(25평·34평)만 눌러서 전환할 수 있다. "기타"·"기본"(seed 시세가
