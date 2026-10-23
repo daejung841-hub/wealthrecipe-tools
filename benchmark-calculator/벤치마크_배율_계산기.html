@@ -899,6 +899,11 @@ body.l44 .tier-seg.current.tier-low, body.l44 .tier-seg.current.tier-veryLow{box
 .cx-link-l64:hover,.cx-link-l64:focus-visible{text-decoration-color:currentColor;}
 /* 묶음 L69(146단계): 칸 기준과 다른 실제 면적 표기 */
 .slot-area-l69{display:inline-block;margin-left:4px;font-size:.88em;font-weight:500;color:var(--ink-muted);white-space:nowrap;}
+.ext-l74{display:inline-flex;gap:4px;flex:none;white-space:nowrap;vertical-align:middle;}
+.ext-lk-l74{display:inline-flex;align-items:center;min-height:26px;padding:2px 8px;border:1px solid var(--border-strong);border-radius:8px;background:var(--surface);color:var(--accent);font-size:12px;font-weight:600;line-height:1.2;text-decoration:none;white-space:nowrap;}
+.ext-lk-l74:hover,.ext-lk-l74:focus-visible{background:var(--accent-soft);}
+.card-head .name .ext-l74{margin-left:6px;}
+.card-head-l74{flex-wrap:wrap;row-gap:4px;}
 .cx-note-l64{margin:0 0 8px;padding:7px 10px;border-radius:8px;background:var(--info-bg);color:var(--ink);font-size:12.5px;line-height:1.5;}
 .twin-tabs-l64{display:flex;gap:6px;}
 .twin-tab-l64{flex:1 1 0;min-width:0;padding:7px 6px;border:1px solid var(--border);border-radius:8px;background:var(--surface);color:var(--ink-muted);font:inherit;font-size:13px;font-weight:700;cursor:pointer;}
@@ -2682,9 +2687,9 @@ function seoulHistoricalAvg(){
 // 라이브는 주소 플래그를 읽지 않으므로 이 기본값이 그대로 동작한다.
 const BUNDLES = { A:false, B:false, C:false, D1:false, D2:false, D3:false, D4:false, E1:true, E2:false, E3:true, F1:true, F2:true, F3:true, F4:true, F5:true, F6:true,
   H1:false, H2:true, H3:true, H4:true, H5:true, H6:true, H7:true,
-  L1:true, L2:true, L3:true, L4:true, L5:true, L6:false, L7:true, L8:true, L9:true, L10:true, L11:true, L12:true, L13:true, L14:true, L15:true, L16:true, L17:true, L18:true, L19:true, L19B:true, L20:true, L22:true, L23:true, L24:true, L25:true, L26:true, L27:!!window.POOL_EXCLUDE_ON, L31:!!window.NEW_NAME_RULE_ON, L32:true, L33:true, L34:true, L37:true, L28:true, L38:true, L40:true, L39:true, L41:true, L42:true, L43:true, L44:true, L45:true, L46:true, L47:true, L49:true, L48:true, L50:true, L51:true, L52:true, L53:true, L54:true, L55:true, L56:true, L57:true, L58:true, L59:true, L59_DND:true, L59_INFOCARD:true, L59_STATION:true, L59_SCHOOL:true, L59_FAVSEARCH:true, L60:true, L60_REL:false, L60_WHY:false, L60_NOTE:true, L61:true, L64:true, L64_LINK:true, L64_NEWBUILD:false, L65:true, L69:true, L70:true, L35:true, L36:true, L30:true, L29:true, L29R:false, K1:false, K2:true, K4:false };
+  L1:true, L2:true, L3:true, L4:true, L5:true, L6:false, L7:true, L8:true, L9:true, L10:true, L11:true, L12:true, L13:true, L14:true, L15:true, L16:true, L17:true, L18:true, L19:true, L19B:true, L20:true, L22:true, L23:true, L24:true, L25:true, L26:true, L27:!!window.POOL_EXCLUDE_ON, L31:!!window.NEW_NAME_RULE_ON, L32:true, L33:true, L34:true, L37:true, L28:true, L38:true, L40:true, L39:true, L41:true, L42:true, L43:true, L44:true, L45:true, L46:true, L47:true, L49:true, L48:true, L50:true, L51:true, L52:true, L53:true, L54:true, L55:true, L56:true, L57:true, L58:true, L59:true, L59_DND:true, L59_INFOCARD:true, L59_STATION:true, L59_SCHOOL:true, L59_FAVSEARCH:true, L60:true, L60_REL:false, L60_WHY:false, L60_NOTE:true, L61:true, L64:true, L64_LINK:true, L64_NEWBUILD:false, L65:true, L69:true, L70:true, L74:true, L35:true, L36:true, L30:true, L29:true, L29R:false, K1:false, K2:true, K4:false };
 const BUNDLE_GROUPS = { D:['D1','D2','D3','D4'], E:['E1','E2','E3'], F:['F1','F2','F3','F4','F5','F6'], H:['H1','H2','H3','H4','H5','H6','H7'],
-  L:['L1','L2','L3','L4','L5','L6','L7','L8','L9','L10','L11','L12','L13','L14','L15','L16','L17','L18','L19','L19B','L20','L22','L23','L24','L25','L26','L27','L29','L30','L31','L32','L33','L34','L37','L35','L36','L28','L38','L40','L39','L41','L42','L43','L44','L45','L46','L47','L49','L48','L50','L51','L52','L53','L54','L55','L56','L57','L58','L59','L60','L61','L64','L65','L69','L70'], K:['K1','K2','K4'] };
+  L:['L1','L2','L3','L4','L5','L6','L7','L8','L9','L10','L11','L12','L13','L14','L15','L16','L17','L18','L19','L19B','L20','L22','L23','L24','L25','L26','L27','L29','L30','L31','L32','L33','L34','L37','L35','L36','L28','L38','L40','L39','L41','L42','L43','L44','L45','L46','L47','L49','L48','L50','L51','L52','L53','L54','L55','L56','L57','L58','L59','L60','L61','L64','L65','L69','L70','L74'], K:['K1','K2','K4'] };
 // 묶음 L46(69단계): 그래프 점선 모양 통일 — 모든 점선을 "선도단지 대비 적정가" 선(FAIR_LINE_STYLE.borderDash)과 같은 긴 점선으로.
 // 촘촘한 점("좁쌀")·점-선 섞인 패턴을 없앤다. 새 점선은 항상 dashL46(예전 값)을 쓴다 — L46을 끄면 예전 값 그대로.
 const DASH_L46 = [5, 4];
@@ -5397,6 +5402,37 @@ function cxNameHtmlL64(name, id){
   if (!BUNDLES.L64_LINK || !id || !seedEntryById(id)) return esc(name);
   return '<a href="'+esc(cxUrlL64(id, p25 ? 25 : 34))+'" class="cx-link-l64" data-cx-open-l64="'+esc(id)+'" title="'+esc(name)+' 단지 보기">'+esc(name)+'</a>';
 }
+// ---- 묶음 L74(155단계): 진단 요약 카드 이름 링크 + 네이버 부동산·호갱노노 바로가기 ----
+// 바깥 주소에는 단지 이름(호갱노노는 법정동 + 이름)이나 그 사이트의 단지 번호만 넣는다 — 우리 시세·진단 값은 넣지 않는다.
+// 단지 번호는 seed에 naverComplexNo·hogangId가 생기면 그 단지 페이지로 간다(155단계 현재 seed에는 없음 → 모두 이름 검색).
+const EXT_NAVER_L74 = { label: '네이버 부동산', page: 'https://fin.land.naver.com/complexes/', search: 'https://fin.land.naver.com/search?q=' };   // PC·휴대폰 같은 주소
+const EXT_HOGANG_L74 = { label: '호갱노노', page: 'https://hogangnono.com/apt/', search: 'https://hogangnono.com/search?q=' };
+function extEntryL74(id){ return id ? (seedEntryById(id) || (typeof seed25EntryL70 === 'function' ? seed25EntryL70(id) : null) || null) : null; }
+// 검색어: 괄호·쉼표·공백을 뺀다 — 네이버는 "상계주공 10단지"(띄어 씀)를 못 찾고 "상계주공10단지"는 찾는다(155단계 표본)
+function extQueryNameL74(name){ return String(name || '').replace(/[(),·]/g, '').replace(/\s+/g, ''); }
+function extLinksL74(id){
+  const e = extEntryL74(id);
+  if (!e || !e.name) return null;
+  const q = extQueryNameL74(stripPyeongSuffix(e.kbName || e.name));   // 표시 이름("역북동 우미린센트럴파크(처인)")이 아니라 KB 원래 이름으로 찾는다
+  if (!q) return null;
+  const nv = e.naverComplexNo ? EXT_NAVER_L74.page + encodeURIComponent(e.naverComplexNo) : EXT_NAVER_L74.search + encodeURIComponent(q);
+  const hg = e.hogangId ? EXT_HOGANG_L74.page + encodeURIComponent(e.hogangId) : EXT_HOGANG_L74.search + encodeURIComponent((e.dong ? e.dong + ' ' : '') + q);   // 호갱노노는 동을 앞에 붙이면 같은 이름 단지 중 그 단지가 맨 위
+  return [[EXT_NAVER_L74.label, nv], [EXT_HOGANG_L74.label, hg]];
+}
+function extLinksHtmlL74(id){
+  if (!BUNDLES.L74) return '';
+  const L = extLinksL74(id);
+  if (!L) return '';
+  return '<span class="ext-l74">'+L.map(([t, u]) => '<a class="ext-lk-l74" href="'+esc(u)+'" target="_blank" rel="noopener noreferrer" referrerpolicy="no-referrer">'+esc(t)+'</a>').join('')+'</span>';
+}
+// 진단 요약 카드 머리 이름: 카드의 슬롯이 seed 단지면 링크(평형은 카드 평형), 아니면 글자 그대로
+function summaryNameHtmlL74(comp, label){
+  const ref = comp && comp._refL74;
+  if (!BUNDLES.L74 || !BUNDLES.L64_LINK || !ref || !ref.id || !seedEntryById(ref.id)) return esc(label);
+  const p = ref.pyeong === 25 ? 25 : 34;
+  return '<a href="'+esc(cxUrlL64(ref.id, p))+'" class="cx-link-l64" data-cx-open-l64="'+esc(ref.id)+'" data-cx-p-l74="'+p+'" title="'+esc(label)+' 단지 보기">'+esc(label)+'</a>';
+}
+function summaryExtHtmlL74(comp){ const ref = comp && comp._refL74; return ref && ref.id ? extLinksHtmlL74(ref.id) : ''; }   // 이름 줄 끝(메타 글자 뒤)에 붙여 카드 높이를 덜 늘린다
 function cxSnapshotL64(){
   let y = 0;
   try { y = window.scrollY || window.pageYOffset || 0; } catch (e) {}
@@ -5482,7 +5518,8 @@ try {
     if (!a || !BUNDLES.L64_LINK) return;
     if (ev.ctrlKey || ev.metaKey || ev.shiftKey || ev.button === 1) return;   // 새 탭으로 열기는 브라우저에 맡긴다
     ev.preventDefault();
-    const p = (state.topMode === 'single' && isPyeong25Name(state.singleTargetName)) ? 25 : 34;
+    const pa = a.getAttribute('data-cx-p-l74');   // 묶음 L74: 진단 요약 카드는 그 카드의 평형
+    const p = (BUNDLES.L74 && pa) ? (pa === '25' ? 25 : 34) : (state.topMode === 'single' && isPyeong25Name(state.singleTargetName)) ? 25 : 34;
     openComplexLinkL64(a.getAttribute('data-cx-open-l64'), p);
   });
   window.addEventListener('popstate', (ev) => {
@@ -8917,7 +8954,8 @@ function buildDiagCardBody(i, comp, r, sync, wide, estimate, benchStatusHtml, ke
         '<button class="frame-btn'+(frame==='base'?' active':'')+'" data-frame="base">기준단지 기준</button>'+
       '</div>'
     : '<div class="frame-toggle frame-toggle-placeholder" aria-hidden="true"><button class="frame-btn" tabindex="-1" disabled>선도단지 기준</button></div>';
-  const headHtml = '<div class="card-head"><span class="swatch" style="background:var('+(SLOT_COLORS[i]||'--series-base')+')"></span><span class="name">'+esc(pyeongDisplayName(comp))+esc(complexMetaLabel(comp.name))+rentalHeavyChip(comp.name)+'</span>'+(headBadgeHtml||'')+'</div>'+frameToggleHtml+toneBadge(headlineDiag);
+  const sumL74 = kTag === 'c' || kTag === 'bc';   // 묶음 L74: 진단 요약 카드
+  const headHtml = '<div class="card-head'+(sumL74 && BUNDLES.L74 ? ' card-head-l74' : '')+'"><span class="swatch" style="background:var('+(SLOT_COLORS[i]||'--series-base')+')"></span><span class="name">'+(sumL74 ? summaryNameHtmlL74(comp, pyeongDisplayName(comp)) : esc(pyeongDisplayName(comp)))+esc(complexMetaLabel(comp.name))+rentalHeavyChip(comp.name)+(sumL74 ? summaryExtHtmlL74(comp) : '')+'</span>'+(headBadgeHtml||'')+'</div>'+frameToggleHtml+toneBadge(headlineDiag);
   // 항목 3(2026-09-21 세션) — 배율(%)만 보여주면 실제 금액 감이 바로 안
   // 온다는 지적을 받아, 매매 배율/갭 바로 위에 "현재가 / 적정가" 실제
   // 금액을 한 줄로 추가한다. buildFairPriceSummaryCard의 "적정가는 N억로
@@ -10121,6 +10159,7 @@ function renderSingleDiag(name){
   const infoOnL59 = !!(infoRefL59 && seedEntryById(infoRefL59.id));
   const headTopHtml =
     '<div class="single-target-head"><span class="name">'+esc(name)+(infoOnL59 ? '' : (BUNDLES.L32 ? '<span class="name-meta">'+esc(complexMetaLabel(name))+'</span>' : esc(complexMetaLabel(name))))+rentalHeavyChip(name)+'</span>'+
+      (BUNDLES.L74 ? extLinksHtmlL74((currentSingleRecentRef() || {}).id) : '')+   // 묶음 L74
       (BUNDLES.L59 ? favStarHtmlL59(currentSingleRecentRef(), name, 'head') : '')+   // 묶음 L59
       pyeongChipsHtml(singleSlot(), 'single')+
       '<span class="bench-tag">'+(groupKey==='rebuild'?'🏗️ 재건축 선도단지':'🏙️ 서울 선도단지')+' 기준</span>'+
@@ -11800,6 +11839,7 @@ function renderSummaryCards(base){
     const baseBenchGroup = pickBenchGroupForTarget(stripPyeongSuffix(base.name)).groupKey;
     const baseBench = getVirtualBenchmarkComplex(baseBenchGroup);
     const rBase = (baseBench && baseBench.rows.length) ? computeSlot(baseBench, base) : null;
+    if (BUNDLES.L74) base._refL74 = slotRef(baseSlot(), false);   // 묶음 L74
     if (rBase && !rBase.error){
       any = true;
       const card = document.createElement('div');
@@ -11866,6 +11906,7 @@ function renderSummaryCards(base){
     const baseCompareHtml = (compOwnSync && syncVsBase && !baseIsSameAsCompBench)
       ? buildBaseCompareNote(base.name||'기준단지', syncVsBase)
       : '';
+    if (BUNDLES.L74) comp._refL74 = slotRef(state.compares[i], false);   // 묶음 L74
     card.innerHTML = buildDiagCardBody(i, comp, r, sync, false, estimate, benchStatusHtml, undefined, undefined, undefined, baseCompareHtml, baseIsSameAsCompBench);
     grid.appendChild(card);
     if (!decorateDiagCardPyeong(card, comp)){ // 25평 카드는 쌍둥이·준거를 계산하지 않는다
