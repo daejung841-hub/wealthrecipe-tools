@@ -901,6 +901,7 @@ body.l44 .tier-seg.current.tier-low, body.l44 .tier-seg.current.tier-veryLow{box
 .slot-area-l69{display:inline-block;margin-left:4px;font-size:.88em;font-weight:500;color:var(--ink-muted);white-space:nowrap;}
 .ext-l74{display:inline-flex;gap:4px;flex:none;white-space:nowrap;vertical-align:middle;}
 .ext-lk-l74{display:inline-flex;align-items:center;min-height:26px;padding:2px 8px;border:1px solid var(--border-strong);border-radius:8px;background:var(--surface);color:var(--accent);font-size:12px;font-weight:600;line-height:1.2;text-decoration:none;white-space:nowrap;}
+.ext-lk-l74 .ext-ic-l74{width:12px;height:12px;flex:none;margin-right:3px;}
 .ext-lk-l74:hover,.ext-lk-l74:focus-visible{background:var(--accent-soft);}
 .card-head .name .ext-l74{margin-left:6px;}
 .card-head-l74{flex-wrap:wrap;row-gap:4px;}
@@ -5406,6 +5407,11 @@ function cxNameHtmlL64(name, id){
 // 바깥 주소에는 단지 이름(호갱노노는 법정동 + 이름)이나 그 사이트의 단지 번호만 넣는다 — 우리 시세·진단 값은 넣지 않는다.
 // 단지 번호는 seed에 naverComplexNo·hogangId가 생기면 그 단지 페이지로 간다(155단계 현재 seed에는 없음 → 모두 이름 검색).
 const EXT_NAVER_L74 = { label: '네이버 부동산', page: 'https://fin.land.naver.com/complexes/', search: 'https://fin.land.naver.com/search?q=' };   // PC·휴대폰 같은 주소
+// 아이콘: 일반 모양만(집 = 네이버 부동산, 지도 핀 = 호갱노노). 사이트 로고·상표는 쓰지 않는다(사용 허락 미확인).
+const EXT_ICON_L74 = {
+  home: '<svg class="ext-ic-l74" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/></svg>',
+  pin: '<svg class="ext-ic-l74" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 22s7-6.6 7-12a7 7 0 0 0-14 0c0 5.4 7 12 7 12z" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/><circle cx="12" cy="10" r="2.6" fill="currentColor"/></svg>'
+};
 const EXT_HOGANG_L74 = { label: '호갱노노', page: 'https://hogangnono.com/apt/', search: 'https://hogangnono.com/search?q=' };
 function extEntryL74(id){ return id ? (seedEntryById(id) || (typeof seed25EntryL70 === 'function' ? seed25EntryL70(id) : null) || null) : null; }
 // 검색어: 괄호·쉼표·공백을 뺀다 — 네이버는 "상계주공 10단지"(띄어 씀)를 못 찾고 "상계주공10단지"는 찾는다(155단계 표본)
@@ -5417,13 +5423,13 @@ function extLinksL74(id){
   if (!q) return null;
   const nv = e.naverComplexNo ? EXT_NAVER_L74.page + encodeURIComponent(e.naverComplexNo) : EXT_NAVER_L74.search + encodeURIComponent(q);
   const hg = e.hogangId ? EXT_HOGANG_L74.page + encodeURIComponent(e.hogangId) : EXT_HOGANG_L74.search + encodeURIComponent((e.dong ? e.dong + ' ' : '') + q);   // 호갱노노는 동을 앞에 붙이면 같은 이름 단지 중 그 단지가 맨 위
-  return [[EXT_NAVER_L74.label, nv], [EXT_HOGANG_L74.label, hg]];
+  return [[EXT_NAVER_L74.label, nv, 'home'], [EXT_HOGANG_L74.label, hg, 'pin']];
 }
 function extLinksHtmlL74(id){
   if (!BUNDLES.L74) return '';
   const L = extLinksL74(id);
   if (!L) return '';
-  return '<span class="ext-l74">'+L.map(([t, u]) => '<a class="ext-lk-l74" href="'+esc(u)+'" target="_blank" rel="noopener noreferrer" referrerpolicy="no-referrer">'+esc(t)+'</a>').join('')+'</span>';
+  return '<span class="ext-l74">'+L.map(([t, u, ic]) => '<a class="ext-lk-l74" href="'+esc(u)+'" target="_blank" rel="noopener noreferrer" referrerpolicy="no-referrer">'+(EXT_ICON_L74[ic] || '')+esc(t)+'</a>').join('')+'</span>';
 }
 // 진단 요약 카드 머리 이름: 카드의 슬롯이 seed 단지면 링크(평형은 카드 평형), 아니면 글자 그대로
 function summaryNameHtmlL74(comp, label){
