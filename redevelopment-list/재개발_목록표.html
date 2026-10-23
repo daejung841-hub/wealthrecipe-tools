@@ -3088,9 +3088,8 @@ const RT21 = {"meta":{"src":"목록표_연결_v3_3_b.json · 목록표_시계열
     } finally { rtBusy = false; }
   }
   // 44차: 표·카드 꾸밈 — 이름 옆 '실거래'(실거래 추정값 있는 구역)·'재건축', 일반분양비율 옆 강의 기준 사업성, 공공 사업 단계 '시행자 지정'
-  const HAS_TIP = '실거래 신고 자료로 만든 추정 투자금·프리미엄이 있는 구역이에요(참고용). 구역을 누르면 실거래 칸에서 볼 수 있어요.';
-  const nameTags = (r) => { const o = rtOf(r), has = o && (o.b.s === 'ok' || o.b.s === 'few');
-    return (has ? `<span class="rt-has" data-rt-has tabindex="0" data-rt-tip="${esc(HAS_TIP)}">실거래</span>` : '') + (r.sheet === '재건축단독' ? '<span class="rt-ty rt-ty-r rt-rb" data-rt-rb tabindex="0" data-rt-tip="재건축">재건축</span>' : ''); };
+  // 58차: 구역명 옆 '실거래' 배지는 뺌(거의 모든 구역에 붙어 뜻이 없음) — '재건축' 표시만 남김
+  const nameTags = (r) => (r.sheet === '재건축단독' ? '<span class="rt-ty rt-ty-r rt-rb" data-rt-rb tabindex="0" data-rt-tip="재건축">재건축</span>' : '');
   const GONG_RE = [[/조합\s*설립\s*인가/g, '사업시행자 지정'], [/조합\s*설립/g, '시행자 지정']];
   function relabelGong(root){ if (!root) return; const w = document.createTreeWalker(root, NodeFilter.SHOW_TEXT), ns = []; while (w.nextNode()) ns.push(w.currentNode);
     ns.forEach((n) => { if (!/조합\s*설립/.test(n.nodeValue) || (n.parentElement && n.parentElement.closest('#rtSec, script, style'))) return; let t = n.nodeValue; GONG_RE.forEach(([re, x]) => { t = t.replace(re, x); }); n.nodeValue = t; }); }
