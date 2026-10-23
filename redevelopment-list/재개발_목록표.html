@@ -1353,6 +1353,7 @@ window.SBJListLink = (function () {
     });
   }
 
+  window.RT_GRP = (name) => { const subs = DATA.filter(r => r.sheet === '모아타운' && r.name === name && r.subCode != null && r.subCode !== ''); if (!subs.length) return null; const g = groupMoa(subs)[0]; const la = landShareLabel(g), ls = [...new Set(subs.map(landShareLabel))]; return { ratio: generalRatio(g), gen: g.general, own: rowOwners(g), land: la && la !== '-' ? la : (ls.length === 1 && ls[0] !== '-' ? ls[0] : null) }; };   // 56차: 모아타운 상위 줄 일반분양 비율 등(목록표 계산 그대로)
   // ---------- 렌더 ----------
   function cellRowHtml(r, isSub, cols){
     const gen = parseGeneral(r);
@@ -2697,6 +2698,7 @@ const RT21 = {"meta":{"src":"목록표_연결_v3_3_b.json · 목록표_시계열
     mig2: ['감정 시점 확인 필요', '이주비 기준 투자금인데, 감정평가 시점이 오래돼 실제 이주비와 차이가 클 수 있어요. 조합 안내로 확인해 주세요.'],
     ref: ['참고', '최근 거래가 적어 참고용으로만 보세요.'],
     dir: ['직거래 위주·확인 필요', '최근 거래 대부분이 중개 없이 이뤄진 직거래라 시세로 보기 어려워 값을 내지 않았어요. 현장 시세를 확인해 주세요.'] };
+  TGT.town = ['타운 대표', '하위구역별 거래가 적어 타운 전체 거래로 계산한 값이에요.'];   // 56차
   const tg = (k, label, tag) => `<${tag || 'small'} class="rt-tg" tabindex="0" data-rt-tip-h="${esc(TGT[k][0])}" data-rt-tip="${esc(TGT[k][1])}">${label}</${tag || 'small'}>`;
   const MIG = (b) => (b.mig ? ' · ' + tg('mig', '이주비 기준', 'span') + (b.mig === 2 ? ' · ' + tg('mig2', '감정 시점 확인 필요', 'span') : '') : '');   // 32차: 관리처분·이주 구역(C탭 이주비 방식)
   const RBT = { inv: ['추정 투자금', '최근 실거래 매매가에서 추정 전세(관리처분 이후 구역은 추정 이주비)를 뺀 대표값이에요. 실제 투자금은 거래 조건·대출에 따라 달라요.'],
@@ -2717,6 +2719,16 @@ const RT21 = {"meta":{"src":"목록표_연결_v3_3_b.json · 목록표_시계열
     const self = z[1] || null, mine = self && b.town ? (b.town.subs.find((s) => norm(s[0]) === norm(self)) || null) : null;
     return {b, self, mine};
   }
+  // 56차: 모아타운 타운(하위구역이 있는 관리지역) — 하위구역들이 같은 실거래 경계 하나를 쓰면 그 경계 값이 타운 대표값
+  const TOWN = new Map();
+  const townB = (name) => { if (TOWN.has(name)) return TOWN.get(name);
+    const bs = new Set(REDEV_DATA.filter((r) => r.sheet === '모아타운' && r.name === name && r.subCode != null && r.subCode !== '').map((r) => (RT21.z[uid(r)] || [])[0]).filter(Boolean));
+    const b = bs.size === 1 ? RT21.b[[...bs][0]] || null : null; TOWN.set(name, b); return b; };
+  // 묶음 줄(data-group): 하위구역 있는 타운이면 타운 대표값, 하위구역 없는 단일 구역이면 그 구역 값
+  const grpRows = (name) => REDEV_DATA.filter((r) => r.sheet === '모아타운' && r.name === name);
+  const grpVal = (name, k) => { if (townB(name)) return valTown(name, k); const rs = grpRows(name); return rs.length === 1 ? valOf(rs[0], k) : { v: null, c: 2 }; };
+  const grpSort = (name, k) => { if (townB(name)) return valB(townB(name), k); const rs = grpRows(name); return rs.length === 1 ? valOf(rs[0], k) : { v: null, c: 2 }; };
+  const inTown = (r) => !!(r && r.sheet === '모아타운' && r.subCode != null && r.subCode !== '' && townB(r.name));
   const flowText = (fl) => (fl === 1 ? '▲' : fl === -1 ? '최근 낮은 거래 있음' : '');
   // 카드 한 줄(32차: 가운데 값 굵게): "추정 투자금 약 <b>6.1억</b> (5.7~6.8억) · 최근 6개월 81건 ▲" / 거래 적음 '· 참고' / 값 없음·거래 없음 '실거래 부족' / 경계 확인 필요는 표시 없음 — HTML을 돌려줌
   function cardText(o){   // 39차: 카드 한 줄 "투자금 2.3억 · 프리미엄 1.7억"(대표값), 참고·이주비 작게, 값 없음 '—'. 경계 확인 필요는 줄 없음
@@ -2745,7 +2757,7 @@ const RT21 = {"meta":{"src":"목록표_연결_v3_3_b.json · 목록표_시계열
   // ── 카드 ──
   function decorateCards(){
     document.querySelectorAll('#cardList .m-card[data-id]').forEach((c) => {
-      if (c.querySelector('.rt-line')) return; const o = rtOf(BYID.get(parseInt(c.dataset.id, 10))); if (!o) return; const t = cardText(o); if (!t) return;
+      if (c.querySelector('.rt-line')) return; const r = BYID.get(parseInt(c.dataset.id, 10)), o = rtOf(r); if (!o) return; const t = inTown(r) ? `투자금 ${cellTxt(valOf(r, 'inv'))} · 프리미엄 ${cellTxt(valOf(r, 'p'))}` : cardText(o); if (!t) return;   // 56차
       const key = c.querySelector('.m-key'), h = `<div class="rt-line" data-rt>${t}</div>`;   // 32차: cardText가 HTML(값은 숫자·고정 문구만)
       if (key) key.insertAdjacentHTML('beforebegin', h); else c.insertAdjacentHTML('beforeend', h);
     });
@@ -2765,7 +2777,7 @@ const RT21 = {"meta":{"src":"목록표_연결_v3_3_b.json · 목록표_시계열
     const qr = b.qr || {}, chartBox = b.s === 'direct' ? '<div class="rt-none" data-rt-dirchart>그래프 자료 없음 · 직거래 위주·확인 필요</div>' : qr.r === 'nofile' || qr.r === 'few' ?`<div class="rt-none">그래프 자료 없음 · ${esc(QR[qr.r])}</div>` : '<div class="rt-chartbox" data-rt-chart><div class="rt-sub">그래프 자료를 불러오는 중…</div></div>';
     const more = `<button type="button" class="rt-more" data-rt-more aria-expanded="false">자세히 보기 ▾</button><div class="rt-detail" data-rt-detail hidden>${METHOD}${SRC}<div class="rt-asof">기준일: 실거래 신고 ${esc(RT21.meta.asof)}까지 · 값은 모두 잠정</div></div>`;
     // 35차: 제목 줄 오른쪽 배지 2개(대표값 = 가운데 값). 값 없으면 생략, 거래 적음은 '참고'
-    const bdgHtml = asofB(RT_YM() ? '실거래 ' + RT_YM() + '까지' : '') + `<span class="rt-bdgs" data-rt-hb2>${RBDG.of(b)}</span>`;   // 52차: 실거래 칸 제목 옆 '투자금 N억'·'프리미엄 N억'(대표값, 마이너스 프리미엄 0원) — 팝업 머리 배지와 같은 값
+    const bdgHtml = asofB(RT_YM() ? '실거래 ' + RT_YM() + '까지' : '') + `<span class="rt-bdgs" data-rt-hb2>${RBDG.of(b)}${b.town && (b.s === 'ok' || b.s === 'few') ? tg('town', '타운 대표', 'span') : ''}</span>`;   // 56차: 타운 경계 값이면 '타운 대표'   // 52차: 실거래 칸 제목 옆 '투자금 N억'·'프리미엄 N억'(대표값, 마이너스 프리미엄 0원) — 팝업 머리 배지와 같은 값
     const head = `<div class="modal-section" id="rtSec" data-rt-b="${esc(b.b)}" data-rt-id="${rid}"><h4 class="rt-h">실거래${bdgHtml}</h4>${TOPN}${WARN}${chartBox}`;   // 38차: 경고는 접지 않고 그래프 바로 위
     if (b.s === 'direct') return `${head}<dl class="rt-grid"><dt>추정 투자금</dt><dd>직거래 위주·확인 필요</dd><dt>추정 프리미엄</dt><dd>직거래 위주·확인 필요</dd><dt>기간·건수</dt><dd>직거래가 대부분이라 값을 내지 않았어요</dd></dl>${more}</div>`;   // 43차
     if (b.s === 'none' || b.s === 'zero') return `${head}<dl class="rt-grid"><dt>기간·건수</dt><dd>실거래 부족${b.n ? ` (최근 12개월 ${b.n}건)` : ' (최근 12개월 거래 없음)'}</dd></dl>${more}</div>`;
@@ -2979,6 +2991,7 @@ const RT21 = {"meta":{"src":"목록표_연결_v3_3_b.json · 목록표_시계열
   (function(){ const s = document.createElement('style'); s.textContent = '.rt-gosi{margin-top:10px;padding-top:8px;border-top:1px dashed var(--border,#DCE3E9);}.rt-gosi-btn{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:700;text-decoration:none;border:1px solid var(--accent,#0E5C6B);color:var(--accent,#0E5C6B);border-radius:8px;padding:6px 12px;min-height:36px;}.rt-gosi-btn:hover{background:var(--surface-alt,#EDF2F4);}'
     + '.rt-gosi-f{font-size:11px;font-weight:700;border-radius:5px;padding:0 5px;background:var(--surface-alt,#EDF2F4);color:var(--ink-muted,#5B6670);}.rt-gosi-m{margin-top:4px;font-size:12px;color:var(--ink-muted,#5B6670);}.rt-gosi-pc{display:none;margin-top:3px;font-size:11.5px;color:#B45309;}@media (max-width:820px){.rt-gosi-pc{display:block;}}'
     + '.rt-gosi-none{display:inline-block;font-size:12.5px;color:var(--ink-faint,#93A1AC);background:var(--surface-alt,#EDF2F4);border-radius:8px;padding:5px 10px;}'
+    + '.rt-twn{color:var(--ink-faint,#93A1AC);font-weight:500;}.rt-tg[data-rt-tip-h="타운 대표"]{font-size:10px;}#tbody td.rt-td .rt-tg[data-rt-tip-h="타운 대표"]{display:block;margin:1px 0 0;line-height:1.2;}.rt-lg-town{margin-left:0;}.rt-lg.rt-lg-x{background:#EDF1F4;color:#64748B;}'
     + '.rt-sg{display:inline-flex;flex-wrap:wrap;align-items:center;gap:4px;margin-left:8px;vertical-align:1px;}.rt-sg-btn{display:inline-flex;align-items:center;gap:4px;font-size:11.5px;font-weight:700;text-decoration:none;border:1px solid var(--accent,#0E5C6B);color:var(--accent,#0E5C6B);border-radius:999px;padding:1px 9px;line-height:1.6;white-space:nowrap;}.rt-sg-btn:hover{background:var(--surface-alt,#EDF2F4);}.rt-sg-btn .rt-gosi-f{font-size:10px;padding:0 4px;}.rt-sg-l{font-size:12px;color:var(--ink-muted,#5B6670);}.rt-gosi[data-rt-gosi="stage"] .rt-sg{margin-left:4px;margin-right:6px;}.rt-sg-first{font-size:11px;color:var(--ink-muted,#5B6670);text-decoration:underline;text-underline-offset:2px;white-space:nowrap;}'
     + '.rt-hide{margin-left:6px;}.rt-hide[aria-pressed="true"]{background:var(--accent,#0E5C6B);color:#fff;border-color:var(--accent,#0E5C6B);}.rt-hide-n{font-size:11.5px;font-weight:600;opacity:.85;}';
     document.head.appendChild(s); })();
@@ -3002,9 +3015,18 @@ const RT21 = {"meta":{"src":"목록표_연결_v3_3_b.json · 목록표_시계열
     + ':root[data-theme="dark"] .rt-ty-s{background:#1E2A4A;color:#BFD3FF;}:root[data-theme="dark"] .rt-ty-g{background:#123323;color:#A7F3C0;}:root[data-theme="dark"] .rt-ty-m{background:#2E1A40;color:#E2C8FF;}:root[data-theme="dark"] .rt-ty-n{background:#26313A;color:#CBD5E1;}:root[data-theme="dark"] .rt-ty-r{background:#3A2412;color:#FDBA74;}';
     document.head.appendChild(s); })();
   // 값: 대표값(가운데 값) · 상태(0 정상 / 1 참고 / 2 없음)
-  function valOf(r, k){ const o = r && rtOf(r); if (o && o.b.s === 'direct') return { v: null, c: 2, dir: true }; if (!o || o.b.s === 'chk' || o.b.s === 'none' || o.b.s === 'zero') return { v: null, c: 2 };
+  const valB = (b, k) => { if (!b) return { v: null, c: 2 }; if (b.s === 'direct') return { v: null, c: 2, dir: true }; if (b.s !== 'ok' && b.s !== 'few') return { v: null, c: 2 };
+    const t = k === 'inv' ? b.inv : b.p; if (!t || t[0] == null) return { v: null, c: 2 }; return { v: k === 'p' ? z0(t[0]) : t[0], s: t[0], c: b.s === 'few' ? 1 : 0, mig: k === 'inv' && b.mig ? b.mig : 0 }; };
+  const valTown = (name, k) => Object.assign(valB(townB(name), k), { twn: 'top' });   // 상위 타운 줄
+  // 정렬·필터용 값
+  const sortVal = (r, k) => valOf(r, k);   // 56차: 낱개 줄(전체 탭의 하위구역 포함)은 화면에 보이는 값으로 정렬·필터(자기 값 또는 흐린 타운 값) — 묶음 줄만 타운 대표값
+  function valOf(r, k){   // 56차: 타운 하위구역 — 투자금은 자기 값(거래 5건 이상, 실거래 표의 하위구역 값)이 있으면 그 값, 없으면 타운 대표값(흐리게 + '타운 대표'). 프리미엄은 하위구역 값이 없어 타운 대표값
+    if (inTown(r)) { const o = rtOf(r), T = townB(r.name);
+      if (k === 'inv' && o && o.mine && o.mine[3] != null && T && (T.s === 'ok' || T.s === 'few')) return { v: o.mine[3], s: o.mine[3], c: 0, mig: 0 };
+      const x = valB(T, k); return x.v == null ? x : Object.assign(x, { twn: 'fb' }); }
+    const o = r && rtOf(r); if (o && o.b.s === 'direct') return { v: null, c: 2, dir: true }; if (!o || o.b.s === 'chk' || o.b.s === 'none' || o.b.s === 'zero') return { v: null, c: 2 };
     const t = k === 'inv' ? o.b.inv : o.b.p; if (!t || t[0] == null) return { v: null, c: 2 }; return { v: k === 'p' ? z0(t[0]) : t[0], s: t[0], c: o.b.s === 'few' ? 1 : 0, mig: k === 'inv' && o.b.mig ? o.b.mig : 0 }; }
-  const cellTxt = (x) => (x.dir ? tg('dir', '직거래 위주·확인 필요') : x.v == null ? '—' : `${e1(x.v)}억${x.mig ? tg(x.mig === 2 ? 'mig2' : 'mig', '이주비') : ''}${x.c === 1 ? tg('ref', '참고') : ''}`);
+  const cellTxt = (x) => (x.dir ? tg('dir', '직거래 위주·확인 필요') : x.v == null ? '—' : `${x.twn === 'fb' ? '<span class="rt-twn">' + e1(x.v) + '억</span>' : e1(x.v) + '억'}${x.mig ? tg(x.mig === 2 ? 'mig2' : 'mig', '이주비') : ''}${x.c === 1 ? tg('ref', '참고') : ''}${x.twn ? tg('town', '타운 대표') : ''}`);   // 56차: 타운 대표(상위 줄은 진하게, 하위구역 대신 쓴 값은 흐리게)
   // ── 팝업 머리 ──
   function decorateHead(r){
     const hd = box.querySelector('.modal-header'); if (!hd || hd.dataset.rt39) return; const h3 = hd.querySelector('h3'), sub = hd.querySelector('.modal-sub'); if (!h3 || !sub) return;
@@ -3014,7 +3036,7 @@ const RT21 = {"meta":{"src":"목록표_연결_v3_3_b.json · 목록표_시계열
     const gHtml = gb ? `<button type="button" class="rt-gb ${esc(gb.className.replace(/\b(rt-\S+)/g, ''))}" data-rt-gb tabindex="0" aria-label="${esc(gb.textContent)}">${ov ? '◆ ' : ''}${esc(gb.textContent)}</button>` : '';
     h3.insertAdjacentHTML('beforeend', `<span class="rt-hb" data-rt-hb><span class="rt-ty ${ty[1]}" data-rt-ty tabindex="0" data-rt-tip="${esc(TYTIP[ty[0]] || ty[0])}">${ty[0]}</span>${gHtml}</span>`);
     const inv = valOf(r, 'inv'), pr = valOf(r, 'p'), g = String(r.grade || '').match(BIZ);
-    const o43 = rtOf(r), sb = o43 && o43.b.s === 'direct' ? `<span class="rt-sbg" data-rt-sb="dir" tabindex="0" data-rt-tip-h="${esc(TGT.dir[0])}" data-rt-tip="${esc(TGT.dir[1])}">직거래 위주·확인 필요</span>` + (g ? `${hbiz(r)}` : '') : [inv.v != null ? `<span class="rt-sbg" data-rt-sb="inv">투자금 ${e1(inv.v)}억${inv.mig ? tg(inv.mig === 2 ? 'mig2' : 'mig', '이주비 기준') : ''}${inv.c === 1 ? tg('ref', '참고') : ''}</span>` : '', pr.v != null ? `<span class="rt-sbg" data-rt-sb="p">프리미엄 ${e1(pr.v)}억${pr.c === 1 ? tg('ref', '참고') : ''}</span>` : '', o43 && o43.b.old ? OLDB(o43.b) : '', g ? `${hbiz(r)}` : ''].filter(Boolean).join('');   // 43차: 감정 시점 배지, 사업성 즉시 설명
+    const o43 = rtOf(r), sb = o43 && o43.b.s === 'direct' ? `<span class="rt-sbg" data-rt-sb="dir" tabindex="0" data-rt-tip-h="${esc(TGT.dir[0])}" data-rt-tip="${esc(TGT.dir[1])}">직거래 위주·확인 필요</span>` + (g ? `${hbiz(r)}` : '') : [inv.v != null ? `<span class="rt-sbg" data-rt-sb="inv">투자금 ${e1(inv.v)}억${inv.mig ? tg(inv.mig === 2 ? 'mig2' : 'mig', '이주비 기준') : ''}${inv.c === 1 ? tg('ref', '참고') : ''}${inv.twn ? tg('town', '타운 대표') : ''}</span>` : '', pr.v != null ? `<span class="rt-sbg" data-rt-sb="p">프리미엄 ${e1(pr.v)}억${pr.c === 1 ? tg('ref', '참고') : ''}${pr.twn ? tg('town', '타운 대표') : ''}</span>` : '', o43 && o43.b.old ? OLDB(o43.b) : '', g ? `${hbiz(r)}` : ''].filter(Boolean).join('');   // 43차: 감정 시점 배지, 사업성 즉시 설명
     // 작은 글씨 줄: 지역 · 주변 시세 · 단계(시공사 선정이면 시공사 이름). 진행 기간 줄은 그 아래
     const prog = sub.querySelector('[data-prog]'), parts = sub.textContent.replace(prog ? prog.textContent : '', '').split(' · ').map((x) => x.trim()).filter(Boolean);
     const region = parts[1] || r.gu || '', stage = String(r.stage || parts[2] || '').trim(), bld = bOk(r.builder) ? r.builder : null;
@@ -3027,12 +3049,14 @@ const RT21 = {"meta":{"src":"목록표_연결_v3_3_b.json · 목록표_시계열
   // ── 메인 표 칸 + 정렬(오름 → 내림 → 끔). '—'는 늘 맨 아래, '참고'는 정상 값 뒤 ──
   const rs = { k: null, dir: 'asc' }, OBS = []; let rtBusy = false;
   const idOf = (el) => { let x = el; while (x && !x.dataset.id) x = x.nextElementSibling; return x ? parseInt(x.dataset.id, 10) : null; };   // 모아타운 묶음 줄은 다음 하위구역 줄의 id
-  const cmp = (k) => (a, b) => { const x = valOf(BYID.get(idOf(a[0])), k), y = valOf(BYID.get(idOf(b[0])), k); if (x.c !== y.c) return x.c - y.c; if (x.v == null) return 0; return rs.dir === 'asc' ? x.s - y.s : y.s - x.s; };   // 정렬은 원래 값(마이너스끼리도 순서), 표시는 0원
+  const elVal = (el, k) => (el.dataset.group ? grpSort(el.dataset.group, k) : sortVal(BYID.get(idOf(el)), k));   // 56차: 타운 묶음은 타운 대표값
+  const cmp = (k) => (a, b) => { const x = elVal(a[0], k), y = elVal(b[0], k); if (x.c !== y.c) return x.c - y.c; if (x.v == null) return 0; return rs.dir === 'asc' ? x.s - y.s : y.s - x.s; };   // 정렬은 원래 값(마이너스끼리도 순서), 표시는 0원
   function reorder(parent, sel, isSub, tail){ const blocks = []; [...parent.querySelectorAll(':scope > ' + sel)].forEach((el) => { if (isSub(el) && blocks.length) blocks[blocks.length - 1].push(el); else blocks.push([el]); });
     blocks.sort(cmp(rs.k)); blocks.forEach((bk) => bk.forEach((el) => parent.appendChild(el))); if (tail) parent.appendChild(tail); }
-  const hasRt = (r) => { const o = r && rtOf(r); return !!(o && (o.b.s === 'ok' || o.b.s === 'few')); };   // 46차: '자료 있음' = 대표값 또는 참고값
+  const townHas = (name) => { const b = townB(name); return !!(b && (b.s === 'ok' || b.s === 'few')); };
+  const hasRt = (r) => { if (inTown(r)) return townHas(r.name); const o = r && rtOf(r); return !!(o && (o.b.s === 'ok' || o.b.s === 'few')); };   // 56차: 타운 하위구역은 타운 대표값이 있으면 자료 있음(화면에 타운 값을 보여 줌)   // 46차: '자료 있음' = 대표값 또는 참고값
   const blockIds = (el, isSub) => { const ids = []; let x = el; do { if (x.dataset && x.dataset.id) ids.push(+x.dataset.id); x = x.nextElementSibling; } while (x && isSub(x)); if (!ids.length) { const i = idOf(el); if (i != null) ids.push(i); } return ids; };
-  const blockHas = (el, isSub) => blockIds(el, isSub).some((id) => hasRt(BYID.get(id)));
+  const blockHas = (el, isSub) => { const g = el.dataset && el.dataset.group; if (g) { if (townB(g)) return townHas(g); const rs = grpRows(g); if (rs.length === 1) return hasRt(rs[0]); } return blockIds(el, isSub).some((id) => hasRt(BYID.get(id))); };   // 56차   // 56차
   function sinkNoData(parent, sel, isSub, tail){   // 자료 없는 묶음을 순서 그대로 맨 아래로(이미 그렇게 놓였으면 손대지 않음)
     if (!parent) return; const blocks = []; [...parent.querySelectorAll(':scope > ' + sel)].forEach((el) => { if (isSub(el) && blocks.length) blocks[blocks.length - 1].push(el); else blocks.push([el]); });
     const has = blocks.map((bk) => blockHas(bk[0], isSub)); const firstNo = has.indexOf(false); if (firstNo < 0 || has.slice(firstNo).every((h) => !h)) return;
@@ -3047,10 +3071,10 @@ const RT21 = {"meta":{"src":"목록표_연결_v3_3_b.json · 목록표_시계열
       if (nth && !nth.querySelector('[data-rt-asof]') && NB_YM()) nth.insertAdjacentHTML('beforeend', asofB(NB_YM() + ' 시세 기준', 'rt-asofb-th'));   // 52차
       if (nth && !document.querySelector('#thead .rt-th')) nth.insertAdjacentHTML('afterend', `<th class="rt-th" data-rt-sort="inv" style="width:6%" data-rt-tip="눌러서 정렬(오름 → 내림 → 해제)">추정 투자금<span class="rt-arr"></span></th><th class="rt-th" data-rt-sort="p" style="width:6%" data-rt-tip="눌러서 정렬(오름 → 내림 → 해제)">추정 프리미엄<span class="rt-arr"></span></th>`);
       document.querySelectorAll('#thead .rt-th').forEach((th) => { th.querySelector('.rt-arr').textContent = rs.k === th.dataset.rtSort ? (rs.dir === 'asc' ? '▲' : '▼') : ''; th.setAttribute('aria-sort', rs.k === th.dataset.rtSort ? (rs.dir === 'asc' ? 'ascending' : 'descending') : 'none'); });
-      [...document.querySelectorAll('#tbody tr')].slice(0, ROWLIM).forEach((tr) => { if (tr.querySelector('.rt-td')) return; const nc = tr.querySelector('td.nb3-td'); if (!nc) return; const r = BYID.get(idOf(tr));
-        const mk = (k) => { const td = document.createElement('td'); td.className = 'rt-td'; td.dataset.rtTd = k; const h = cellTxt(valOf(r, k)); if (h.indexOf('<') < 0) td.textContent = h; else td.innerHTML = h; return td; };   // 51차
+      [...document.querySelectorAll('#tbody tr')].slice(0, ROWLIM).forEach((tr) => { if (tr.querySelector('.rt-td')) return; const nc = tr.querySelector('td.nb3-td'); if (!nc) return; const grp = tr.dataset.group || null, r = grp ? null : BYID.get(idOf(tr));
+        const mk = (k) => { const td = document.createElement('td'); td.className = 'rt-td'; td.dataset.rtTd = k; const h = cellTxt(grp ? grpVal(grp, k) : valOf(r, k)); if (h.indexOf('<') < 0) td.textContent = h; else td.innerHTML = h; return td; };   // 51차
         nc.after(mk('inv'), mk('p')); });
-      decorate44();
+      decorate44(); decorateTown();
       regionFilter();
       const bar = document.getElementById('mBar');
       if (bar && !bar.querySelector('.rt-msort')) { const cnt = bar.querySelector('#mCount'); const h = '<span class="rt-msort" data-rt-msort><button type="button" data-rt-msort="inv">투자금순</button><button type="button" data-rt-msort="p">프리미엄순</button></span>'; if (cnt) cnt.insertAdjacentHTML('beforebegin', h); else bar.insertAdjacentHTML('beforeend', h); }
@@ -3071,6 +3095,24 @@ const RT21 = {"meta":{"src":"목록표_연결_v3_3_b.json · 목록표_시계열
   function relabelGong(root){ if (!root) return; const w = document.createTreeWalker(root, NodeFilter.SHOW_TEXT), ns = []; while (w.nextNode()) ns.push(w.currentNode);
     ns.forEach((n) => { if (!/조합\s*설립/.test(n.nodeValue) || (n.parentElement && n.parentElement.closest('#rtSec, script, style'))) return; let t = n.nodeValue; GONG_RE.forEach(([re, x]) => { t = t.replace(re, x); }); n.nodeValue = t; }); }
   const TPL = new Map(), frag = (h) => { let t = TPL.get(h); if (!t) { t = document.createElement('template'); t.innerHTML = h; TPL.set(h, t); } return t.content.cloneNode(true); };   // 51차: 같은 배지 묶음은 한 번만 해석해 복제
+  // 56차: 타운 줄 사업성 — 목록표가 상위 줄에 계산한 일반분양 비율(하위구역 합계, window.RT_GRP)로 강의 기준 3단계 배지 + 사업성 표 툴팁
+  const XCHK = (v) => v >= 200;   // 57차: 일반분양 비율 200% 이상은 사업성 배지 대신 회색 '데이터 확인 중'(원자료 확인 중)
+  const xBadge = (extra) => `<span class="rt-lg rt-lg-x${extra || ''}" tabindex="0" data-rt-tip-h="사업성" data-rt-tip="원자료 확인 중이에요">데이터 확인 중</span>`;
+  const townBiz = (name) => { const g = window.RT_GRP && window.RT_GRP(name); if (!g || g.ratio == null || isNaN(g.ratio)) return null; const v = +g.ratio; if (XCHK(v)) return { x: true, v }; const L = LECT.find(([b0]) => v >= b0);
+    const row = (k, x) => `<tr><td>${k}</td><td>${x}</td></tr>`, n = (x, u) => (x == null ? '—' : Number(x).toLocaleString('ko-KR') + u);
+    const html = '<table class="rt-tt">' + row('사업성', `<span class="rt-tt-${L[2].slice(-1)}">${L[1]}</span>`) + row('일반분양 비율', (Math.round(v * 10) / 10) + '%') + row('대지지분', g.land ? esc(g.land) : '—') + row('조합원 수', n(g.own, '명')) + row('일반분양 세대수', n(g.gen, '세대')) + '</table>'
+      + '<div class="rt-tt-n">타운 전체(하위구역 합계) 기준 · 일반분양 비율 50% 이상 좋음 · 30% 이상 보통 · 그 아래 낮음</div>';
+    return { lab: L[1], cls: L[2], html, v }; };
+  function decorateTown(){
+    const gk = [...document.querySelectorAll('#thead th')].findIndex((th) => th.dataset.key === 'grade');
+    document.querySelectorAll('#tbody tr.group-row[data-group]').forEach((tr) => { if (tr.dataset.rtTown) return; tr.dataset.rtTown = '1'; const gc = gk >= 0 ? tr.children[gk] : null, B = townBiz(tr.dataset.group);
+      if (gc && B && B.x && /^\s*-?\s*$/.test(gc.textContent)) gc.innerHTML = xBadge(' rt-lg-town');
+      else if (gc && B && /^\s*-?\s*$/.test(gc.textContent)) gc.innerHTML = `<span class="rt-lg ${B.cls} rt-lg-town" tabindex="0" data-rt-tip-h="사업성" data-rt-tip-html="${esc(B.html)}">${B.lab}</span>`;
+      else if (gc && !B && /^\s*-?\s*$/.test(gc.textContent)) { const rs = grpRows(tr.dataset.group), L = rs.length === 1 ? lectOf(rs[0]) : null; if (L && XCHK(ratioOf(rs[0]))) gc.innerHTML = xBadge(' rt-lg-town'); else if (L) gc.innerHTML = `<span class="rt-lg ${L.cls} rt-lg-town" tabindex="0" data-rt-biz="${rs[0].id}">${L.lab}</span>`; } });   // 하위구역 없는 단일 구역 묶음 줄은 그 구역 사업성
+    document.querySelectorAll('#cardList .m-card.m-group[data-group]').forEach((c) => { if (c.querySelector('.rt-line')) return; const name = c.dataset.group, rs = grpRows(name); if (!townB(name) && rs.length !== 1) return; if (!townB(name)) { const o = rtOf(rs[0]); const t = o ? cardText(o) : ''; if (t) { const key = c.querySelector('.m-key'), h = `<div class="rt-line" data-rt data-rt-town>${t}</div>`; if (key) key.insertAdjacentHTML('beforebegin', h); else c.insertAdjacentHTML('beforeend', h); } return; } const B = townBiz(name);
+      const h = `<div class="rt-line" data-rt data-rt-town>투자금 ${cellTxt(valTown(name, 'inv'))} · 프리미엄 ${cellTxt(Object.assign(valTown(name, 'p'), { twn: '' }))}${B ? (B.x ? ' · ' + xBadge() : ` · <span class="rt-lg ${B.cls}" tabindex="0" data-rt-tip-h="사업성" data-rt-tip-html="${esc(B.html)}">사업성 ${B.lab}</span>`) : ''}</div>`;
+      const key = c.querySelector('.m-key'); if (key) key.insertAdjacentHTML('beforebegin', h); else c.insertAdjacentHTML('beforeend', h); });
+  }
   function decorate44(){
     const gk = [...document.querySelectorAll('#thead th')].findIndex((th) => th.dataset.key === 'grade');   // 51차: 머리 칸 위치는 한 번만
     [...document.querySelectorAll('#tbody tr.data-row[data-id]')].slice(0, ROWLIM).forEach((tr) => { if (tr.dataset.rt44) return; tr.dataset.rt44 = '1'; const r = BYID.get(parseInt(tr.dataset.id, 10)); if (!r) return;
@@ -3094,7 +3136,7 @@ const RT21 = {"meta":{"src":"목록표_연결_v3_3_b.json · 목록표_시계열
     if (anchor && !document.getElementById('rtRegion')) anchor.insertAdjacentHTML('beforebegin', `<div class="rt-region" id="rtRegion" role="group" aria-label="지역">${['전체', '서울', '경기', '인천'].map((t) => `<button type="button" data-rt-reg="${t}" aria-pressed="${RG.v === t}">${t}</button>`).join('')}<span class="rt-regn" data-rt-regn></span></div>`);
     const rgn = document.getElementById('rtRegion'); if (rgn && !document.getElementById('rtAsof')) rgn.insertAdjacentHTML('afterend', `<div class="rt-asofrow" id="rtAsof">${asofB(NB_YM() ? '주변 시세·급지 ' + NB_YM() + ' 시세 기준' : '')}${asofB(RT_YM() ? '실거래 ' + RT_YM() + '까지' : '')}<span class="rt-rfn" data-rt-rfn hidden></span></div>`);   // 52차
     if (!document.querySelector('[data-rt-hide]')) { const rg = document.getElementById('rtRegion'); if (rg) rg.insertAdjacentHTML('beforeend', '<button type="button" class="rt-hide" data-rt-hide aria-pressed="false">자료 없는 구역 숨기기 <span class="rt-hide-n" data-rt-hiden></span></button>'); }
-    const show = (el) => { const id = idOf(el); return RG.v === '전체' || regOf(BYID.get(id)) === RG.v; };
+    const show = (el) => { if (RG.v === '전체') return true; if (el.dataset.group) { const r0 = REDEV_DATA.find((r) => r.sheet === '모아타운' && r.name === el.dataset.group); return regOf(r0) === RG.v; } return regOf(BYID.get(idOf(el))) === RG.v; };   // 56차: 타운 묶음은 타운 이름으로
     let n = 0, nh = 0, nh2 = 0;
     const apply = (parent, sel, isSub, cnt) => { let cur = true; [...(parent ? parent.querySelectorAll(':scope > ' + sel) : [])].forEach((el) => { if (!isSub(el)) { cur = show(el); if (cur && !blockHas(el, isSub)) { cnt(); if (HIDE.v) cur = false; } if (cur) n++; } const dv = cur ? '' : 'none'; if (el.style.display !== dv) el.style.display = dv; }); };   // 51차: 값이 같으면 쓰지 않음
     apply(document.getElementById('tbody'), 'tr', (el) => el.classList.contains('sub-row'), () => nh++);
@@ -3107,7 +3149,8 @@ const RT21 = {"meta":{"src":"목록표_연결_v3_3_b.json · 목록표_시계열
   // 52차: 상세 필터 '추정 투자금·추정 프리미엄' 범위(억, 대표값 기준·프리미엄은 0원 아래를 0원으로). 범위를 넣으면 값이 없는 구역은 빠짐. 목록표 필터(getFilteredFlat)에 끼워 다른 필터·정렬·지역 버튼과 함께 동작
   const RF = { inv: [null, null], p: [null, null] }, RFQ = { inv: [[null, 1], [1, 2], [2, 3], [3, 5], [5, null]], p: [[null, 1], [1, 3], [3, 5], [5, null]] };
   const rfOn = () => ['inv', 'p'].some((k) => RF[k][0] != null || RF[k][1] != null);
-  const rfOk = (r) => ['inv', 'p'].every((k) => { const [lo, hi] = RF[k]; if (lo == null && hi == null) return true; const x = valOf(r, k); if (x.v == null) return false; return (lo == null || x.v >= lo - 1e-9) && (hi == null || x.v <= hi + 1e-9); });
+  // 56차: 범위 필터도 보이는 값(하위구역은 자기 값 또는 타운 값)
+  const rfOk = (r) => ['inv', 'p'].every((k) => { const [lo, hi] = RF[k]; if (lo == null && hi == null) return true; const x = sortVal(r, k); if (x.v == null) return false; return (lo == null || x.v >= lo - 1e-9) && (hi == null || x.v <= hi + 1e-9); });
   const rfTxt = (k) => { const [lo, hi] = RF[k]; return lo == null && hi == null ? '' : (k === 'inv' ? '투자금 ' : '프리미엄 ') + (lo == null ? '~' + hi + '억' : hi == null ? lo + '억 이상' : lo + '~' + hi + '억'); };
   const qLab = (lo, hi) => (lo == null ? '~' + hi + '억' : hi == null ? lo + '억 이상' : lo + '~' + hi + '억');
   function rfSync(){
