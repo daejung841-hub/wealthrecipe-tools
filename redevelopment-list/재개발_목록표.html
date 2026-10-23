@@ -2517,7 +2517,7 @@ tr.dmp-me td{background:var(--accent-soft);font-weight:600;}
   decorate();
 
   // ---------- 구역 상세 팝업: 다음 단계 예상·속도 / 역까지 도보 / 같은 시기 구역 ----------
-  const X = P.x || {};
+  const X = P.x || {}; window.RT_PX = X;   // 54차: 진행 단계 날짜 보충(실거래 블록이 같은 시기 기준일을 읽음)
   const monthsBetween = (a, b) => (b - a) / (30.4375 * 864e5);
   const r0 = (v) => Math.round(v);
   const CLS = {'빠름':'빠른 편','평균':'보통','느림':'느린 편'};
@@ -2934,6 +2934,42 @@ const RT21 = {"meta":{"src":"목록표_연결_v3_3_b.json · 목록표_시계열
   // 51차: 고시문 링크 파일은 첫 화면에서 읽지 않고 팝업을 처음 열 때 한 번만 읽음
   let gLoad = null;
   const loadGosi = () => gLoad || (gLoad = new Promise((ok, no) => { if (window.GOSI_LINKS) return ok(); const s = document.createElement('script'); s.src = '고시문_링크.js'; s.onload = () => ok(); s.onerror = () => { gLoad = null; no(); }; document.head.appendChild(s); }));
+  // 54차: 단계별 고시문(단계별_고시문.js — {구역키: {단계: [[고시번호, 고시일, 주소, 형식] 최신, 최초|null]}}) — 고시문_링크.js와 함께 팝업을 처음 열 때 읽음
+  let sLoad = null;
+  const loadStage = () => sLoad || (sLoad = new Promise((ok, no) => { if (window.GOSI_STAGE) return ok(); const s = document.createElement('script'); s.src = '단계별_고시문.js'; s.onload = () => ok(); s.onerror = () => { sLoad = null; no(); }; document.head.appendChild(s); }));
+  const ymd2 = (d) => { const m = /^(\d{4})[.\-](\d{1,2})[.\-](\d{1,2})/.exec(String(d || '')); return m ? `${m[1].slice(2)}.${m[2].padStart(2, '0')}.${m[3].padStart(2, '0')}` : ''; };
+  const STG = [['대상지선정', /대상지\s*선정|후보지\s*선정/], ['관리계획고시', /관리계획\s*고시/], ['정비계획', /정비\s*구역\s*지정|구역\s*지정|정비계획/], ['조합설립인가', /조합\s*설립/], ['사업시행인가', /사업\s*시행\s*(계획)?\s*인가/], ['관리처분인가', /관리\s*처분/]];
+  const stepKey = (st) => { const t = ((st.querySelector('.tl-label') || {}).textContent || '').replace(/\s/g, ''); const m = STG.find(([, re]) => re.test(t)); return m ? m[0] : null; };
+  const gA = (u, inner, cls, tip) => `<a class="${cls}" href="${esc(u)}" target="_blank" rel="noopener noreferrer" referrerpolicy="no-referrer"${tip ? ` data-rt-tip-h="고시문" data-rt-tip="${esc(tip)}"` : ''}>${inner}</a>`;   // 툴팁: 고시번호 · 고시일(타운 고시면 표시)
+  const gTip = (x, town) => [town ? '타운 고시' : '', x[0], x[1]].filter(Boolean).join(' · ');
+  const sgHtml = (late, first, key, town) => `<span class="rt-sg" data-rt-sg="${key}">${gA(late[2], `고시문${late[3] === 'pdf' ? '<span class="rt-gosi-f">PDF</span>' : ''}`, 'rt-sg-btn', gTip(late, town))}${first ? gA(first[2], '최초 고시', 'rt-sg-first', gTip(first)) : ''}</span>`;
+  // 모아타운·신통: 단계 이력에 '대상지 선정' 날짜가 비었거나 단계가 없으면 '같은 시기 구역' 기준일(P.x.period, 대상지 선정일)로 화면에서만 채움(원자료 그대로)
+  function fillPeriodDate(tl, r){
+    const pe = ((window.RT_PX || {}).period || {})[uid(r)]; if (!pe || !pe.base || pe.kind !== '대상지선정' || tl.querySelector('[data-rt-pdate]')) return;
+    const st = [...tl.querySelectorAll('.tl-step')].find((x) => stepKey(x) === '대상지선정');
+    if (st) { if (!st.querySelector('.tl-date')) st.querySelector('.tl-label').insertAdjacentHTML('afterend', `<span class="tl-date" data-rt-pdate>${ymd2(pe.base)}</span>`); else st.dataset.rtPdate = 'same'; }
+    else tl.insertAdjacentHTML('afterbegin', `<div class="tl-step done" data-rt-pstep data-rt-pdate><span class="tl-mark">✓</span><span class="tl-label">대상지선정</span><span class="tl-date">${ymd2(pe.base)}</span></div>`);
+  }
+  // 모아타운: 관리계획 고시일 — 고시문 링크표의 타운 고시(확실) 고시일로, 단계가 없으면 대상지 선정 다음에, 날짜가 비었으면 채움
+  function fillManDate(tl, g){
+    if (!g || g[4] !== 1 || !g[1] || tl.querySelector('[data-rt-mdate]')) return; const st = [...tl.querySelectorAll('.tl-step')].find((x) => stepKey(x) === '관리계획고시');
+    if (st) { if (!st.querySelector('.tl-date')) st.querySelector('.tl-label').insertAdjacentHTML('afterend', `<span class="tl-date" data-rt-mdate>${ymd2(g[1])}</span>`); return; }
+    const h = `<div class="tl-step done" data-rt-mstep data-rt-mdate><span class="tl-mark">✓</span><span class="tl-label">관리계획고시</span><span class="tl-date">${ymd2(g[1])}</span></div>`;
+    const ds = [...tl.querySelectorAll('.tl-step')].find((x) => stepKey(x) === '대상지선정'); if (ds) ds.insertAdjacentHTML('afterend', h); else tl.insertAdjacentHTML('afterbegin', h);
+  }
+  function stageButtons(sec, tl, r){
+    const g = (window.GOSI_LINKS || {})[uid(r)], S = (window.GOSI_STAGE || {})[uid(r)] || {}; fillManDate(tl, g);
+    const steps = [...tl.querySelectorAll('.tl-step')]; let placedPlan = !g;
+    const done1 = new Set([...tl.querySelectorAll('.rt-sg')].map((x) => x.dataset.rtSg));   // 같은 단계 이름 줄이 둘이면(관리처분계획인가·관리처분인가) 첫 줄에만
+    steps.forEach((st) => { const k = stepKey(st); if (!k || st.querySelector('.rt-sg') || done1.has(k)) return; done1.add(k);
+      const at = st.querySelector('.tl-label');   // 단계 이름 바로 뒤(날짜는 오른쪽 끝 그대로)
+      if (S[k]) { at.insertAdjacentHTML('afterend', sgHtml(S[k][0], S[k][1], k)); if (g && (g[4] === 1 ? k === '관리계획고시' : k === '정비계획')) placedPlan = true; }   // 55차: 단계별 링크(실거래-63 관리계획 고시 등)가 있으면 그것을 씀
+      else if (g && !placedPlan && (g[4] === 1 ? k === '관리계획고시' : k === '정비계획')) { at.insertAdjacentHTML('afterend', sgHtml([g[0], g[1], g[2], g[3]], null, k, g[4] === 1)); placedPlan = true; } });
+    const have = new Set([...tl.querySelectorAll('.rt-sg')].map((x) => x.dataset.rtSg)), un = Object.keys(S).filter((k) => !have.has(k));   // 단계 줄이 없는 단계(단계 이력에 그 단계가 빠진 구역)는 칸 아래에 단계 이름과 함께
+    const fs = un.length ? `<div class="rt-gosi" data-rt-gosi="stage">${un.map((k) => `<span class="rt-sg-l">${esc(k)}</span>${sgHtml(S[k][0], S[k][1], k)}`).join(' ')}</div>` : '';
+    const fb = !placedPlan ? `<div class="rt-gosi" data-rt-gosi="link">${gA(g[2], `정비계획 고시문 보기${g[3] === 'pdf' ? '<span class="rt-gosi-f">PDF</span>' : ''}`, 'rt-gosi-btn')}<div class="rt-gosi-m">${g[4] ? '타운 고시 · ' : ''}${esc(g[0])} · ${esc(g[1])}</div></div>` : '';   // 맞는 단계 줄이 없을 때만 칸 아래 버튼
+    const w0 = sec.querySelector('[data-rt-gosi="wait"]'); if (w0) w0.outerHTML = fs + fb + '<i data-rt-gosi="done" hidden></i>';   // 링크 없는 단계는 비워 둠('준비 중' 문구 없음)
+  }
   function gosiHtml(r){
     const g = (window.GOSI_LINKS || {})[uid(r)];
     if (!g) return `<div class="rt-gosi" data-rt-gosi="none"><span class="rt-gosi-none">${designated(r) ? '고시문 링크 준비 중' : '지정 고시 전'}</span></div>`;
@@ -2943,6 +2979,7 @@ const RT21 = {"meta":{"src":"목록표_연결_v3_3_b.json · 목록표_시계열
   (function(){ const s = document.createElement('style'); s.textContent = '.rt-gosi{margin-top:10px;padding-top:8px;border-top:1px dashed var(--border,#DCE3E9);}.rt-gosi-btn{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:700;text-decoration:none;border:1px solid var(--accent,#0E5C6B);color:var(--accent,#0E5C6B);border-radius:8px;padding:6px 12px;min-height:36px;}.rt-gosi-btn:hover{background:var(--surface-alt,#EDF2F4);}'
     + '.rt-gosi-f{font-size:11px;font-weight:700;border-radius:5px;padding:0 5px;background:var(--surface-alt,#EDF2F4);color:var(--ink-muted,#5B6670);}.rt-gosi-m{margin-top:4px;font-size:12px;color:var(--ink-muted,#5B6670);}.rt-gosi-pc{display:none;margin-top:3px;font-size:11.5px;color:#B45309;}@media (max-width:820px){.rt-gosi-pc{display:block;}}'
     + '.rt-gosi-none{display:inline-block;font-size:12.5px;color:var(--ink-faint,#93A1AC);background:var(--surface-alt,#EDF2F4);border-radius:8px;padding:5px 10px;}'
+    + '.rt-sg{display:inline-flex;flex-wrap:wrap;align-items:center;gap:4px;margin-left:8px;vertical-align:1px;}.rt-sg-btn{display:inline-flex;align-items:center;gap:4px;font-size:11.5px;font-weight:700;text-decoration:none;border:1px solid var(--accent,#0E5C6B);color:var(--accent,#0E5C6B);border-radius:999px;padding:1px 9px;line-height:1.6;white-space:nowrap;}.rt-sg-btn:hover{background:var(--surface-alt,#EDF2F4);}.rt-sg-btn .rt-gosi-f{font-size:10px;padding:0 4px;}.rt-sg-l{font-size:12px;color:var(--ink-muted,#5B6670);}.rt-gosi[data-rt-gosi="stage"] .rt-sg{margin-left:4px;margin-right:6px;}.rt-sg-first{font-size:11px;color:var(--ink-muted,#5B6670);text-decoration:underline;text-underline-offset:2px;white-space:nowrap;}'
     + '.rt-hide{margin-left:6px;}.rt-hide[aria-pressed="true"]{background:var(--accent,#0E5C6B);color:#fff;border-color:var(--accent,#0E5C6B);}.rt-hide-n{font-size:11.5px;font-weight:600;opacity:.85;}';
     document.head.appendChild(s); })();
   // ── 39차: 팝업 제목 배지(유형·급지) + 서브 배지(투자금·프리미엄·사업성) + 작은 글씨 줄 · 메인 표 '추정 투자금·추정 프리미엄' 칸과 정렬 · 카드 한 줄 ──
@@ -3166,8 +3203,10 @@ const RT21 = {"meta":{"src":"목록표_연결_v3_3_b.json · 목록표_시계열
     const r = BYID.get(lastId); if (!r) return;
     try { decorateBuilder(tb, r); decoratePe(tb); } catch (e) { /* 꾸밈 실패해도 팝업은 그대로 */ }
     try { decorateHead(r); } catch (e) { /* 39차: 머리 배지 실패해도 팝업은 그대로 */ }
-    try { const tl0 = tb.querySelector('.timeline'), tls0 = tl0 && tl0.closest('.modal-section'); if (tls0 && !tls0.querySelector('[data-rt-gosi]')) { tls0.insertAdjacentHTML('beforeend', '<div class="rt-gosi" data-rt-gosi="wait"></div>');
-      const put = () => { const w0 = tls0.querySelector('[data-rt-gosi="wait"]'); if (w0) w0.outerHTML = gosiHtml(r); }; loadGosi().then(put, put); } } catch (e) { /* 46차 · 51차: 링크 파일을 읽은 뒤 채움(못 읽으면 '준비 중') */ }
+    try { const tl0 = tb.querySelector('.timeline'), tls0 = tl0 && tl0.closest('.modal-section'); if (tl0) fillPeriodDate(tl0, r);
+      if (tls0 && !tls0.querySelector('[data-rt-gosi]')) { tls0.insertAdjacentHTML('beforeend', '<div class="rt-gosi-w" data-rt-gosi="wait" hidden></div>');
+        const put = () => { try { stageButtons(tls0, tl0, r); } catch (e) { const w0 = tls0.querySelector('[data-rt-gosi="wait"]'); if (w0) w0.outerHTML = '<i data-rt-gosi="done" hidden></i>'; } };
+        Promise.allSettled([loadGosi(), loadStage()]).then(put); } } catch (e) { /* 54차: 진행 단계 날짜 보충 · 단계별 고시문(두 링크 파일을 읽은 뒤) */ }
     try { // 49차: 현재 단계가 '사업시행자 지정'인데 단계 이력에 없고 조합설립이 있으면 → 이력 순서대로 조합설립 다음 줄에 표시(원자료는 그대로)
       if (/사업시행자\s*지정/.test(String(r.stage || '')) && !hist(r).some((h) => /사업시행자/.test(String(h.stage || ''))) && r.lastDate) { const tl0 = tb.querySelector('.timeline');
         const js = tl0 && !tl0.querySelector('[data-rt-sjd]') && [...tl0.querySelectorAll('.tl-step.done')].find((x) => /조합\s*설립/.test((x.querySelector('.tl-label') || {}).textContent || ''));
