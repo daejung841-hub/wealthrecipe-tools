@@ -2452,6 +2452,8 @@ window.SBJ_RENT16 = {"source":"seedComplexes.js@67d3760 (md5 65724010) rentalHou
   const SBJ1713 = { LS62: true };
   // 17-14 플래그: LS63 주변 추천 연식 = 1단계 준공 2~11년(2015~2024년식) → 2단계 2~15년 → 3곳 미만 빈 목록(필요 수·3곳 조건·반경 5km·34평·임대·계열·점수 그대로), 2단계로 넓히면 급지 칸에 안내. [단지 찾기] 추천 필터·신축 표시도 2년 기준. 끄면 17-13
   const SBJ1714 = { LS63: true };
+  // 17-16 플래그: LS64 저장 — 화면이 이어진 기록(불러오기·저장·임시저장 복원)과 구역이 다르면 [저장]도 새 기록으로(같은 구역이면 지금처럼 덮어쓰기). 구역 비교 = 구역 열쇠(source.listKey → 목록표 key → 그 밖의 출처 tool|key) + 구역명(공백 무시). 저장 형식·STORE 그대로. 끄면 17-14 동작
+  const SBJ1716 = { LS64: true };
   let LOC1712 = null;   // { key: 임장 구역 id, status: 'loading'|'found'|'none' } — 지금 화면의 임장 구역 위치 찾기 상태(저장하지 않음)
   const GI_COORDS_URL = 'data/gi_coords_v1.json';   // LS55: 비교단지 이름 검색(단지 찾기·이름 자동완성)에 좌표 파일에 없는 단지(경기·인천 등, 현재가 인덱스에만 있음)도 보여 줌 — 고르면 현재가 자동, 준공연도·세대수는 직접 입력
   if (SBJ177.LS50 && document.body) document.body.classList.add('l50');
@@ -3225,7 +3227,7 @@ window.SBJ_RENT16 = {"source":"seedComplexes.js@67d3760 (md5 65724010) rentalHou
     $('btnUndoImport').hidden = !store.hasPrevBackup();
     const days = store.lastBackupDays();
     $('backupAge').textContent = days === null ? '아직 백업 파일을 내보낸 적이 없어요. 폰을 바꾸거나 기록을 지우면 사라질 수 있으니 가끔 내보내 두세요.' : '마지막 백업 ' + (days === 0 ? '오늘' : days + '일 전');
-    $('saveState').textContent = state.id ? '불러온 기록을 고치는 중: 저장하면 덮어써요.' : '';
+    $('saveState').textContent = saveNote1716();
     $('sum6').textContent = items.length + '건 저장됨';
   }
   function adopt(r) {
@@ -3244,6 +3246,11 @@ window.SBJ_RENT16 = {"source":"seedComplexes.js@67d3760 (md5 65724010) rentalHou
     state = adopt(r); frozen = r.result || null; activeComp = 0; openMemo.clear(); openInfo.clear(); markClean();
     renderAll(false); checkPriceRefresh(); toast('불러왔어요.');
   }
+  // 17-16(LS64): 구역 열쇠 — 임장 구역의 listKey 와 목록표 key 는 같은 '시트|구역명|세부'라 같은 구역끼리 맞음
+  function zoneKey1716(t) { const s = t && t.source; if (!s) return ''; if (s.listKey) return String(s.listKey); return s.key ? (s.tool === 'redevlist' ? String(s.key) : s.tool + '|' + s.key) : ''; }
+  function sameZone1716(a, b) { const zn = (t) => String((t && t.zoneName) || '').replace(/\s+/g, '').toLowerCase(); return zoneKey1716(a) === zoneKey1716(b) && zn(a) === zn(b); }
+  function movedZone1716() { if (!SBJ1716.LS64 || !state.id) return false; const o = store.get(state.id); return !!o && !sameZone1716(o.target, state.target); }   // 이어진 기록이 지워졌으면 지금처럼(같은 id 로 다시 생김)
+  function saveNote1716() { return state.id && !movedZone1716() ? '불러온 기록을 고치는 중: 저장하면 덮어써요.' : ''; }
   function doSave(asNew) {
     const name = $('recName').value.trim();
     if (!name) { toast('저장 이름을 입력해 주세요.'); setOpen(6, true); $('recName').focus(); return; }
@@ -3251,12 +3258,13 @@ window.SBJ_RENT16 = {"source":"seedComplexes.js@67d3760 (md5 65724010) rentalHou
     if (state.options && state.options.example) { delete state.options.example; renderExampleNote(); }
     const res = frozen ? null : calc(state);
     const rec = JSON.parse(JSON.stringify(state));
-    if (asNew) { rec.id = null; delete rec.createdAt; }
+    const moved = !asNew && movedZone1716();   // 17-16: 다른 구역이면 [저장]도 새 기록
+    if (asNew || moved) { rec.id = null; delete rec.createdAt; }
     rec.ruleVersion = frozen ? frozen.ruleVersion : R.version;
     rec.result = frozen ? frozen : E.snapshot(res);
     const r = store.save(rec);
     if (!r.ok) { modal('저장하지 못했어요', [para(r.msg || '저장 오류')], [{ label: '확인' }]); return; }
-    state.id = r.id; state.createdAt = r.record.createdAt; markClean(); toast('저장했어요.'); renderList();
+    state.id = r.id; state.createdAt = r.record.createdAt; markClean(); toast(moved ? '새 구역이라 새 기록으로 저장했어요. 이전 기록은 그대로 있어요.' : '저장했어요.'); renderList();
   }
 
   // ───────── 파일 저장·공유 (임장 앱 send.js 의 download·sendFiles 방식을 복사 — 임장 파일은 그대로) ─────────
@@ -3413,6 +3421,7 @@ window.SBJ_RENT16 = {"source":"seedComplexes.js@67d3760 (md5 65724010) rentalHou
     { const pm = /^comps\.(\d+)\.price$/.exec(el.dataset.path); if (pm) onPriceEdited(Number(pm[1])); }
     if (el.dataset.path === 'target.pyeong') { const pv = normPy17(state); if (pv) { el.value = String(pv); toast('전용면적을 ' + pv + '㎡로 맞췄어요'); } refreshAutoAll(); }
     if (el.dataset.path === 'target.zoneName' && SBJ17.LS32) zacOnInput(el);   // 17단계: 구역명 자동완성
+    if (el.dataset.path === 'target.zoneName' && SBJ1716.LS64) { const sn = $('saveState'); if (sn) sn.textContent = saveNote1716(); }   // 17-16: 구역명을 직접 고치면 덮어쓰기 안내도 바로
     { const nm = /^comps\.(\d+)\.name$/.exec(el.dataset.path); if (nm && SBJ9.LS12) acOnInput(Number(nm[1]), el); }
     { const nm2 = /^comps\.(\d+)\.name$/.exec(el.dataset.path); if (nm2) renderPriceChips(); }
     { const m = /^comps\.(\d+)\.name$/.exec(el.dataset.path); const c = m && state.comps[Number(m[1])]; if (c && c.complexId && c.pickedName && el.value.trim() !== c.pickedName.trim()) { c.complexId = null; c.coord = null; c.pickedName = null; const cb = document.querySelector('[data-calc="' + m[1] + '"]'); if (cb) cb.remove(); if (c.현재가출처 && c.현재가출처.kind === 'auto') { c.현재가출처 = { kind: 'manual' }; renderPriceChips(); } } }
