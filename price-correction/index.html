@@ -157,6 +157,12 @@ a.btn{display:inline-flex;align-items:center;text-decoration:none;}
 body.l50 .jline[data-badge]{gap:8px 12px;margin:8px 0 10px;}
 body.l50 .jline[data-badge] > .badge:first-child{font-size:28px;font-weight:800;line-height:1.2;padding:10px 26px;border-radius:14px;letter-spacing:.02em;}
 .ratios{font-size:14px;margin:4px 0;}
+.cmp1715{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:6px;margin:8px 0 4px;}
+.cmp1715 .ct{background:var(--tile,#EDF2F4);border-radius:10px;padding:8px 10px;min-width:0;}
+.cmp1715 .ct span{display:block;font-size:13px;color:var(--ink-muted);word-break:keep-all;}
+.cmp1715 .ct b{display:block;font-size:24px;line-height:1.25;word-break:keep-all;}
+.cmp1715 .ct b.need{font-size:17px;color:var(--ink-muted);}
+.cmp1715 .cd{grid-column:1 / -1;text-align:center;font-size:15px;font-weight:700;border-radius:10px;padding:6px 8px;}
 .fsum{font-size:13.5px;color:var(--ink-muted);margin:4px 0;overflow-wrap:anywhere;}
 .notice{margin:6px 0;padding:7px 10px;border-radius:8px;font-size:13.5px;line-height:1.55;}
 .notice.info{background:var(--info-bg);}
@@ -1184,14 +1190,17 @@ window.SBJ_GUIDE = {
     // 판정 배지
     if (res && res.mode !== 'apt') {
       const colors = jv.kind === 'graded' ? C['g' + (jv.gradeIndex + 1)] : C.neutral;
-      const label = jv.kind === 'graded' ? jv.grade : (jv.text || '판정 없음');
+      let label = jv.kind === 'graded' ? jv.grade : (jv.text || '판정 없음'), why = '';
       const BB = M.bigBadge ? { fs: 60, h: 100, pad: 44, r: 22, ty: 18, sy: 30, step: 128 } : { fs: 36, h: 64, pad: 32, r: 32, ty: 12, sy: 16, step: 92 };   // 17-7(LS50): 큰 판정 배지
-      const bw = Math.min(inner, measure(label, BB.fs, true) + BB.pad * 2);
+      if (M.badgeFit && measure(label, BB.fs, true) + BB.pad * 2 > inner) { const m = /^(.*?)\s*\((.*)\)$/.exec(label); if (m) { label = m[1]; why = m[2]; } }   // 17-15(LS65): 배지가 카드보다 넓으면 괄호 안 이유는 배지 아래 줄로
+      const bfs = M.badgeFit ? (() => { let f = BB.fs; while (f > 28 && measure(label, f, true) + BB.pad * 2 > inner) f -= 2; return f; })() : BB.fs;
+      const bw = Math.min(inner, measure(label, bfs, true) + BB.pad * 2);
       shapes.push({ type: 'rect', x: P, y, w: bw, h: BB.h, fill: colors[0], r: BB.r });
-      texts.push({ text: label, x: P + BB.pad, y: y + BB.ty, size: BB.fs, bold: true, color: colors[1], align: 'left' });
+      texts.push({ text: label, x: P + BB.pad, y: y + BB.ty + Math.round((BB.fs - bfs) / 2), size: bfs, bold: true, color: colors[1], align: 'left' });
       const side = jv.kind === 'graded' ? judgeLabel(res.judgement, M.stage) + ' · 기준 B ' + res.judgement.B + '%' : (M.stage ? stageText(M.stage) : '');
       if (side) wrap(side, 28, false, inner - bw - 24, measure, 1).forEach((l) => texts.push({ text: l, x: P + bw + 24, y: y + BB.sy, size: 28, bold: false, color: C.muted, align: 'left' }));
       y += BB.step;
+      if (why) { wrap(why, 28, false, inner, measure, 2).forEach((l) => { T(l, 28, { color: C.muted, why15: true }); y += 42; }); y += 6; }
       if (M.gradeNote) { wrap(M.gradeNote, 28, true, inner, measure, 1).forEach((l) => { T(l, 28, { color: C.bad, bold: true, note17: true }); y += 42; }); y += 6; }   // 17단계(LS33): 사용자 수정·금액 직접 입력·편차 큼 한 줄
     }
     // 보정 합계·비교단지
@@ -2454,6 +2463,8 @@ window.SBJ_RENT16 = {"source":"seedComplexes.js@67d3760 (md5 65724010) rentalHou
   const SBJ1714 = { LS63: true };
   // 17-16 플래그: LS64 저장 — 화면이 이어진 기록(불러오기·저장·임시저장 복원)과 구역이 다르면 [저장]도 새 기록으로(같은 구역이면 지금처럼 덮어쓰기). 구역 비교 = 구역 열쇠(source.listKey → 목록표 key → 그 밖의 출처 tool|key) + 구역명(공백 무시). 저장 형식·STORE 그대로. 끄면 17-14 동작
   const SBJ1716 = { LS64: true };
+  // 17-15 플래그(시안): LS65 결과 이미지·결과 칸 가운데 [내 마진 비율] vs [적정 마진(급지·단계)] 나란히 + 차이 %p·판정(판정 색), 급지 미정이면 "급지 선택 필요". 판정 공식·숫자는 그대로(보여 주기만)
+  const SBJ1715 = { LS65: true };
   let LOC1712 = null;   // { key: 임장 구역 id, status: 'loading'|'found'|'none' } — 지금 화면의 임장 구역 위치 찾기 상태(저장하지 않음)
   const GI_COORDS_URL = 'data/gi_coords_v1.json';   // LS55: 비교단지 이름 검색(단지 찾기·이름 자동완성)에 좌표 파일에 없는 단지(경기·인천 등, 현재가 인덱스에만 있음)도 보여 줌 — 고르면 현재가 자동, 준공연도·세대수는 직접 입력
   if (SBJ177.LS50 && document.body) document.body.classList.add('l50');
@@ -3157,6 +3168,7 @@ window.SBJ_RENT16 = {"source":"seedComplexes.js@67d3760 (md5 65724010) rentalHou
     const p = res.primary;
     if (res.mode === 'redev') {
       top.push('<div class="four" data-four>' + kvPy17(kv('준공 시 적정가치', res.avg ? V.eok2(res.avg.value) : '—')) + kv('총매매가', p ? V.eok2(p.totalPrice) : '—') + kv('필요 투자금', p ? V.eok2(p.invest) : '—', p && isNeg(p.invest)) + kv('안전마진', p && E.isNum(p.totalMargin) ? V.eok2(p.totalMargin) : '—', p && isNeg(p.totalMargin)) + '</div>');
+      { const c = cmp1715(res); if (c) top.push('<div class="cmp1715" data-cmp1715="' + c.kind + '"><div class="ct"><span>내 마진 비율</span><b>' + esc(c.mine) + '</b></div><div class="ct"><span>적정 마진 ' + esc(c.fairSub) + '</span><b' + (c.kind === 'graded' ? '' : ' class="need"') + '>' + esc(c.fair) + '</b></div><div class="cd badge ' + (c.gi === null ? 'neutral' : 'g' + (c.gi + 1)) + '">' + esc(c.line) + '</div></div>'); }   // 17-15(LS65) 시안
       top.push(judgeHtml(res));
       if (SBJ180.LS53 && outsideSeoulZone(state.target) && !(SBJ179G.LS56 && (gradeNow(state).base || []).length)) top.push('<div class="gi-note180" data-gi-note>' + esc(G.g17.giResult) + '</div>');   // 17-8 추가
       if (p && E.isNum(p.totalMargin) && !(res.judgement && res.judgement.state === 'excluded')) top.push('<div class="ratios">매수가 대비 마진비율 <b>' + (E.isNum(p.ratioBuy) ? E.fmtPct(p.ratioBuy) : '계산할 수 없음') + '</b> · 실투자금 마진비율 <b>' + (E.isNum(p.ratioInvest) ? E.fmtPct(p.ratioInvest) : '계산할 수 없음') + '</b></div>');
@@ -3251,14 +3263,17 @@ window.SBJ_RENT16 = {"source":"seedComplexes.js@67d3760 (md5 65724010) rentalHou
   function sameZone1716(a, b) { const zn = (t) => String((t && t.zoneName) || '').replace(/\s+/g, '').toLowerCase(); return zoneKey1716(a) === zoneKey1716(b) && zn(a) === zn(b); }
   function movedZone1716() { if (!SBJ1716.LS64 || !state.id) return false; const o = store.get(state.id); return !!o && !sameZone1716(o.target, state.target); }   // 이어진 기록이 지워졌으면 지금처럼(같은 id 로 다시 생김)
   function saveNote1716() { return state.id && !movedZone1716() ? '불러온 기록을 고치는 중: 저장하면 덮어써요.' : ''; }
+  // 17-16 보완(LS64): 새 기록으로 저장할 때 저장 이름에 이전 구역명이 들어 있으면 새 구역명으로 바꿈("신길1 저장" → "상도15 저장"). 이전 구역명이 없거나 이미 새 구역명이 들어 있으면 그대로
+  function renamed1716(name, oldT, newT) { const oz = String((oldT && oldT.zoneName) || '').trim(), nz = String((newT && newT.zoneName) || '').trim(); return oz && nz && name.includes(oz) && !name.includes(nz) ? name.split(oz).join(nz).slice(0, 80) : name; }
   function doSave(asNew) {
-    const name = $('recName').value.trim();
+    let name = $('recName').value.trim();
     if (!name) { toast('저장 이름을 입력해 주세요.'); setOpen(6, true); $('recName').focus(); return; }
+    const moved = !asNew && movedZone1716();   // 17-16: 다른 구역이면 [저장]도 새 기록
+    if (moved) { const nm = renamed1716(name, (store.get(state.id) || {}).target, state.target); if (nm !== name) { name = nm; $('recName').value = nm; } }
     state.name = name;
     if (state.options && state.options.example) { delete state.options.example; renderExampleNote(); }
     const res = frozen ? null : calc(state);
     const rec = JSON.parse(JSON.stringify(state));
-    const moved = !asNew && movedZone1716();   // 17-16: 다른 구역이면 [저장]도 새 기록
     if (asNew || moved) { rec.id = null; delete rec.createdAt; }
     rec.ruleVersion = frozen ? frozen.ruleVersion : R.version;
     rec.result = frozen ? frozen : E.snapshot(res);
@@ -3383,9 +3398,41 @@ window.SBJ_RENT16 = {"source":"seedComplexes.js@67d3760 (md5 65724010) rentalHou
     if (z.dev && z.dev.dev) t.push(G.g17.cardDev + (j.check17 ? '(' + G.g17.checkBadge + ')' : ''));
     return [t.length ? '급지: ' + t.join(' · ') : '', cdt].filter(Boolean).join(' · ');
   }
+  // 17-15(LS65) 시안: 내 마진(실투자금 마진비율) vs 적정 마진(판정에 쓴 기준 B = 급지·단계) — 숫자는 판정 결과 그대로 읽기만
+  function cmp1715(res) {
+    if (!SBJ1715.LS65 || !res || res.mode !== 'redev' || !res.avg) return null;
+    const p = res.primary, j = res.judgement || {}, st = state.target.stage, stl = ({ early: '초기', mid: '중기', late: '후기' })[st] || '';
+    if (!st || !p || !E.isNum(p.ratioInvest) || j.state === 'pre' || j.state === 'noInvest') return null;
+    const mine = E.fmtPct(p.ratioInvest), z = j.zone, gn = z ? (z.label || z.name) : '';
+    if (j.state === 'graded') { const d = p.ratioInvest * 100 - j.B; const diff = (d >= 0 ? '+' : '−') + Math.abs(d).toFixed(1) + '%p'; return { kind: 'graded', mine, fair: j.B + '%', fairSub: '(' + [gn ? gn + ' 급지' : '', stl].filter(Boolean).join('·') + ')', diff, line: '차이 ' + diff + ' · 판정 ' + j.grade, gi: j.gradeIndex }; }
+    if (j.state === 'gradePending') return { kind: 'pending', mine, fair: '급지 선택 필요', fairSub: stl ? '(' + stl + ')' : '', diff: null, line: '판정 보류 · 급지를 정하면 적정 마진과 비교해요', gi: null };
+    if (j.state === 'excluded') return { kind: 'excluded', mine, fair: '투자 제외 급지', fairSub: '', diff: null, line: '투자 제외 급지(평균 6억 이하)', gi: null };
+    return null;
+  }
+  const CARD1715 = { tile: '#EDF2F4', ink: '#182430', muted: '#61707D', g: [['#FBEAEA', '#C63F3F'], ['#FBF1DF', '#A9720E'], ['#EAF1FD', '#2F6FE0'], ['#E5F5EC', '#1E8E5A']], neutral: ['#EDF1F4', '#61707D'] };   // VIEW CARD 색과 같은 값
+  function card1715(layout, c, measure) {   // 4칸(과 조합원분양가 줄) 바로 아래에 블록을 끼우고 그 아래를 내림
+    const W = layout.width, P = 64, inner = W - P * 2, tw = (inner - 24) / 2, BH = 190 + 16 + 72 + 32;
+    const tiles = layout.shapes.filter((s) => s.type === 'rect' && s.fill === CARD1715.tile); if (!tiles.length) return layout;
+    const last = tiles[tiles.length - 1], sub = layout.texts.find((t) => t.sub), y0 = sub ? sub.y + 48 : last.y + last.h + 32;
+    layout.texts.forEach((t) => { if (t.y >= y0) t.y += BH; }); layout.shapes.forEach((s) => { if (s.id !== 'bg' && s.id !== 'card' && s.y >= y0) s.y += BH; });
+    layout.shapes[0].h += BH; layout.shapes[1].h += BH; layout.height += BH;
+    const fit = (t, px, b, w) => { let s = t; while (s.length > 1 && measure(s, px, b) > w) s = s.slice(0, -1); return s; };
+    [['내 마진 비율', c.mine, ''], ['적정 마진', c.fair, c.fairSub]].forEach((t, i) => {
+      const x = P + i * (tw + 24), big = c.kind === 'graded' || i === 0;
+      layout.shapes.push({ type: 'rect', x, y: y0, w: tw, h: 190, fill: CARD1715.tile, r: 20, c1715: true });
+      layout.texts.push({ text: fit(t[0], 30, true, tw - 48), x: x + 24, y: y0 + 24, size: 30, bold: true, color: CARD1715.muted, align: 'left', c1715: true });
+      layout.texts.push({ text: fit(t[1], big ? 72 : 46, true, tw - 48), x: x + 24, y: y0 + (big ? 68 : 82), size: big ? 72 : 46, bold: true, color: big ? CARD1715.ink : CARD1715.muted, align: 'left', c1715: true });
+      if (t[2]) layout.texts.push({ text: fit(t[2], 26, false, tw - 48), x: x + 24, y: y0 + 150, size: 26, bold: false, color: CARD1715.muted, align: 'left', c1715: true });
+    });
+    const col = c.gi === null ? CARD1715.neutral : CARD1715.g[c.gi] || CARD1715.neutral;
+    layout.shapes.push({ type: 'rect', x: P, y: y0 + 206, w: inner, h: 72, fill: col[0], r: 20, c1715: true });
+    layout.texts.push({ text: fit(c.line, 36, true, inner - 48), x: W / 2, y: y0 + 223, size: 36, bold: true, color: col[1], align: 'center', c1715: true });
+    return layout;
+  }
   async function makeCard(mode) {
     const res = frozen ? frozenView(frozen) : calc(state);
-    const layout = V.buildCardLines(res, mode, { zoneName: state.target.zoneName, stage: state.target.stage, compNames: state.comps.map((c) => c.name), ruleVersion: frozen ? frozen.ruleVersion : R.version, measure: measureFn(), memberPrice: state.buy.memberPrice, appraisalRange: !!(state.buy.appraisal && state.buy.appraisal.type === 'range'), gradeNote: cardNote17(res), bigBadge: SBJ177.LS50, pyNote: res && res.mode === 'redev' ? pyNote17(state.target.pyeong) : '' });
+    let layout = V.buildCardLines(res, mode, { zoneName: state.target.zoneName, stage: state.target.stage, compNames: state.comps.map((c) => c.name), ruleVersion: frozen ? frozen.ruleVersion : R.version, measure: measureFn(), memberPrice: state.buy.memberPrice, appraisalRange: !!(state.buy.appraisal && state.buy.appraisal.type === 'range'), gradeNote: cardNote17(res), bigBadge: SBJ177.LS50, badgeFit: SBJ1715.LS65, pyNote: res && res.mode === 'redev' ? pyNote17(state.target.pyeong) : '' });
+    { const c = cmp1715(res); if (c) layout = card1715(layout, c, measureFn()); }   // 17-15(LS65) 시안
     const cv = drawCard(layout);
     const blob = await new Promise((ok, no) => cv.toBlob((b) => (b ? ok(b) : no(new Error('이미지를 만들지 못했어요'))), 'image/png'));
     const zone = (state.target.zoneName || '구역').replace(/[\\/:*?"<>|]/g, ' ').trim().slice(0, 30) || '구역';
