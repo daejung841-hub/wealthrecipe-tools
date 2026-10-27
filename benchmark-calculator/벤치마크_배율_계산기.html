@@ -3874,17 +3874,21 @@ function isShortHistoryL28(r){
 
 // ---- 묶음 L80(166단계): 시세 이력이 짧은 노후 칸의 저평가 배지 보류 ----
 // 165단계 권고 1: 준공 HOLD_BUILT_MAX_L80년 이하 + 매매 시세가 있는 달 HOLD_SALE_MONTHS_L80개월 미만인 칸은 이력이 짧아 저평가가 부풀려진다
-// (같은 단지도 이력을 자르면 저평가 18.7% → 25.7%). 2026-09 seed에서 이 범위의 저평가는 35칸. 화면 이름·색만 바꾼다(badgeViewL61).
+// (같은 단지도 이력을 자르면 저평가 18.7% → 25.7%). 화면 이름·색만 바꾼다(badgeViewL61).
+// 167단계: 화면에 "저평가 + 전세 동반 약세"로 보이는 칸(kind 'bothDown')도 보류. 2026-09 seed에서 저평가 35 + 동반 약세 14 = 49칸.
 const HOLD_BUILT_MAX_L80 = 2016, HOLD_SALE_MONTHS_L80 = 84;
-const HOLD_LABEL_L80 = '판단 보류 (시세 이력 부족)', HOLD_NOTE_L80 = '이력이 짧아 참고용';
+const HOLD_LABEL_L80 = '판단 보류';
+function holdNoteL80(ym){ return '시세 이력이 짧아' + (ym ? '(KB 제공 ' + Math.floor(ym / 100) + '년 ' + (ym % 100) + '월부터)' : '') + ' 저평가 판단을 보류합니다. 숫자는 참고용입니다.'; }
 function markHoldL80(comp, diag){
   if (!diag) return diag;
   let hold = false;
-  if (diag.badge === '저평가' && comp && comp.rows){
-    const e = seedEntryByName(comp.name);
-    hold = !!(e && e.builtYear != null && e.builtYear <= HOLD_BUILT_MAX_L80 && comp.rows.filter(r => r.saleMid != null).length < HOLD_SALE_MONTHS_L80);
+  let from = null;
+  if ((diag.badge === '저평가' || diag.kind === 'bothDown') && comp && comp.rows){
+    const e = seedEntryByName(comp.name), sale = comp.rows.filter(r => r.saleMid != null);
+    hold = !!(e && e.builtYear != null && e.builtYear <= HOLD_BUILT_MAX_L80 && sale.length < HOLD_SALE_MONTHS_L80);
+    if (hold && sale.length) from = Math.min.apply(null, sale.map(r => r.ym));
   }
-  diag.holdL80 = hold;
+  diag.holdL80 = hold; diag.holdFromL80 = from;
   return diag;
 }
 function isHoldL80(r){ return !!(BUNDLES.L80 && r && r.diag && r.diag.holdL80); }
@@ -9748,7 +9752,7 @@ function buildConclusionBox(r, opts){
   const priceHtml = BUNDLES.L15 ? conclusionPriceLineHtml(r, opts.label) : '';
   return '<div class="concl-box tone-'+p.tone+'">'+
     (BUNDLES.L15 ? ((badgeHtml || priceHtml) ? '<div class="concl-top">'+badgeHtml+priceHtml+'</div>' : '') : badgeHtml)+
-    (isHoldL80(r) ? '<div class="hold-note-l80">'+esc(HOLD_NOTE_L80)+'</div>' : '')+   // 묶음 L80
+    (isHoldL80(r) ? '<div class="hold-note-l80">'+esc(holdNoteL80(r.diag.holdFromL80))+'</div>' : '')+   // 묶음 L80
     fairBasisHtmlL75(r)+   // 묶음 L75
     '<div class="concl-main">'+p.mainHtml+'</div>'+
     subLineHtmlL61(r, opts.label)+   // 묶음 L61
