@@ -2465,6 +2465,10 @@ window.SBJ_RENT16 = {"source":"seedComplexes.js@67d3760 (md5 65724010) rentalHou
   const SBJ1716 = { LS64: true };
   // 17-15 플래그(시안): LS65 결과 이미지·결과 칸 가운데 [내 마진 비율] vs [적정 마진(급지·단계)] 나란히 + 차이 %p·판정(판정 색), 급지 미정이면 "급지 선택 필요". 판정 공식·숫자는 그대로(보여 주기만)
   const SBJ1715 = { LS65: true };
+  // 17-17 플래그: LS66 급지 근거 최소 단지 수 3 → 1(1곳이면 그 단지 시세 = 평균). 1~2곳이면 노란 안내·결과 이미지 "비교 N곳 기준", 안내 문구 "1곳 이상(여러 곳일수록 정확)". 판정 공식·엔진 그대로, 끄면 17-16 동작
+  const SBJ1717 = { LS66: true };
+  const PICK_MIN = SBJ1717.LS66 ? 1 : 3;   // 급지 근거로 고를 최소 단지 수
+  const FEW1717 = (n) => (SBJ1717.LS66 && n >= 1 && n <= 2 ? '비교 단지 ' + n + '곳 기준이에요. 입지가 비슷한 단지를 여러 곳 고를수록 결과가 더 정확해져요.' : '');
   let LOC1712 = null;   // { key: 임장 구역 id, status: 'loading'|'found'|'none' } — 지금 화면의 임장 구역 위치 찾기 상태(저장하지 않음)
   const GI_COORDS_URL = 'data/gi_coords_v1.json';   // LS55: 비교단지 이름 검색(단지 찾기·이름 자동완성)에 좌표 파일에 없는 단지(경기·인천 등, 현재가 인덱스에만 있음)도 보여 줌 — 고르면 현재가 자동, 준공연도·세대수는 직접 입력
   if (SBJ177.LS50 && document.body) document.body.classList.add('l50');
@@ -2492,6 +2496,10 @@ window.SBJ_RENT16 = {"source":"seedComplexes.js@67d3760 (md5 65724010) rentalHou
     const fix = (o) => { if (!o || typeof o !== 'object') return; Object.keys(o).forEach((k) => { const v = o[k]; if (typeof v === 'string') o[k] = v.split('(준공 3~15년)').join('(준공 2~11년, 부족하면 15년까지)'); else if (v && typeof v === 'object') fix(v); }); };
     fix(G.g17); fix(G.grade12); fix(G.welcome); fix(G.quick);
     const I = G.grade12 && G.grade12.info; if (I) { I.age3 = I.age1_1714; I.age2 = I.age2_1714; }
+  }
+  if (SBJ1717.LS66) {   // 17-17: 급지 근거 "3곳 이상·3~5곳" 문구를 1곳부터로(GUIDE 원문은 그대로, 비교단지 "1~3곳"은 그대로)
+    const fix = (o) => { if (!o || typeof o !== 'object') return; Object.keys(o).forEach((k) => { const v = o[k]; if (typeof v === 'string') o[k] = v.split('3곳 이상 골라 주세요').join('1곳 이상 골라 주세요(여러 곳일수록 정확)').split('3곳 이상 고르거나').join('1곳 이상 고르거나').split('3~5곳').join('1~5곳'); else if (v && typeof v === 'object') fix(v); }); };
+    fix(G.g17); fix(G.grade12); fix(G.welcome); fix(G.quick);
   }
   if (SBJ11.LS15 && G.grade12) { const g12 = G.grade12; G.quick.stagesTitle = g12.stagesTitle; G.quick.stages = g12.stages; G.welcome.notes = (G.welcome.notes || []).map((n) => (/판정은 진행단계별 기준/.test(n) ? g12.welcomeNote : n)); }
   const GR = window.SBJGrade11;
@@ -2569,7 +2577,7 @@ window.SBJ_RENT16 = {"source":"seedComplexes.js@67d3760 (md5 65724010) rentalHou
     if (SBJ175.LS42) {   // 17-5: 고른 단지 3곳 이상일 때만 급지(금액 입력이 있으면 금액)
       if (pk.amountOn && pk.amount !== null) { const a = GR.amountGrade(pk.amount, GRU()); if (a) return Object.assign({ base: base || [], pick: pk }, extra || {}, a); }
       const b6 = base || [], chosen = b6.filter((x) => pk.on.includes(x.id)).concat(addItems17(pk.add));
-      const ev = chosen.length >= 3 ? GR.evaluate(chosen, 'custom', GRU()) : null;
+      const ev = chosen.length >= PICK_MIN ? GR.evaluate(chosen, 'custom', GRU()) : null;   // 17-17(LS66): 1곳부터
       return ev ? Object.assign({ base: b6, pick: pk, picked: chosen }, extra || {}, ev) : Object.assign({ status: 'pending', source: 'pick', base: b6, pick: pk, picked: chosen }, extra || {});
     }
     if (pk.amountOn && pk.amount !== null) { const a = GR.amountGrade(pk.amount, GRU()); if (a) return Object.assign({ base: base || [], pick: pk }, extra || {}, a); }   // 금액 칸이 비어 있으면 고른 단지·추천 그대로
@@ -3169,6 +3177,7 @@ window.SBJ_RENT16 = {"source":"seedComplexes.js@67d3760 (md5 65724010) rentalHou
     if (res.mode === 'redev') {
       top.push('<div class="four" data-four>' + kvPy17(kv('준공 시 적정가치', res.avg ? V.eok2(res.avg.value) : '—')) + kv('총매매가', p ? V.eok2(p.totalPrice) : '—') + kv('필요 투자금', p ? V.eok2(p.invest) : '—', p && isNeg(p.invest)) + kv('안전마진', p && E.isNum(p.totalMargin) ? V.eok2(p.totalMargin) : '—', p && isNeg(p.totalMargin)) + '</div>');
       { const c = cmp1715(res); if (c) top.push('<div class="cmp1715" data-cmp1715="' + c.kind + '"><div class="ct"><span>내 마진 비율</span><b>' + esc(c.mine) + '</b></div><div class="ct"><span>적정 마진 ' + esc(c.fairSub) + '</span><b' + (c.kind === 'graded' ? '' : ' class="need"') + '>' + esc(c.fair) + '</b></div><div class="cd badge ' + (c.gi === null ? 'neutral' : 'g' + (c.gi + 1)) + '">' + esc(c.line) + '</div></div>'); }   // 17-15(LS65) 시안
+      { const n = few1717n(); if (n) top.push('<div class="notice warn few1717" data-few1717>' + esc(FEW1717(n)) + '</div>'); }   // 17-17(LS66): 1~2곳 노란 안내(결과 칸)
       top.push(judgeHtml(res));
       if (SBJ180.LS53 && outsideSeoulZone(state.target) && !(SBJ179G.LS56 && (gradeNow(state).base || []).length)) top.push('<div class="gi-note180" data-gi-note>' + esc(G.g17.giResult) + '</div>');   // 17-8 추가
       if (p && E.isNum(p.totalMargin) && !(res.judgement && res.judgement.state === 'excluded')) top.push('<div class="ratios">매수가 대비 마진비율 <b>' + (E.isNum(p.ratioBuy) ? E.fmtPct(p.ratioBuy) : '계산할 수 없음') + '</b> · 실투자금 마진비율 <b>' + (E.isNum(p.ratioInvest) ? E.fmtPct(p.ratioInvest) : '계산할 수 없음') + '</b></div>');
@@ -3410,8 +3419,10 @@ window.SBJ_RENT16 = {"source":"seedComplexes.js@67d3760 (md5 65724010) rentalHou
     return null;
   }
   const CARD1715 = { tile: '#EDF2F4', ink: '#182430', muted: '#61707D', g: [['#FBEAEA', '#C63F3F'], ['#FBF1DF', '#A9720E'], ['#EAF1FD', '#2F6FE0'], ['#E5F5EC', '#1E8E5A']], neutral: ['#EDF1F4', '#61707D'] };   // VIEW CARD 색과 같은 값
-  function card1715(layout, c, measure) {   // 4칸(과 조합원분양가 줄) 바로 아래에 블록을 끼우고 그 아래를 내림
-    const W = layout.width, P = 64, inner = W - P * 2, tw = (inner - 24) / 2, BH = 190 + 16 + 72 + 32;
+  // 17-17(LS66): 급지 근거로 고른 단지가 1~2곳이면 그 수(아니면 0) — 금액 입력·추천 기준·직접 급지는 0
+  function few1717n() { if (!SBJ1717.LS66 || state.mode !== 'redev') return 0; const g = gradeNow(state); if (!g || g.source !== 'custom' || !(g.status === 'ok' || g.status === 'excluded')) return 0; const n = (g.used || []).length; return n >= 1 && n <= 2 ? n : 0; }
+  function card1715(layout, c, measure, few) {   // 4칸(과 조합원분양가 줄) 바로 아래에 블록을 끼우고 그 아래를 내림
+    const W = layout.width, P = 64, inner = W - P * 2, tw = (inner - 24) / 2, BH = 190 + 16 + 72 + 32 + (few ? 40 : 0);   // 17-17: 1~2곳이면 아래 작은 줄 하나 더
     const tiles = layout.shapes.filter((s) => s.type === 'rect' && s.fill === CARD1715.tile); if (!tiles.length) return layout;
     const last = tiles[tiles.length - 1], sub = layout.texts.find((t) => t.sub), y0 = sub ? sub.y + 48 : last.y + last.h + 32;
     layout.texts.forEach((t) => { if (t.y >= y0) t.y += BH; }); layout.shapes.forEach((s) => { if (s.id !== 'bg' && s.id !== 'card' && s.y >= y0) s.y += BH; });
@@ -3427,12 +3438,13 @@ window.SBJ_RENT16 = {"source":"seedComplexes.js@67d3760 (md5 65724010) rentalHou
     const col = c.gi === null ? CARD1715.neutral : CARD1715.g[c.gi] || CARD1715.neutral;
     layout.shapes.push({ type: 'rect', x: P, y: y0 + 206, w: inner, h: 72, fill: col[0], r: 20, c1715: true });
     layout.texts.push({ text: fit(c.line, 36, true, inner - 48), x: W / 2, y: y0 + 223, size: 36, bold: true, color: col[1], align: 'center', c1715: true });
+    if (few) layout.texts.push({ text: '비교 ' + few + '곳 기준', x: W / 2, y: y0 + 290, size: 26, bold: false, color: CARD1715.muted, align: 'center', few1717: true });   // 17-17(LS66): 결과 이미지에 작게
     return layout;
   }
   async function makeCard(mode) {
     const res = frozen ? frozenView(frozen) : calc(state);
     let layout = V.buildCardLines(res, mode, { zoneName: state.target.zoneName, stage: state.target.stage, compNames: state.comps.map((c) => c.name), ruleVersion: frozen ? frozen.ruleVersion : R.version, measure: measureFn(), memberPrice: state.buy.memberPrice, appraisalRange: !!(state.buy.appraisal && state.buy.appraisal.type === 'range'), gradeNote: cardNote17(res), bigBadge: SBJ177.LS50, badgeFit: SBJ1715.LS65, pyNote: res && res.mode === 'redev' ? pyNote17(state.target.pyeong) : '' });
-    { const c = cmp1715(res); if (c) layout = card1715(layout, c, measureFn()); }   // 17-15(LS65) 시안
+    { const c = cmp1715(res); if (c) layout = card1715(layout, c, measureFn(), c.kind === 'graded' ? few1717n() : 0); }   // 17-15(LS65) · 17-17(LS66) 비교 N곳
     const cv = drawCard(layout);
     const blob = await new Promise((ok, no) => cv.toBlob((b) => (b ? ok(b) : no(new Error('이미지를 만들지 못했어요'))), 'image/png'));
     const zone = (state.target.zoneName || '구역').replace(/[\\/:*?"<>|]/g, ' ').trim().slice(0, 30) || '구역';
@@ -3854,7 +3866,8 @@ window.SBJ_RENT16 = {"source":"seedComplexes.js@67d3760 (md5 65724010) rentalHou
     if (G17.limitMsg) h += '<div class="gp-limit" data-gp-limit>' + esc(G17.limitMsg) + '</div>';
     h += '<div class="gp-row"><button type="button" class="btn small" data-gp-add aria-expanded="' + (G17.searchOpen ? 'true' : 'false') + '">' + esc(G.g17.add) + '</button>' +
       '<label class="chk"><input type="checkbox" data-gp-amount-toggle' + (pk.amountOn ? ' checked' : '') + '> ' + esc(G.g17.amountToggle) + '</label>' +
-      '<button type="button" class="btn small primary" data-gp-confirm' + (n >= 3 || (amt && ok) ? '' : ' disabled') + '>' + esc(G.g17.confirm) + '</button></div>';
+      '<button type="button" class="btn small primary" data-gp-confirm' + (n >= PICK_MIN || (amt && ok) ? '' : ' disabled') + '>' + esc(G.g17.confirm) + '</button></div>';
+    { const fw = ok && !amt && g.source === 'custom' ? FEW1717((g.used || []).length) : ''; if (fw) h += '<div class="notice warn few1717" data-few1717>' + esc(fw) + '</div>'; }   // 17-17(LS66): 1~2곳 노란 안내(선택 칸)
     if (G17.searchOpen) h += '<div class="gp-search" data-gp-search><input type="search" data-gp-q placeholder="' + esc(G.g17.addPh) + '" aria-label="비교대상 아파트 검색" value="' + esc(G17.q) + '"><div class="gp-res" data-gp-res></div></div>';
     if (pk.amountOn) { const a = pk.amount !== null ? GR.amountGrade(pk.amount, GRU()) : null; h += '<div class="gp-amt"><label for="gpAmount">' + esc(G.g17.amountLabel) + '</label><input id="gpAmount" class="txt" data-gp-amount inputmode="decimal" value="' + (pk.amount !== null ? esc(String(pk.amount)) : '') + '"><span data-gp-amount-grade>' + esc(a ? '→ 급지 ' + a.label : G.g17.amountNeed) + '</span></div>'; }
     if (SBJ1714.LS63 && G11.rec && G11.rec.base6 && G11.rec.base6.length && G11.rec.base6.ageStage === '2~15') h += '<div class="gp-hint" data-age-wide>' + esc((G.grade12 && G.grade12.info && G.grade12.info.age2_1714) || '') + '</div>';   // 17-14: 카드 6곳을 준공 15년까지 넓힌 구역
