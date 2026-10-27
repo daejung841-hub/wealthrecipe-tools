@@ -372,6 +372,7 @@ button.pyeong-chip{font:inherit;font-size:11.5px;}
 .pyeong-chip.switchable:hover b{color:var(--accent);}
 .pyeong-chip[disabled]{cursor:wait;opacity:.6;}
 .late-note-l79{margin-top:6px;}
+.hold-note-l80{margin:2px 0 4px;font-size:12.5px;color:var(--ink-muted);}
 #pyeongNotice:empty{display:none;}
 #pyeongNotice{display:flex;flex-direction:column;gap:6px;margin-bottom:12px;}
 .pyeong-notice{padding:8px 12px;border-radius:8px;font-size:12.5px;line-height:1.5;border:1px solid var(--border);background:var(--surface-alt);color:var(--ink);}
@@ -2093,6 +2094,7 @@ const L61_SUB_FIRST = '서울 선도단지 대비 매매는 많이 싸졌지만 
 const L61_SUB_LINE = '전세도 함께 약해져 있어요. 아래 설명을 확인해 보세요.';
 function badgeViewL61(diag){
   if (!diag) return { text: '', tone: 'neutral', sub: false };
+  if (BUNDLES.L80 && diag.holdL80) return { text: HOLD_LABEL_L80, tone: 'neutral', sub: false };   // 묶음 L80
   if (BUNDLES.L61 && diag.kind === 'bothDown') return { text: L61_MAIN_LABEL, tone: 'good', sub: true };
   return { text: diag.badge, tone: diag.tone, sub: false };
 }
@@ -2691,9 +2693,9 @@ function seoulHistoricalAvg(){
 // 라이브는 주소 플래그를 읽지 않으므로 이 기본값이 그대로 동작한다.
 const BUNDLES = { A:false, B:false, C:false, D1:false, D2:false, D3:false, D4:false, E1:true, E2:false, E3:true, F1:true, F2:true, F3:true, F4:true, F5:true, F6:true,
   H1:false, H2:true, H3:true, H4:true, H5:true, H6:true, H7:true,
-  L1:true, L2:true, L3:true, L4:true, L5:true, L6:false, L7:true, L8:true, L9:true, L10:true, L11:true, L12:true, L13:true, L14:true, L15:true, L16:true, L17:true, L18:true, L19:true, L19B:true, L20:true, L22:true, L23:true, L24:true, L25:true, L26:true, L27:!!window.POOL_EXCLUDE_ON, L31:!!window.NEW_NAME_RULE_ON, L32:true, L33:true, L34:true, L37:true, L28:true, L38:true, L40:true, L39:true, L41:true, L42:true, L43:true, L44:true, L45:true, L46:true, L47:true, L49:true, L48:true, L50:true, L51:true, L52:true, L53:true, L54:true, L55:true, L56:true, L57:true, L58:true, L59:true, L59_DND:true, L59_INFOCARD:true, L59_STATION:true, L59_SCHOOL:true, L59_FAVSEARCH:true, L60:true, L60_REL:false, L60_WHY:false, L60_NOTE:true, L61:true, L64:true, L64_LINK:true, L64_NEWBUILD:false, L65:true, L69:true, L70:true, L71:true, L74:true, L75:true, L76:true, L77:true, L78:true, L79:true, L35:true, L36:true, L30:true, L29:true, L29R:false, K1:false, K2:true, K4:false };
+  L1:true, L2:true, L3:true, L4:true, L5:true, L6:false, L7:true, L8:true, L9:true, L10:true, L11:true, L12:true, L13:true, L14:true, L15:true, L16:true, L17:true, L18:true, L19:true, L19B:true, L20:true, L22:true, L23:true, L24:true, L25:true, L26:true, L27:!!window.POOL_EXCLUDE_ON, L31:!!window.NEW_NAME_RULE_ON, L32:true, L33:true, L34:true, L37:true, L28:true, L38:true, L40:true, L39:true, L41:true, L42:true, L43:true, L44:true, L45:true, L46:true, L47:true, L49:true, L48:true, L50:true, L51:true, L52:true, L53:true, L54:true, L55:true, L56:true, L57:true, L58:true, L59:true, L59_DND:true, L59_INFOCARD:true, L59_STATION:true, L59_SCHOOL:true, L59_FAVSEARCH:true, L60:true, L60_REL:false, L60_WHY:false, L60_NOTE:true, L61:true, L64:true, L64_LINK:true, L64_NEWBUILD:false, L65:true, L69:true, L70:true, L71:true, L74:true, L75:true, L76:true, L77:true, L78:true, L79:true, L80:true, L35:true, L36:true, L30:true, L29:true, L29R:false, K1:false, K2:true, K4:false };
 const BUNDLE_GROUPS = { D:['D1','D2','D3','D4'], E:['E1','E2','E3'], F:['F1','F2','F3','F4','F5','F6'], H:['H1','H2','H3','H4','H5','H6','H7'],
-  L:['L1','L2','L3','L4','L5','L6','L7','L8','L9','L10','L11','L12','L13','L14','L15','L16','L17','L18','L19','L19B','L20','L22','L23','L24','L25','L26','L27','L29','L30','L31','L32','L33','L34','L37','L35','L36','L28','L38','L40','L39','L41','L42','L43','L44','L45','L46','L47','L49','L48','L50','L51','L52','L53','L54','L55','L56','L57','L58','L59','L60','L61','L64','L65','L69','L70','L71','L74','L75','L76','L77','L78','L79'], K:['K1','K2','K4'] };
+  L:['L1','L2','L3','L4','L5','L6','L7','L8','L9','L10','L11','L12','L13','L14','L15','L16','L17','L18','L19','L19B','L20','L22','L23','L24','L25','L26','L27','L29','L30','L31','L32','L33','L34','L37','L35','L36','L28','L38','L40','L39','L41','L42','L43','L44','L45','L46','L47','L49','L48','L50','L51','L52','L53','L54','L55','L56','L57','L58','L59','L60','L61','L64','L65','L69','L70','L71','L74','L75','L76','L77','L78','L79','L80'], K:['K1','K2','K4'] };
 // 묶음 L46(69단계): 그래프 점선 모양 통일 — 모든 점선을 "선도단지 대비 적정가" 선(FAIR_LINE_STYLE.borderDash)과 같은 긴 점선으로.
 // 촘촘한 점("좁쌀")·점-선 섞인 패턴을 없앤다. 새 점선은 항상 dashL46(예전 값)을 쓴다 — L46을 끄면 예전 값 그대로.
 const DASH_L46 = [5, 4];
@@ -3870,6 +3872,22 @@ function isShortHistoryL28(r){
   try { return !!(typeof BUNDLES !== 'undefined' && BUNDLES.L28 && r && r.diag && r.diag.shortL28); } catch (e) { return false; }
 }
 
+// ---- 묶음 L80(166단계): 시세 이력이 짧은 노후 칸의 저평가 배지 보류 ----
+// 165단계 권고 1: 준공 HOLD_BUILT_MAX_L80년 이하 + 매매 시세가 있는 달 HOLD_SALE_MONTHS_L80개월 미만인 칸은 이력이 짧아 저평가가 부풀려진다
+// (같은 단지도 이력을 자르면 저평가 18.7% → 25.7%). 2026-09 seed에서 이 범위의 저평가는 35칸. 화면 이름·색만 바꾼다(badgeViewL61).
+const HOLD_BUILT_MAX_L80 = 2016, HOLD_SALE_MONTHS_L80 = 84;
+const HOLD_LABEL_L80 = '판단 보류 (시세 이력 부족)', HOLD_NOTE_L80 = '이력이 짧아 참고용';
+function markHoldL80(comp, diag){
+  if (!diag) return diag;
+  let hold = false;
+  if (diag.badge === '저평가' && comp && comp.rows){
+    const e = seedEntryByName(comp.name);
+    hold = !!(e && e.builtYear != null && e.builtYear <= HOLD_BUILT_MAX_L80 && comp.rows.filter(r => r.saleMid != null).length < HOLD_SALE_MONTHS_L80);
+  }
+  diag.holdL80 = hold;
+  return diag;
+}
+function isHoldL80(r){ return !!(BUNDLES.L80 && r && r.diag && r.diag.holdL80); }
 function computeSlot(base, comp){
   if (!base.rows.length || !comp.rows.length) return { error:'데이터 없음' };
   const full = commonYms(base.rowMap, comp.rowMap);
@@ -4000,7 +4018,7 @@ function computeSlot(base, comp){
     factorNotStarted: factorProgress!=null && factorProgress < 0,
     curSalePrice: curSale ? curSale.c : null, curJeonsePrice: curJeonse ? curJeonse.c : null,
     curSaleYm: curSale ? curSale.ym : null, curJeonseYm: curJeonse ? curJeonse.ym : null,
-    diag, saleSeries, jeonseSeries,
+    diag: markHoldL80(comp, diag), saleSeries, jeonseSeries,   // 묶음 L80: 표시만(diag.badge 그대로)
     outsideSeoulL60: outsideSeoulForNoteL60(base, comp),   // 묶음 L60(L60_NOTE)
     // 묶음 L75: 적정가 근거(code 0 배율 기준·1 전고점·2 주변 단지·3 전세 상한), 배율 모델만의 적정가
     fairBasisL75: fairL75 ? Object.assign({}, fairL75, { l71Fair: curSale ? curSale.b * fairL75.l71Ratio / 100 : null }) : null
@@ -9730,6 +9748,7 @@ function buildConclusionBox(r, opts){
   const priceHtml = BUNDLES.L15 ? conclusionPriceLineHtml(r, opts.label) : '';
   return '<div class="concl-box tone-'+p.tone+'">'+
     (BUNDLES.L15 ? ((badgeHtml || priceHtml) ? '<div class="concl-top">'+badgeHtml+priceHtml+'</div>' : '') : badgeHtml)+
+    (isHoldL80(r) ? '<div class="hold-note-l80">'+esc(HOLD_NOTE_L80)+'</div>' : '')+   // 묶음 L80
     fairBasisHtmlL75(r)+   // 묶음 L75
     '<div class="concl-main">'+p.mainHtml+'</div>'+
     subLineHtmlL61(r, opts.label)+   // 묶음 L61
