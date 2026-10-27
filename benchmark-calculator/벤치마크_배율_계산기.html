@@ -371,6 +371,7 @@ button.pyeong-chip{font:inherit;font-size:11.5px;}
 .pyeong-chip.switchable:hover{border-color:var(--accent);color:var(--accent);}
 .pyeong-chip.switchable:hover b{color:var(--accent);}
 .pyeong-chip[disabled]{cursor:wait;opacity:.6;}
+.late-note-l79{margin-top:6px;}
 #pyeongNotice:empty{display:none;}
 #pyeongNotice{display:flex;flex-direction:column;gap:6px;margin-bottom:12px;}
 .pyeong-notice{padding:8px 12px;border-radius:8px;font-size:12.5px;line-height:1.5;border:1px solid var(--border);background:var(--surface-alt);color:var(--ink);}
@@ -2690,9 +2691,9 @@ function seoulHistoricalAvg(){
 // 라이브는 주소 플래그를 읽지 않으므로 이 기본값이 그대로 동작한다.
 const BUNDLES = { A:false, B:false, C:false, D1:false, D2:false, D3:false, D4:false, E1:true, E2:false, E3:true, F1:true, F2:true, F3:true, F4:true, F5:true, F6:true,
   H1:false, H2:true, H3:true, H4:true, H5:true, H6:true, H7:true,
-  L1:true, L2:true, L3:true, L4:true, L5:true, L6:false, L7:true, L8:true, L9:true, L10:true, L11:true, L12:true, L13:true, L14:true, L15:true, L16:true, L17:true, L18:true, L19:true, L19B:true, L20:true, L22:true, L23:true, L24:true, L25:true, L26:true, L27:!!window.POOL_EXCLUDE_ON, L31:!!window.NEW_NAME_RULE_ON, L32:true, L33:true, L34:true, L37:true, L28:true, L38:true, L40:true, L39:true, L41:true, L42:true, L43:true, L44:true, L45:true, L46:true, L47:true, L49:true, L48:true, L50:true, L51:true, L52:true, L53:true, L54:true, L55:true, L56:true, L57:true, L58:true, L59:true, L59_DND:true, L59_INFOCARD:true, L59_STATION:true, L59_SCHOOL:true, L59_FAVSEARCH:true, L60:true, L60_REL:false, L60_WHY:false, L60_NOTE:true, L61:true, L64:true, L64_LINK:true, L64_NEWBUILD:false, L65:true, L69:true, L70:true, L71:true, L74:true, L75:true, L76:true, L77:true, L78:true, L35:true, L36:true, L30:true, L29:true, L29R:false, K1:false, K2:true, K4:false };
+  L1:true, L2:true, L3:true, L4:true, L5:true, L6:false, L7:true, L8:true, L9:true, L10:true, L11:true, L12:true, L13:true, L14:true, L15:true, L16:true, L17:true, L18:true, L19:true, L19B:true, L20:true, L22:true, L23:true, L24:true, L25:true, L26:true, L27:!!window.POOL_EXCLUDE_ON, L31:!!window.NEW_NAME_RULE_ON, L32:true, L33:true, L34:true, L37:true, L28:true, L38:true, L40:true, L39:true, L41:true, L42:true, L43:true, L44:true, L45:true, L46:true, L47:true, L49:true, L48:true, L50:true, L51:true, L52:true, L53:true, L54:true, L55:true, L56:true, L57:true, L58:true, L59:true, L59_DND:true, L59_INFOCARD:true, L59_STATION:true, L59_SCHOOL:true, L59_FAVSEARCH:true, L60:true, L60_REL:false, L60_WHY:false, L60_NOTE:true, L61:true, L64:true, L64_LINK:true, L64_NEWBUILD:false, L65:true, L69:true, L70:true, L71:true, L74:true, L75:true, L76:true, L77:true, L78:true, L79:true, L35:true, L36:true, L30:true, L29:true, L29R:false, K1:false, K2:true, K4:false };
 const BUNDLE_GROUPS = { D:['D1','D2','D3','D4'], E:['E1','E2','E3'], F:['F1','F2','F3','F4','F5','F6'], H:['H1','H2','H3','H4','H5','H6','H7'],
-  L:['L1','L2','L3','L4','L5','L6','L7','L8','L9','L10','L11','L12','L13','L14','L15','L16','L17','L18','L19','L19B','L20','L22','L23','L24','L25','L26','L27','L29','L30','L31','L32','L33','L34','L37','L35','L36','L28','L38','L40','L39','L41','L42','L43','L44','L45','L46','L47','L49','L48','L50','L51','L52','L53','L54','L55','L56','L57','L58','L59','L60','L61','L64','L65','L69','L70','L71','L74','L75','L76','L77','L78'], K:['K1','K2','K4'] };
+  L:['L1','L2','L3','L4','L5','L6','L7','L8','L9','L10','L11','L12','L13','L14','L15','L16','L17','L18','L19','L19B','L20','L22','L23','L24','L25','L26','L27','L29','L30','L31','L32','L33','L34','L37','L35','L36','L28','L38','L40','L39','L41','L42','L43','L44','L45','L46','L47','L49','L48','L50','L51','L52','L53','L54','L55','L56','L57','L58','L59','L60','L61','L64','L65','L69','L70','L71','L74','L75','L76','L77','L78','L79'], K:['K1','K2','K4'] };
 // 묶음 L46(69단계): 그래프 점선 모양 통일 — 모든 점선을 "선도단지 대비 적정가" 선(FAIR_LINE_STYLE.borderDash)과 같은 긴 점선으로.
 // 촘촘한 점("좁쌀")·점-선 섞인 패턴을 없앤다. 새 점선은 항상 dashL46(예전 값)을 쓴다 — L46을 끄면 예전 값 그대로.
 const DASH_L46 = [5, 4];
@@ -7678,6 +7679,8 @@ function slotAreaL69(id, p){
   return Array.isArray(a) && a[1] > 0 ? a : null;
 }
 function slotAreaTextL69(id, p){ const a = slotAreaL69(id, p); return a ? (a[0] ? a[0] + '평형(전용 ' + a[1] + '㎡)' : '전용 ' + a[1] + '㎡') : ''; }
+// 묶음 L79(165단계): 면적만 나오던 칩(146 예외 25평 칸·"기타·기본")에도 그 타입 세대수를 붙인다(다른 칩처럼 "…세대")
+function chipUnitsL79(n){ return (BUNDLES.L79 && n > 0) ? ' ' + n + '세대' : ''; }
 function areaChipLabelL69(a){ return a[0] ? '<b>' + a[0] + '평형</b>(전용 ' + a[1] + '㎡)' : '<b>전용</b>' + a[1] + '㎡'; }
 // 쌍둥이·괴리·준거 카드의 상대 단지(34평 칸) 이름 뒤에 붙인다
 function areaTagHtmlL69(id, p){ const t = slotAreaTextL69(id, p === 25 ? 25 : 34); return t ? '<span class="slot-area-l69">' + esc(t) + '</span>' : ''; }
@@ -7978,7 +7981,7 @@ function pyeongChipsHtml(slot, target){
   if (has25){
     const a25 = slotAreaL69(ref.id, 25);   // 묶음 L69: 25평 칸 기준에 맞는 타입이 없어 가장 가까운 평형을 넣은 단지
     const tip = (a25 ? '25평 칸 기준(전용 56~62㎡)에 맞는 타입이 없어 가장 가까운 '+slotAreaTextL69(ref.id, 25)+' 시세를 넣었어요\n' : '') + (b ? '25평대(전용 '+fmtM2Range(b[1], b[2])+') 전체 '+b[0]+'세대\n' : '') + basis25Text;
-    const label = a25 ? areaChipLabelL69(a25) : '<b>25평</b>'+(b ? b[0]+'세대' : '');
+    const label = a25 ? areaChipLabelL69(a25) + chipUnitsL79(q[1] === 0 ? q[2] : 0) : '<b>25평</b>'+(b ? b[0]+'세대' : '');   // 묶음 L79: q[1]=0이면 q[2]가 그 타입 세대수
     if (cur === 25 && ref.pending && seed25FailedL43()) out.push('<button type="button" class="pyeong-chip current" data-pyeong-retry="1" title="25평 시세를 불러오지 못했어요. 누르면 다시 불러와요"><b>25평</b>다시 시도</button>');   // 묶음 L43(P10)
     else if (cur === 25 && ref.pending) out.push('<span class="pyeong-chip current" title="'+esc(tip)+'"><b>25평</b>불러오는 중…</span>');
     else if (cur === 25) out.push('<span class="pyeong-chip current" title="'+esc(tip)+'">'+label+'</span>');
@@ -7997,7 +8000,7 @@ function pyeongChipsHtml(slot, target){
     // 원래 seed 시세로 되돌릴 수 있다(2026-09-30). 이 칩으로 다른 평형으로 가지는 않는다.
     const tag = s === 25 ? '기본' : '기타';
     const a34 = slotAreaL69(ref.id, 34);   // 묶음 L69: KB 공급면적 평형 + 전용(공급면적이 없으면 전용만)
-    const label = a34 ? (a34[0] ? areaChipLabelL69(a34) : '<b>'+tag+'</b>전용 '+a34[1]+'㎡') : '<b>'+tag+'</b>'+Math.floor(x[0])+'㎡';
+    const label = (a34 ? (a34[0] ? areaChipLabelL69(a34) : '<b>'+tag+'</b>전용 '+a34[1]+'㎡') : '<b>'+tag+'</b>'+Math.floor(x[0])+'㎡') + chipUnitsL79(x[1]);   // 묶음 L79: x[1] = seed 시세 타입 세대수
     if (cur === null){
       const tip = seedBasisText + (s === 25 ? '\n(25평 칩을 누르면 25평 대표 타입 시세로 바뀝니다)' : '');
       out.push('<span class="pyeong-chip other current" title="'+esc(tip)+'">'+label+'</span>');
@@ -10761,6 +10764,27 @@ function updateSingleBenchmarkOverlayToggle(){
   btn.textContent = on ? '🏙️ 선도단지 표시 중 (끄기)' : '🏙️ 선도단지 표시';
   sel.value = state.singleBenchmarkOverlayGroup;
 }
+// ---- 묶음 L79(165단계): 시세 이력이 늦게 시작하는 칸 안내 ----
+// 164단계 기준과 같다: 준공 LATE_BUILT_MAX_L79년 이하 단지 중, 그 칸 시세 시작 연도가 max(준공 연도, KB 시세 첫해) + LATE_GAP_YEARS_L79 이상.
+// 2026-09 seed에서 164의 늦은시작 180칸(34평 116·25평 64)과 칸·시작월이 같다. 목록을 넣지 않고 시세에서 계산하므로 seed가 바뀌면 따라 바뀐다.
+const LATE_BUILT_MAX_L79 = 2016, LATE_KB_FIRST_YEAR_L79 = 2004, LATE_GAP_YEARS_L79 = 5;
+function lateStartYmL79(id, comp){
+  const e = id ? seedEntryById(id) : null;
+  if (!e || e.builtYear == null || e.builtYear > LATE_BUILT_MAX_L79 || !comp || !comp.rows || !comp.rows.length) return null;
+  const st = Math.min.apply(null, comp.rows.map(r => r.ym));
+  return Math.floor(st / 100) >= Math.max(e.builtYear, LATE_KB_FIRST_YEAR_L79) + LATE_GAP_YEARS_L79 ? st : null;
+}
+function lateStartTextL79(ym){ return 'KB 시세가 ' + Math.floor(ym / 100) + '년 ' + (ym % 100) + '월부터 제공되어, 적정가는 그 이후 기간만 반영합니다.'; }
+function syncLateNoteL79(target){
+  const area = document.getElementById('singleChartArea');
+  if (!area || !area.parentNode) return;
+  let el = document.getElementById('lateStartNoteL79');
+  const ref = BUNDLES.L79 ? currentSingleRecentRef() : null;
+  const ym = ref ? lateStartYmL79(ref.id, target) : null;
+  if (!ym){ if (el) el.remove(); return; }
+  if (!el){ el = document.createElement('div'); el.id = 'lateStartNoteL79'; el.className = 'common-range late-note-l79'; area.parentNode.insertBefore(el, area.nextSibling); }
+  el.textContent = lateStartTextL79(ym);
+}
 function renderSingleActiveChart(bench, target){
   const area = document.getElementById('singleChartArea');
   if (!area) return;
@@ -10781,6 +10805,7 @@ function renderSingleActiveChart(bench, target){
   updateSingleAxisSplitToggle();
   const fairNoteEl = document.getElementById('singleFairOutlookNote');
   if (fairNoteEl) fairNoteEl.innerHTML = '';
+  try { syncLateNoteL79(target); } catch (e) {}   // 묶음 L79
   if (charts.singleMainCanvas) destroyChart('singleMainCanvas');
   if (singleDragCleanup){ singleDragCleanup(); singleDragCleanup = null; }
 
