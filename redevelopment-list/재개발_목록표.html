@@ -2678,9 +2678,10 @@ const RT21 = {"meta":{"src":"목록표_연결_v3_4_pub.json · 목록표_시계�
   const isGong = (r) => !!r && (r.sheet === '공공재개발' || (r.sheet === '경기인천' && GI_TYPE[r.name + '|' + (r.sigungu || '')] === '공공'));
   // 44차: 강의 기준 사업성 — 일반분양비율(일반분양 ÷ 조합원) 50% 이상 좋음 · 30% 이상 보통 · 그 아래 낮음. 경기·인천도 같은 기준(따로 정한 기준 없음)
   const LECT = [[50, '좋음', 'rt-lg-g'], [30, '보통', 'rt-lg-m'], [-Infinity, '낮음', 'rt-lg-l']];
+  const BIZ_LINE = '조합원 대비 일반분양 비율 기준이에요. 실제 사업성은 종전자산 대비 종후자산(비례율)에 따라 달라요.';   // 74차: 사업성 배지 툴팁(표·카드·팝업 같은 줄)
   const ratioOf = (r) => { if (!r || r.noGen || r.suspect === true) return null; const m = /¦ratio=(-?[\d.]+)/.exec(String(r.grade || '')); const v = m ? parseFloat(m[1]) : NaN; return isNaN(v) ? null : v; };
   const lectOf = (r) => { const v = ratioOf(r); if (v == null) return null; const L = LECT.find(([b]) => v >= b), est = /¦est=1/.test(String(r.grade || ''));
-    return { lab: L[1], cls: L[2], tip: `사업성 ${L[1]} — 일반분양비율 ${est ? '약 ' + Math.round(v) : v}%${est || /¦genest=1/.test(String(r.grade || '')) ? '(추정치)' : ''}${prRow(r) ? '(' + PR_NOTE + ')' : ''}. 기준: 일반분양비율(일반분양 ÷ 조합원) 50% 이상 좋음 · 30% 이상 보통 · 30% 미만 낮음${bizNote(r) ? ' · ' + bizNote(r) : ''}` }; };   // 69차: 방배13 B안 설명
+    return { lab: L[1], cls: L[2], tip: `사업성 ${L[1]} — 일반분양비율 ${est ? '약 ' + Math.round(v) : v}%${est || /¦genest=1/.test(String(r.grade || '')) ? '(추정치)' : ''}${prRow(r) ? '(' + PR_NOTE + ')' : ''}. 기준: 일반분양비율(일반분양 ÷ 조합원) 50% 이상 좋음 · 30% 이상 보통 · 30% 미만 낮음${bizNote(r) ? ' · ' + bizNote(r) : ''}. ${BIZ_LINE}` }; };   // 69차: 방배13 B안 설명
   const lectBadge = (r) => { const L = lectOf(r); return L ? `<span class="rt-lg ${L.cls}" data-rt-lg="${L.lab}" tabindex="0" data-rt-tip="${esc(L.tip)}">${L.lab}</span>` : ''; };
   const uid = (r) => [r.sheet || '', r.name || '', r.subCode == null ? '' : String(r.subCode)].join('|');
   // 60차: 고시 근거 구역(g)·공공지원민간임대 매각 포함 구역(pr) — 빌드 때 master 출처로 채움
@@ -2942,7 +2943,7 @@ const RT21 = {"meta":{"src":"목록표_연결_v3_4_pub.json · 목록표_시계�
     const row = (k, v) => `<tr><td>${k}</td><td>${v}</td></tr>`;
     return '<table class="rt-tt">' + row('사업성', L ? `<span class="rt-tt-${L[1]}">${L[0]}</span>` : esc(label || '—')) + row('일반분양 비율', ratio == null ? '—' : (est ? '약 ' + Math.round(ratio) : ratio) + '%' + e(est || /¦genest=1/.test(g)))
       + row('대지지분', land == null ? '—' : land + '평' + e(landEst)) + row('조합원 수', n(union, '명') + e(union != null && unEst)) + row('일반분양 세대수', n(gen, '세대') + e(gen != null && genEst)) + '</table>'
-      + '<div class="rt-tt-n">일반분양 비율 50% 이상 좋음 · 30% 이상 보통 · 그 아래 낮음</div>';
+      + '<div class="rt-tt-n">일반분양 비율 50% 이상 좋음 · 30% 이상 보통 · 그 아래 낮음</div>' + `<div class="rt-tt-n">${BIZ_LINE}</div>`;
   }
   // 51차: 표는 미리 만들지 않음 — 구역 번호만 달아 두고(화면 배치를 읽지 않음) 마우스를 올리거나 누르는 순간 bizHtml로 만듦
   const bizMark = (el, r) => { if (!el || !r || el.dataset.rtBiz || el.hasAttribute('data-rt-x')) return; el.dataset.rtBiz = String(r.id); el.tabIndex = 0; };
@@ -3235,7 +3236,7 @@ const RT21 = {"meta":{"src":"목록표_연결_v3_4_pub.json · 목록표_시계�
   const townBiz = (name) => { const g = window.RT_GRP && window.RT_GRP(name); if (!g || g.ratio == null || isNaN(g.ratio)) return null; const v = +g.ratio; if (XCHK(v) && !townGosi(name)) return { x: true, v }; const L = LECT.find(([b0]) => v >= b0);
     const row = (k, x) => `<tr><td>${k}</td><td>${x}</td></tr>`, n = (x, u) => (x == null ? '—' : Number(x).toLocaleString('ko-KR') + u);
     const html = '<table class="rt-tt">' + row('사업성', `<span class="rt-tt-${L[2].slice(-1)}">${L[1]}</span>`) + row('일반분양 비율', (Math.round(v * 10) / 10) + '%') + row('대지지분', g.land ? esc(g.land) : '—') + row('조합원 수', n(g.own, '명')) + row('일반분양 세대수', n(g.gen, '세대')) + '</table>'
-      + '<div class="rt-tt-n">타운 전체(하위구역 합계) 기준 · 일반분양 비율 50% 이상 좋음 · 30% 이상 보통 · 그 아래 낮음</div>';
+      + '<div class="rt-tt-n">타운 전체(하위구역 합계) 기준 · 일반분양 비율 50% 이상 좋음 · 30% 이상 보통 · 그 아래 낮음</div>' + `<div class="rt-tt-n">${BIZ_LINE}</div>`;
     return { lab: L[1], cls: L[2], html, v }; };
   function decorateTown(){
     const gk = [...document.querySelectorAll('#thead th')].findIndex((th) => th.dataset.key === 'grade');
