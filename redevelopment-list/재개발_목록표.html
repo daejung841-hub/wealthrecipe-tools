@@ -2972,6 +2972,38 @@ const RT21 = {"meta":{"src":"목록표_연결_v3_4_pub.json · 목록표_시계�
   const gTip = (x, town) => [town ? '타운 고시' : '', x[0], x[1], x[4] ? '첨부: ' + x[4] : ''].filter(Boolean).join(' · ');   // 59차: 첨부 종류(HWP는 고시 상세 페이지에서 내려받음)
   // 67차 2부: 고시문 보관소(고시문_보관소.js — {구역키: {단계: {l, f, n, x}}}) — 보관소 PDF가 있으면 버튼이 보관소 주소를 열고, 원래 주소는 작은 '원문 사이트' 링크로 남김
   let aLoad = null;
+  // 76차: 상세 보기 '공사비·분양가·보정률·비례율' 칸(실거래-82) — 화면 표시만, 계산에 쓰지 않음
+  let cLoad = null;
+  const loadCost = () => cLoad || (cLoad = new Promise((ok, no) => { if (window.COST_INFO) return ok(); const s = document.createElement('script'); s.src = '공사비_분양가.js'; s.onload = () => ok(); s.onerror = () => { cLoad = null; no(); }; document.head.appendChild(s); }));
+  const CS_ITEMS = [['공사비', '공사비'], ['조합원분양가', '조합원분양가'], ['일반분양가', '일반분양가'], ['보정률', '공동주택 보정률'], ['비례율', '비례율']];
+  const CS_NOTE = '정비계획·기사 숫자는 발표 시점 기준이에요. 감정평가·분양신청·공사비 협상을 거치며 실제 값은 달라질 수 있어요.';
+  function costSec(tb, r){
+    if (tb.querySelector('#rtCost')) return;
+    const D = (window.COST_INFO || {})[uid(r)]; if (!D) return;
+    const secs = [...tb.querySelectorAll('.modal-section')], ip = tb.querySelector('.modal-section.interp'), kc = secs.find((x) => ((x.querySelector('h4') || {}).textContent || '').trim() === '핵심 수치');
+    const at = ip || kc; if (!at) return;
+    const dot = ' · ', ext = (u, t) => gA(u, esc(t) + ' ↗', 'rt-cs-a', '');
+    const srcH = (sc, d) => sc.k === '기사' ? `<span class="rt-cs-s">기사</span> ${esc(sc.m || '')}${d ? dot + esc(d) : ''}${dot}${ext(sc.u, '기사 보기')}`
+      : sc.a ? `<span class="rt-cs-s">공식</span> ` + gArch(sc.a, '고시문' + PDF_F, 'rt-sg-btn', '', 'c')
+      : sc.o ? `<span class="rt-cs-s">공식</span> ${ext(sc.o, '공식 원문')}`
+      : sc.u ? `<span class="rt-cs-s">정보공개서</span> ${ext(sc.u, '정보공개서')}` : '';
+    const val = (v, tip) => tip ? `<b class="rt-cs-v" tabindex="0" data-rt-tip="${esc(tip)}">${esc(v)}</b>` : `<b class="rt-cs-v">${esc(v)}</b>`;
+    const line = (it, x) => { const [v, tip, lab, t, d, b, sc, diff] = x, art = sc.k === '기사', p = [];
+      const per = /^세대당/.test(v) ? val(v, tip) : '3.3㎡당 ' + val(v, tip);
+      if (it === '공사비') { p.push(per, lab === '계약' ? '계약 기준' : lab); if (!art && d) p.push(esc(d)); if (b) p.push(esc(b)); }
+      else if (it === '조합원분양가' || it === '일반분양가') { p.push(per, esc(t)); if (!art && d) p.push(esc(d)); }
+      else if (it === '보정률') { p.push(val(v, ''), esc(t)); if (!art && d) p.push(esc(d)); }
+      else { p.push(val(v, ''), esc(lab)); if (!art && d) p.push(esc(d)); }
+      p.push(srcH(sc, art ? d : '')); if (diff) p.push('<span class="rt-cs-diff">자료마다 값이 달라요</span>');
+      return `<div class="rt-cs-l">${p.filter(Boolean).join(dot)}</div>`; };
+    const body = CS_ITEMS.map(([k, nm]) => `<div class="rt-cs-it"><div class="rt-cs-k">${nm}</div>${(D[k] || []).length ? D[k].map((x) => line(k, x)).join('') : '<div class="rt-cs-l rt-cs-none">자료 없음</div>'}</div>`).join('');
+    at.insertAdjacentHTML('afterend', `<div class="modal-section" id="rtCost"><h4>공사비·분양가·보정률·비례율</h4>${body}<div class="rt-cs-note">${CS_NOTE}</div></div>`);
+    if (!document.getElementById('rtCostCss')) { const st = document.createElement('style'); st.id = 'rtCostCss';
+      st.textContent = '#rtCost .rt-cs-it{margin:8px 0 0;}#rtCost .rt-cs-k{font-size:13px;font-weight:700;margin-bottom:2px;}#rtCost .rt-cs-l{font-size:12.5px;line-height:1.6;overflow-wrap:anywhere;}#rtCost .rt-cs-none{color:#8A949E;}'
+        + '#rtCost .rt-cs-v{font-weight:700;}#rtCost .rt-cs-v[data-rt-tip]{border-bottom:1px dotted currentColor;cursor:help;}#rtCost .rt-cs-s{display:inline-block;font-size:11px;font-weight:700;padding:0 6px;border-radius:999px;background:#EEF2F5;color:#3D4A56;}'
+        + '#rtCost a.rt-cs-a{color:var(--accent,#0E5C6B);font-weight:700;text-decoration:none;}#rtCost a.rt-cs-a:hover{text-decoration:underline;}#rtCost .rt-cs-diff{color:#B4621B;font-weight:700;}#rtCost .rt-cs-note{margin-top:10px;font-size:12px;line-height:1.55;color:#6B7785;}#rtCost .rt-sg-btn{margin-left:0;}';
+      document.head.appendChild(st); }
+  }
   const loadArch = () => aLoad || (aLoad = new Promise((ok, no) => { if (window.GOSI_ARCH) return ok(); const s = document.createElement('script'); s.src = '고시문_보관소.js'; s.onload = () => ok(); s.onerror = () => { aLoad = null; no(); }; document.head.appendChild(s); }));
   const ARCH_URL = 'https://daejung841-hub.github.io/wealthrecipe-gosi/';
   const PDF_F = '<span class="rt-gosi-f">PDF</span>';
@@ -3662,6 +3694,7 @@ const RT21 = {"meta":{"src":"목록표_연결_v3_4_pub.json · 목록표_시계�
       if (tls0 && !tls0.querySelector('[data-rt-gosi]')) { tls0.insertAdjacentHTML('beforeend', '<div class="rt-gosi-w" data-rt-gosi="wait" hidden></div>');
         const put = () => { try { rightsLine(tls0, tl0, r); } catch (e) { /* 59차 */ } try { speedSec(tls0, r); arrange(tb); } catch (e) { /* 66차 진행 속도 */ } try { stageButtons(tls0, tl0, r); } catch (e) { const w0 = tls0.querySelector('[data-rt-gosi="wait"]'); if (w0) w0.outerHTML = '<i data-rt-gosi="done" hidden></i>'; } };
         Promise.allSettled([loadGosi(), loadStage(), loadRights(), loadArch()]).then(put);   /* 67차: 고시문 보관소 */ } } catch (e) { /* 54차: 진행 단계 날짜 보충 · 단계별 고시문(두 링크 파일을 읽은 뒤) */ }
+    try { if (!tb.querySelector('#rtCost')) loadCost().then(() => { try { costSec(tb, r); } catch (e) { /* 76차 */ } }).catch(() => {}); } catch (e) { /* 76차: 공사비·분양가 칸은 없어도 팝업은 그대로 */ }
     try { // 49차: 현재 단계가 '사업시행자 지정'인데 단계 이력에 없고 조합설립이 있으면 → 이력 순서대로 조합설립 다음 줄에 표시(원자료는 그대로)
       if (/사업시행자\s*지정/.test(String(r.stage || '')) && !hist(r).some((h) => /사업시행자/.test(String(h.stage || ''))) && r.lastDate) { const tl0 = tb.querySelector('.timeline');
         const js = tl0 && !tl0.querySelector('[data-rt-sjd]') && [...tl0.querySelectorAll('.tl-step.done')].find((x) => /조합\s*설립/.test((x.querySelector('.tl-label') || {}).textContent || ''));
