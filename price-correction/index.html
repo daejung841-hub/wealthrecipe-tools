@@ -162,6 +162,13 @@ body.l50 .jline[data-badge] > .badge:first-child{font-size:28px;font-weight:800;
 .cmp1715 .ct span{display:block;font-size:13px;color:var(--ink-muted);word-break:keep-all;}
 .cmp1715 .ct b{display:block;font-size:24px;line-height:1.25;word-break:keep-all;}
 .cmp1715 .ct b.need{font-size:17px;color:var(--ink-muted);}
+.cmp1715 .ct small.f1718{display:block;font-size:12px;color:var(--ink-muted);word-break:keep-all;}
+.grade-line .gl-fair{margin-top:2px;font-size:13.5px;word-break:keep-all;}
+.grade-line .gl-fair b{font-size:14px;}
+.grade-line .fair1718d{margin-top:4px;font-size:12.5px;color:var(--ink-muted);}
+.grade-line .fair1718t{font-size:12.5px;}
+.grade-line .fair1718t tr.me td{font-weight:800;color:var(--ink);}
+.grade-line .fair1718t td.on{background:var(--tile,#EDF2F4);}
 .cmp1715 .cd{grid-column:1 / -1;text-align:center;font-size:15px;font-weight:700;border-radius:10px;padding:6px 8px;}
 .fsum{font-size:13.5px;color:var(--ink-muted);margin:4px 0;overflow-wrap:anywhere;}
 .notice{margin:6px 0;padding:7px 10px;border-radius:8px;font-size:13.5px;line-height:1.55;}
@@ -2303,6 +2310,7 @@ window.SBJ_RENT16 = {"source":"seedComplexes.js@67d3760 (md5 65724010) rentalHou
       <section class="card sec" id="secComps" data-sec="2">
         <div class="notice warn" id="compDev17" hidden data-comp-dev></div>
         <div class="gp-hint note45" id="compNote17" hidden data-note45></div>
+        <div class="notice warn few1718" id="few1718c" hidden data-few1718c></div>
         <button type="button" class="sec-head" data-toggle="2" aria-expanded="true"><span class="step">2</span><span class="ttl">비교단지</span><span class="sum" id="sum2"></span><span class="dot" id="dot2" hidden></span><span class="chev">▾</span></button>
         <div class="sec-body">
           <div class="guard25" id="guard25" hidden></div>
@@ -2469,6 +2477,10 @@ window.SBJ_RENT16 = {"source":"seedComplexes.js@67d3760 (md5 65724010) rentalHou
   const SBJ1717 = { LS66: true };
   const PICK_MIN = SBJ1717.LS66 ? 1 : 3;   // 급지 근거로 고를 최소 단지 수
   const FEW1717 = (n) => (SBJ1717.LS66 && n >= 1 && n <= 2 ? '비교 단지 ' + n + '곳 기준이에요. 입지가 비슷한 단지를 여러 곳 고를수록 결과가 더 정확해져요.' : '');
+  // 17-18 플래그: LS67 적정 마진 근거 상시 표시(급지 칸 아래 "적정 마진 375% = 초기 기준 300% × 중하 1.25" + ⓘ 급지별 표, 비교 블록·결과 이미지 적정 마진 아래 작은 줄) + 비교단지 보정 1~2곳 노란 안내·결과 이미지 개수. 판정 공식·엔진 그대로(보여 주기만), 끄면 17-17 동작
+  const SBJ1718 = { LS67: true };
+  const FEW1718C = (n) => (SBJ1718.LS67 && n >= 1 && n <= 2 ? '비교 단지 ' + n + '곳 기준이에요. 입지가 비슷한 단지를 여러 곳 고를수록 결과가 더 정확해져요.' : '');
+  const G1718 = { open: false };   // 급지별 적정 마진 표(ⓘ) 펼침
   let LOC1712 = null;   // { key: 임장 구역 id, status: 'loading'|'found'|'none' } — 지금 화면의 임장 구역 위치 찾기 상태(저장하지 않음)
   const GI_COORDS_URL = 'data/gi_coords_v1.json';   // LS55: 비교단지 이름 검색(단지 찾기·이름 자동완성)에 좌표 파일에 없는 단지(경기·인천 등, 현재가 인덱스에만 있음)도 보여 줌 — 고르면 현재가 자동, 준공연도·세대수는 직접 입력
   if (SBJ177.LS50 && document.body) document.body.classList.add('l50');
@@ -2746,6 +2758,41 @@ window.SBJ_RENT16 = {"source":"seedComplexes.js@67d3760 (md5 65724010) rentalHou
     if (outsideSeoulZone(state.target) || !base.length) h += '<div class="gp-hint" data-gp-outside>' + esc(G.g17.outsideHint) + '</div>';
     return h + '</div>';
   }
+  // 17-18(LS67): 적정 마진 근거 한 줄 — 판정과 같은 값(judgeBases[단계] = 단계 기준 × 급지 비율)
+  const mult1718 = (m) => Number(m).toFixed(2);
+  function fair1718(g) {
+    if (!SBJ1718.LS67 || state.mode !== 'redev' || !g || g.status === 'loading') return null;
+    const R = GR.SBJ_GRADE_RULES, st = STAGE_KO[state.target.stage] ? state.target.stage : null;
+    if (g.status === 'excluded') return { kind: 'excluded', text: '투자 제외 급지(평균 6억 이하)라 적정 마진을 정하지 않고 판정하지 않아요' };
+    if (g.status !== 'ok' || !E.isNum(g.mult)) return { kind: 'none', text: '급지를 정하면 적정 마진이 나와요' };
+    const lab = g.label || g.name;
+    if (!st) return { kind: 'noStage', lab, text: '진행단계를 정하면 적정 마진이 나와요' };
+    const B = GR.judgeBases(g.mult)[st];
+    return { kind: 'ok', lab, st, B, text: '적정 마진 ' + B + '% = ' + STAGE_KO[st] + ' 기준 ' + R.base[st] + '% × ' + lab + ' ' + mult1718(g.mult) };
+  }
+  function fairTable1718(lab) {
+    const R = GR.SBJ_GRADE_RULES, st = state.target.stage, K = ['early', 'mid', 'late'];
+    const rows = R.manual.map((n) => { const m = GR.manual(n).mult, b = GR.judgeBases(m), me = n === lab || (lab === '최하' && n === R.lowSub.label); return '<tr' + (me ? ' class="me" data-fair-me' : '') + '><td>' + esc(n) + '</td>' + K.map((k) => '<td' + (me && k === st ? ' class="on"' : '') + '>' + b[k] + '%</td>').join('') + '</tr>'; }).join('');
+    return '<div class="fair1718d" data-fair-detail><div>급지별 적정 마진(실투자금 마진비율이 이 값 이상이면 기준 충족) — 진행단계 기준(초기 ' + R.base.early + '% · 중기 ' + R.base.mid + '% · 후기 ' + R.base.late + '%) × 급지 비율</div>' +
+      '<div class="table-wrap"><table class="tbl fair1718t"><thead><tr><th>급지</th><th>초기</th><th>중기</th><th>후기</th></tr></thead><tbody>' + rows + '</tbody></table></div><div>평균 6억 이하는 투자 제외 급지라 판정하지 않아요.</div></div>';
+  }
+  function fairHtml1718(g) {
+    const f = fair1718(g); if (!f) return '';
+    return '<div class="gl-fair" data-fair1718="' + f.kind + '">' + (f.kind === 'ok' ? '<b>' + esc(f.text) + '</b>' : esc(f.text)) +
+      '<button type="button" class="gl-info" data-fair-info aria-label="급지별 적정 마진 표" aria-expanded="' + (G1718.open ? 'true' : 'false') + '">ⓘ</button></div>' + (G1718.open ? fairTable1718(f.lab || '') : '');
+  }
+  // 결과 칸·결과 이미지 적정 마진 아래 작은 줄 — 판정에 쓴 B·급지에서 다시 계산해 같을 때만
+  function fairShort1718(res) {
+    if (!SBJ1718.LS67 || !res || res.mode !== 'redev') return '';
+    const j = res.judgement || {}, z = j.zone, st = state.target.stage, R = GR.SBJ_GRADE_RULES;
+    if (j.state !== 'graded' || !z || !STAGE_KO[st] || !E.isNum(j.B)) return '';
+    const m = multOf1711(z); if (m === null || GR.judgeBases(m)[st] !== j.B) return '';
+    return STAGE_KO[st] + ' ' + R.base[st] + '% × ' + (z.label || z.name) + ' ' + mult1718(m);
+  }
+  // 비교단지 보정에 쓴 단지 수(1~2곳일 때만, 아니면 0)
+  // 결과 이미지 작은 줄: 끄면 17-17 그대로("비교 N곳 기준"), 켜면 급지 근거·비교단지 보정 개수를 나눠서
+  function cardFew1718(gN, cN) { if (!SBJ1718.LS67) return gN; const t = [gN ? '급지 근거 ' + gN + '곳' : '', cN ? '비교단지 보정 ' + cN + '곳' : ''].filter(Boolean); return t.length ? t.join(' · ') + ' 기준' : ''; }
+  function few1718c(res) { if (!SBJ1718.LS67 || !res || !res.avg || !Array.isArray(res.comps)) return 0; const n = res.comps.length; return n >= 1 && n <= 2 ? n : 0; }
   function renderGrade17(el, g, GT) {
     const GRR = GR.SBJ_GRADE_RULES, ok = g.status === 'ok' || g.status === 'excluded';
     let h = devHtml(g);
@@ -2753,6 +2800,7 @@ window.SBJ_RENT16 = {"source":"seedComplexes.js@67d3760 (md5 65724010) rentalHou
       const nDrop = (g.dropped || []).length, rate = gradeRateText(g);
       h += '<div class="gl-main">급지 <b>' + esc(g.source === 'manual' ? g.label : g.name) + '</b>' + (E.isNum(g.avgEok) ? ' · 평균 ' + gEok(g.avgEok) : '') + ' · ' + esc(gradeBasisText(g)) + (rate ? ' · <span data-grade-rate>' + esc(rate) + '</span>' : '') + (nDrop ? ' · 뺀 단지 ' + nDrop + '곳' : '') +
         '<button type="button" class="gl-info" data-grade-info aria-label="급지 설명" aria-expanded="' + (G11.open ? 'true' : 'false') + '">ⓘ</button>' + (g.near ? '<span class="gl-near" data-grade-near>' + esc(g.near) + '</span>' : '') + '</div>';
+      h += fairHtml1718(g);   // 17-18(LS67)
       if (kbDiffers(g)) h += '<div class="gl-kb" data-grade-kb>' + esc(GT.kbNote || '급지는 KB 시세 기준이에요(직접 넣은 값과 다를 수 있어요)') + '</div>';
       if (SBJ13.LS22 && g.basis === 'gu' && g.source === 'recommend') h += '<div class="gl-kb" data-grade-gu>' + esc(G.g13.guNote) + '</div>';
       if (SBJ13.LS19 && is25p(state.target.pyeong)) h += '<div class="gl-kb" data-grade-25>' + esc(G.g13.grade25) + '</div>';
@@ -2772,11 +2820,13 @@ window.SBJ_RENT16 = {"source":"seedComplexes.js@67d3760 (md5 65724010) rentalHou
       }
     } else {
       h += '<div class="gl-main" data-grade-none>급지 <b>정하지 못함</b> · ' + esc(SBJ175.LS42 ? G.g17.need3 : G.g17.checkMsg) + '</div>';
+      h += fairHtml1718(g);   // 17-18(LS67): "급지를 정하면 적정 마진이 나와요"
       if (outsideSeoulZone(state.target) && !(SBJ179G.LS56 && (g.base || []).length)) h += '<div class="hint" data-outside>' + esc(SBJ179G.LS56 ? G.g17.outsideGiShort : G.g17.outside) + '</div>';
     }
     h += rentBandHtml(g) + pickHtml17(g) + rentHtml(g);
     el.innerHTML = h;
     const ib = el.querySelector('[data-grade-info]'); if (ib) ib.onclick = () => { G11.open = !G11.open; renderGrade(); };
+    const fb = el.querySelector('[data-fair-info]'); if (fb) fb.onclick = () => { G1718.open = !G1718.open; renderGrade(); };
     bindRent(el); bindPick17(el, g);
     if (G17.popKey) setTimeout(maybeDevPopup17, 0);
   }
@@ -3176,7 +3226,7 @@ window.SBJ_RENT16 = {"source":"seedComplexes.js@67d3760 (md5 65724010) rentalHou
     const p = res.primary;
     if (res.mode === 'redev') {
       top.push('<div class="four" data-four>' + kvPy17(kv('준공 시 적정가치', res.avg ? V.eok2(res.avg.value) : '—')) + kv('총매매가', p ? V.eok2(p.totalPrice) : '—') + kv('필요 투자금', p ? V.eok2(p.invest) : '—', p && isNeg(p.invest)) + kv('안전마진', p && E.isNum(p.totalMargin) ? V.eok2(p.totalMargin) : '—', p && isNeg(p.totalMargin)) + '</div>');
-      { const c = cmp1715(res); if (c) top.push('<div class="cmp1715" data-cmp1715="' + c.kind + '"><div class="ct"><span>내 마진 비율</span><b>' + esc(c.mine) + '</b></div><div class="ct"><span>적정 마진 ' + esc(c.fairSub) + '</span><b' + (c.kind === 'graded' ? '' : ' class="need"') + '>' + esc(c.fair) + '</b></div><div class="cd badge ' + (c.gi === null ? 'neutral' : 'g' + (c.gi + 1)) + '">' + esc(c.line) + '</div></div>'); }   // 17-15(LS65) 시안
+      { const c = cmp1715(res); if (c) top.push('<div class="cmp1715" data-cmp1715="' + c.kind + '"><div class="ct"><span>내 마진 비율</span><b>' + esc(c.mine) + '</b></div><div class="ct"><span>적정 마진 ' + esc(c.fairSub) + '</span><b' + (c.kind === 'graded' ? '' : ' class="need"') + '>' + esc(c.fair) + '</b>' + (c.kind === 'graded' && fairShort1718(res) ? '<small class="f1718" data-fair1718s>' + esc(fairShort1718(res)) + '</small>' : '') + '</div><div class="cd badge ' + (c.gi === null ? 'neutral' : 'g' + (c.gi + 1)) + '">' + esc(c.line) + '</div></div>'); }   // 17-15(LS65) 시안
       { const n = few1717n(); if (n) top.push('<div class="notice warn few1717" data-few1717>' + esc(FEW1717(n)) + '</div>'); }   // 17-17(LS66): 1~2곳 노란 안내(결과 칸)
       top.push(judgeHtml(res));
       if (SBJ180.LS53 && outsideSeoulZone(state.target) && !(SBJ179G.LS56 && (gradeNow(state).base || []).length)) top.push('<div class="gi-note180" data-gi-note>' + esc(G.g17.giResult) + '</div>');   // 17-8 추가
@@ -3189,6 +3239,7 @@ window.SBJ_RENT16 = {"source":"seedComplexes.js@67d3760 (md5 65724010) rentalHou
       const parts = R.factors.map((fd) => { const v = c0.reduce((s, c) => s + c.pct[fd.key], 0) / c0.length; return Math.abs(v) > 1e-12 ? fd.label + ' ' + E.fmtRate(v) : null; }).filter(Boolean);
       top.push('<div class="fsum">요소별 보정' + (c0.length > 1 ? '(평균)' : '') + ': ' + esc(parts.length ? parts.join(' · ') : '없음') + ' → 합계 <b>' + esc(E.fmtRate(V.avgPct(res))) + '</b>' + (c0.length > 1 ? ' · 비교단지 ' + c0.length + '곳 평균' : '') + '</div>');
     }
+    { const n = few1718c(res); if (n) top.push('<div class="notice warn few1718" data-few1718>' + esc(FEW1718C(n)) + '</div>'); }   // 17-18(LS67): 비교단지 보정 1~2곳 노란 안내(결과 칸)
     $('resultTop').innerHTML = top.join('');
     // 상세(보정 내역표 = 최대 3자리)
     const out = [];
@@ -3421,8 +3472,9 @@ window.SBJ_RENT16 = {"source":"seedComplexes.js@67d3760 (md5 65724010) rentalHou
   const CARD1715 = { tile: '#EDF2F4', ink: '#182430', muted: '#61707D', g: [['#FBEAEA', '#C63F3F'], ['#FBF1DF', '#A9720E'], ['#EAF1FD', '#2F6FE0'], ['#E5F5EC', '#1E8E5A']], neutral: ['#EDF1F4', '#61707D'] };   // VIEW CARD 색과 같은 값
   // 17-17(LS66): 급지 근거로 고른 단지가 1~2곳이면 그 수(아니면 0) — 금액 입력·추천 기준·직접 급지는 0
   function few1717n() { if (!SBJ1717.LS66 || state.mode !== 'redev') return 0; const g = gradeNow(state); if (!g || g.source !== 'custom' || !(g.status === 'ok' || g.status === 'excluded')) return 0; const n = (g.used || []).length; return n >= 1 && n <= 2 ? n : 0; }
-  function card1715(layout, c, measure, few) {   // 4칸(과 조합원분양가 줄) 바로 아래에 블록을 끼우고 그 아래를 내림
-    const W = layout.width, P = 64, inner = W - P * 2, tw = (inner - 24) / 2, BH = 190 + 16 + 72 + 32 + (few ? 40 : 0);   // 17-17: 1~2곳이면 아래 작은 줄 하나 더
+  function card1715(layout, c, measure, few, fs) {   // 4칸(과 조합원분양가 줄) 바로 아래에 블록을 끼우고 그 아래를 내림
+    const fewT = typeof few === 'string' ? few : few ? '비교 ' + few + '곳 기준' : '', EX = fs ? 34 : 0;   // 17-18(LS67): few = 문구, fs = 적정 마진 아래 작은 줄(칸 높이 +34)
+    const W = layout.width, P = 64, inner = W - P * 2, tw = (inner - 24) / 2, BH = 190 + EX + 16 + 72 + 32 + (fewT ? 40 : 0);   // 17-17: 1~2곳이면 아래 작은 줄 하나 더
     const tiles = layout.shapes.filter((s) => s.type === 'rect' && s.fill === CARD1715.tile); if (!tiles.length) return layout;
     const last = tiles[tiles.length - 1], sub = layout.texts.find((t) => t.sub), y0 = sub ? sub.y + 48 : last.y + last.h + 32;
     layout.texts.forEach((t) => { if (t.y >= y0) t.y += BH; }); layout.shapes.forEach((s) => { if (s.id !== 'bg' && s.id !== 'card' && s.y >= y0) s.y += BH; });
@@ -3430,21 +3482,22 @@ window.SBJ_RENT16 = {"source":"seedComplexes.js@67d3760 (md5 65724010) rentalHou
     const fit = (t, px, b, w) => { let s = t; while (s.length > 1 && measure(s, px, b) > w) s = s.slice(0, -1); return s; };
     [['내 마진 비율', c.mine, ''], ['적정 마진', c.fair, c.fairSub]].forEach((t, i) => {
       const x = P + i * (tw + 24), big = c.kind === 'graded' || i === 0;
-      layout.shapes.push({ type: 'rect', x, y: y0, w: tw, h: 190, fill: CARD1715.tile, r: 20, c1715: true });
+      layout.shapes.push({ type: 'rect', x, y: y0, w: tw, h: 190 + EX, fill: CARD1715.tile, r: 20, c1715: true });
+      if (fs && i === 1) layout.texts.push({ text: fit(fs, 24, false, tw - 48), x: x + 24, y: y0 + 184, size: 24, bold: false, color: CARD1715.muted, align: 'left', c1715: true, fair1718: true });   // 17-18(LS67)
       layout.texts.push({ text: fit(t[0], 30, true, tw - 48), x: x + 24, y: y0 + 24, size: 30, bold: true, color: CARD1715.muted, align: 'left', c1715: true });
       layout.texts.push({ text: fit(t[1], big ? 72 : 46, true, tw - 48), x: x + 24, y: y0 + (big ? 68 : 82), size: big ? 72 : 46, bold: true, color: big ? CARD1715.ink : CARD1715.muted, align: 'left', c1715: true });
       if (t[2]) layout.texts.push({ text: fit(t[2], 26, false, tw - 48), x: x + 24, y: y0 + 150, size: 26, bold: false, color: CARD1715.muted, align: 'left', c1715: true });
     });
     const col = c.gi === null ? CARD1715.neutral : CARD1715.g[c.gi] || CARD1715.neutral;
-    layout.shapes.push({ type: 'rect', x: P, y: y0 + 206, w: inner, h: 72, fill: col[0], r: 20, c1715: true });
-    layout.texts.push({ text: fit(c.line, 36, true, inner - 48), x: W / 2, y: y0 + 223, size: 36, bold: true, color: col[1], align: 'center', c1715: true });
-    if (few) layout.texts.push({ text: '비교 ' + few + '곳 기준', x: W / 2, y: y0 + 290, size: 26, bold: false, color: CARD1715.muted, align: 'center', few1717: true });   // 17-17(LS66): 결과 이미지에 작게
+    layout.shapes.push({ type: 'rect', x: P, y: y0 + 206 + EX, w: inner, h: 72, fill: col[0], r: 20, c1715: true });
+    layout.texts.push({ text: fit(c.line, 36, true, inner - 48), x: W / 2, y: y0 + 223 + EX, size: 36, bold: true, color: col[1], align: 'center', c1715: true });
+    if (fewT) layout.texts.push({ text: fit(fewT, 26, false, inner - 48), x: W / 2, y: y0 + 290 + EX, size: 26, bold: false, color: CARD1715.muted, align: 'center', few1717: true });   // 17-17(LS66): 결과 이미지에 작게 · 17-18 급지 근거·보정 개수
     return layout;
   }
   async function makeCard(mode) {
     const res = frozen ? frozenView(frozen) : calc(state);
     let layout = V.buildCardLines(res, mode, { zoneName: state.target.zoneName, stage: state.target.stage, compNames: state.comps.map((c) => c.name), ruleVersion: frozen ? frozen.ruleVersion : R.version, measure: measureFn(), memberPrice: state.buy.memberPrice, appraisalRange: !!(state.buy.appraisal && state.buy.appraisal.type === 'range'), gradeNote: cardNote17(res), bigBadge: SBJ177.LS50, badgeFit: SBJ1715.LS65, pyNote: res && res.mode === 'redev' ? pyNote17(state.target.pyeong) : '' });
-    { const c = cmp1715(res); if (c) layout = card1715(layout, c, measureFn(), c.kind === 'graded' ? few1717n() : 0); }   // 17-15(LS65) · 17-17(LS66) 비교 N곳
+    { const c = cmp1715(res); if (c) layout = card1715(layout, c, measureFn(), cardFew1718(c.kind === 'graded' ? few1717n() : 0, few1718c(res)), c.kind === 'graded' ? fairShort1718(res) : ''); }   // 17-15(LS65) · 17-17(LS66) 비교 N곳 · 17-18(LS67)
     const cv = drawCard(layout);
     const blob = await new Promise((ok, no) => cv.toBlob((b) => (b ? ok(b) : no(new Error('이미지를 만들지 못했어요'))), 'image/png'));
     const zone = (state.target.zoneName || '구역').replace(/[\\/:*?"<>|]/g, ' ').trim().slice(0, 30) || '구역';
@@ -3908,6 +3961,7 @@ window.SBJ_RENT16 = {"source":"seedComplexes.js@67d3760 (md5 65724010) rentalHou
     const d = compDev17();
     if (d && d.dev) { el.hidden = false; el.textContent = SBJ175.LS44 ? fmtDev17(G.g17.pickBand, d) : '비교단지 사이 시세 차이가 커요(최저 ' + gEok(d.min / 10000) + ' ~ 최고 ' + gEok(d.max / 10000) + ', ' + d.ratio.toFixed(1) + '배)'; } else { el.hidden = true; el.textContent = ''; }
     const nt = $('compNote17'); if (nt) { nt.hidden = !SBJ175.LS45; nt.textContent = SBJ175.LS45 ? G.g17.note45 : ''; }   // 17-5(LS45)
+    const fw = $('few1718c'); if (fw) { const n = few1718c(lastResult); fw.hidden = !n; fw.textContent = FEW1718C(n); }   // 17-18(LS67): 비교단지 칸 노란 안내
     if (G17.compArm) setTimeout(compDevPopup17, 0);
   }
   function compDevPopup17() {
