@@ -2980,6 +2980,7 @@ const RT21 = {"meta":{"src":"목록표_연결_v3_4_pub.json · 목록표_시계�
   function costSec(tb, r){
     if (tb.querySelector('#rtCost')) return;
     const D = (window.COST_INFO || {})[uid(r)]; if (!D) return;
+    const H = (() => { try { const a = r.stageHistory ? JSON.parse(r.stageHistory) : []; return Array.isArray(a) ? a : []; } catch (e) { return []; } })();   // 78차: 단계 이력(시점 날짜)
     const secs = [...tb.querySelectorAll('.modal-section')], ip = tb.querySelector('.modal-section.interp'), kc = secs.find((x) => ((x.querySelector('h4') || {}).textContent || '').trim() === '핵심 수치');
     const at = ip || kc; if (!at) return;
     const dot = ' · ', ext = (u, t) => gA(u, esc(t) + ' ↗', 'rt-cs-a', '');
@@ -2987,21 +2988,21 @@ const RT21 = {"meta":{"src":"목록표_연결_v3_4_pub.json · 목록표_시계�
       : sc.a ? `<span class="rt-cs-s">공식</span> ` + gArch(sc.a, '고시문' + PDF_F, 'rt-sg-btn', '', 'c')
       : sc.o ? `<span class="rt-cs-s">공식</span> ${ext(sc.o, '공식 원문')}`
       : sc.u ? `<span class="rt-cs-s">정보공개서</span> ${ext(sc.u, '정보공개서')}` : '';
-    const val = (v, tip) => tip ? `<b class="rt-cs-v" tabindex="0" data-rt-tip="${esc(tip)}">${esc(v)}</b>` : `<b class="rt-cs-v">${esc(v)}</b>`;
-    const line = (it, x) => { const [v, tip, lab, t, d, b, sc, diff] = x, art = sc.k === '기사', p = [];
-      const per = /^세대당/.test(v) ? val(v, tip) : '3.3㎡당 ' + val(v, tip);
-      if (it === '공사비') { p.push(per, lab === '계약' ? '계약 기준' : lab); if (!art && d) p.push(esc(d)); if (b) p.push(esc(b)); }
-      else if (it === '조합원분양가' || it === '일반분양가') { p.push(per, esc(t)); if (!art && d) p.push(esc(d)); }
-      else if (it === '보정률') { p.push(val(v, ''), esc(t)); if (!art && d) p.push(esc(d)); }
-      else { p.push(val(v, ''), esc(lab)); if (!art && d) p.push(esc(d)); }
-      p.push(srcH(sc, art ? d : '')); if (diff) p.push('<span class="rt-cs-diff">자료마다 값이 달라요</span>');
-      return `<div class="rt-cs-l">${p.filter(Boolean).join(dot)}</div>`; };
-    const body = CS_ITEMS.map(([k, nm]) => `<div class="rt-cs-it"><div class="rt-cs-k">${nm}</div>${(D[k] || []).length ? D[k].map((x) => line(k, x)).join('') : '<div class="rt-cs-l rt-cs-none">자료 없음</div>'}</div>`).join('');
+    const PY_TIP = '3.3㎡당 가격에 공급면적(34평=전용 84㎡, 25평=전용 59㎡)을 곱해 계산한 대략값이에요. 실제 평형별 분양가와 다를 수 있어요.';
+    const none = (t) => `<div class="rt-cs-l rt-cs-none">${t}</div>`;
+    const tipT = (t, tip) => tip === 'N' ? `<span class="rt-cs-none">${esc(t)}</span>` : tip ? `<span class="rt-cs-when" tabindex="0" data-rt-tip="${esc(tip)}">${esc(t)}</span>` : esc(t);
+    const L = (x) => { const [pre, v, vt, lab, lt, ex, py, ss] = x, p = [(pre ? esc(pre) + ' ' : '') + (vt ? `<b class="rt-cs-v" tabindex="0" data-rt-tip="${esc(vt)}">${esc(v)}</b>` : `<b class="rt-cs-v">${esc(v)}</b>`)];
+      if (lab) p.push(tipT(lab, lt)); if (ex) p.push(esc(ex)); (ss || []).forEach((sc) => p.push(srcH(sc, sc.d || '')));
+      return `<div class="rt-cs-l">${p.filter(Boolean).join(dot)}</div>` + (py ? `<div class="rt-cs-py" tabindex="0" data-rt-tip="${esc(PY_TIP)}">${esc(py)}</div>` : ''); };
+    const blk = (nm, ls, emp) => `<div class="rt-cs-it"><div class="rt-cs-k">${nm}</div>${(ls || []).length ? ls.map(L).join('') : none(emp)}</div>`;
+    const G = D.g, GI = [['조합원분양가', '조합원분양가'], ['일반분양가', '일반분양가'], ['비례율', '비례율']];
+    const body = (G ? `<div class="rt-cs-gh">${tipT(G[0], G[1])}</div>` + GI.map(([k, nm]) => blk(nm, G[2][k], '이 시점 자료 없음')).join('') : GI.map(([k, nm]) => blk(nm, [], '자료 없음')).join(''))
+      + blk('공사비', D.c, '자료 없음') + blk('공동주택 보정률', D.b, '자료 없음');
     at.insertAdjacentHTML('afterend', `<div class="modal-section" id="rtCost"><h4>공사비·분양가·보정률·비례율</h4>${body}<div class="rt-cs-note">${CS_NOTE}</div></div>`);
     if (!document.getElementById('rtCostCss')) { const st = document.createElement('style'); st.id = 'rtCostCss';
       st.textContent = '#rtCost .rt-cs-it{margin:8px 0 0;}#rtCost .rt-cs-k{font-size:13px;font-weight:700;margin-bottom:2px;}#rtCost .rt-cs-l{font-size:12.5px;line-height:1.6;overflow-wrap:anywhere;}#rtCost .rt-cs-none{color:#8A949E;}'
         + '#rtCost .rt-cs-v{font-weight:700;}#rtCost .rt-cs-v[data-rt-tip]{border-bottom:1px dotted currentColor;cursor:help;}#rtCost .rt-cs-s{display:inline-block;font-size:11px;font-weight:700;padding:0 6px;border-radius:999px;background:#EEF2F5;color:#3D4A56;}'
-        + '#rtCost a.rt-cs-a{color:var(--accent,#0E5C6B);font-weight:700;text-decoration:none;}#rtCost a.rt-cs-a:hover{text-decoration:underline;}#rtCost .rt-cs-diff{color:#B4621B;font-weight:700;}#rtCost .rt-cs-note{margin-top:10px;font-size:12px;line-height:1.55;color:#6B7785;}#rtCost .rt-sg-btn{margin-left:0;}';
+        + '#rtCost a.rt-cs-a{color:var(--accent,#0E5C6B);font-weight:700;text-decoration:none;}#rtCost a.rt-cs-a:hover{text-decoration:underline;}#rtCost .rt-cs-diff{color:#B4621B;font-weight:700;}#rtCost .rt-cs-py{font-size:11.5px;line-height:1.5;color:#6B7785;margin:-1px 0 3px;width:fit-content;cursor:help;}#rtCost .rt-cs-when{border-bottom:1px dotted currentColor;cursor:help;}#rtCost .rt-cs-gh{margin:8px 0 2px;padding:4px 8px;border-radius:6px;background:#F1F5F8;font-size:12.5px;font-weight:700;color:#2F3B46;width:fit-content;max-width:100%;overflow-wrap:anywhere;}#rtCost .rt-cs-note{margin-top:10px;font-size:12px;line-height:1.55;color:#6B7785;}#rtCost .rt-sg-btn{margin-left:0;}';
       document.head.appendChild(st); }
   }
   const loadArch = () => aLoad || (aLoad = new Promise((ok, no) => { if (window.GOSI_ARCH) return ok(); const s = document.createElement('script'); s.src = '고시문_보관소.js'; s.onload = () => ok(); s.onerror = () => { aLoad = null; no(); }; document.head.appendChild(s); }));
