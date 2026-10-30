@@ -920,6 +920,16 @@ body.l44 .tier-seg.current.tier-low, body.l44 .tier-seg.current.tier-veryLow{box
 .div-card-l64 .div-why-l64{margin-bottom:4px;}
 .div-tag-l64{background:none;font-family:inherit;cursor:pointer;display:inline-block;margin-right:4px;padding:0 5px;border:1px solid var(--border-strong);border-radius:4px;font-size:10.5px;font-weight:600;line-height:16px;color:var(--ink-muted);vertical-align:1px;white-space:nowrap;}
 .div-tag-l64[aria-expanded="true"]{border-color:var(--accent);color:var(--accent);}
+/* 묶음 L81: 괴리 탭 방향 버튼·묶음 제목·카드 방향 표시(색은 배지 규칙 — 고평가 bad, 저평가 good) */
+.div-dir-row-l81{display:flex;gap:6px;flex-wrap:wrap;}
+.div-dir-btn-l81{flex:1 1 0;min-width:0;padding:6px 4px;border:1px solid var(--border);border-radius:8px;background:var(--surface);color:var(--ink-muted);font:inherit;font-size:12.5px;font-weight:700;cursor:pointer;white-space:nowrap;}
+.div-dir-btn-l81[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft);color:var(--accent);}
+:root[data-theme="dark"] .div-dir-btn-l81[aria-pressed="true"]{color:var(--ink);}
+.div-group-head-l81{font-size:13.5px;font-weight:700;line-height:1.45;margin:4px 0 -2px;overflow-wrap:anywhere;}
+.div-none-l81{font-size:12.5px;color:var(--ink-muted);}
+.div-dir-l81{display:inline-block;margin-right:4px;padding:0 5px;border-radius:4px;font-size:10.5px;font-weight:700;line-height:16px;vertical-align:1px;white-space:nowrap;}
+.div-dir-l81.up{background:var(--bad-bg);color:var(--bad);}
+.div-dir-l81.down{background:var(--good-bg);color:var(--good);}
 .div-tagnote-l64{font-size:11.5px;color:var(--ink-muted);line-height:1.5;margin:-2px 0 6px;}
 .twin-out-l64{font-size:11.5px;color:var(--ink-muted);line-height:1.5;margin:-2px 0 6px;overflow-wrap:anywhere;}
 /* 항목(2026-09-22 세션, "쌍둥이 단지 즐겨찾기") */
@@ -2693,9 +2703,9 @@ function seoulHistoricalAvg(){
 // 라이브는 주소 플래그를 읽지 않으므로 이 기본값이 그대로 동작한다.
 const BUNDLES = { A:false, B:false, C:false, D1:false, D2:false, D3:false, D4:false, E1:true, E2:false, E3:true, F1:true, F2:true, F3:true, F4:true, F5:true, F6:true,
   H1:false, H2:true, H3:true, H4:true, H5:true, H6:true, H7:true,
-  L1:true, L2:true, L3:true, L4:true, L5:true, L6:false, L7:true, L8:true, L9:true, L10:true, L11:true, L12:true, L13:true, L14:true, L15:true, L16:true, L17:true, L18:true, L19:true, L19B:true, L20:true, L22:true, L23:true, L24:true, L25:true, L26:true, L27:!!window.POOL_EXCLUDE_ON, L31:!!window.NEW_NAME_RULE_ON, L32:true, L33:true, L34:true, L37:true, L28:true, L38:true, L40:true, L39:true, L41:true, L42:true, L43:true, L44:true, L45:true, L46:true, L47:true, L49:true, L48:true, L50:true, L51:true, L52:true, L53:true, L54:true, L55:true, L56:true, L57:true, L58:true, L59:true, L59_DND:true, L59_INFOCARD:true, L59_STATION:true, L59_SCHOOL:true, L59_FAVSEARCH:true, L60:true, L60_REL:false, L60_WHY:false, L60_NOTE:true, L61:true, L64:true, L64_LINK:true, L64_NEWBUILD:false, L65:true, L69:true, L70:true, L71:true, L74:true, L75:true, L76:true, L77:true, L78:true, L79:true, L80:true, L35:true, L36:true, L30:true, L29:true, L29R:false, K1:false, K2:true, K4:false };
+  L1:true, L2:true, L3:true, L4:true, L5:true, L6:false, L7:true, L8:true, L9:true, L10:true, L11:true, L12:true, L13:true, L14:true, L15:true, L16:true, L17:true, L18:true, L19:true, L19B:true, L20:true, L22:true, L23:true, L24:true, L25:true, L26:true, L27:!!window.POOL_EXCLUDE_ON, L31:!!window.NEW_NAME_RULE_ON, L32:true, L33:true, L34:true, L37:true, L28:true, L38:true, L40:true, L39:true, L41:true, L42:true, L43:true, L44:true, L45:true, L46:true, L47:true, L49:true, L48:true, L50:true, L51:true, L52:true, L53:true, L54:true, L55:true, L56:true, L57:true, L58:true, L59:true, L59_DND:true, L59_INFOCARD:true, L59_STATION:true, L59_SCHOOL:true, L59_FAVSEARCH:true, L60:true, L60_REL:false, L60_WHY:false, L60_NOTE:true, L61:true, L64:true, L64_LINK:true, L64_NEWBUILD:false, L65:true, L69:true, L70:true, L71:true, L74:true, L75:true, L76:true, L77:true, L78:true, L79:true, L80:true, L81:true, L35:true, L36:true, L30:true, L29:true, L29R:false, K1:false, K2:true, K4:false };
 const BUNDLE_GROUPS = { D:['D1','D2','D3','D4'], E:['E1','E2','E3'], F:['F1','F2','F3','F4','F5','F6'], H:['H1','H2','H3','H4','H5','H6','H7'],
-  L:['L1','L2','L3','L4','L5','L6','L7','L8','L9','L10','L11','L12','L13','L14','L15','L16','L17','L18','L19','L19B','L20','L22','L23','L24','L25','L26','L27','L29','L30','L31','L32','L33','L34','L37','L35','L36','L28','L38','L40','L39','L41','L42','L43','L44','L45','L46','L47','L49','L48','L50','L51','L52','L53','L54','L55','L56','L57','L58','L59','L60','L61','L64','L65','L69','L70','L71','L74','L75','L76','L77','L78','L79','L80'], K:['K1','K2','K4'] };
+  L:['L1','L2','L3','L4','L5','L6','L7','L8','L9','L10','L11','L12','L13','L14','L15','L16','L17','L18','L19','L19B','L20','L22','L23','L24','L25','L26','L27','L29','L30','L31','L32','L33','L34','L37','L35','L36','L28','L38','L40','L39','L41','L42','L43','L44','L45','L46','L47','L49','L48','L50','L51','L52','L53','L54','L55','L56','L57','L58','L59','L60','L61','L64','L65','L69','L70','L71','L74','L75','L76','L77','L78','L79','L80','L81'], K:['K1','K2','K4'] };
 // 묶음 L46(69단계): 그래프 점선 모양 통일 — 모든 점선을 "선도단지 대비 적정가" 선(FAIR_LINE_STYLE.borderDash)과 같은 긴 점선으로.
 // 촘촘한 점("좁쌀")·점-선 섞인 패턴을 없앤다. 새 점선은 항상 dashL46(예전 값)을 쓴다 — L46을 끄면 예전 값 그대로.
 const DASH_L46 = [5, 4];
@@ -5485,7 +5495,7 @@ function divCardHtmlL64(d, idx, comp, iMode, iRangeMode, iShowBench){
   const note = (iMode==='price' ? '실제 가격(억원) · 같은 축 공유' : '양쪽 모두 시작 시점 대비 상승률(%) · 그래프의 지점을 클릭하면 그 지점을 새 기준점으로 다시 계산합니다')+
     (iRangeMode==='full' ? '' : ' · 빨간 음영='+fmtYm(d.onsetYm)+'부터 벌어진 구간('+d.devMonths+'개월)')+((iShowBench && iMode!=='price') ? ' · 주황 점선=서울 선도단지' : '');
   return '<div class="twin-card div-card-l64">'+
-    '<div class="twin-card-head">'+divTagsHtmlL64(d)+cxNameHtmlL64(d.name, d.seedId)+esc(regionSuffix(d.name))+areaTagHtmlL69(d.seedId, dP)+rentalHeavyChip(d.name)+favBtnHtml+'</div>'+divTagNotesHtmlL64(d)+
+    '<div class="twin-card-head">'+divDirMarkHtmlL81(d)+divTagsHtmlL64(d)+cxNameHtmlL64(d.name, d.seedId)+esc(regionSuffix(d.name))+areaTagHtmlL69(d.seedId, dP)+rentalHeavyChip(d.name)+favBtnHtml+'</div>'+divTagNotesHtmlL64(d)+
     '<div class="div-main-l64">'+withParticleNameL64(cheap, '이', '가')+' '+esc(other)+' 대비 평소보다 '+Math.round(d.cheapPct)+'% 싸졌어요</div>'+
     '<div class="div-why-l64">평소 '+withParticleNameL64(divSentNameL64(d.nameA), '은', '는')+' '+esc(divSentNameL64(d.nameB))+'의 '+(d.mean*100).toFixed(0)+'% → 지금 '+(d.now*100).toFixed(0)+'% · 동조 '+d.syncMonths+'개월 → 이탈 '+d.devMonths+'개월('+fmtYm(d.onsetYm)+'부터) · 평소 변동 '+(d.cv*100).toFixed(1)+'%</div>'+
     toggles+
@@ -5496,10 +5506,42 @@ function divCardHtmlL64(d, idx, comp, iMode, iRangeMode, iShowBench){
     '<button class="view-multi-btn" data-div-view-l64="'+idx+'">📊 여러 단지 비교에서 보기</button>'+
   '</div>';
 }
+// ---- 묶음 L81: 괴리 탭 방향별 정렬 ----
+// 방향 = 기준단지(지금 보는 단지) ÷ 짝 단지 비율이 동조 기간 평소 비율보다 높아졌는지(▲고평가 쪽)·낮아졌는지(▼저평가 쪽).
+// 카드 문장 "A가 B 대비 평소보다 N% 싸졌어요"의 싸진 쪽(cheapId)으로 정한다 — 짝이 싸졌으면 기준단지가 비싸진 쪽.
+// 판정(divergencePairL64)은 그대로라 모든 괴리 쌍이 두 묶음 중 하나에 든다. 2026-09 seed 164,436쌍에서 이 방향과 기준단지 쪽 비율 변화의 부호가 다른 쌍 0.
+const L81_DIR = {
+  up: { mark: '▲고평가 쪽', btn: '고평가 쪽만', title: '더 비싸진 짝' },
+  down: { mark: '▼저평가 쪽', btn: '저평가 쪽만', title: '더 싸진 짝' },
+};
+const divDirStateL81 = new Map();   // twinKey::단지 이름 -> 'all' | 'up' | 'down'
+function divDirL81(d){ return d.cheapId === d.seedId ? 'up' : 'down'; }
+function divDirMarkHtmlL81(d){ if (!BUNDLES.L81) return ''; const g = divDirL81(d); return '<span class="div-dir-l81 '+g+'">'+L81_DIR[g].mark+'</span>'; }
+function sortDivL81(list){ return list.slice().sort((a, b) => (b.cheapPct - a.cheapPct) || divSortL64(a, b)); }
+// 보일 묶음과 카드(묶음마다 L64_PAGE_SIZE장씩, 묶음마다 더보기). list = 화면에 그릴 카드를 묶음 순서대로 이은 것(카드 번호 idx의 기준).
+function layoutDivL81(comp, allList, key){
+  const sk = key + '::' + comp.name, dir = divDirStateL81.get(sk) || 'all';
+  const groups = ['up', 'down'].filter(g => dir === 'all' || dir === g).map(g => {
+    const all = sortDivL81(allList.filter(d => divDirL81(d) === g));
+    const shown = Math.min(all.length, Math.max(L64_PAGE_SIZE, divShownL64.get(sk + '::' + g) || L64_PAGE_SIZE));
+    return { g, all, shown };
+  });
+  return { sk, dir, groups, list: [].concat(...groups.map(x => x.all.slice(0, x.shown))) };
+}
+function divGroupsHtmlL81(lay, comp, cardOf){
+  const btn = (k, label) => '<button type="button" class="div-dir-btn-l81" data-div-dir-l81="'+k+'" aria-pressed="'+(lay.dir === k)+'">'+label+'</button>';
+  const who = divSentNameL64(comp.name);
+  let idx = 0;
+  return '<div class="div-dir-row-l81">'+btn('all', '전체')+btn('up', L81_DIR.up.btn)+btn('down', L81_DIR.down.btn)+'</div>'+
+    lay.groups.map(x => '<div class="div-group-head-l81" data-div-group-l81="'+x.g+'">'+withParticleNameL64(who, '이', '가')+' '+L81_DIR[x.g].title+' '+x.all.length+'곳</div>'+
+      (x.all.length ? x.all.slice(0, x.shown).map(d => cardOf(d, idx++)).join('') : '<div class="div-none-l81">해당 없음</div>')+
+      (x.shown < x.all.length ? '<button class="twin-more-btn" data-div-more-l81="'+x.g+'">더보기 ('+(x.all.length - x.shown)+'개 더 보기)</button>' : '')).join('');
+}
 function renderDivListL64(el, comp, allList, key){
   if (!allList.length){ el.innerHTML = '<div class="twin-msg">'+L64_EMPTY_TEXT+'</div>'; return; }
   const shown = Math.min(allList.length, Math.max(L64_PAGE_SIZE, divShownL64.get(key + '::' + comp.name) || L64_PAGE_SIZE));
-  const list = allList.slice(0, shown);
+  const lay = BUNDLES.L81 ? layoutDivL81(comp, allList, key) : null;   // 묶음 L81
+  const list = lay ? lay.list : allList.slice(0, shown);
   const bench = getVirtualBenchmarkComplex('seoul');
   const keyOf = d => itemOverrideKey(key, 'div', d.name);
   const modeOf = d => cardChartModeOverride.get(keyOf(d)) || 'index';
@@ -5507,9 +5549,16 @@ function renderDivListL64(el, comp, allList, key){
   const benchOf = d => cardBenchLineOverride.has(keyOf(d)) ? cardBenchLineOverride.get(keyOf(d)) : false;
   const items = list.map(d => divItemL64(comp, d));
   el.innerHTML = '<div class="twin-kind-caption"><b>괴리 쌍둥이</b> = 7년 넘게 가격 비율이 거의 같았는데, 그 비율이 5% 넘게 벌어져 지금까지 이어지는 단지예요. 같이 움직인 기간이 벌어진 기간의 2배 이상이고 벌어진 지 5년이 안 된 짝만 보여 드려요('+(isPyeong25Name(comp.name) && BUNDLES.L70 ? '25평 KB 시세 — 상대도 25평 칸' : '34평 KB 시세')+').</div>'+
+    (lay ? divGroupsHtmlL81(lay, comp, (d, idx) => divCardHtmlL64(d, idx, comp, modeOf(d), rangeOf(d), benchOf(d))) :
     list.map((d, idx) => divCardHtmlL64(d, idx, comp, modeOf(d), rangeOf(d), benchOf(d))).join('')+
-    (shown < allList.length ? '<button class="twin-more-btn" data-div-more-l64="1">더보기 ('+(allList.length - shown)+'개 더 보기)</button>' : '');
+    (shown < allList.length ? '<button class="twin-more-btn" data-div-more-l64="1">더보기 ('+(allList.length - shown)+'개 더 보기)</button>' : ''));
   const rerender = () => renderDivListL64(el, comp, allList, key);
+  if (lay){
+    el.querySelectorAll('[data-div-dir-l81]').forEach(b => b.addEventListener('click', () => { divDirStateL81.set(lay.sk, b.dataset.divDirL81); rerender(); }));
+    el.querySelectorAll('[data-div-more-l81]').forEach(b => b.addEventListener('click', () => {
+      const x = lay.groups.find(y => y.g === b.dataset.divMoreL81); divShownL64.set(lay.sk + '::' + x.g, x.shown + L64_PAGE_SIZE); rerender();
+    }));
+  }
   const more = el.querySelector('[data-div-more-l64]');
   if (more) more.addEventListener('click', () => { divShownL64.set(key + '::' + comp.name, shown + L64_PAGE_SIZE); rerender(); });
   list.forEach((d, idx) => {
