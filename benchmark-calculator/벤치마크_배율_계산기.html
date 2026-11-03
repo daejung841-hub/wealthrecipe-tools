@@ -3,7 +3,32 @@
 <title>저평가 단지 계산기</title>
 <script src="../config.js"></script>
 <script src="../gate.js"></script>
-<script>requireSiteAuth('../index.html');</script>
+<script>
+(function(){
+  var H = document.documentElement, GO = '../index.html';
+  H.classList.add('gate-pending');   // 잠금 확인이 끝나기 전에는 내용을 보여 주지 않음(11-03 잠금 안전장치 — 목록표·재개발 지도와 같은 방식)
+  var st = document.createElement('style');
+  st.textContent = 'html.gate-pending body > *:not(#gateFail){display:none!important;}#gateFail{position:fixed;left:0;top:0;right:0;bottom:0;z-index:2147483647;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:24px;text-align:center;background:#fff;color:#182430;font:16px/1.5 sans-serif;}#gateFail button{height:44px;padding:0 22px;border:0;border-radius:10px;background:#1E3A8A;color:#fff;font:inherit;font-size:15px;font-weight:700;cursor:pointer;}';
+  document.head.appendChild(st);
+  var ready = function(){ return typeof requireSiteAuth === 'function' && typeof isSiteAuthed === 'function' && typeof SITE_PASSWORD !== 'undefined'; };
+  var run = function(){ requireSiteAuth(GO); if (isSiteAuthed()) { H.classList.remove('gate-pending'); try { window.dispatchEvent(new Event('resize')); } catch (e) {} } };   // 인증이 안 됐으면 requireSiteAuth가 첫 화면으로 보냄(그동안 내용은 계속 숨김). 보여 줄 때 화면 크기 다시 맞춤(지도·그래프)
+  var fail = function(){
+    var mk = function(){ if (document.getElementById('gateFail')) return; var d = document.createElement('div'); d.id = 'gateFail'; d.setAttribute('role', 'alert');
+      d.innerHTML = '<div>잠금 확인 파일을 불러오지 못했어요.<br>잠시 뒤 다시 불러와 주세요.</div><button type="button" id="gateRetry">다시 불러오기</button>'; document.body.appendChild(d);
+      document.getElementById('gateRetry').addEventListener('click', function(){ location.reload(); }); };
+    if (document.body) mk(); else document.addEventListener('DOMContentLoaded', mk);
+  };
+  if (ready()) { run(); return; }
+  var tries = 0, need = function(){ return typeof SITE_PASSWORD === 'undefined' ? '../config.js' : '../gate.js'; };
+  (function retry(){
+    if (ready()) { run(); return; }
+    if (tries >= 3) { fail(); return; }
+    tries++; var sc = document.createElement('script'); sc.src = need() + '?r=' + Date.now() + tries;
+    sc.onload = function(){ retry(); }; sc.onerror = function(){ setTimeout(retry, 700); };
+    document.head.appendChild(sc);
+  })();
+})();
+</script>
 <script>
 // 묶음 L52·L53(83단계): 아래 정적 스크립트 주소의 ?v=와 이 표는 build_l52_versions.py가 빌드 때 실제 파일 해시로 채운다(손으로 쓰지 않음).
 // 표는 25평 seed 지연 로딩(loadSeed25)이 실행 중에 쓴다. EARLY_FLAGS_L52는 xlsx 태그(L53)를 쓸지 정하려고 주소 플래그를 먼저 읽는다
