@@ -43,10 +43,27 @@
   const read = () => { try { return root.localStorage.getItem(KEY); } catch (e) { return null; } };
   const write = (v) => { try { v == null ? root.localStorage.removeItem(KEY) : root.localStorage.setItem(KEY, v); } catch (e) { /* 저장 불가면 기억만 못 함 */ } };
 
-  // 앱을 열 때 한 번: 'ok'(입장) | 'locked'(비밀번호 입력 필요) | 'broken'(config.js/gate.js 로딩 실패)
+  // 11-04 잠금 안전장치 보충: 두 파일 중 못 받은 것을 3번까지 다시 받아 본다(?r=로 새로 요청 — 서비스워커는 경로로 알아보고 네트워크 우선).
+  // config.js는 'const SITE_PASSWORD'라 이미 받았으면 다시 넣지 않는다(두 번 넣으면 오류).
+  function loadOne(src) {
+    return new Promise((ok) => {
+      const s = root.document.createElement('script');
+      s.src = src + '?r=' + Date.now(); s.onload = () => ok(true); s.onerror = () => ok(false);
+      root.document.head.appendChild(s);
+    });
+  }
+  async function retryGate() {
+    for (let i = 1; i <= 3 && !gateReady(); i++) {
+      const ok = await loadOne(sitePassword() === null ? '../config.js' : '../gate.js');
+      if (!ok) await new Promise((r) => setTimeout(r, 400 * i));
+    }
+    return gateReady();
+  }
+
+  // 앱을 열 때 한 번: 'ok'(입장) | 'locked'(비밀번호 입력 필요) | 'broken'(config.js/gate.js를 3번 다시 받아도 실패)
   async function check() {
     if (isLocalDev()) return 'ok';
-    if (!gateReady()) return 'broken';
+    if (!gateReady() && !(await retryGate())) return 'broken';
     if (root.isSiteAuthed()) { write(await fingerprint()); return 'ok'; } // 사이트 입구에서 이미 통과한 경우도 기억해 둔다
     const saved = read();
     if (saved) {

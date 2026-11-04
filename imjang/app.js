@@ -1454,7 +1454,11 @@
     const st = await window.ImjangAuth.check();
     if (st === 'ok') enter();
     else if (st === 'locked') showLock('');
-    else showLock('입장 설정을 불러오지 못했어요. 새로고침해 주세요.', true);
+    else {
+      showLock('입장 설정을 불러오지 못했어요. 잠시 뒤 다시 불러와 주세요.', true);
+      // 11-04 잠금 안전장치 보충: 3번 다시 받아도 실패하면 [다시 불러오기] 단추(입력은 막힌 그대로)
+      if (!$('lockRetry')) $('lockForm').after(h('button', { type: 'button', class: 'btn ghost', id: 'lockRetry', style: 'margin-top:10px', onclick: () => location.reload() }, '다시 불러오기'));
+    }
   }
   boot();
 })();

@@ -16,6 +16,41 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@600;700&family=Noto+Sans+KR:wght@400;500;700&family=JetBrains+Mono:wght@400;500;600&display=swap">
 <script src="config.js"></script>
 <script src="gate.js"></script>
+<script>
+(function(){
+  // 11-04 잠금 안전장치 보충(첫 화면): 두 파일을 다 받았으면 아무것도 바꾸지 않는다(예전과 같음).
+  // 못 받았으면 화면을 가린 채 3번까지 다시 받고, 받은 뒤에 페이지 스크립트(hubWhenGate로 맡긴 것)를 시작한다. 끝내 못 받으면 "다시 불러오기".
+  var H = document.documentElement, queue = [], done = false;
+  var ready = function(){ return typeof isSiteAuthed === 'function' && typeof grantSiteAuth === 'function' && typeof SITE_PASSWORD !== 'undefined'; };
+  window.hubWhenGate = function(f){ if (done) f(); else queue.push(f); };
+  if (ready()) { done = true; return; }
+  H.classList.add('gate-pending');
+  var st = document.createElement('style');
+  st.textContent = 'html.gate-pending body > *:not(#gateFail){display:none!important;}#gateFail{position:fixed;left:0;top:0;right:0;bottom:0;z-index:2147483647;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:24px;text-align:center;background:#fff;color:#182430;font:16px/1.5 sans-serif;}#gateFail button{height:44px;padding:0 22px;border:0;border-radius:10px;background:#1E3A8A;color:#fff;font:inherit;font-size:15px;font-weight:700;cursor:pointer;}';
+  document.head.appendChild(st);
+  var start = function(){
+    done = true; H.classList.remove('gate-pending');
+    var q = queue; queue = []; q.forEach(function(f){ try { f(); } catch (e) { setTimeout(function(){ throw e; }); } });
+    // hub-auth.js(이 기기에서 기억하기)가 처음 실행 때 두 파일이 없어 조용히 빠졌으면(잊기 단추가 없으면) 한 번 더 불러온다
+    if (!document.querySelector('.hub-forget')) { var s = document.createElement('script'); s.src = 'hub-auth.js?r=' + Date.now(); document.body.appendChild(s); }
+  };
+  var fail = function(){
+    var mk = function(){ if (document.getElementById('gateFail')) return; var d = document.createElement('div'); d.id = 'gateFail'; d.setAttribute('role', 'alert');
+      d.innerHTML = '<div>잠금 확인 파일을 불러오지 못했어요.<br>잠시 뒤 다시 불러와 주세요.</div><button type="button" id="gateRetry">다시 불러오기</button>'; document.body.appendChild(d);
+      document.getElementById('gateRetry').addEventListener('click', function(){ location.reload(); }); };
+    if (document.body) mk(); else document.addEventListener('DOMContentLoaded', mk);
+  };
+  var tries = 0, need = function(){ return typeof SITE_PASSWORD === 'undefined' ? 'config.js' : 'gate.js'; };
+  var again = function(){
+    if (ready()) { if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start); else start(); return; }
+    if (tries >= 3) { fail(); return; }
+    tries++; var sc = document.createElement('script'); sc.src = need() + '?r=' + Date.now() + tries;
+    sc.onload = function(){ setTimeout(again, 0); }; sc.onerror = function(){ setTimeout(again, 400 * tries); };
+    document.head.appendChild(sc);
+  };
+  again();
+})();
+</script>
 <style>
 :root{
   color-scheme: light;
@@ -179,7 +214,7 @@ body{background:var(--bg);}
 </div>
 
 <script>
-(function(){
+hubWhenGate(function(){   // 잠금 파일을 받은 뒤 시작(위 머리 블록 — 이미 받았으면 바로)
   const themeToggle = document.getElementById('themeToggle');
   if (themeToggle){
     themeToggle.addEventListener('click', () => {
@@ -213,7 +248,7 @@ body{background:var(--bg);}
     }
   });
 
-})();
+});
 </script>
 <script src="hub-auth.js"></script>
 <script src="hub-install.js"></script>
