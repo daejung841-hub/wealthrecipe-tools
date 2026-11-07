@@ -61,9 +61,13 @@
   const L95CFG = { diagMin: 545, key: 'calcMapPanelW95', labelGrid: 7, noCancelBefore: 202001 };
   const l95 = () => { try { return !!(BUNDLES.L95 && l94()); } catch (e) { return false; } };
   const l96 = () => { try { return !!(BUNDLES.L96 && l95()); } catch (e) { return false; } };   // 묶음 L96: 단지에서 연 학군 창 — 거리·가까운 3곳(계산기 HTML rateTableL94)
+  // 묶음 L97(모바일 보완 + 단지 링크 이동) 설정 한 곳 — 단지 이름(detailZoom)·세대수·연식 줄(infoZoom)이 보이는 확대 단계, 단지 링크로 옮길 때 확대,
+  //   실거래 받기 기다림(ms, 넘으면 '다시 불러오기'), 폰에서 단지 패널을 처음부터 전체 화면으로, [← 이전 단지]로 되돌아갈 수 있는 개수
+  const L97CFG = { detailZoom: 15, infoZoom: 16, linkZoom: 16, rtTimeout: 20000, phoneFull: true, backMax: 20 };
+  const l97 = () => { try { return !!(BUNDLES.L97 && l96()); } catch (e) { return false; } };
   const panelKey94 = () => l95() ? L95CFG.key : L94CFG.key;
   // 지금 쓰는 확대 단계(묶음 L89를 끄면 L88 값 그대로)
-  const ZM = () => l89() ? { dist: L89CFG.distZoom, open: L89CFG.distOpenZoom, cx: L89CFG.cxMinZoom, detail: L89CFG.detailZoom, info: L89CFG.infoZoom, cxOpen: L89CFG.openZoom }
+  const ZM = () => l89() ? { dist: L89CFG.distZoom, open: L89CFG.distOpenZoom, cx: L89CFG.cxMinZoom, detail: l97() ? L97CFG.detailZoom : L89CFG.detailZoom, info: l97() ? L97CFG.infoZoom : L89CFG.infoZoom, cxOpen: L89CFG.openZoom }
     : { dist: L87CFG.distZoom, open: L87CFG.distOpenZoom, cx: CX_MIN_ZOOM, detail: DETAIL_ZOOM, info: L88CFG.infoZoom, cxOpen: OPEN_ZOOM };
   const SHEET_HALF = '52%';   // 폰 아래 시트 첫 높이(11-02 결정: 52% 유지 — 대표님 폰 확인 뒤 여기만 바꿈)
 
@@ -116,6 +120,10 @@
   .cm84-bb .col{display:flex;flex-direction:column;align-items:flex-start}
   .cm84-bb.sel{border-color:var(--cm-navy);box-shadow:0 0 0 2px var(--cm-navy)}
   .cm84-bb .nmt{display:none}
+  /* 묶음 L97: [← 이전 단지] · 실거래 [다시 불러오기] */
+  .cm84-ph .bk97{flex:0 0 auto;border:1px solid var(--cm-line);background:#fff;color:var(--cm-navy);font:inherit;font-size:12px;font-weight:700;padding:5px 8px;border-radius:8px;cursor:pointer;white-space:nowrap;margin-right:2px}
+  .cm84-rt .rer97{color:#92400E}
+  .cm84-rt .rtre97{display:inline-block;margin:6px 0 4px;border:1px solid var(--cm-navy);background:var(--cm-navy);color:#fff;font:inherit;font-size:13px;font-weight:700;padding:8px 14px;border-radius:9px;cursor:pointer}
   @media (hover:hover){   /* 묶음 L96: PC는 말풍선에 마우스를 올리면 이름표(1줄 단지명 굵게, 2줄 세대수 / 연차 작게)가 바로 뜸(폰은 누르면 패널 — 그대로) */
     .cm84-bb[data-nm]:hover .nmt{display:block;position:absolute;left:50%;bottom:calc(100% + 9px);transform:translateX(-50%);padding:4px 9px;border-radius:6px;background:#111827;color:#fff;line-height:1.35;white-space:nowrap;text-align:center;pointer-events:none;box-shadow:0 2px 8px rgba(0,0,0,.25)}
     .cm84-bb .nmt .n1{display:block;font-size:12.5px;font-weight:800;color:#fff}
@@ -683,17 +691,24 @@
     hint.hidden = true;
     const v = view(), detail = zm >= Z.detail, info = detail && l88() && zm >= Z.info, boxes = [], t0 = performance.now();
     const sel = selId ? itemsById.get(selId) : null;
-    const list = sel ? [sel].concat(items.filter(x => x !== sel)) : items;
+    const L97 = l97() && detail;   // 묶음 L97: 이름이 보이는 단계에서는 세대수 큰 단지부터 자리를 잡고, 이름 말풍선이 겹치는 작은 단지는 이름 없이 가격만(그래도 겹치면 숨김)
+    const base = L97 ? items.slice().sort((a, b) => (Number(b.units) || 0) - (Number(a.units) || 0)) : items;
+    const list = sel ? [sel].concat(base.filter(x => x !== sel)) : base;
+    const hit = (bx) => boxes.some(q => !(bx.r < q.l || bx.l > q.r || bx.b < q.t || bx.t > q.b));
     for (const it of list){
       if (!inView(v, it.lat, it.lng)) continue;
       const f = shownInfo(it, it === sel); if (!f || f.cur == null) continue;   // 묶음 L89: 고른 평형 값(없으면 숨김)
       if (it !== sel && !passFilter(it, f)) continue;   // 묶음 L88: 필터(누른 단지는 늘 보임)
       const pt = v.proj.fromCoordToOffset(new NV.LatLng(it.lat, it.lng));
-      const x = pt.x - v.oSW.x, y = pt.y - v.oNE.y; const [w, h] = boxOf(it, f, detail, info);
-      const bx = { l: x - w / 2, r: x + w / 2, t: y - h - 7, b: y };
-      if (it !== sel && boxes.some(q => !(bx.r < q.l || bx.l > q.r || bx.b < q.t || bx.t > q.b))) continue;
+      const x = pt.x - v.oSW.x, y = pt.y - v.oNE.y; let dt = detail, ii = info, [w, h] = boxOf(it, f, dt, ii);
+      let bx = { l: x - w / 2, r: x + w / 2, t: y - h - 7, b: y };
+      if (it !== sel && hit(bx)){
+        if (!L97) continue;
+        dt = false; ii = false; [w, h] = boxOf(it, f, false, false); bx = { l: x - w / 2, r: x + w / 2, t: y - h - 7, b: y };
+        if (hit(bx)) continue;
+      }
       boxes.push(bx);
-      const m = new NV.Marker({ map, position: new NV.LatLng(it.lat, it.lng), zIndex: it === sel ? 300 : 60, title: l96() ? '' : it.name, icon: { content: bubble(it, f, detail, info), anchor: new NV.Point(0, 0) } });
+      const m = new NV.Marker({ map, position: new NV.LatLng(it.lat, it.lng), zIndex: it === sel ? 300 : 60, title: l96() ? '' : it.name, icon: { content: bubble(it, f, dt, ii), anchor: new NV.Point(0, 0) } });
       NV.Event.addListener(m, 'click', () => openPanel(it, l89() ? f.p : undefined));   // 묶음 L89: 고른 평형으로 연다
       marks.push(m);
     }
@@ -1019,6 +1034,8 @@
     const fs = panel.querySelector('.fs'); if (fs) fs.onclick = enterFull;
     const bk = panel.querySelector('.bk'); if (bk) bk.onclick = exitFull;
     const sz = panel.querySelector('.sz'); if (sz) sz.onclick = () => { panel.classList.remove('mini95'); const f = panel.classList.toggle('full'); sz.textContent = l87() ? (f ? '▼' : '▲') : (f ? '▼ 작게' : '▲ 크게'); };
+    if (l97() && L97CFG.phoneFull && window.innerWidth < 768){ panel.classList.add('full'); if (sz) sz.textContent = '▼'; }   // 묶음 L97: 폰은 단지 패널을 처음부터 전체 화면(✕ = 지도로, 보던 자리 그대로)
+    const b97 = panel.querySelector('.bk97'); if (b97) b97.onclick = () => { const pr = back97.pop(); if (pr) go97(pr.id, pr.p); };   // 묶음 L97: 바로 전 단지로
     if (!panel.querySelector('.cm84-rz')) panel.insertAdjacentHTML('afterbegin', '<div class="cm84-rz" title="끌어서 넓이 조절"></div>');
     wireSheetTabs(panel);
     layoutL87(); setTimeout(resize, 30);
@@ -1135,7 +1152,38 @@
   function twinWide(on){
     if (l94() && panel.classList.contains('l91')){ if (on) return openTwin94() ? { side: true } : null; closeTwin94(); return null; }   // 묶음 L94: 패널을 넓히지 않고 실거래 칸 자리에
     panel.classList.toggle('twv', !!on); window.CALC_MAP_L84.twin = !!on; setTimeout(resize, 30); }
+  // ---- 묶음 L97: 패널 안 계산기의 단지 링크(쌍둥이·괴리·준거·요약 카드 이름 — 모두 data-cx-open-l64) → 지도·패널을 그 단지로 ----
+  //   계산기가 지도 안에서 열렸을 때만 계산기 쪽이 {type:'cx-open-l97', id, p}를 보낸다(단독 계산기는 그대로). 지도는 그 단지로(확대 linkZoom), 패널은 저평가 진단부터,
+  //   최근 본 단지에 넣고(openPanel), 바로 전 단지는 [← 이전 단지]로. 좌표 없는 단지는 지도는 그대로 두고 패널만("지도 위치 없음")
+  let back97 = [], nav97 = false;
+  function go97(id, p){
+    const it = itemsById.get(id); nav97 = true;
+    try {
+      if (it){ map.setCenter(new NV.LatLng(it.lat, it.lng)); map.setZoom(L97CFG.linkZoom); openPanel(it, p); }
+      else {
+        let e = typeof seedEntryById === 'function' ? seedEntryById(id) : null;
+        if (!e && LIGHT){ const s = LIGHT.s.find(x => (x[0] || x[1]) === id); if (s) e = { name: s[1] }; }
+        if (!e) return false;
+        openPanel({ id, name: e.name }, p);
+      }
+    } finally { nav97 = false; }
+    window.CALC_MAP_L84.link97 = { id, p, at: performance.now(), map: !!it, back: back97.length };
+    return true;
+  }
+  function linkOpen97(id, p){
+    const cur = panel.dataset.id ? { id: panel.dataset.id, p: +panel.dataset.p === 25 ? 25 : 34 } : null;
+    if (cur && cur.id === id && cur.p === p) return;
+    const keep = back97.slice();
+    if (cur){ back97.push(cur); if (back97.length > L97CFG.backMax) back97.shift(); }
+    if (!go97(id, p)) back97 = keep;   // 못 열면 기록도 그대로
+  }
+  window.addEventListener('message', (ev) => {
+    const m = ev.data; if (!m || m.type !== 'cx-open-l97' || !l97() || !panel || !m.id) return;
+    if (![...panel.querySelectorAll('iframe')].some(f => f.contentWindow === ev.source)) return;   // 이 패널 안 계산기(진단·쌍둥이 창)가 보낸 것만
+    linkOpen97(String(m.id), m.p === 25 ? 25 : 34);
+  });
   function openPanel(it, pOver){
+    if (l97() && !nav97) back97 = [];   // 묶음 L97: 링크가 아니라 지도·검색·최근 본 단지로 열면 되돌아가기 기록을 새로
     selId = it.id; const f = itemsById.has(it.id) ? (info(it) || {}) : {};
     const p = pOver || f.p || 34, url = calcUrl(it.id, p);
     exitFull();
@@ -1189,9 +1237,9 @@
   }
   // 묶음 L87-3: 단지 패널 머리 — 단지명 하나(조금 크게) + 바로 옆 [비교 단지 추가], 폰은 글자 없는 작은 버튼으로 한 줄
   function headCx(it, p, url){
-    return `<div class="cm84-ph cx"><span class="ty">단지</span><h2 title="${esc(it.name)}">${esc(it.name + (p === 25 ? '(25평)' : ''))}</h2>`
+    return `<div class="cm84-ph cx"><span class="ty">단지</span>${l97() && back97.length ? '<button type="button" class="bk97" title="바로 전에 보던 단지로">← 이전 단지</button>' : ''}<h2 title="${esc(it.name)}">${esc(it.name + (p === 25 ? '(25평)' : ''))}</h2>`
       + `<button type="button" class="ad" disabled title="비교 단지 추가">➕<span class="tx"> 비교 단지</span></button>`
-      + (fullOn() ? '<button type="button" class="bk">← 지도로</button>' : '') + (itemsById.has(it.id) ? '' : '<span class="nomap">위치 없음</span>')
+      + (fullOn() ? '<button type="button" class="bk">← 지도로</button>' : '') + (itemsById.has(it.id) ? '' : '<span class="nomap">' + (l97() ? '지도 위치 없음' : '위치 없음') + '</span>')
       + `<a href="${url}" target="_blank" rel="opener">새 탭</a>`
       + (fullOn() ? '<button type="button" class="fs" title="전체 화면으로 보기">⛶<span class="tx"> 전체 화면</span></button>' : '')
       + '<button type="button" class="zt">🏗️ 구역</button><button type="button" class="sz" aria-label="패널 크기">▲</button><button type="button" class="x" aria-label="닫기">✕<span class="tx"> 닫기</span></button></div>';
@@ -1258,7 +1306,7 @@
     const fe = (v) => typeof fmtEok === 'function' ? fmtEok(v) : eok(v), [, , col] = bandOf(g.badge);
     return `<div class="cm84-sum"><span>현재가 <b>${fe(g.cur)}</b>${g.p === 25 ? ' <small>(25평)</small>' : ''}</span><span class="bd" style="background:${col}">${esc(g.badge)}</span>${g.fair != null ? `<span class="fr">적정가 약 <b>${fe(g.fair)}</b></span>` : ''}</div>`;
   }
-  function closePanel(){ exitFull(); delete panel.dataset.id; panel.classList.remove('on', 'full', 'twv', 'back'); mainEl.classList.remove('pon'); panel.innerHTML = ''; selId = null; layoutL87(); setTimeout(resize, 30); }
+  function closePanel(){ back97 = []; exitFull(); delete panel.dataset.id; panel.classList.remove('on', 'full', 'twv', 'back'); mainEl.classList.remove('pon'); panel.innerHTML = ''; selId = null; layoutL87(); setTimeout(resize, 30); }
   // PC: 패널 가장자리를 끌어 넓이 조절(이 브라우저에서 기억). 묶음 L85_LEFT면 패널이 왼쪽이라 손잡이는 패널 오른쪽 끝
   function wireResize(){
     let on = false, x0 = 0, w0 = 0;
@@ -1452,7 +1500,17 @@
   // 묶음 L93: 직거래 칸을 더한 판(지도자료 v3 — 옛 6칸과 나머지는 한 글자도 같음). 열 이름으로 읽으므로 L93을 꺼도 이 폴더를 그대로 씀(옛 폴더는 올리지 않음)
   // 묶음 L94 추가(11-06): 분석 탭 최신판 결과_20년_202610(monthly_map 첫 실행, 2006-01~2026-10, 같은 7칸)으로 — 지도자료_202610\단지별·단지별_이전(학구도·진학률은 지도자료_202609 그대로)
   const RT93 = { recent: '단지별/', old: '단지별_이전/' };
-  function getTrades(id, old){ const k = (old ? 'o|' : 'r|') + id; if (!rtCache.has(k)) rtCache.set(k, fetch(rtFile(old ? RT93.old : RT93.recent, id)).then(r => r.ok ? r.json() : null).catch(() => null)); return rtCache.get(k); }
+  function getTrades(id, old){ const k = (old ? 'o|' : 'r|') + id; if (!rtCache.has(k)) rtCache.set(k, l97() ? fetchTrades97(k, rtFile(old ? RT93.old : RT93.recent, id), old) : fetch(rtFile(old ? RT93.old : RT93.recent, id)).then(r => r.ok ? r.json() : null).catch(() => null)); return rtCache.get(k); }
+  // 묶음 L97: 실거래 받기 — 파일이 없으면(404) '자료 없음', 받다가 끊기거나 rtTimeout을 넘으면 '못 받음'(기억하지 않고 다음에 다시 받음).
+  //   최근 파일(old=false)은 못 받으면 실패로 넘겨 실거래 칸에 [다시 불러오기], 이전 파일(old=true)은 지금처럼 없는 것으로(최고점은 최근 5년으로만)
+  function fetchTrades97(k, u, old){
+    const ac = typeof AbortController === 'function' ? new AbortController() : null, t = ac ? setTimeout(() => ac.abort(), L97CFG.rtTimeout) : 0;
+    const pr = fetch(u, ac ? { signal: ac.signal } : undefined).then(r => r.ok ? r.json() : (r.status === 404 ? null : Promise.reject(new Error('rt ' + r.status))));
+    const done = pr.then(v => { clearTimeout(t); return v; }, e => { clearTimeout(t); rtCache.delete(k); window.CALC_MAP_L84.rtFail97 = (window.CALC_MAP_L84.rtFail97 || 0) + 1; throw e; });
+    return old ? done.catch(() => null) : done;
+  }
+  // 묶음 L97: 실거래 칸 '못 받음' — 한 줄 안내 + [다시 불러오기](누르면 다시 '불러오는 중' → 받으면 채움)
+  function rtFailHtml97(){ return (l93() ? head93('rt') : '') + '<div class="rtb"><div class="rld rer97">실거래를 불러오지 못했어요. 연결이 느리거나 잠시 끊겼을 수 있어요.</div><button type="button" class="rtre97">다시 불러오기</button></div>'; }
   function rtTagOf(id){ return RT.on() && RTX && RTX.tags ? RTX.tags[id] || null : null; }
   const rtTagHtml = (t) => t ? `<span class="rtg ${t[0] > 0 ? 'up' : 'dn'}">실거래${t[0] > 0 ? '↑' : '↓'}</span>` : '';
   // 같은 평형대(칸 기준 전용㎡ ±3㎡ — 분석 탭 꼬리표와 같은 잣대): 146 예외 칸이면 실제 면적, 아니면 칩의 seed 시세 타입 면적, 없으면 칸 기준 범위
@@ -1540,6 +1598,10 @@
       const mb = host.querySelector('.rtm'); if (mb) mb.onclick = () => { const v = host.querySelector('.rtv'), o = v.hidden; v.hidden = !o; mb.setAttribute('aria-expanded', String(o)); mb.textContent = o ? '실거래 접기 ▴' : '실거래 자세히 ▾'; host.classList.toggle('open', o); if (o && !v.dataset.done){ v.dataset.done = '1'; renderRtView(v, it, p, d); } };
       if (L91 && d){ const v = host.querySelector('.rtv'); v.hidden = false; v.dataset.done = '1'; host.classList.add('open'); renderRtView(v, it, p, d); }
       window.CALC_MAP_L84.rtShownAt = performance.now(); window.CALC_MAP_L84.rtP = p;
+    }).catch(e => {   // 묶음 L97: 못 받았거나 그리다 멈추면 빈 칸·반응 없음 대신 안내 + [다시 불러오기]
+      if (!l97() || selId !== id || !panel.contains(host)) return;
+      host.innerHTML = rtFailHtml97(); window.CALC_MAP_L84.rtFailShown97 = performance.now();
+      const b = host.querySelector('.rtre97'); if (b) b.onclick = () => { host.innerHTML = (l93() ? head93('rt') : '') + '<div class="rtb"><div class="rld">실거래를 불러오는 중이에요…</div></div>'; renderRT(it, p, kb); };
     });
   }
   // ---- 묶음 L93: 최고점·신고가 — 같은 평형 칸(slotBandRT)의 모든 거래(최근 5년 + 이전 파일, 이전 파일은 패널을 열 때 같이 받음) ----
@@ -1769,7 +1831,7 @@
   }
   function openKbless(x){
     exitFull(); selId = null; panel.dataset.id = x.id; panel.dataset.p = 34; panel.classList.remove('twv'); drawCx();
-    panel.innerHTML = panelHead('실거래만', '#868E96', x.name, '<span class="nomap">위치 없음</span>')
+    panel.innerHTML = panelHead('실거래만', '#868E96', x.name, '<span class="nomap">' + (l97() ? '지도 위치 없음' : '위치 없음') + '</span>')
       + `<div class="cm84-body"><div class="cm84-kbl"><p class="kn">KB 시세가 없어 실거래만 보여 줍니다. 적정가·판정은 계산하지 않습니다.</p>`
       + `<dl><dt>위치</dt><dd>${esc([x.dong, x.jb].filter(Boolean).join(' '))}</dd><dt>준공</dt><dd>${x.built ? esc(x.built) + '년' : '-'}</dd><dt>최근 6개월 거래</dt><dd>${(x.n || 0).toLocaleString('ko-KR')}건</dd></dl>`
       + `<table class="rtl"><thead><tr><th>전용 면적</th><th>건수</th><th>중앙값</th></tr></thead><tbody>${(x.areas || []).map(a => `<tr><td>${esc(a[0])}</td><td>${a[1]}건</td><td>${eokTx(a[2])}</td></tr>`).join('')}</tbody></table>`
