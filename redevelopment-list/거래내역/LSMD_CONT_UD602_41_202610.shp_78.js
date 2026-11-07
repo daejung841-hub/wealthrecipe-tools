@@ -1,0 +1,2 @@
+(window.RT_TX = window.RT_TX || {})["LSMD_CONT_UD602_41_202610.shp#78"] = 
+{"b":"LSMD_CONT_UD602_41_202610.shp#78","n":"도환중1","per":"12개월","mig":0,"inv":null,"p":null,"r":[["","2017-04","중앙동 436",null,40.78,"2",1993,1.795,null,null,null,null,null,0.605,3,0,0,"",0,[0.85,17],30,"(436-0)",null,16.53,0]]};
