@@ -65,6 +65,8 @@
   //   실거래 받기 기다림(ms, 넘으면 '다시 불러오기'), 폰에서 단지 패널을 처음부터 전체 화면으로, [← 이전 단지]로 되돌아갈 수 있는 개수
   const L97CFG = { detailZoom: 15, infoZoom: 16, linkZoom: 16, rtTimeout: 20000, phoneFull: true, backMax: 20 };
   const l97 = () => { try { return !!(BUNDLES.L97 && l96()); } catch (e) { return false; } };
+  // 묶음 L97B(11-08): 초등 학구·중학교 학군 작은 창을 오른쪽 위 작은 상자로(요약 + [자세히]), 학교를 누르면 학구가 화면에 들어오게
+  const l97b = () => { try { return !!(BUNDLES.L97B && l97()); } catch (e) { return false; } };
   const panelKey94 = () => l95() ? L95CFG.key : L94CFG.key;
   // 지금 쓰는 확대 단계(묶음 L89를 끄면 L88 값 그대로)
   const ZM = () => l89() ? { dist: L89CFG.distZoom, open: L89CFG.distOpenZoom, cx: L89CFG.cxMinZoom, detail: l97() ? L97CFG.detailZoom : L89CFG.detailZoom, info: l97() ? L97CFG.infoZoom : L89CFG.infoZoom, cxOpen: L89CFG.openZoom }
@@ -337,6 +339,21 @@
   .cm84-sch.on{background:var(--s);color:#fff;z-index:2}
   .cm84-scc{position:absolute;left:10px;top:104px;z-index:265;width:min(340px,calc(100% - 20px));max-height:calc(100% - 150px);overflow:auto;background:#fff;border:1px solid var(--cm-line);border-radius:12px;box-shadow:0 8px 22px rgba(0,0,0,.18);padding:12px 14px;font-size:13px;color:var(--cm-ink)}
   .cm84-scc[hidden]{display:none}
+  /* 묶음 L97B: 작은 상자 — PC 오른쪽 위 폭 320px, 폰 폭 60%·높이 최대 30%(오른쪽 세로 단추 왼쪽). [자세히]는 상자 안에서 스크롤 */
+  .cm84-scc.l97b{left:auto;right:78px;top:92px;width:320px;max-height:calc(100% - 110px);padding:9px 11px;font-size:12.5px;box-shadow:0 4px 14px rgba(0,0,0,.16)}
+  @media (max-width:767px){ .cm84-scc.l97b{right:66px;top:118px;width:60%;max-height:30%} }
+  .cm84-scc .h97b{display:flex;align-items:center;gap:4px;padding-right:40px;font-size:14px;font-weight:800}
+  .cm84-scc .i97b{border:0;background:none;color:var(--cm-faint);font:inherit;font-size:13px;cursor:pointer;padding:0 3px}
+  .cm84-scc .inf97b{margin:5px 0 2px;font-size:11px;color:var(--cm-sub);line-height:1.5;background:#F8F9FA;border-radius:6px;padding:5px 7px}
+  .cm84-scc .inf97b p{margin:2px 0}
+  .cm84-scc .t97b{margin:6px 0 2px;font-size:11.5px;font-weight:700;color:var(--cm-sub)}
+  .cm84-scc .t97b small{color:#1864AB;font-weight:700;margin-left:4px;font-size:11px}
+  .cm84-scc .g97b{font-size:11px;color:var(--cm-faint);margin-top:4px;font-weight:700}
+  .cm84-scc ul.u97b{list-style:none;margin:0;padding:0}
+  .cm84-scc ul.u97b li{display:flex;flex-wrap:wrap;gap:1px 8px;align-items:baseline;padding:2px 0;font-size:12px}
+  .cm84-scc .det97b{margin-top:6px;border-top:1px dashed var(--cm-line);padding-top:6px}
+  .cm84-scc .ft97b{display:flex;justify-content:flex-end;margin-top:6px}
+  .cm84-scc .more97b{font:inherit;font-size:12px;border:1px solid var(--cm-line);background:#fff;border-radius:7px;padding:3px 10px;cursor:pointer;color:var(--cm-ink)}
   @media (max-width:767px){ .cm84-scc{width:calc(100% - 88px)} }   /* 폰: 오른쪽 세로 버튼(학구도·학군 끄기)을 가리지 않게 */
   .cm84-scc > b{font-size:15px;font-weight:800}
   .cm84-scc .scx{position:absolute;right:8px;top:8px;border:0;background:#F1F3F5;border-radius:8px;font:inherit;font-size:12px;padding:3px 7px;cursor:pointer;color:var(--cm-sub)}
@@ -1882,8 +1899,36 @@
   function scCard(html, kind){
     let c = mapEl.querySelector('#cm84Scc');
     if (!html){ if (c && (!kind || c.dataset.kind === kind)) c.hidden = true; return; }
-    if (!c){ c = document.createElement('div'); c.id = 'cm84Scc'; c.className = 'cm84-scc'; mapEl.appendChild(c); c.addEventListener('click', (ev) => { if (ev.target.closest('.scx')){ c.hidden = true; if (c.dataset.kind === 'elem' && scSel){ scSel = null; drawSchool(); } if (c.dataset.kind === 'mid' && midSel93){ midSel93 = null; styleMid93(); } } }); }
+    if (!c){ c = document.createElement('div'); c.id = 'cm84Scc'; c.className = 'cm84-scc'; mapEl.appendChild(c); c.addEventListener('click', (ev) => { if (ev.target.closest('.scx')){ c.hidden = true; if (c.dataset.kind === 'elem' && scSel){ scSel = null; drawSchool(); } if (c.dataset.kind === 'mid' && midSel93){ midSel93 = null; styleMid93(); } }
+        const mb = ev.target.closest('.more97b'), ib = ev.target.closest('.i97b');   // 묶음 L97B: [자세히]/[간단히] · ⓘ 안내 펼치기
+        if (mb){ const d = c.querySelector('.det97b'), sm = c.querySelector('.sum97b'), on = d && d.hidden; if (d){ d.hidden = !on; if (sm) sm.hidden = on; mb.textContent = on ? '간단히' : '자세히'; mb.setAttribute('aria-expanded', on ? 'true' : 'false'); c.scrollTop = 0; } }
+        if (ib){ const f = c.querySelector('.inf97b'); if (f){ f.hidden = !f.hidden; ib.setAttribute('aria-expanded', f.hidden ? 'false' : 'true'); } } }); }
+    c.classList.remove('l97b');   // 묶음 L97B: 작은 상자는 scCard97b가 다시 붙임
     c.dataset.kind = kind; c.innerHTML = '<button type="button" class="scx" aria-label="닫기">✕</button>' + html; c.hidden = false;
+  }
+  // 묶음 L97B: 작은 상자 — 제목 ⓘ / 요약 / [자세히](지금의 전체 내용, 상자 안에서 스크롤)
+  function scCard97b(kind, o){
+    scCard(`<div class="h97b"><b>${esc(o.title)}</b>${o.info ? '<button type="button" class="i97b" aria-label="안내 보기" aria-expanded="false">ⓘ</button>' : ''}</div>`
+      + (o.info ? `<div class="inf97b" hidden>${o.info}</div>` : '') + `<div class="sum97b">${o.sum}</div><div class="det97b" hidden>${o.detail}</div>`
+      + `<div class="ft97b"><button type="button" class="more97b" aria-expanded="false">자세히</button></div>`, kind);
+    const c = mapEl.querySelector('#cm84Scc'); if (c){ c.classList.add('l97b'); c.scrollTop = 0; }
+  }
+  // 묶음 L97B: 가까운 중학교(추정) 요약 — 남·여 후보가 같으면 한 번만("남·여 같음"), 다르면 둘로. 긴 안내문은 ⓘ로
+  function nearSum97b(html){
+    const d = document.createElement('div'); d.innerHTML = html || '';
+    const g = [...d.querySelectorAll('.r94-g')], ul = g.map(x => x.querySelector('ul')), note = d.querySelector('.r94-n');
+    if (g.length < 2 || !ul[0] || !ul[1]) return { sum: html || '', note: '' };
+    const same = ul[0].innerHTML === ul[1].innerHTML;
+    const sum = '<div class="t97b">가까운 중학교(추정)' + (same ? '<small>남·여 같음</small>' : '') + '</div>'
+      + (same ? `<ul class="u97b">${ul[0].innerHTML}</ul>` : g.map((x, i) => `<div class="g97b">${i ? '여학생' : '남학생'}</div><ul class="u97b">${ul[i].innerHTML}</ul>`).join(''));
+    return { sum, note: note ? note.innerHTML : '', same };
+  }
+  // 묶음 L97B: 학교·학군을 누르면 그 범위가 작은 상자 옆 빈 곳에 들어오게
+  let scFit97b = false;
+  function fitMargin97b(mob){
+    const c = mapEl.querySelector('#cm84Scc');
+    if (!l97b() || !c || c.hidden || !c.classList.contains('l97b')) return null;
+    return mob ? { top: c.offsetTop + c.offsetHeight + 12, right: 24, bottom: 24, left: 24 } : { top: 60, right: Math.max(60, mapEl.clientWidth - c.offsetLeft + 16), bottom: 40, left: 60 };
   }
   function drawElem91(){
     if (!SCP){ loadSchoolPts(); return; }
@@ -1894,7 +1939,9 @@
         if (!p){ p = new NV.Polygon({ paths: z.ll.map(r => r.map(([y, x]) => new NV.LatLng(y, x))), fillColor: S.c, fillOpacity: .10, strokeColor: S.c, strokeWeight: 2.4, strokeOpacity: .95, strokeStyle: 'solid', clickable: false, zIndex: 16 }); scPolys.set(k, p); }
         if (!p.getMap()) p.setMap(map);
         if (l95() && tok === scTok95 && scSel.lat != null){ const v3 = view(); if (!inView(v3, scSel.lat, scSel.lng)){ const q = labelPos95(z, v3);   // 묶음 L95: 학교 이름표가 화면 밖이면 보이는 범위 안쪽에 학구 이름표
-          if (q){ const m = new NV.Marker({ map, position: new NV.LatLng(q[0], q[1]), zIndex: 35, clickable: false, icon: { content: `<div class="cm84-scl" style="--s:${S.c}">${esc(shortSch(scSel.name))} 학구</div>`, anchor: new NV.Point(0, 0) } }); scMarks.push(m); } } } }); }); }
+          if (q){ const m = new NV.Marker({ map, position: new NV.LatLng(q[0], q[1]), zIndex: 35, clickable: false, icon: { content: `<div class="cm84-scl" style="--s:${S.c}">${esc(shortSch(scSel.name))} 학구</div>`, anchor: new NV.Point(0, 0) } }); scMarks.push(m); } } } });
+      if (scFit97b && l97b()){ scFit97b = false; const zz = j._dec.filter(z => scSel.zones.includes(z.zid));   // 묶음 L97B: 지도에서 학교를 누른 경우 그 학구(여러 구역이면 합친 범위)가 보이게
+        if (zz.length) fitBB95(zz.reduce((a, z) => ({ s: Math.min(a.s, z.bb.s), w: Math.min(a.w, z.bb.w), n: Math.max(a.n, z.bb.n), e: Math.max(a.e, z.bb.e) }), { s: 90, w: 180, n: -90, e: -180 }), [scSel.lat, scSel.lng]); } }); }
     if (zm < L91CFG.schoolZoom) return;
     let n = 0;
     for (const e of SCP.elem){
@@ -1903,7 +1950,7 @@
       const m = new NV.Marker({ map, position: new NV.LatLng(e[1], e[2]), zIndex: on ? 90 : 36, title: e[0], icon: { content: `<div class="cm84-sch${on ? ' on' : ''}" style="--s:${S.c}">${esc(shortSch(e[0]))}</div>`, anchor: new NV.Point(0, 0) } });
       NV.Event.addListener(m, 'click', () => {
         if (scSel && scSel.name === e[0]){ scSel = null; scCard(null, 'elem'); }
-        else elemSel91(e);
+        else { elemSel91(e); scFit97b = l97b(); }   // 묶음 L97B: 누른 학교의 학구가 보이게(그린 뒤 맞춤)
         drawSchool(); });
       scMarks.push(m);
     }
@@ -1913,7 +1960,11 @@
     scSel = { name: e[0], sd: e[3], zones: e[4], lat: e[1], lng: e[2] };
     const zs = e[4].map(z => (scAttr.elem || {})[z]).filter(Boolean).map(a => String(a[0]));
     const near = (k) => rate94() && typeof elemNearL94 === 'function' ? `<div class="sc94">${elemNearL94(e[0], e[1], e[2], e[3])}</div>` : '';   // 묶음 L94: 가까운 중학교(추정) 남 3·여 3과 진학률
-    const card = () => scCard(`<b>${esc(e[0])}</b><div class="scs">배정 범위: ${zs.length ? zs.map(esc).join(', ') : '학구도 자료에 연결된 통학구역 없음'}${e[4].length > 1 ? ' <small>(여러 구역)</small>' : ''}</div>${near()}<div class="scn">${esc(SC.note)}</div>`, 'elem');
+    const range = `배정 범위: ${zs.length ? zs.map(esc).join(', ') : '학구도 자료에 연결된 통학구역 없음'}${e[4].length > 1 ? ' <small>(여러 구역)</small>' : ''}`;
+    const card = () => { if (l97b()){ const nh = rate94() && typeof elemNearL94 === 'function' ? elemNearL94(e[0], e[1], e[2], e[3]) : '', ns = nearSum97b(nh);   // 묶음 L97B: 작은 상자
+        scCard97b('elem', { title: String(e[0]).replace(/^(서울|인천|경기)(?=.)/, ''), sum: ns.sum || `<div class="scs">${range}</div>`, info: `<p>${range}</p>${ns.note ? `<p>${ns.note}</p>` : ''}<p>${esc(SC.note)}</p>`,
+          detail: `<div class="scs">${range}</div>${near()}<div class="scn">${esc(SC.note)}</div>` }); window.CALC_MAP_L84.elemCard97b = { same: !!ns.same }; return; }
+      scCard(`<b>${esc(e[0])}</b><div class="scs">${range}</div>${near()}<div class="scn">${esc(SC.note)}</div>`, 'elem'); };
     card(); if (rate94() && rateStateL94(e[3]) !== 'loaded') loadRateL94(e[3]).then(() => { if (scSel && scSel.name === e[0]) card(); });
     window.CALC_MAP_L84.elemCard = { name: e[0], sd: e[3] };
   }
@@ -1940,7 +1991,7 @@
     const mob = window.innerWidth < 768;
     if (mob && panel && panel.classList.contains('on')){ panel.classList.remove('full'); panel.classList.add('mini95'); setTimeout(resize, 220); }   // 폰: 시트를 낮춰 지도가 보이게(시트 머리를 누르면 원래대로)
     let s = bb.s, w = bb.w, n = bb.n, e = bb.e; if (extra){ s = Math.min(s, extra[0]); n = Math.max(n, extra[0]); w = Math.min(w, extra[1]); e = Math.max(e, extra[1]); }
-    const go = () => { try { map.fitBounds(new NV.LatLngBounds(new NV.LatLng(s, w), new NV.LatLng(n, e)), mob ? { top: 110, right: 70, bottom: 20, left: 20 } : { top: 60, right: 60, bottom: 40, left: 370 }); } catch (er) { map.setCenter(new NV.LatLng((s + n) / 2, (w + e) / 2)); }
+    const go = () => { try { map.fitBounds(new NV.LatLngBounds(new NV.LatLng(s, w), new NV.LatLng(n, e)), fitMargin97b(mob) || (mob ? { top: 110, right: 70, bottom: 20, left: 20 } : { top: 60, right: 60, bottom: 40, left: 370 })); /* 묶음 L97B: 작은 상자 옆 빈 곳 */ } catch (er) { map.setCenter(new NV.LatLng((s + n) / 2, (w + e) / 2)); }
       if (map.getZoom() < L91CFG.schoolZoom) map.setZoom(L91CFG.schoolZoom); };   // 학교 이름표가 보이는 단계까지는 가까이
     if (mob) setTimeout(go, 260); else go();
   }
@@ -1976,11 +2027,23 @@
     return true;
   }
   const rate94 = () => l94() && typeof rateTableL94 === 'function' && typeof loadRateL94 === 'function';   // 묶음 L94: 진학률 표는 계산기 HTML 함수를 같이 씀
-  function midCard(zid, sd, from){
+  function midCard(zid, sd, from, bb97){   // 묶음 L97B: bb97 = 지도에서 학군을 누른 경우 그 범위(상자를 그린 뒤 화면 맞춤)
     Promise.all([loadAssign(), loadSchoolPts(), rate94() ? loadRateL94(sd) : null]).then(([AM]) => {
       if (rate94()){   // 묶음 L94: 학교별 특목·자사고 진학률·시도 안 상위 %·과·외·자 인원·시도 평균 + 남·여·공학(나이스)
         const M = AM ? AM[1] : null, zn = M && M._zones ? M._zones[zid] : null, nm = zn ? zn[0] : (((scAttr.mid || {})[zid] || [])[0] || '중학교 학군'), list = zn ? zn[2] || [] : [];
         const gu = /중학구$/.test(nm) ? '중학구' : '학교군', R = SC.rule;
+        if (l97b()){   // 묶음 L97B: 작은 상자 — 요약은 표 위 3곳(+ 나머지 수), 배정 원리·출처는 ⓘ, [자세히]는 지금의 전체 내용
+          const tb = rateTableL94(list, sd, from || null), d = document.createElement('div'); d.innerHTML = tb; const rows = [...d.querySelectorAll('tbody tr')];
+          const li = rows.slice(0, 3).map(r => { const td = [...r.cells]; return `<li><b>${td[0] ? td[0].innerHTML : ''}</b>${td.length > 1 ? td[td.length - 1].innerHTML : ''}</li>`; }).join('');   // 학교 · 상위 % · 진학률 한 줄씩
+          const more = rows.length > 3 ? `<div class="scs">외 ${rows.length - 3}곳은 [자세히]</div>` : '';
+          d.querySelectorAll('table').forEach(t => t.remove()); const foot = d.innerHTML.trim();   // 표 아래 진학률 설명은 ⓘ로
+          scCard97b('mid', { title: nm + (zn && zn[1] ? ' (공동)' : ''), sum: `<div class="t97b">소속 중학교 ${list.length}곳</div>${li ? `<ul class="u97b">${li}</ul>` : ''}${more}`,
+            info: (foot ? `<div>${foot}</div>` : '') + `<p><b>배정 원리</b> ${esc(R[gu])}</p>${gu === '학교군' ? `<p>${esc(R.중학구)}</p>` : ''}<p>${esc(R[sd] || '')}</p><p>출처: ${esc([R.src.공통, R.src[sd]].filter(Boolean).join(' · '))} · ${esc(SC.note)}</p>`,
+            detail: `<div class="scs">소속 중학교 ${list.length}곳</div>${tb}<div class="scr"><b>배정 원리</b><p>${esc(R[gu])}</p>${gu === '학교군' ? `<p>${esc(R.중학구)}</p>` : ''}<p>${esc(R[sd] || '')}</p></div><div class="scn">출처: ${esc([R.src.공통, R.src[sd]].filter(Boolean).join(' · '))} · ${esc(SC.note)}</div>` });
+          window.CALC_MAP_L84.midCard = { zid, nm, n: list.length, rate: rateStateL94(sd), from96: !!from, l97b: true };
+          if (bb97) fitBB95(bb97);
+          return;
+        }
         scCard(`<b>${esc(nm)}</b>${zn && zn[1] ? ' <small>(공동)</small>' : ''}<div class="scs">소속 중학교 ${list.length}곳</div>` + rateTableL94(list, sd, from || null)
           + `<div class="scr"><b>배정 원리</b><p>${esc(R[gu])}</p>${gu === '학교군' ? `<p>${esc(R.중학구)}</p>` : ''}<p>${esc(R[sd] || '')}</p></div>`
           + `<div class="scn">출처: ${esc([R.src.공통, R.src[sd]].filter(Boolean).join(' · '))} · ${esc(SC.note)}</div>`, 'mid');
@@ -2026,7 +2089,7 @@
             if (!vis2(z.bb) || z2 < SC.minZoom){ if (p) p.setMap(null); return; }
             if (!p){ const ck = kind === 'mid' && l91();   // 묶음 L91: 학군을 누르면 소속 중학교·배정 원리
               p = new NV.Polygon({ paths: z.ll.map(r => r.map(([y, x]) => new NV.LatLng(y, x))), fillColor: S.c, fillOpacity: ck ? .01 : 0, strokeColor: S.c, strokeWeight: kind === 'mid' ? 2.4 : 1.6, strokeOpacity: .9, strokeStyle: S.dash, clickable: ck, zIndex: 15 }); scPolys.set(k, p);
-              if (ck) NV.Event.addListener(p, 'click', () => { if (l93()){ if (midSel93 === z.zid){ midSel93 = null; styleMid93(); scCard(null, 'mid'); return; } midSel93 = z.zid; styleMid93(); } midCard(z.zid, sd); });
+              if (ck) NV.Event.addListener(p, 'click', () => { if (l93()){ if (midSel93 === z.zid){ midSel93 = null; styleMid93(); scCard(null, 'mid'); return; } midSel93 = z.zid; styleMid93(); } midCard(z.zid, sd, null, l97b() ? z.bb : null); });
               if (kind === 'mid' && l93()) styleMid93One(p, z.zid); }
             if (!p.getMap()) p.setMap(map);
             if ((z2 >= SC.labelZoom || (l95() && kind === 'mid' && z.zid === midSel93)) && scMarks.length < SC.labelMax){   // 묶음 L95: 고른 학군은 한 단계 멀리서도 이름표

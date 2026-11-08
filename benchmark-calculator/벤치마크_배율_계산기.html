@@ -33,7 +33,7 @@
 // 묶음 L52·L53(83단계): 아래 정적 스크립트 주소의 ?v=와 이 표는 build_l52_versions.py가 빌드 때 실제 파일 해시로 채운다(손으로 쓰지 않음).
 // 표는 25평 seed 지연 로딩(loadSeed25)이 실행 중에 쓴다. EARLY_FLAGS_L52는 xlsx 태그(L53)를 쓸지 정하려고 주소 플래그를 먼저 읽는다
 // (applyBundlesFromUrl과 같은 규칙, 로컬 주소에서만: 값이 없으면 모두 켬, 있으면 적힌 묶음만 — 묶음 이름 'L' 포함).
-var ASSET_VERSIONS_L52 = /*L52_VERSIONS*/{"shared.js":"8e8ee813","seedComplexes.js":"123bdffb","seedChips.js":"21287378","m2Series.js":"acc3bcaa","seedComplexes25.js":"0dee2642","feedback-widget.js":"52cf1fae","station_walk.js":"d1744c95","school_elem.js":"e368c3b0","calc_map.js":"15c9f858","map_light.js":"c838e836","map_trade_idx.js":"7fe63d48"}/*END_L52_VERSIONS*/;
+var ASSET_VERSIONS_L52 = /*L52_VERSIONS*/{"shared.js":"8e8ee813","seedComplexes.js":"123bdffb","seedChips.js":"21287378","m2Series.js":"acc3bcaa","seedComplexes25.js":"0dee2642","feedback-widget.js":"52cf1fae","station_walk.js":"d1744c95","school_elem.js":"e368c3b0"}/*END_L52_VERSIONS*/;
 var EARLY_FLAGS_L52 = (function(){
   var on = { L52: true, L53: true, L86: true, L88: true };   // L86(시세 이력 미루기)은 지도 중심 화면(L85)이 켜져 있을 때만 — L85를 끄면 여기 L86도 false
   try {
@@ -1433,6 +1433,25 @@ html body.l59-favbar .wrap{padding-bottom:calc(150px + env(safe-area-inset-botto
 .chart-ext-tooltip-main .chart-ext-values{gap:3px 10px;}
 .chart-ext-tooltip-main .chart-ext-line{font-size:13px;line-height:1.35;gap:4px;}
 .chart-ext-tooltip-main .chart-ext-dot{width:8px;height:8px;}
+/* 묶음 L97B: 진단 큰 그래프 — 값 상자를 그래프 바로 위 칸으로(그림 안 위쪽 여백 172px → 8px), 칸 높이는 내용만큼 */
+.chart-box.l97b{height:auto;}
+.chart-box.l97b > .chart-canvas-wrap{height:488px;}
+.chart-ext-tooltip.l97b-row{position:static !important;left:auto !important;top:auto !important;right:auto;width:auto;max-width:none;max-height:none;overflow:visible;white-space:normal;margin:0 0 6px;box-shadow:none;}
+.chart-ext-tooltip.l97b-row.cross-l85{display:flex;flex-wrap:wrap;align-items:center;gap:2px 14px;}
+.chart-ext-tooltip.l97b-row .cross-title-l85{flex-basis:100%;}
+.chart-ext-tooltip.l97b-row .cross-row-l85{min-width:0;}
+.chart-ext-tooltip.l97b-row .cross-name-l85{max-width:none;overflow:visible;text-overflow:clip;white-space:normal;}
+.chart-ext-tooltip.l97b-row .cross-val-l85{margin-left:0;padding-left:6px;white-space:nowrap;}
+/* 묶음 L97B: 시세 비교표 — 상자 안 스크롤 없이 최근 12개월만, [더 보기]로 펼침 */
+.recent-box.l97b{height:auto !important;max-height:none !important;overflow:visible !important;overflow:clip !important;}
+.recent-box.l97b thead th{position:sticky;top:0;z-index:4;}
+.recent-box.l97b th.name-th{white-space:normal;}
+.recent-box.l97b:not(.open-l97b) tr.more-l97b{display:none;}
+.fold-l97b{display:flex;justify-content:center;margin-top:10px;}
+.fold-l97b button{font:inherit;font-size:13px;font-weight:600;padding:7px 16px;border-radius:8px;border:1px solid var(--border-strong, #CBD5E1);background:var(--surface);color:var(--ink);cursor:pointer;}
+.pyeong-chip .chk-l97b{color:var(--ink-faint, #868E96);font-weight:600;font-size:.92em;}
+.jr-l97b{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0 2px;}
+.jr-l97b .btn{white-space:nowrap;}
 .twin-msg{font-size:12px;color:var(--ink-muted);margin-top:6px;line-height:1.5;}
 .twin-select-reason{font-size:12px;color:var(--ink-muted);line-height:1.5;margin:4px 0 2px;}
 .twin-kind-caption{font-size:12px;color:var(--ink-muted);background:var(--surface-alt);border-radius:8px;padding:7px 10px;margin:8px 0;line-height:1.5;}
@@ -2036,6 +2055,13 @@ const CHART_EXT_TOOLTIP_RESERVED_TOP_MAIN = 172;
 function chartExtTooltipAnchor(chart){
   return chart.canvas.parentNode;
 }
+// 묶음 L97B: 진단 큰 그래프(singleMainCanvas, 그래프 칸 .chart-box.l97b 안)인지 — 값 상자를 그래프 위 칸으로 옮기는 대상
+function rowOnL97B(chart){ try { return !!(typeof BUNDLES !== 'undefined' && BUNDLES.L97B && chart && chart.canvas && chart.canvas.id === 'singleMainCanvas' && chart.canvas.closest('.chart-box.l97b')); } catch (e) { return false; } }
+// 값 상자 칸 높이: 한 번 늘어난 높이는 유지(마우스·손가락을 옮길 때 그래프가 위아래로 흔들리지 않게)
+function rowFitL97B(box){ box.style.left = ''; box.style.top = ''; const h = box.offsetHeight; if (h > (box.$mhL97B || 0)){ box.$mhL97B = h; box.style.minHeight = h + 'px'; } }
+// 묶음 L97B: 그래프 설정의 위쪽 여백을 8px로(값 상자가 그래프 밖 칸으로 갔으므로)
+function padTopL97B(cfg){ if (!BUNDLES.L97B || !cfg) return cfg; cfg.options = cfg.options || {}; const lo = cfg.options.layout = cfg.options.layout || {}; const p = lo.padding;
+  lo.padding = (p && typeof p === 'object') ? Object.assign({}, p, { top: 8 }) : { top: 8, left: typeof p === 'number' ? p : 0, right: typeof p === 'number' ? p : 0, bottom: typeof p === 'number' ? p : 0 }; return cfg; }
 function ensureChartExtTooltipBox(chart){
   // 만들어둔 박스를 차트 인스턴스에 직접 붙여둔다 — Chart.js가 destroy()
   // 도중 chart.canvas를 먼저 null로 비워버려서(실측으로 확인된 실제
@@ -2073,7 +2099,8 @@ function ensureChartExtTooltipBox(chart){
     else if (anchor.classList.contains('twin-chart-wrap')) box.classList.add('chart-ext-tooltip-tiny');
     else box.classList.add('chart-ext-tooltip-main');
     box.innerHTML = '<span class="chart-ext-placeholder">'+chartExtPlaceholderText()+'</span>';
-    anchor.insertBefore(box, anchor.firstChild);
+    if (rowOnL97B(chart) && anchor.parentNode){ box.classList.add('l97b-row'); anchor.parentNode.insertBefore(box, anchor); }   // 묶음 L97B: 그래프 위 칸
+    else anchor.insertBefore(box, anchor.firstChild);
   }
   chart.$extTooltipBox = box;
   return box;
@@ -2097,6 +2124,7 @@ function chartExternalTooltipHandler(context){
     return '<span class="chart-ext-line">'+dot+'<span class="chart-ext-label">'+esc(b.lines.join(' '))+'</span></span>';
   });
   box.innerHTML = (title ? '<div class="chart-ext-title">'+esc(title)+'</div>' : '') + '<div class="chart-ext-values">'+lines.join('')+'</div>';
+  if (box.classList.contains('l97b-row')) rowFitL97B(box);   // 묶음 L97B
 }
 // ---- 묶음 L85_CROSS(L85 보충): 그래프 세로선 + 세로선 바로 위 가격 상자 — 모든 Chart.js 그래프 공통(전역 플러그인) ----
 // 마우스(폰은 손가락을 대고 좌우로 끄는 곳)의 시점에 세로선을 긋고, 그 위(그래프 위쪽 끝, 예약 여백 안)에 "2025.09 · 6억 4,350만" 상자.
@@ -2159,6 +2187,7 @@ function crossTooltipL85(context){
 }
 // 상자 자리: 세로선 가운데 위, 그래프 왼쪽·오른쪽 끝에서는 안쪽으로 붙임(잘리지 않게)
 function crossPlaceL85(chart, box, idx){
+  if (box.classList.contains('l97b-row')){ rowFitL97B(box); return; }   // 묶음 L97B: 그래프 위 칸(자리 고정)
   const ca = chart.chartArea, cv = chart.canvas, x = crossXL85(chart, idx); if (x == null || !ca) return;
   const ox = cv.offsetLeft || 0, oy = cv.offsetTop || 0, w = box.offsetWidth, h = box.offsetHeight;
   const minL = ox + ca.left, maxL = ox + ca.right - w;
@@ -3007,9 +3036,9 @@ function seoulHistoricalAvg(){
 // 라이브는 주소 플래그를 읽지 않으므로 이 기본값이 그대로 동작한다.
 const BUNDLES = { A:false, B:false, C:false, D1:false, D2:false, D3:false, D4:false, E1:true, E2:false, E3:true, F1:true, F2:true, F3:true, F4:true, F5:true, F6:true,
   H1:false, H2:true, H3:true, H4:true, H5:true, H6:true, H7:true,
-  L1:true, L2:true, L3:true, L4:true, L5:true, L6:false, L7:true, L8:true, L9:true, L10:true, L11:true, L12:true, L13:true, L14:true, L15:true, L16:true, L17:true, L18:true, L19:true, L19B:true, L20:true, L22:true, L23:true, L24:true, L25:true, L26:true, L27:!!window.POOL_EXCLUDE_ON, L31:!!window.NEW_NAME_RULE_ON, L32:true, L33:true, L34:true, L37:true, L28:true, L38:true, L40:true, L39:true, L41:true, L42:true, L43:true, L44:true, L45:true, L46:true, L47:true, L49:true, L48:true, L50:true, L51:true, L52:true, L53:true, L54:true, L55:true, L56:true, L57:true, L58:true, L59:true, L59_DND:true, L59_INFOCARD:true, L59_STATION:true, L59_SCHOOL:true, L59_FAVSEARCH:true, L60:true, L60_REL:false, L60_WHY:false, L60_NOTE:true, L61:true, L64:true, L64_LINK:true, L64_NEWBUILD:false, L65:true, L69:true, L70:true, L71:true, L74:true, L75:true, L76:true, L77:true, L78:true, L79:true, L80:true, L81:true, L82:true, L84:true, L85:true, L85_CROSS:true, L85_LEFT:true, L85_INFO:true, L85_LBL:true, L85_FULL:true, L86:(typeof EARLY_FLAGS_L52 === 'undefined' || !!EARLY_FLAGS_L52.L86), L87:true, L88:true, L88_EMBED:true, L88_SHARE:true, L89:true, L84_RT:true, L84_SC:true, L91:true, L92:true, L93:true, L94:true, L95:true, L96:true, L97:true, L35:true, L36:true, L30:true, L29:true, L29R:false, K1:false, K2:true, K4:false };
+  L1:true, L2:true, L3:true, L4:true, L5:true, L6:false, L7:true, L8:true, L9:true, L10:true, L11:true, L12:true, L13:true, L14:true, L15:true, L16:true, L17:true, L18:true, L19:true, L19B:true, L20:true, L22:true, L23:true, L24:true, L25:true, L26:true, L27:!!window.POOL_EXCLUDE_ON, L31:!!window.NEW_NAME_RULE_ON, L32:true, L33:true, L34:true, L37:true, L28:true, L38:true, L40:true, L39:true, L41:true, L42:true, L43:true, L44:true, L45:true, L46:true, L47:true, L49:true, L48:true, L50:true, L51:true, L52:true, L53:true, L54:true, L55:true, L56:true, L57:true, L58:true, L59:true, L59_DND:true, L59_INFOCARD:true, L59_STATION:true, L59_SCHOOL:true, L59_FAVSEARCH:true, L60:true, L60_REL:false, L60_WHY:false, L60_NOTE:true, L61:true, L64:true, L64_LINK:true, L64_NEWBUILD:false, L65:true, L69:true, L70:true, L71:true, L74:true, L75:true, L76:true, L77:true, L78:true, L79:true, L80:true, L81:true, L82:true, L84:true, L85:true, L85_CROSS:true, L85_LEFT:true, L85_INFO:true, L85_LBL:true, L85_FULL:true, L86:(typeof EARLY_FLAGS_L52 === 'undefined' || !!EARLY_FLAGS_L52.L86), L87:true, L88:true, L88_EMBED:true, L88_SHARE:true, L89:true, L84_RT:true, L84_SC:true, L91:true, L92:true, L93:true, L94:true, L95:true, L96:true, L97:true, L97B:true, L35:true, L36:true, L30:true, L29:true, L29R:false, K1:false, K2:true, K4:false };
 const BUNDLE_GROUPS = { D:['D1','D2','D3','D4'], E:['E1','E2','E3'], F:['F1','F2','F3','F4','F5','F6'], H:['H1','H2','H3','H4','H5','H6','H7'],
-  L:['L1','L2','L3','L4','L5','L6','L7','L8','L9','L10','L11','L12','L13','L14','L15','L16','L17','L18','L19','L19B','L20','L22','L23','L24','L25','L26','L27','L29','L30','L31','L32','L33','L34','L37','L35','L36','L28','L38','L40','L39','L41','L42','L43','L44','L45','L46','L47','L49','L48','L50','L51','L52','L53','L54','L55','L56','L57','L58','L59','L60','L61','L64','L65','L69','L70','L71','L74','L75','L76','L77','L78','L79','L80','L81','L82','L84','L85','L86','L87','L88','L89','L91','L92','L93','L94','L95','L96','L97'], K:['K1','K2','K4'] };
+  L:['L1','L2','L3','L4','L5','L6','L7','L8','L9','L10','L11','L12','L13','L14','L15','L16','L17','L18','L19','L19B','L20','L22','L23','L24','L25','L26','L27','L29','L30','L31','L32','L33','L34','L37','L35','L36','L28','L38','L40','L39','L41','L42','L43','L44','L45','L46','L47','L49','L48','L50','L51','L52','L53','L54','L55','L56','L57','L58','L59','L60','L61','L64','L65','L69','L70','L71','L74','L75','L76','L77','L78','L79','L80','L81','L82','L84','L85','L86','L87','L88','L89','L91','L92','L93','L94','L95','L96','L97','L97B'], K:['K1','K2','K4'] };
 // 묶음 L46(69단계): 그래프 점선 모양 통일 — 모든 점선을 "선도단지 대비 적정가" 선(FAIR_LINE_STYLE.borderDash)과 같은 긴 점선으로.
 // 촘촘한 점("좁쌀")·점-선 섞인 패턴을 없앤다. 새 점선은 항상 dashL46(예전 값)을 쓴다 — L46을 끄면 예전 값 그대로.
 const DASH_L46 = [5, 4];
@@ -3615,6 +3644,8 @@ const state = {
   singleRatioPeakOn: false,
   singleRatioTroughOn: false,
   singleRatioAvgOn: false,
+  singleRatioSeoulAvgOn: false,   // 묶음 L97B: [서울 평균]
+  singleRatioBenchAvgOn: false,   // 묶음 L97B: [선도단지 평균]
   singleBenchmarkOverlayOn: false,
   singleBenchmarkOverlayGroup: 'seoul',
   singleBenchLineOn: null, // 묶음 L12: 단일 진단 선도단지 선 보이기(null = 사용자 선택 없음 → 켜짐). L12를 끄면 쓰지 않는다
@@ -8067,6 +8098,10 @@ function slotAreaL69(id, p){
 function slotAreaTextL69(id, p){ const a = slotAreaL69(id, p); return a ? (a[0] ? a[0] + '평형(전용 ' + a[1] + '㎡)' : '전용 ' + a[1] + '㎡') : ''; }
 // 묶음 L79(165단계): 면적만 나오던 칩(146 예외 25평 칸·"기타·기본")에도 그 타입 세대수를 붙인다(다른 칩처럼 "…세대")
 function chipUnitsL79(n){ return (BUNDLES.L79 && n > 0) ? ' ' + n + '세대' : ''; }
+// 묶음 L97B: 평형 칩 세대수를 다시 맞추는 동안(급지표 11월 seed 전) — 세대수 자리에 "확인 중"
+const CHIP_SPLIT_L97B = new Set(["e편한세상검단어반센트로", "e편한세상금빛그랑메종2단지", "e편한세상김포어반베뉴", "거여1단지-도시개발-_60", "광주탄벌서희스타힐스1단지", "그란츠리버파크", "김포마송디에트르퍼스티지", "김포센트럴헤센1단지", "늘푸른마을_60", "덕계역금강펜테리움센트럴파크", "동부삼환_60", "매화마을공무원-2단지-_59", "벽적골8단지-두산-우성-한신-_60", "벽적골9단지주공_59", "벽적골주공-8단지-_60", "부영-1차-_60", "부영_60", "북청라하우스토리", "브라운스톤부평", "비봉금강펜테리움", "상계주공-10단지-_58", "상계주공-11단지-_58", "상계주공-16단지-_59", "상계주공-9단지-_58", "서원_60", "성포주공-11단지-_58", "숲속마을-1단지-_60", "신내-4단지-_60", "신내-6단지-_60", "신성-신안-쌍용-진흥_60", "신월시영_59", "양주옥정LH엘리프", "양주회천한양수자인", "에듀시티파라곤", "영통센트럴파크뷰_60", "영통자이", "영통포레파크원_60", "오산운암5단지주공_60", "용인드마크데시앙", "용인보평역서희스타힐스리버파크", "원천주공_62", "율곡_58", "은빛-1단지-_60", "은빛-2단지-_60", "이안평택안중역", "이천안흥주공_60", "이충부영-1-2-3단지-_60", "이편한세상고천파크루체", "인천시청역힐스테이트", "인천유림노르웨이숲에듀오션", "장미-서울-노원구-_59", "장암2단지주공_60", "주공-1단지-부천시소사구-_58", "주공-2단지-군포시-_60", "주공-평택군문2단지-_60", "주공4단지-한라-_59", "중계무지개_59", "중흥에스클래스에듀시티", "청량리롯데캐슬하이루체", "청솔_59", "태강-10단지-_59", "파주연풍양우내안애에코하임", "포레나안산고잔", "포천모아엘가리더스파크", "학마을서해_60", "학마을한진_60", "한솔마을-6단지-_59", "현대전자산업주식회사사원아파트_59", "화서4단지주공_60", "회천트루엘시그니처"]);   // 같은 평형이 칩 두 개로 나뉜 단지(분석 탭 점검 11-08, 70곳)
+const CHIP_CHECK_TIP_L97B = '평형별 세대수를 KB 자료와 다시 맞추는 중이에요(시세·판정은 그대로)';
+function chipCheckL97B(){ return ' <span class="chk-l97b">확인 중</span>'; }
 function areaChipLabelL69(a){ return a[0] ? '<b>' + a[0] + '평형</b>(전용 ' + a[1] + '㎡)' : '<b>전용</b>' + a[1] + '㎡'; }
 // 쌍둥이·괴리·준거 카드의 상대 단지(34평 칸) 이름 뒤에 붙인다
 function areaTagHtmlL69(id, p){ const t = slotAreaTextL69(id, p === 25 ? 25 : 34); return t ? '<span class="slot-area-l69">' + esc(t) + '</span>' : ''; }
@@ -8366,8 +8401,9 @@ function pyeongChipsHtml(slot, target){
   const out = [];
   if (has25){
     const a25 = slotAreaL69(ref.id, 25);   // 묶음 L69: 25평 칸 기준에 맞는 타입이 없어 가장 가까운 평형을 넣은 단지
-    const tip = (a25 ? '25평 칸 기준(전용 56~62㎡)에 맞는 타입이 없어 가장 가까운 '+slotAreaTextL69(ref.id, 25)+' 시세를 넣었어요\n' : '') + (b ? '25평대(전용 '+fmtM2Range(b[1], b[2])+') 전체 '+b[0]+'세대\n' : '') + basis25Text;
-    const label = a25 ? areaChipLabelL69(a25) + chipUnitsL79(q[1] === 0 ? q[2] : 0) : '<b>25평</b>'+(b ? b[0]+'세대' : '');   // 묶음 L79: q[1]=0이면 q[2]가 그 타입 세대수
+    const tip = (BUNDLES.L97B && (a25 || CHIP_SPLIT_L97B.has(ref.id)) ? CHIP_CHECK_TIP_L97B + '\n' : '') + (a25 ? '25평 칸 기준(전용 56~62㎡)에 맞는 타입이 없어 가장 가까운 '+slotAreaTextL69(ref.id, 25)+' 시세를 넣었어요\n' : '') + (b ? '25평대(전용 '+fmtM2Range(b[1], b[2])+') 전체 '+b[0]+'세대\n' : '') + basis25Text;
+    const chk25 = BUNDLES.L97B && (a25 || CHIP_SPLIT_L97B.has(ref.id));   // 묶음 L97B: 세대수 확인 중
+    const label = chk25 ? (a25 ? areaChipLabelL69(a25) : '<b>25평</b>') + chipCheckL97B() : a25 ? areaChipLabelL69(a25) + chipUnitsL79(q[1] === 0 ? q[2] : 0) : '<b>25평</b>'+(b ? b[0]+'세대' : '');   // 묶음 L79: q[1]=0이면 q[2]가 그 타입 세대수
     if (cur === 25 && ref.pending && seed25FailedL43()) out.push('<button type="button" class="pyeong-chip current" data-pyeong-retry="1" title="25평 시세를 불러오지 못했어요. 누르면 다시 불러와요"><b>25평</b>다시 시도</button>');   // 묶음 L43(P10)
     else if (cur === 25 && ref.pending) out.push('<span class="pyeong-chip current" title="'+esc(tip)+'"><b>25평</b>불러오는 중…</span>');
     else if (cur === 25) out.push('<span class="pyeong-chip current" title="'+esc(tip)+'">'+label+'</span>');
@@ -8386,9 +8422,9 @@ function pyeongChipsHtml(slot, target){
     // 원래 seed 시세로 되돌릴 수 있다(2026-09-30). 이 칩으로 다른 평형으로 가지는 않는다.
     const tag = s === 25 ? '기본' : '기타';
     const a34 = slotAreaL69(ref.id, 34);   // 묶음 L69: KB 공급면적 평형 + 전용(공급면적이 없으면 전용만)
-    const label = (a34 ? (a34[0] ? areaChipLabelL69(a34) : '<b>'+tag+'</b>전용 '+a34[1]+'㎡') : '<b>'+tag+'</b>'+Math.floor(x[0])+'㎡') + chipUnitsL79(x[1]);   // 묶음 L79: x[1] = seed 시세 타입 세대수
+    const label = (a34 ? (a34[0] ? areaChipLabelL69(a34) : '<b>'+tag+'</b>전용 '+a34[1]+'㎡') : '<b>'+tag+'</b>'+Math.floor(x[0])+'㎡') + (BUNDLES.L97B ? chipCheckL97B() : chipUnitsL79(x[1]));   // 묶음 L97B: 세대수 확인 중   // 묶음 L79: x[1] = seed 시세 타입 세대수
     if (cur === null){
-      const tip = seedBasisText + (s === 25 ? '\n(25평 칩을 누르면 25평 대표 타입 시세로 바뀝니다)' : '');
+      const tip = (BUNDLES.L97B ? CHIP_CHECK_TIP_L97B + '\n' : '') + seedBasisText + (s === 25 ? '\n(25평 칩을 누르면 25평 대표 타입 시세로 바뀝니다)' : '');
       out.push('<span class="pyeong-chip other current" title="'+esc(tip)+'">'+label+'</span>');
     } else {
       out.push('<button type="button" class="pyeong-chip other switchable" title="'+esc(seedBasisText+'\n클릭하면 원래 시세로 되돌립니다')+'"'+btnAttrs(34)+'>'+label+'</button>');
@@ -10646,6 +10682,7 @@ try {
   });
 } catch (e) { /* DOM이 없는 환경(테스트 하네스) */ }
 function renderSingleDiag(name){
+  jrResetL97B(name);   // 묶음 L97B
   if (BUNDLES.L26){ try { hideRedundantSingleBenchSelect(); } catch (e) {} }
   const headEl = document.getElementById('singleDiagHead');
   const resultEl = document.getElementById('singleDiagResult');
@@ -11215,7 +11252,7 @@ function renderSingleActiveChart(bench, target){
     const field = state.singleActiveChart==='sale' ? 'saleMid' : 'jeonseMid';
     area.innerHTML =
       '<div class="chart-layout">'+
-        '<div class="chart-box"><div class="chart-canvas-wrap" id="singleChartCanvasWrap">'+
+        '<div class="chart-box'+(BUNDLES.L97B ? ' l97b' : '')+'"><div class="chart-canvas-wrap" id="singleChartCanvasWrap">'+
           '<canvas id="singleMainCanvas"></canvas>'+
           '<div class="drag-select-box" id="singleDragBox" hidden></div>'+
           '<div class="drag-result" id="singleDragResult" hidden>'+
@@ -11243,7 +11280,7 @@ function renderSingleActiveChart(bench, target){
     if (!benchLine) cfg.data.datasets = cfg.data.datasets.filter(ds => !(ds._kind === 'base' || (benchmarkOverlay && ds.label === benchmarkOverlay.name)));
     if (BUNDLES.L93 && field === 'saleMid' && inMapPanelL93()) cfg.data.datasets.forEach(ds => { if (ds._kind === 'comp' && !(benchmarkOverlay && ds.label === benchmarkOverlay.name)) ds.label += ' KB 시세'; });   // 묶음 L93: 지도 실거래 칸 그래프 범례와 같은 말
     const idx19 = indexMode ? applyAxisIndexL19B(cfg) : null;
-    charts.singleMainCanvas = new Chart(document.getElementById('singleMainCanvas'), cfg);
+    charts.singleMainCanvas = new Chart(document.getElementById('singleMainCanvas'), padTopL97B(cfg));
     if (indexMode && idx19){
       charts.singleMainCanvas.$axisIndexL19B = idx19;
       const noteText = AXIS_SPLIT_TEXT_L19B.note(idx19) + (idx19.hasFair ? AXIS_SPLIT_TEXT_L19B.fairNote : '') + (idx19.short ? AXIS_SPLIT_TEXT_L19.short(idx19) : '');
@@ -11260,6 +11297,7 @@ function renderSingleActiveChart(bench, target){
     // 위에서 이미 비워둔 채로 둔다.
     // 묶음 L12: 선도단지 선이 기본으로 켜지므로, 기준이 같은 그룹 선도단지일 때 생기던 "선도단지÷기준단지 100%" 열은 넣지 않는다
     document.getElementById('singleRecentTable').innerHTML = buildRecentTable(base, comps, field, ratioField, (BUNDLES.L12 && !benchmarkUsable) ? null : benchmarkOverlay);
+    if (BUNDLES.L97B) recentFoldL97B(document.getElementById('singleRecentTable'), String(state.singleTargetId || '') + '|' + field);   // 묶음 L97B
     const dragResult = document.getElementById('singleDragResult');
     singleDragCleanup = wireDragSelect(charts.singleMainCanvas, document.getElementById('singleChartCanvasWrap'), document.getElementById('singleDragBox'), dragResult);
     document.getElementById('singleDragResultClear').addEventListener('click', ()=>{
@@ -11274,19 +11312,21 @@ function renderSingleActiveChart(bench, target){
     entries.forEach(entry => { entry.stats = computeSelfRatioStats(entry.complex); });
     const cardsHtml = entries.map(entry => buildRatioStatCard(entry, entry.stats, state.threshold)).join('');
     area.innerHTML = (BUNDLES.L46 ? ratioAvgLineL46(entries, 'single') : '')+   // 묶음 L46
-      '<div class="chart-layout solo"><div class="chart-box"><canvas id="singleMainCanvas"></canvas></div></div>'+
+      (BUNDLES.L97B ? '<div class="chart-layout solo"><div class="chart-box l97b"><div class="chart-canvas-wrap"><canvas id="singleMainCanvas"></canvas></div></div></div>' : '<div class="chart-layout solo"><div class="chart-box"><canvas id="singleMainCanvas"></canvas></div></div>')+
+      (BUNDLES.L97B ? jrBtnsL97B() : '')+   // 묶음 L97B: 그래프 아래 [서울 평균] [선도단지 평균]
       '<div class="common-range" id="singleRatioNote"></div>'+
       '<div class="cards-grid" style="margin-top:14px;">'+cardsHtml+'</div>';
-    const cfg = jeonseRatioChartConfig(entries, state.singleRatioPeakOn, state.singleRatioTroughOn, state.singleRatioAvgOn);
+    const cfg = jeonseRatioChartConfig(entries, state.singleRatioPeakOn, state.singleRatioTroughOn, state.singleRatioAvgOn, false, BUNDLES.L97B ? { split: true, bench: !!state.singleRatioBenchAvgOn, seoul: !!state.singleRatioSeoulAvgOn } : null);
     if (BUNDLES.L45 && singleRatioPriceOnL45) addRatioPriceLinesL45(cfg, entries, 'single');   // 묶음 L45
-    charts.singleMainCanvas = new Chart(document.getElementById('singleMainCanvas'), cfg);
-    document.getElementById('singleRatioNote').textContent = state.singleRatioAvgOn ? '서울시 평균은 현재 라이브러리에 등록된 단지 기준 근사치이며, 실제 서울 전체 통계와 다를 수 있습니다.' : '';
+    charts.singleMainCanvas = new Chart(document.getElementById('singleMainCanvas'), padTopL97B(cfg));
+    if (BUNDLES.L97B) area.querySelectorAll('[data-jr97b]').forEach(b => b.addEventListener('click', () => { const k = b.dataset.jr97b === 'seoul' ? 'singleRatioSeoulAvgOn' : 'singleRatioBenchAvgOn'; state[k] = !state[k]; saveState(); renderSingleDiag(state.singleTargetName); }));
+    document.getElementById('singleRatioNote').textContent = (BUNDLES.L97B ? state.singleRatioSeoulAvgOn : state.singleRatioAvgOn) ? '서울시 평균은 현재 라이브러리에 등록된 단지 기준 근사치이며, 실제 서울 전체 통계와 다를 수 있습니다.' : '';
     return;
   }
   if (state.singleActiveChart==='saleRatio' || state.singleActiveChart==='jeonseRatio'){
-    area.innerHTML = '<div class="chart-layout solo"><div class="chart-box"><canvas id="singleMainCanvas"></canvas></div></div>';
+    area.innerHTML = (BUNDLES.L97B ? '<div class="chart-layout solo"><div class="chart-box l97b"><div class="chart-canvas-wrap"><canvas id="singleMainCanvas"></canvas></div></div></div>' : '<div class="chart-layout solo"><div class="chart-box"><canvas id="singleMainCanvas"></canvas></div></div>');
     const cfg = ratioChartConfig(base, comps, state.singleActiveChart==='saleRatio'?'sale':'jeonse');
-    charts.singleMainCanvas = new Chart(document.getElementById('singleMainCanvas'), cfg);
+    charts.singleMainCanvas = new Chart(document.getElementById('singleMainCanvas'), padTopL97B(cfg));
     return;
   }
 }
@@ -14381,7 +14421,14 @@ function ratioAvgLineL46(entries, mode){
     : '역사상 평균 <b>'+a1.toFixed(1)+'%</b>보다 <b>'+ad.toFixed(1)+'%p '+(c1 > a1 ? '높아요' : '낮아요')+'</b>.';
   return '<div class="ratio-avg-l46">'+head+'로, '+tail+'</div>';
 }
-function jeonseRatioChartConfig(entries, showPeak, showTrough, showAvg, compactLabels){
+// 묶음 L97B: 전세가율 그래프 아래 단추 줄(켜진 단추는 active 색)
+function jrBtnsL97B(){ const b = (k, on, t) => '<button type="button" class="btn small fair-cta'+(on ? ' active' : '')+'" data-jr97b="'+k+'" aria-pressed="'+(on ? 'true' : 'false')+'">'+t+'</button>';
+  return '<div class="jr-l97b">'+b('seoul', !!state.singleRatioSeoulAvgOn, '서울 평균')+b('bench', !!state.singleRatioBenchAvgOn, '선도단지 평균')+'</div>'; }
+// 묶음 L97B: 다른 단지로 넘어가면 전세가율 단추(평균선·최고점·최저점·서울 평균·선도단지 평균)를 기본(꺼짐)으로
+const JR_LAST_L97B = { name: null };
+function jrResetL97B(name){ if (!BUNDLES.L97B || name === JR_LAST_L97B.name) return; JR_LAST_L97B.name = name;
+  state.singleRatioAvgOn = false; state.singleRatioPeakOn = false; state.singleRatioTroughOn = false; state.singleRatioSeoulAvgOn = false; state.singleRatioBenchAvgOn = false; }
+function jeonseRatioChartConfig(entries, showPeak, showTrough, showAvg, compactLabels, avgOpt){   // 묶음 L97B: avgOpt = { split, bench, seoul }(진단 화면만)
   const allYmsSet = new Set();
   const seriesByEntry = entries.map(entry=>{
     const { yms, map } = selfRatioSeries(entry.complex);
@@ -14419,7 +14466,16 @@ function jeonseRatioChartConfig(entries, showPeak, showTrough, showAvg, compactL
     });
   }
 
-  if (showAvg){
+  if (avgOpt && avgOpt.split){   // 묶음 L97B: 해당 단지 평균은 [평균선 표시], 선도단지 평균·서울시 평균은 각자 단추
+    seriesByEntry.forEach(entry=>{
+      if (!entry.stats || entry.stats.avg==null) return;
+      if (entry.key==='base' ? !avgOpt.bench : !showAvg) return;
+      datasets.push({ label: entry.name+' 역사상 평균(전세가율, '+entry.stats.avg.toFixed(1)+'%)', data: flat(entry.stats.avg),
+        borderColor: cssVar(entry.varName), backgroundColor: cssVar(entry.varName), borderWidth:1.75, borderDash: dashL46([2,2]), pointRadius:0, tension:0 });
+    });
+    const seoul = avgOpt.seoul ? seoulHistoricalAvg() : null;
+    if (seoul && seoul.avg!=null) datasets.push({ label:'서울시 평균(전세가율)', data: flat(seoul.avg), borderColor: cssVar('--ink-faint'), backgroundColor: cssVar('--ink-faint'), borderWidth:1.5, borderDash: dashL46([6,3]), pointRadius:0, tension:0 });
+  } else if (showAvg){
     // 항목 2(2026-09-20 세션) — "서울 선도단지(일반) 역사상 평균(전세가율,
     // 54.4%)"처럼 카드 폭에 비해 라벨이 너무 길다는 지적을 받아, .bench-
     // chart-wrap 전용 호출(benchJeonseRatioChartConfig, compactLabels=true)만
@@ -14682,6 +14738,19 @@ function recentFairTagL30(col, kind){
   if (kind==='bench') return ath + tag('적정(선도단지 대비) '+v(col.fairOwn));
   if (kind==='base') return ath + tag('적정(기준단지 대비) '+v(col.fairBase));
   return ath + tag('적정(선도단지 대비) '+v(col.fairOwn)) + tag('적정(기준단지 대비) '+v(col.fairBase));
+}
+// 묶음 L97B: 시세 비교표 — 최근 12개월만 보이고 [더 보기 — 전체 10년]/[접기]. 상자 안 스크롤은 없앰(CSS .recent-box.l97b). 펼침 상태는 같은 단지·같은 그래프에서 다시 그려도 유지
+const RECENT_FOLD_L97B = { first: 12, open: {} };
+function recentFoldL97B(box, key){
+  if (!box) return; box.classList.add('l97b'); const rows = [...box.querySelectorAll('tbody tr')];
+  const old = box.querySelector('.fold-l97b'); if (old) old.remove();
+  if (rows.length <= RECENT_FOLD_L97B.first){ box.classList.add('open-l97b'); return; }
+  rows.forEach((tr, i) => { if (i >= RECENT_FOLD_L97B.first) tr.classList.add('more-l97b'); });
+  const bar = document.createElement('div'); bar.className = 'fold-l97b'; const b = document.createElement('button'); b.type = 'button'; bar.appendChild(b); box.appendChild(bar);
+  const set = (on) => { box.classList.toggle('open-l97b', on); b.textContent = on ? '접기' : '더 보기 — 전체 10년'; b.setAttribute('aria-expanded', on ? 'true' : 'false'); RECENT_FOLD_L97B.open[key] = on; };
+  set(!!RECENT_FOLD_L97B.open[key]);
+  b.addEventListener('click', () => { const on = !box.classList.contains('open-l97b'); set(on);
+    if (!on){ const r = box.getBoundingClientRect(); if (r.top < 0 || r.top > window.innerHeight - 40) box.scrollIntoView({ block: 'start' }); } });   // 접으면 표 위치로
 }
 function buildRecentTable(base, comps, field, ratioField, benchmarkOverlay, fairKind){
   const l30 = !!(BUNDLES.L30 && fairKind); // L30: 여러 단지 비교 화면에서만(단일 진단은 fairKind 없이 부른다)
