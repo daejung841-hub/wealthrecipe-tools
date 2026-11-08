@@ -3655,7 +3655,7 @@ const RT21 = {"meta":{"src":"목록표_연결_v3_4_pub.json · 목록표_시계�
   const GS_LOAD = {};   // 96차: 지번 상세 공시가 자료(구역별, 팝업 열 때만)
   const gsFile = (b) => '공시가/' + encodeURIComponent(String(b).replace(/[^0-9A-Za-z가-힣._-]/g, '_')) + '.js';
   const loadGs = (b) => GS_LOAD[b] || (GS_LOAD[b] = new Promise((ok, no) => { if ((window.RT_GS || {})[b]) return ok(); loadScript(gsFile(b), () => ok(), () => { delete GS_LOAD[b]; no(); }); }));
-  const TX_PAGE = 20;
+  const TX_PAGE = 10;   // 1108b: 거래 내역 처음 10건 + 더 보기 10건씩
   function txButton(sec, r){   // 96차: 버튼 없이 거래 목록을 바로 보여 줌
     if (!sec || sec.querySelector('[data-rt-tx]')) return; const sc = txScope(r); if (!sc || !sc.all) return;
     sec.insertAdjacentHTML('beforeend', `<div class="rt-tx" data-rt-tx="${esc(sc.b)}"><h4 class="rt-txh">거래 내역</h4><div class="rt-txbody" data-rt-txbody><div class="rt-sub">거래 내역을 불러오는 중…</div></div></div>`);
@@ -3697,7 +3697,7 @@ const RT21 = {"meta":{"src":"목록표_연결_v3_4_pub.json · 목록표_시계�
       + `<button type="button" class="rt-txmore" data-rt-txmore${rows.length > st.shown ? '' : ' hidden'}>더 보기 (${rows.length - st.shown}건 남음)</button>`;
     try { const h4 = wrap.closest('.rt-tx').querySelector('.rt-txh'); if (h4) h4.textContent = `거래 내역 · 전체 ${rows.length.toLocaleString('ko-KR')}건`; } catch (e) { /* 117차 */ }
   }
-  function txMore(wrap){   // 96차: 20건씩 아래에 이어 붙임(다시 그리지 않음)
+  function txMore(wrap){   // 96차: TX_PAGE건씩 아래에 이어 붙임(다시 그리지 않음)
     const st = wrap.__tx, d = (window.RT_TX || {})[st.sc.b]; if (!st || !d) return;
     const n0 = st.shown, n1 = Math.min(st.rows.length, n0 + TX_PAGE), H = st.rows.slice(n0, n1).map((x, k) => txRowHtml(x, n0 + k, st.sc, !!d.mig, st.sc.moa));
     wrap.querySelector('[data-rt-txtb]').insertAdjacentHTML('beforeend', H.map((h) => h[0]).join('')); wrap.querySelector('[data-rt-txcb]').insertAdjacentHTML('beforeend', H.map((h) => h[1]).join(''));
