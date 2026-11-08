@@ -67,6 +67,11 @@
   const l97 = () => { try { return !!(BUNDLES.L97 && l96()); } catch (e) { return false; } };
   // 묶음 L97B(11-08): 초등 학구·중학교 학군 작은 창을 오른쪽 위 작은 상자로(요약 + [자세히]), 학교를 누르면 학구가 화면에 들어오게
   const l97b = () => { try { return !!(BUNDLES.L97B && l97()); } catch (e) { return false; } };
+  // 묶음 L98(11-08): 실거래 v5(+92곳, 못 맞춘 12곳은 분석 탭 '표시' 문구) + 실거래 칸 [매매 | 전세] — 전세 = 신규 거래만 그래프·가격(갱신·구분없음·임대 의심 뺌),
+  //   갱신은 목록에만 "갱신(종전 ○억 → ○억)", 임대 의심은 목록에 흐리게 + 계산에서 뺌, 전세 4지표(최근 12개월) 참고 한 줄 + 임대 의심 코드 2·3·4 문구. 오피스텔 자료면 "오피스텔 실거래" 표시
+  const L98CFG = { jDir: '전세_단지별/', j4: 'jeonse4_panel.json', listN: 20, boxMonths: [3, 6], boxMin: 3,
+    src: '국토교통부 전월세 실거래가 공개 자료', srcOffi: '국토교통부 오피스텔 실거래가 공개 자료', codeTx: { 2: '임대 비중 높아 참고', 3: '임대 섞임 의심, 참고', 4: 'KB 시세 확인 중, 참고' } };
+  const l98 = () => { try { return !!(BUNDLES.L98 && l97b()); } catch (e) { return false; } };
   const panelKey94 = () => l95() ? L95CFG.key : L94CFG.key;
   // 지금 쓰는 확대 단계(묶음 L89를 끄면 L88 값 그대로)
   const ZM = () => l89() ? { dist: L89CFG.distZoom, open: L89CFG.distOpenZoom, cx: L89CFG.cxMinZoom, detail: l97() ? L97CFG.detailZoom : L89CFG.detailZoom, info: l97() ? L97CFG.infoZoom : L89CFG.infoZoom, cxOpen: L89CFG.openZoom }
@@ -342,6 +347,21 @@
   /* 묶음 L97B: 작은 상자 — PC 오른쪽 위 폭 320px, 폰 폭 60%·높이 최대 30%(오른쪽 세로 단추 왼쪽). [자세히]는 상자 안에서 스크롤 */
   .cm84-scc.l97b{left:auto;right:78px;top:92px;width:320px;max-height:calc(100% - 110px);padding:9px 11px;font-size:12.5px;box-shadow:0 4px 14px rgba(0,0,0,.16)}
   @media (max-width:767px){ .cm84-scc.l97b{right:66px;top:118px;width:60%;max-height:30%} }
+  .cm84-rt .md98{display:flex;gap:6px;margin:0 0 8px}   /* 묶음 L98: 실거래 칸 [매매 | 전세] */
+  .cm84-rt .md98 button{flex:0 0 auto;border:1px solid var(--cm-line);background:#fff;border-radius:999px;font:inherit;font-size:12.5px;font-weight:700;color:#495057;padding:5px 16px;cursor:pointer}
+  .cm84-rt .md98 button[aria-pressed="true"]{background:var(--cm-navy);border-color:var(--cm-navy);color:#fff}
+  .cm84-rt .sv98[hidden],.cm84-rt .jv98[hidden]{display:none}
+  .cm84-rt .of98{display:inline-block;margin:0 0 6px;background:#FFF4E6;color:#D9480F;border-radius:5px;padding:1px 7px;font-size:11.5px;font-weight:800}
+  .cm84-rt .sh98{color:#495057;font-size:12.5px;font-weight:700}
+  .cm84-rt .bx.jn98 b{color:#2B8A3E}
+  .cm84-rt .j4l98{margin:7px 0 0;font-size:12.5px;line-height:1.5}
+  .cm84-rt .j4l98 small{color:var(--cm-faint);font-size:11px}
+  .cm84-rt .rtt.cd98{color:#B45309;font-weight:700}
+  .cm84-rt .jt98 th:nth-child(1){width:25%}.cm84-rt .jt98 th:nth-child(2){width:18%}.cm84-rt .jt98 th:nth-child(3){width:10%}
+  .cm84-rt .jt98 td{white-space:nowrap;overflow:hidden;text-overflow:clip}.cm84-rt .jt98 td:last-child{white-space:normal;overflow:visible;word-break:keep-all;line-height:1.45}
+  .cm84-rt .jt98 tr.su98 td{color:#ADB5BD}
+  .cm84-rt .jt98 td small{display:inline-block;font-size:10.5px;border-radius:4px;padding:0 4px;font-weight:700;line-height:1.5}
+  .cm84-rt .jt98 .nw98{background:#EBFBEE;color:#2B8A3E}.cm84-rt .jt98 .gs98{background:#F1F3F5;color:#495057}.cm84-rt .jt98 .nk98{background:#F8F9FA;color:#868E96}.cm84-rt .jt98 .sb98{background:#FFF0F6;color:#C2255C}
   .cm84-scc .h97b{display:flex;align-items:center;gap:4px;padding-right:40px;font-size:14px;font-weight:800}
   .cm84-scc .i97b{border:0;background:none;color:var(--cm-faint);font:inherit;font-size:13px;cursor:pointer;padding:0 3px}
   .cm84-scc .inf97b{margin:5px 0 2px;font-size:11px;color:var(--cm-sub);line-height:1.5;background:#F8F9FA;border-radius:6px;padding:5px 7px}
@@ -1606,8 +1626,11 @@
         + (st && st.n >= RT.boxMin ? `<b>${eokTx(st.med)}</b><small>최근 3개월 중앙값 · ${st.n}건 · 마지막 ${ymd(st.last)}</small>` : `<b class="few">거래 적음</b><small>최근 3개월 ${st ? st.n : 0}건${st && st.last ? ' · 마지막 ' + ymd(st.last) : ''}</small>`))
         + '</div></div>' + (l93() && d ? '<div class="nhb93" hidden></div><div class="rth93"><div class="rld">최고점을 찾는 중이에요…</div></div>' : '');   // 묶음 L93: 최근 신고가 한 줄 · 최고점 두 줄
       const more = d && !L91 ? `<button type="button" class="rtm" aria-expanded="false">실거래 자세히 ▾</button>` : '';   // 묶음 L91: 접지 않고 늘 펼침
-      host.innerHTML = (l93() ? head93('rt') : '') + `<div class="rtb">${box}${st ? diffLine(kb, st) : ''}${d ? tagLine(d.꼬리표) : ''}${d ? '' : '<div class="rts">이 단지는 맞춘 실거래 자료가 없어요.</div>'}<div class="rtj-w"></div>${more}<div class="rtv" hidden></div>`
-        + `<div class="rts">${esc(RT.src)} · ${esc(d ? ymd(String(d.기간).split('~')[1]) : (RTX && RTX.meta ? RTX.meta.month.replace('-', '.') : ''))} 기준 · 참고용(판정은 KB 시세로만)${l95() ? ' · 중앙값은 계약 해제·직거래 뺌' : ''}</div><div class="sc-w"></div></div>`;
+      const L98 = l98(), jm = L98 && rtMode98 === 'jeon', offi = L98 && !!d && d.원자료 === '오피스텔', shTx = L98 && !d && RTX && RTX.show ? RTX.show[id] : null;   // 묶음 L98: 오피스텔 자료·못 맞춘 단지 문구
+      const sale = `${offi ? '<div class="of98">오피스텔 실거래</div>' : ''}${box}${st ? diffLine(kb, st) : ''}${d ? tagLine(d.꼬리표) : ''}${d ? '' : (shTx ? `<div class="rts sh98">${esc(shTx)}</div>` : '<div class="rts">이 단지는 맞춘 실거래 자료가 없어요.</div>')}<div class="rtj-w"></div>${more}<div class="rtv" hidden></div>`
+        + `<div class="rts">${esc(offi ? L98CFG.srcOffi : RT.src)} · ${esc(d ? ymd(String(d.기간).split('~')[1]) : (RTX && RTX.meta ? RTX.meta.month.replace('-', '.') : ''))} 기준 · 참고용(판정은 KB 시세로만)${l95() ? ' · 중앙값은 계약 해제·직거래 뺌' : ''}</div>`;
+      host.innerHTML = (l93() ? head93('rt') : '') + '<div class="rtb">' + (L98 ? md98Html(jm) + `<div class="sv98"${jm ? ' hidden' : ''}>${sale}</div><div class="jv98"${jm ? '' : ' hidden'}></div>` : sale) + '<div class="sc-w"></div></div>';
+      if (L98) wire98(host, it, p);
       const fillJ = () => { const w = host.querySelector('.rtj-w'); if (w) w.innerHTML = jeonseHtml(id); };
       if (seedsPending() && typeof whenSeedsL86 === 'function') whenSeedsL86(ok => { if (ok && selId === id) fillJ(); }); else fillJ();
       renderSchool(host.querySelector('.sc-w'), id);
@@ -1620,6 +1643,105 @@
       host.innerHTML = rtFailHtml97(); window.CALC_MAP_L84.rtFailShown97 = performance.now();
       const b = host.querySelector('.rtre97'); if (b) b.onclick = () => { host.innerHTML = (l93() ? head93('rt') : '') + '<div class="rtb"><div class="rld">실거래를 불러오는 중이에요…</div></div>'; renderRT(it, p, kb); };
     });
+  }
+  // ---- 묶음 L98: 실거래 칸 [매매 | 전세] — 고른 쪽은 다른 단지를 열어도 그대로(이 창 안에서만 기억) ----
+  //   자료: 지도자료_<기준월>\전세_단지별\<seed id>.json(분석 탭 결과_전세거래_<기준월>_보강판\단지별 그대로, 최근 5년), jeonse4_panel.json(전세 4지표 보강판, 칸별 값 12개)
+  let rtMode98 = 'sale', jChart98 = null, J4 = null, j4Load = null;
+  const md98Html = (jm) => `<div class="md98" role="group" aria-label="실거래 종류"><button type="button" data-md98="sale" aria-pressed="${!jm}">매매</button><button type="button" data-md98="jeon" aria-pressed="${!!jm}">전세</button></div>`;
+  function wire98(host, it, p){
+    const sv = host.querySelector('.sv98'), jv = host.querySelector('.jv98'); if (!sv || !jv) return;
+    const show = (k) => {
+      rtMode98 = k; sv.hidden = k === 'jeon'; jv.hidden = k !== 'jeon';
+      host.querySelectorAll('[data-md98]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.md98 === k)));
+      if (k === 'jeon' && !jv.dataset.done){ jv.dataset.done = '1'; renderJ98(jv, it, p); }
+      setTimeout(() => { const c = k === 'jeon' ? jChart98 : rtChart; try { if (c) c.resize(); } catch (e) {} }, 30);
+    };
+    host.querySelectorAll('[data-md98]').forEach(b => b.onclick = () => show(b.dataset.md98));
+    if (rtMode98 === 'jeon'){ jv.dataset.done = '1'; renderJ98(jv, it, p); }
+  }
+  const mq98 = () => RTX && RTX.meta ? '?m=' + encodeURIComponent(RTX.meta.month) : '';
+  function getJeon98(id){ const k = 'j|' + id; if (!rtCache.has(k)) rtCache.set(k, fetchTrades97(k, RT.base + L98CFG.jDir + encodeURIComponent(id) + '.json' + mq98(), false)); return rtCache.get(k); }
+  function loadJ4(){   // 못 받으면 4지표 줄만 빼고(다음에 다시 받음)
+    if (j4Load) return j4Load;
+    j4Load = fetch(RT.base + L98CFG.j4 + mq98()).then(r => r.ok ? r.json() : null).catch(() => null).then(j => { J4 = j; if (!j) j4Load = null; return j; });
+    return j4Load;
+  }
+  const jcols98 = (d) => { const c = d.열 || [], ix = (n, i) => { const j = c.indexOf(n); return j >= 0 ? j : i; };
+    return { ym: ix('계약연월', 0), d: ix('일', 1), a: ix('전용㎡', 2), f: ix('층', 3), p: ix('보증금(만원)', 4), r: ix('월세(만원)', 5), k: ix('계약구분', 6), o: ix('종전보증금(만원)', 8), s: ix('임대의심', 9) }; };
+  const isNew98 = (t, C) => t[C.k] === 0 && !t[C.s] && !t[C.r];   // 신규 · 임대 의심 아님 · 전세(월세 0)
+  // 최근 신규 전세: 끝 달 포함 3개월 신규 3건 이상이면 3개월, 아니면 6개월 3건 이상, 아니면 없음(분석 탭 4지표 '화면용 신규 전세가'와 같은 규칙)
+  function jBox98(d, id, p){
+    const C = jcols98(d), [lo, hi] = slotBandRT(id, p), end = +String(d.기간 || '').split('~')[1] || 0;
+    const nw = (d.거래 || []).filter(t => isNew98(t, C) && t[C.a] >= lo && t[C.a] <= hi), lastOf = (ts) => ts.reduce((x, t) => Math.max(x, t[C.ym] * 100 + t[C.d]), 0);
+    for (const m of L98CFG.boxMonths){ const from = ymAdd(end, -(m - 1)), ts = nw.filter(t => t[C.ym] >= from && t[C.ym] <= end); if (ts.length >= L98CFG.boxMin) return { m, n: ts.length, med: median(ts.map(t => t[C.p])), last: lastOf(ts), lo, hi, end }; }
+    const from6 = ymAdd(end, -5); return { m: 0, n: nw.filter(t => t[C.ym] >= from6 && t[C.ym] <= end).length, med: null, last: lastOf(nw), lo, hi, end };
+  }
+  function renderJ98(w, it, p){
+    const id = it.id; w.innerHTML = '<div class="rld">전세 실거래를 불러오는 중이에요…</div>';
+    Promise.all([getJeon98(id), loadJ4()]).then(([d, j4]) => {
+      if (!w.isConnected || selId !== id) return;
+      const kr = jeonseRows(id).find(x => x.p === p), kbj = kr ? kr.jeon : null;
+      const cell = j4 && j4.칸 && j4.칸[id] ? j4.칸[id][String(p)] || null : null, code = cell ? cell[11] || 0 : 0, offi = !!d && d.원자료 === '오피스텔';
+      const b = d ? jBox98(d, id, p) : null, sY = (v) => String(v).slice(2, 4) + '.' + String(v).slice(4, 6) + '.' + String(v).slice(6, 8);
+      let h = `<div class="rtx"><div class="bx kb"><small>KB 전세 시세</small><b>${kbj != null ? eokTx(kbj) : '-'}</b><small>${p}평${kr ? ' · ' + yymm(kr.ym) : ''}</small></div>`
+        + `<div class="bx tr jn98"><small>최근 신규 전세 ${p}평대</small>`
+        + (b && b.med != null ? `<b>${eokTx(b.med)}</b><small>${b.m}개월 중앙값 · ${b.n}건</small><small>마지막 ${sY(b.last)}</small>`
+          : `<b class="few">거래 적음</b><small>최근 6개월 신규 ${b ? b.n : 0}건</small>${b && b.last ? `<small>마지막 ${sY(b.last)}</small>` : ''}`) + '</div></div>';
+      if (kbj && b && b.med != null){ const pc = (b.med - kbj) / kbj * 100, sm = Math.abs(pc) <= RT.same;
+        h += `<div class="rtd ${sm ? 'same' : pc > 0 ? 'up' : 'dn'}">${sm ? `신규 전세가 KB 전세와 비슷 (±${RT.same}% 안, ${b.n}건)` : `신규 전세가 KB 전세보다 ${pc > 0 ? '+' : '−'}${Math.abs(pc).toFixed(1)}% (${b.n}건)`}</div>`; }
+      if (code >= 2 && L98CFG.codeTx[code]) h += `<div class="rtt cd98">${esc(L98CFG.codeTx[code])}</div>`;
+      if (cell && (cell[0] != null || cell[2] != null)){
+        const win = j4.메타 && j4.메타.창 ? String(j4.메타.창).split('~').map(yymm).join('~') : '최근 12개월';
+        h += `<div class="j4l98">${cell[0] != null ? `갱신 비율 <b>${cell[0]}%</b>${cell[1] != null ? ` <small>(직전 12개월보다 ${cell[1] >= 0 ? '+' : '−'}${Math.abs(cell[1])}%p)</small>` : ''}` : ''}${cell[0] != null && cell[2] != null ? ' · ' : ''}${cell[2] != null ? `월세 비중 <b>${cell[2]}%</b>` : ''}</div>`
+          + `<div class="rts">전세 4지표 ${esc(win)}(최근 12개월) · 참고용(판정에 안 씀)</div>`;
+      }
+      if (!d) h += '<div class="rts">이 단지는 맞춘 전세 거래 자료가 없어요.</div>';
+      else h += `<div class="rtg-h"><b>전세 그래프</b><small>${p}평 칸 · 신규 전세 월별 중앙값</small></div><div class="rtc c91"><div class="chart-canvas-wrap"><canvas aria-label="KB 전세와 신규 전세"></canvas></div></div><div class="jl98-w"></div>`;
+      h += `<div class="rts">${esc(offi ? L98CFG.srcOffi : L98CFG.src)} · ${esc(d ? ymd(String(d.기간).split('~')[1]) : (RTX && RTX.meta ? RTX.meta.month.replace('-', '.') : ''))} 기준${d ? ' · 최근 5년' : ''} · 전세만(월세 뺌) · 그래프·가격은 신규 거래만(갱신·구분없음·임대 의심 뺌) · 참고용(판정은 KB 시세로만)</div>`;
+      w.innerHTML = (offi ? '<div class="of98">오피스텔 실거래</div>' : '') + h;
+      if (d){ const C = jcols98(d); drawJChart98(w.querySelector('canvas'), id, p, d, C); drawJList98(w.querySelector('.jl98-w'), id, p, d, C); }
+      window.CALC_MAP_L84.j98 = { id, p, box: b, kbj, code, cell, n: d ? (d.거래 || []).length : 0, offi };
+    }).catch(() => {
+      if (!w.isConnected || selId !== id) return;
+      w.innerHTML = '<div class="rld rer97">전세 실거래를 불러오지 못했어요. 연결이 느리거나 잠시 끊겼을 수 있어요.</div><button type="button" class="rtre97">다시 불러오기</button>';
+      const bt = w.querySelector('.rtre97'); if (bt) bt.onclick = () => renderJ98(w, it, p);
+    });
+  }
+  // 전세 그래프: KB 전세 선 + 같은 평형 칸 신규 전세 월별 중앙값 선(거래 없는 달은 비움) — 매매 실거래 그래프와 같은 형식
+  function drawJChart98(cv, id, p, d, C){
+    if (!cv || !window.Chart) return;
+    if (jChart98){ try { jChart98.$crossIdxL85 = -1; jChart98.destroy(); } catch (e) {} jChart98 = null; }
+    const [lo, hi] = slotBandRT(id, p), by = new Map();
+    (d.거래 || []).forEach(t => { if (!isNew98(t, C) || t[C.a] < lo || t[C.a] > hi) return; (by.get(t[C.ym]) || by.set(t[C.ym], []).get(t[C.ym])).push(t[C.p]); });
+    let kbRows = [];
+    try { const e = seedEntryById(id), text = p === 25 ? seed25TextRT(id) : e && e.text, nm = e ? e.name + (p === 25 ? PYEONG25_SUFFIX : '') : ''; if (text) kbRows = buildComplex(text, nm, nm).rows.filter(r => r.jeonseMid != null); } catch (e) {}
+    const pr = String(d.기간 || '').split('~').map(Number), start = pr[0], end = pr[1];
+    if (!start || !end) return;
+    const labels = []; for (let ym = start; ym <= end && labels.length < 400; ym = ymAdd(ym, 1)) labels.push(ym);
+    const kbMap = new Map(kbRows.map(r => [r.ym, r.jeonseMid])), fmt = (v) => v == null ? '—' : (typeof fmtEok === 'function' ? fmtEok(v) : eok(v));
+    const opt = typeof chartOptions === 'function' ? chartOptions(fmt, typeof CHART_EXT_TOOLTIP_RESERVED_TOP !== 'undefined' ? CHART_EXT_TOOLTIP_RESERVED_TOP : undefined) : { responsive: true, maintainAspectRatio: false };
+    opt.animation = false;
+    const ds = [
+      { label: 'KB 전세 시세', data: labels.map(ym => kbMap.has(ym) ? kbMap.get(ym) : null), borderColor: '#1E3A8A', backgroundColor: '#1E3A8A', borderWidth: 2.5, pointRadius: 0, tension: .15, spanGaps: false },
+      { label: '신규 전세 월별 중앙값(' + p + '평 칸)', data: labels.map(ym => by.has(ym) ? median(by.get(ym)) : null), borderColor: '#2B8A3E', backgroundColor: '#2B8A3E', borderWidth: 2, pointRadius: 2, pointHoverRadius: 4, tension: 0, spanGaps: false } ];
+    jChart98 = new Chart(cv, { type: 'line', data: { labels: labels.map(ym => typeof fmtYm === 'function' ? fmtYm(ym) : ymd(ym)), datasets: ds }, options: opt });
+    window.CALC_MAP_L84.jChart98 = { kb: kbRows.length, months: by.size, labels: labels.length, from: start, to: end };
+  }
+  // 전세 거래 목록: 같은 평형 칸 전부(신규·갱신·구분없음), 갱신은 "갱신(종전 ○억 → ○억)", 임대 의심은 흐리게 + 표시
+  function drawJList98(w, id, p, d, C){
+    if (!w) return;
+    const [lo, hi] = slotBandRT(id, p); let shown = L98CFG.listN;
+    const list = (d.거래 || []).filter(t => t[C.a] >= lo && t[C.a] <= hi).sort((a, b) => (b[C.ym] * 100 + b[C.d]) - (a[C.ym] * 100 + a[C.d]));
+    const kind = (t) => t[C.k] === 1 ? `<small class="gs98">갱신${t[C.o] ? `(종전 ${eokTx(t[C.o])} → ${eokTx(t[C.p])})` : ''}</small>` : t[C.k] === 2 ? '<small class="nk98">구분없음</small>' : '<small class="nw98">신규</small>';
+    const draw = () => {
+      w.innerHTML = `<div class="rtg-h"><b>최근 전세 거래</b><small>${p}평 칸(전용 ${Math.round(lo)}~${Math.round(hi)}㎡) · 임대 의심은 흐리게(계산에서 뺌)</small></div>`
+        + `<table class="rtl jt98"><thead><tr><th>계약일</th><th>전용</th><th>층</th><th>보증금</th></tr></thead><tbody>`
+        + list.slice(0, shown).map(t => `<tr${t[C.s] ? ' class="su98"' : ''}><td>${ymd(t[C.ym] * 100 + t[C.d])}</td><td>${t[C.a]}㎡</td><td>${t[C.f]}층</td><td>${eokTx(t[C.p])} ${kind(t)}${t[C.s] ? ' <small class="sb98">임대 의심</small>' : ''}</td></tr>`).join('') + '</tbody></table>'
+        + (list.length > shown ? `<button type="button" class="rtmore">더보기 (${(list.length - shown).toLocaleString('ko-KR')}건 더)</button>` : '')
+        + (!list.length ? '<div class="rts">이 평형 칸 전세 거래가 없어요.</div>' : '');
+      const mo = w.querySelector('.rtmore'); if (mo) mo.onclick = () => { shown += L98CFG.listN; draw(); };
+    };
+    draw();
   }
   // ---- 묶음 L93: 최고점·신고가 — 같은 평형 칸(slotBandRT)의 모든 거래(최근 5년 + 이전 파일, 이전 파일은 패널을 열 때 같이 받음) ----
   //   계약 해제는 목록·최고가·신고가 모두에서 뺌. 직거래(자료 '직거래' 칸)는 목록에 "직거래" 표시, 최고가·신고가 판정에서 빼고 따로 한 줄.
@@ -2139,6 +2261,7 @@
   }
 
   window.CALC_MAP_L84 = {
+    t98: { jBox98, jcols98, getJeon98, loadJ4, slotBandRT },   // 묶음 L98 시험용(읽기만)
     open(sec){
       if (!built) build(sec);
       if (map){ setTimeout(resize, 30); return; }
