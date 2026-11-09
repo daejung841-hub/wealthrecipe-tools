@@ -84,6 +84,12 @@
   button,input,select,textarea{font-family:inherit}
   header{height:var(--hdr);flex:0 0 auto;display:flex;align-items:center;gap:10px;padding:0 16px;border-bottom:1px solid var(--line);background:var(--bg);position:relative;z-index:1300}
   header h1{font-size:17px;margin:0;font-weight:800;letter-spacing:-.3px;color:var(--navy)}
+  .homebtn{border:1px solid var(--line);background:#fff;border-radius:999px;padding:5px 10px;font-size:13px;font-weight:700;color:var(--navy);cursor:pointer;white-space:nowrap;flex:none}
+  .homebtn:hover{background:#F1F5F9}
+  .tb.tbhome{display:none}
+  @media (max-width:767px){.homebtn{display:none}.tb.tbhome{display:block}}
+  .escnote{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);z-index:20000;background:#1F2937;color:#fff;border-radius:10px;padding:10px 14px;font-size:13.5px;box-shadow:0 6px 20px rgba(0,0,0,.25);display:none;max-width:calc(100% - 24px)}
+  .escnote.on{display:block}.escnote a{color:#93C5FD;font-weight:700;margin-left:6px}.escnote button{margin-left:10px;background:none;border:0;color:#CBD5E1;font-size:16px;cursor:pointer}
   header .count{font-size:13px;color:var(--ink-sub)}
   header .count b{color:var(--ink)}
   
@@ -437,6 +443,7 @@
 </head>
 <body>
 <header>
+  <button type="button" class="homebtn" id="homeBtn" title="계산기 첫 화면으로" aria-label="처음 화면(계산기 첫 화면으로)">🏠<span> 처음 화면</span></button>
   <h1>재개발 구역 지도</h1>
   <span class="count" id="count"></span>
   <nav class="vsw" id="vsw" aria-label="보기 전환">
@@ -465,6 +472,7 @@
     <button type="button" class="tb" id="tbCx" aria-pressed="false">비교<br>단지</button>
     <button type="button" class="tb" id="tbSv" aria-pressed="false">거리뷰</button>
     <button type="button" class="tb" id="tbCad" aria-pressed="false">지적도</button>
+    <button type="button" class="tb tbhome" id="tbHome" title="계산기 첫 화면으로" aria-label="처음 화면(계산기 첫 화면으로)">🏠<br>처음</button>
     <button type="button" class="tb" id="tbBar" hidden aria-pressed="false" title="강·하천·지상 철도·큰길·산(서울만, 참고)">생활권 경계</button>
   </div>
   <div class="cadhint" id="cadhint" hidden>확대하면 보여요(지도를 더 키워 주세요)</div>
@@ -488,7 +496,7 @@
   <button type="button" class="ftab r" id="ftabR" hidden>◂ 단지 펼치기</button>
   <div class="sv" id="sv"><div class="pano" id="pano"></div><div class="msg" id="svmsg"></div><button type="button" class="cl" id="svx">닫기 ✕</button></div>
 </div>
-<script src="지도_설정.js?v=20261108-1632"></script>
+<script src="지도_설정.js?v=20261109-1926"></script>
 <script>
 (function() {
  var id = (window.MAP_CONFIG || {}).naverClientId;
@@ -506,7 +514,7 @@
  document.head.appendChild(s);
 })();
 </script>
-<script src="지도_구역.js?v=20261108-1632"></script>
+<script src="지도_구역.js?v=20261109-1926"></script>
 <script>
 (function() {
  const T0 = performance.now();
@@ -1150,7 +1158,7 @@
   }));
   return Math.abs(a / 2) * 111e3 * 88e3;
  }
- const MAP_VER = "20261108-1632";
+ const MAP_VER = "20261109-1926";
  function loadScript(src) {
   return new Promise((res => {
    const s = document.createElement("script");
@@ -2068,6 +2076,17 @@
   frame = document.createElement("iframe");
   frame.title = "목록표 구역 상세";
   frame.addEventListener("load", (() => {
+   try {
+    const fw = frame.contentWindow;
+    if (fw.location.pathname !== LIST_PATH && fw.location.href !== "about:blank") {
+     const u = fw.location.href;
+     frameReady = false;
+     frame.src = LIST_PAGE;
+     escapeTo(u);
+     return;
+    }
+    frameGuard(fw);
+   } catch (e) {}
    frameReady = true;
    try {
     frameCss(frame.contentWindow.document);
@@ -3239,7 +3258,73 @@
   if (mq.matches && cpanel.classList.contains("on")) closeCalc();
   document.getElementById("tbList").setAttribute("aria-pressed", panelMode === "list");
  }
+
+ /* 34차: 구역 창 안(목록표 iframe)에서 바깥 화면으로 나가는 동작은 페이지 전체(top)로 */
+ const LIST_PATH = new URL(LIST_PAGE, location.href).pathname;
+ let escT = 0;
+ function escNote(url) {
+  const n = document.getElementById("escNote");
+  n.innerHTML = `열지 못했어요 · <a href="${esc(url)}" target="_blank" rel="noopener noreferrer" referrerpolicy="no-referrer">새 탭으로 열기</a><button type="button" aria-label="닫기">✕</button>`;
+  n.classList.add("on");
+  n.querySelector("button").onclick = escClear;
+ }
+ function escClear() {
+  clearTimeout(escT);
+  document.getElementById("escNote").classList.remove("on");
+ }
+ function escapeTo(url) {
+  escClear();
+  let u;
+  try { u = new URL(url, location.href); } catch (e) { return; }
+  if (u.origin === location.origin && u.pathname === location.pathname) {   // 지도로 가는 링크: 지도 안에서 그 구역
+   const k = new URLSearchParams(u.hash.replace(/^#/, "")).get("zone");
+   if (k && BYKEY.has(k)) goZone(k, "list");
+   return;
+  }
+  try { window.top.location.href = u.href; } catch (e) { try { location.href = u.href; } catch (e2) {} }
+  escT = setTimeout(() => escNote(u.href), 3000);   // 3초 안에 안 넘어가면 안내(덮개 없음)
+ }
+ function frameGuard(w) {
+  try {
+   if (w.__mapGuard34) return;
+   w.__mapGuard34 = 1;
+   w.document.addEventListener("click", (e => {
+    const a = e.target && e.target.closest ? e.target.closest("a[href]") : null;
+    if (!a || e.defaultPrevented) return;
+    const h = a.getAttribute("href") || "";
+    if (!h || h[0] === "#" || /^javascript:/i.test(h) || /^(mailto|tel):/i.test(h)) return;
+    if ((a.target || "").toLowerCase() === "_blank") return;   // 새 탭 링크는 그대로
+    const u = new URL(a.href, w.location.href);
+    if (u.origin === w.location.origin && u.pathname === w.location.pathname) return;   // 같은 목록표 안
+    e.preventDefault();
+    e.stopPropagation();
+    escapeTo(u.href);
+   }), true);
+   if (w.navigation && w.navigation.addEventListener) w.navigation.addEventListener("navigate", (e => {
+    try {
+     const u = new URL(e.destination.url);
+     if ((u.pathname !== w.location.pathname || u.origin !== w.location.origin) && e.cancelable) {
+      e.preventDefault();
+      escapeTo(u.href);
+     }
+    } catch (er) {}
+   }));
+  } catch (e) {}
+ }
+ function frameBack() {   // 구역 창 닫기·Esc: iframe이 목록표가 아니면 되돌림
+  try {
+   if (frame && frame.contentWindow.location.pathname !== LIST_PATH) { frameReady = false; frame.src = LIST_PAGE; }
+  } catch (e) {}
+ }
+ function goHome() {   /* 37차: 계산기 사이트 첫 화면(배포 저장소 맨 위 index)으로 페이지 전체 이동 */
+  const u = new URL("../index.html", location.href).href;
+  try { window.top.location.href = u; } catch (e) { location.href = u; }
+ }
+ document.getElementById("homeBtn").addEventListener("click", goHome);
+ document.getElementById("tbHome").addEventListener("click", goHome);
  function closePanel() {
+  escClear();
+  frameBack();
   if (mq.matches && MV.stack.length && !MV.closing) {
    MV.closing = true;
    try {
@@ -3753,5 +3838,6 @@
  loadNaver();
 })();
 </script>
+<div class="escnote" id="escNote" role="status"></div>
 </body>
 </html>
