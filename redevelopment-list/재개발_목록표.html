@@ -2680,7 +2680,7 @@ tr.dmp-me td{background:var(--accent-soft);font-weight:600;}
   //   사이트 이름·도메인·버튼 글자는 아래 EXT_LINKS 블록 안에만 둔다(다른 곳은 상수를 참조)
   /* EXT_LINKS_START */
   const EXT_ID_FIELD = 'lkId';   // 구역별 바깥 사이트 번호 필드(정수). 이름을 바꾸려면 이 한 줄과 데이터 내보내기만 고친다
-  const EXT_LINK = { label: '외부 지도에서 보기', base: 'https://jaegebal.com/develops/' };            // 주소 = base + 정수 ID
+  const EXT_LINK = { label: '재개발닷컴 보기', base: 'https://jaegebal.com/develops/' };            // 주소 = base + 정수 ID
   const NAVER_LINK = { label: '네이버 부동산 지도 보기', base: 'https://new.land.naver.com/houses', mBase: 'https://fin.land.naver.com/map' };    // 원본과 같은 좌표 기반 주소 · 19차: 휴대폰은 mBase(PC 주소는 휴대폰에서 '페이지 없음'으로 넘어감)
   /* EXT_LINKS_END */
   // 19차: 휴대폰 판별 = 기기 종류(UA) 또는 좁은 화면 + 터치. 판별이 틀려도 두 주소 모두 지도 화면은 열림
@@ -3978,9 +3978,9 @@ const RT21 = {"meta":{"src":"목록표_연결_v3_4_pub.json · 목록표_시계�
     + '.rt-sp-tab tr.rt-sp-me td{background:#E3EAF3;font-weight:800;color:#1E3A5F;}.rt-sp-tab tr.rt-sp-me td.rt-sp-on{background:#CFE0EE;}.rt-sp-tab tr.rt-sp-grey td{color:var(--ink-faint,#93A1AC);}.rt-sp-go{border:0;background:none;padding:0;font:inherit;color:var(--accent,#1E3A8A);text-decoration:underline;cursor:pointer;}.rt-sp-all{margin-top:6px;}.rt-tl-pend{font-family:inherit !important;font-size:11px;color:var(--ink-faint,#93A1AC);background:var(--surface-alt,#EDF2F4);border-radius:5px;padding:0 6px;}.rt-sp-med{margin:0 0 6px;font-size:12.5px;color:var(--ink-muted,#5B6670);}.rt-sp-tab td.rt-sp-du,.rt-sp-tab th.rt-sp-du{text-align:right;}.rt-sp-tab th.rt-sp-du{white-space:normal;min-width:60px;max-width:84px;line-height:1.25;}.rt-sp-tab td.rt-sp-ty{font-size:11.5px;color:var(--ink-muted,#5B6670);}'
     + ':root[data-theme="dark"] .rt-sp-tab td.rt-sp-on{background:#173A26;}:root[data-theme="dark"] .rt-sp-tab tr.rt-sp-me td{background:#1D2C42;color:#DCE7F5;}@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .rt-sp-tab td.rt-sp-on{background:#173A26;}:root:not([data-theme="light"]) .rt-sp-tab tr.rt-sp-me td{background:#1D2C42;color:#DCE7F5;}}';
     document.head.appendChild(s); })();
-  function relabelLinks(tb){   // 116차: 링크 줄 버튼 이름 — 외부 지도에서 보기(1109) · 네이버 부동산 지도 보기 · 시세 보정하기(그림 글자 뺌)
+  function relabelLinks(tb){   // 116차: 링크 줄 버튼 이름 — 외부 구역 버튼(EXT_LINK.label) · 네이버 부동산 지도 보기 · 시세 보정하기(그림 글자 뺌)
     tb.querySelectorAll('#dmpLinks .dmp-lk').forEach((a) => { const t = a.textContent.replace(/\s+/g, ' ').trim();
-      const n = /외부 지도/.test(t) ? '외부 지도에서 보기' : /네이버/.test(t) ? '네이버 부동산 지도 보기' : /시세\s*보정/.test(t) ? '시세 보정하기' : null; if (n && t !== n) a.textContent = n; });
+      const n = t === EXT_LINK.label ? EXT_LINK.label : /네이버/.test(t) ? '네이버 부동산 지도 보기' : /시세\s*보정/.test(t) ? '시세 보정하기' : null; if (n && t !== n) a.textContent = n; });
   }
   function arrange(tb){   // 116차(대표님 11/03 덧붙임 16): (머리) → 링크 줄 → 진행 단계 → 급지·주변 아파트·핵심 수치 → 실거래 → 나머지 → 맨 아래 같은 시기 선정 구역 진행 속도
     try { relabelLinks(tb); } catch (e) { /* 116차 */ }
