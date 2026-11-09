@@ -188,6 +188,16 @@
   .srcbtn{position:absolute;right:12px;bottom:14px;z-index:900;border:1px solid var(--line);background:#fff;border-radius:999px;font-size:12px;padding:5px 10px;cursor:pointer;color:var(--ink-sub);box-shadow:0 1px 4px rgba(0,0,0,.08)}
   .srcpop{position:absolute;right:12px;bottom:50px;z-index:1050;width:min(400px,calc(100% - 24px));max-height:70%;overflow:auto;background:#fff;border:1px solid var(--line);border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,.16);padding:12px 14px;font-size:12.5px;line-height:1.6;display:none}
   .srcpop.on{display:block}
+  .slg{position:absolute;left:12px;bottom:58px;z-index:1040;background:rgba(255,255,255,.95);border:1px solid var(--line);border-radius:10px;padding:8px 10px 6px;font-size:11.5px;line-height:1.35;box-shadow:0 4px 14px rgba(0,0,0,.12);width:min(330px,calc(100% - 24px))}
+  .slg .bar{height:10px;border-radius:5px;margin:4px 0 2px;position:relative}
+  .slg .tk{position:relative;height:30px}.slg .tk span{position:absolute;transform:translateX(-50%);white-space:nowrap;font-size:10.5px;color:var(--ink-soft,#475569)}
+  .slg .tk span:nth-child(even){top:14px}
+  .slg .t{font-weight:700;font-size:12px}
+  .slg .sw{display:flex;align-items:center;gap:6px;margin-top:3px;white-space:nowrap}.slg .sw i{flex:none;width:20px;height:12px;border-radius:3px;border:1px solid rgba(0,0,0,.12)}.slg .sw b{font-weight:700;min-width:58px}.slg .sw span{color:var(--ink-sub,#475569)}
+  .shov{position:fixed;z-index:1500;pointer-events:none;background:#fff;border:1px solid #CBD5E1;border-radius:8px;padding:5px 9px;font-size:12.5px;box-shadow:0 4px 12px rgba(0,0,0,.15);white-space:nowrap;display:none}.shov.on{display:block}
+  .sbub{background:#fff;border:1px solid #CBD5E1;border-radius:9px;padding:6px 9px;font-size:12.5px;box-shadow:0 4px 12px rgba(0,0,0,.15);white-space:nowrap}
+  #map.slopegrey img[src*="map.naver.net"],#map.slopegrey img[src*="pstatic.net"]{filter:grayscale(.85) brightness(1.04)}
+  @media (max-width:767px){.slg{bottom:74px}}
   .srcpop h3{font-size:13.5px;margin:0 0 6px;display:flex;align-items:center}
   .srcpop h3 button{margin-left:auto;border:0;background:none;font-size:18px;cursor:pointer;color:var(--ink-faint)}
   .srcpop details{margin:2px 0 8px}
@@ -472,10 +482,13 @@
     <button type="button" class="tb" id="tbCx" aria-pressed="false">비교<br>단지</button>
     <button type="button" class="tb" id="tbSv" aria-pressed="false">거리뷰</button>
     <button type="button" class="tb" id="tbCad" aria-pressed="false">지적도</button>
+    <button type="button" class="tb" id="tbSlope" aria-pressed="false" title="땅의 경사(참고용)">경사도</button>
     <button type="button" class="tb tbhome" id="tbHome" title="계산기 첫 화면으로" aria-label="처음 화면(계산기 첫 화면으로)">🏠<br>처음</button>
     <button type="button" class="tb" id="tbBar" hidden aria-pressed="false" title="강·하천·지상 철도·큰길·산(서울만, 참고)">생활권 경계</button>
   </div>
   <div class="cadhint" id="cadhint" hidden>확대하면 보여요(지도를 더 키워 주세요)</div>
+  <div class="slg" id="slopeLg" hidden></div>
+  <div class="shov" id="slopeHov" role="tooltip"></div>
   <div class="svhint" id="svhint" hidden>파란 길을 누르면 그 자리 거리뷰가 열려요</div>
   <div class="basis" id="basis"></div>
   <button type="button" class="srcbtn" id="srcbtn">ⓘ 출처</button>
@@ -496,7 +509,7 @@
   <button type="button" class="ftab r" id="ftabR" hidden>◂ 단지 펼치기</button>
   <div class="sv" id="sv"><div class="pano" id="pano"></div><div class="msg" id="svmsg"></div><button type="button" class="cl" id="svx">닫기 ✕</button></div>
 </div>
-<script src="지도_설정.js?v=20261109-1937"></script>
+<script src="지도_설정.js?v=20261109-1955"></script>
 <script>
 (function() {
  var id = (window.MAP_CONFIG || {}).naverClientId;
@@ -514,7 +527,7 @@
  document.head.appendChild(s);
 })();
 </script>
-<script src="지도_구역.js?v=20261109-1937"></script>
+<script src="지도_구역.js?v=20261109-1955"></script>
 <script>
 (function() {
  const T0 = performance.now();
@@ -765,7 +778,7 @@
  const STAGES = [ "초기", "조합설립", "사업시행", "관리처분 이후", "확인 필요" ];
  const STAGE_CHIP = [ "초기(후보지·조합설립 준비·추진위)", "조합설립", "사업시행", "관리처분 이후" ];
  const STAGE_TIP = [ "후보지·정비계획·구역지정·모아 관리계획·조합설립 준비(옛 추진준비)·추진위", "조합설립·시공사 선정·심의(사업시행인가 전)", "사업시행인가", "관리처분·이주·착공", "단계 정보 확인 중" ];
- const KINDS = [ [ "re", "재개발", "#E8590C" ], [ "sn", "신통", "#D6336C" ], [ "gg", "공공", "#2F9E44" ], [ "mo", "모아타운", "#7048E8" ], [ "rb", "재건축", "#1C7ED6" ], [ "st", "역세권·도시정비", "#0C8599" ] ];
+ const KINDS = [ [ "re", "재개발", "#E8590C" ], [ "sn", "신통", "#D6336C" ], [ "gg", "공공", "#6D4C41" ], [ "mo", "모아타운", "#7048E8" ], [ "rb", "재건축", "#1C7ED6" ], [ "st", "역세권·도시정비", "#0C8599" ] ];
  const KCOL = Object.fromEntries(KINDS.map((([k, , c]) => [ k, c ])));
  const KNAME = Object.fromEntries(KINDS.map((([k, n]) => [ k, n ])));
  function kindOf(z) {
@@ -1158,7 +1171,7 @@
   }));
   return Math.abs(a / 2) * 111e3 * 88e3;
  }
- const MAP_VER = "20261109-1937";
+ const MAP_VER = "20261109-1955";
  function loadScript(src) {
   return new Promise((res => {
    const s = document.createElement("script");
@@ -2954,6 +2967,7 @@
   const chgBtn = hasChg ? `<div class="chgbox"><button type="button" class="chgbtn" id="chgbtn" aria-pressed="${chgOn}">${chgOn ? "경계 변경 닫기" : "경계 변경 보기"}</button>${chgOn ? '<div class="chgnote"><b style="color:#1F2937">점선</b> = 조합 설립 때 구역 / <b>실선</b> = 지금 관리계획 구역 / <b style="color:#2F9E44">초록</b> = 새로 들어온 땅 / <b style="color:#E8590C">주황</b> = 빠진 땅</div>' : ""}</div>` : "";
   const bdn = get(z, "bd"), bdd = get(z, "bdd");
   const bldTxt = "";
+  const slopeTxt = slopeLine(st.sel);
   const loc = !st.townSel && window.MAP_LOCMAP && window.MAP_LOCMAP[get(z, "k")];
   const locBtn = loc ? '<div class="chgbox"><button type="button" class="locbtn" id="locbtn">위치도 보기</button></div>' : "";
   const warnTop = window.MAP_WARN && window.MAP_WARN[get(z, "k")] && !st.townSel ? '<div class="warnbar" id="warnbar">세부 경계 확인 필요 — 참고용 선이에요. 정확한 경계는 아래 위치도·고시문을 확인하세요.</div>' : "";
@@ -2973,8 +2987,8 @@
    townSum = '<div class="tsum">' + [ ...gm ].map((([lab, nm]) => `<div><b>${nm.map(esc).join("·")}</b> ${esc(lab)}</div>`)).join("") + "</div>";
   }
   const noRowTxt = st.subF ? "이 하위구역은 목록표에 행이 없어요. 아래 상세·비교 단지는 같은 타운의 다른 행(" + get(z, "n") + ")이에요." : "";
-  P$(".acts").innerHTML = warnTop + '<button type="button" class="mapgo">지도에서 이 구역 보기</button>' + (bldTxt ? `<div class="bld">${esc(bldTxt)}</div>` : "") + townSum + chgBtn + (noRowTxt ? `<div class="nowsee">${esc(noRowTxt)}</div>` : "") + (nowTxt ? `<div class="nowsee">지금 보는 곳: <b>${esc(nowTxt)}</b></div>` : "") + (why ? `<span class="why">${esc(why)}</span>` : "") + locBtn;
-  P$(".acts").hidden = !why && !nowTxt && !hasChg && !noRowTxt && !townSum && !bldTxt && !locBtn && !warnTop && !mq.matches;
+  P$(".acts").innerHTML = warnTop + '<button type="button" class="mapgo">지도에서 이 구역 보기</button>' + (bldTxt ? `<div class="bld">${esc(bldTxt)}</div>` : "") + (slopeTxt ? `<div class="bld" id="slopeLine">${esc(slopeTxt)}</div>` : "") + townSum + chgBtn + (noRowTxt ? `<div class="nowsee">${esc(noRowTxt)}</div>` : "") + (nowTxt ? `<div class="nowsee">지금 보는 곳: <b>${esc(nowTxt)}</b></div>` : "") + (why ? `<span class="why">${esc(why)}</span>` : "") + locBtn;
+  P$(".acts").hidden = !why && !nowTxt && !hasChg && !noRowTxt && !townSum && !bldTxt && !slopeTxt && !locBtn && !warnTop && !mq.matches;
   const lb = document.getElementById("locbtn");
   if (lb) lb.onclick = () => openLoc(get(z, "n"), loc);
   const cb = document.getElementById("chgbtn");
@@ -3711,10 +3725,170 @@
    schClear();
    return;
   }
+  if (e.key === "Escape" && SLOPE.bub) {
+   slopeBubClose();
+   return;
+  }
   if (e.key === "Escape") {
    if (document.getElementById("locv").classList.contains("on")) closeLoc(); else if (sv.classList.contains("on")) closeSv(); else if (document.getElementById("cxcard").classList.contains("on")) document.getElementById("cxcard").classList.remove("on"); else if (srcpop.classList.contains("on")) srcpop.classList.remove("on"); else if (cpanel.classList.contains("on")) closeCalc(); else if (panel.classList.contains("on")) closePanel();
   }
  }));
+
+ /* 31차 경사도 시험판 */
+ window.__map = () => map;   /* 시험판 전용: 시험 스크립트가 지도를 옮길 때 씀 */
+ const SLOPE = { on: false, layers: [], bub: null, grey: /(^|[?&#])slopegrey=1/.test(location.search + location.hash) };
+ function slopeLoad(cb) {
+  if (window.MAP_SLOPE) return cb();
+  const s = document.createElement("script"); s.src = "지도_경사.js?v=" + SLOPE_V; s.onload = cb; s.onerror = () => cb(); document.head.appendChild(s);
+ }
+ function slopeLine(k) {
+  if (!SLOPE.on || !window.MAP_SLOPE) return "";
+  const v = MAP_SLOPE.구역[k], C = MAP_SLOPE.설정;
+  if (!v) return "경사: 구역계 준비 중";
+  return C.구역줄.replace("{mean}", v[0]).replace("{p95}", v[1]).replace("{rng}", Math.round(v[2])).replace("{fl}", Math.max(1, Math.round(v[2] / C.층높이m))).replace("{steep}", Math.round(v[3]));
+ }
+ function slopeLegend() {
+  const C = MAP_SLOPE.설정, S = C.칠_단계;
+  if (!S) return;
+  document.getElementById("slopeLg").innerHTML = `<div class="t">경사도 (참고용) · ${C["칠_시작%"]}% 미만 평지는 칠하지 않아요</div>` + S.map(([lo, c, al, lab, mean]) => `<div class="sw"><i style="background:rgba(${c},${(al / 255).toFixed(2)})"></i><b>${esc(lab)}</b><span>${esc(mean)}</span></div>`).join("");
+ }
+ const SLOPE_V = "20261109-1955";
+ /* 39차: 타일 묶음 — 'SLB1' + 개수 + [x,y,시작,길이]… + PNG들. 블록은 처음 쓸 때 한 번 받아 기억 */
+ const SLB = new Map;
+ function slbLoad(file) {
+  if (!SLB.has(file)) SLB.set(file, fetch(`경사도/${file}?v=${SLOPE_V}`).then((r => { if (!r.ok) throw new Error(r.status); return r.arrayBuffer(); })).then((buf => {
+   const dv = new DataView(buf), n = dv.getUint32(4, true), base = 8 + n * 12, m = new Map;
+   for (let i = 0; i < n; i++) { const o = 8 + i * 12; m.set(dv.getUint16(o, true) * 65536 + dv.getUint16(o + 2, true), [ base + dv.getUint32(o + 4, true), dv.getUint32(o + 8, true) ]); }
+   return { buf, m };
+  })).catch((() => { SLB.delete(file); return null; })));
+  return SLB.get(file);
+ }
+ async function slopeBlob(kind, z, x, y) {   // 그 타일 PNG(Blob), 없으면(평지만인 곳) null — 요청도 안 함
+  const T = MAP_SLOPE.타일묶음 && MAP_SLOPE.타일묶음[kind] && MAP_SLOPE.타일묶음[kind][z];
+  if (!T) return null;
+  const [sh, names] = T, bk = (x >> sh) + "_" + (y >> sh);
+  if (!names.includes(bk)) return null;
+  const b = await slbLoad(`${kind}_${z}_${bk}.bin`); if (!b) return null;
+  const e = b.m.get(x * 65536 + y); if (!e) return null;
+  return new Blob([ new Uint8Array(b.buf, e[0], e[1]) ], { type: "image/png" });
+ }
+ function slopeLayers() { return []; }
+ let SlopeImg = null;   /* 39차: 경사도 그림을 구역 칠 아래에 깔기(overlayLayer 맨 앞에 넣음) */
+ function slopeImgClass() {
+  if (SlopeImg) return SlopeImg;
+  SlopeImg = class extends NV.OverlayView {
+   constructor(u, bd) { super(); this.u = u; this.bd = bd; }
+   onAdd() {
+    const im = document.createElement("img"); im.src = this.u; im.alt = ""; im.draggable = false;
+    im.style.cssText = "position:absolute;pointer-events:none;user-select:none;max-width:none;margin:0;padding:0;border:0";
+    const p = this.getPanes().overlayLayer; p.insertBefore(im, p.firstChild); this.im = im;
+   }
+   draw() {
+    if (!this.im) return;
+    const pr = this.getProjection(), a = pr.fromCoordToOffset(this.bd.getSW()), b = pr.fromCoordToOffset(this.bd.getNE());
+    const st = this.im.style; st.left = Math.round(a.x) + "px"; st.top = Math.round(b.y) + "px"; st.width = Math.round(b.x - a.x) + "px"; st.height = Math.round(a.y - b.y) + "px";
+   }
+   onRemove() { if (this.im) { this.im.remove(); this.im = null; } }
+  };
+  return SlopeImg;
+ }   // 39차: 네이버 타일 층 안 씀(아래 slopeOver가 모든 단계를 깔아 줌)
+ /* 확대 12~16: 그 단계 타일, 17 이상: 16단계 타일을 늘려서 — 화면에 보이는 것만 지도 위 그림으로 */
+ const SLOPE_GO = new Map, SLOPE_PEND = new Set; let SLOPE_Z = -1, SLOPE_WANT = new Set;
+ function slopeGoClear() { SLOPE_GO.forEach((o => { o.setMap(null); URL.revokeObjectURL(o.__u); })); SLOPE_GO.clear(); }
+ function slopeOver() {
+  const C = window.MAP_SLOPE && MAP_SLOPE.설정;
+  if (!SLOPE.on || !C) { slopeGoClear(); SLOPE_Z = -1; return; }
+  const [z0, z1] = C.확대, mz = Math.round(map.getZoom());
+  if (mz < z0) { slopeGoClear(); SLOPE_Z = -1; return; }
+  const zt = Math.min(z1, mz);
+  if (zt !== SLOPE_Z) { slopeGoClear(); SLOPE_Z = zt; }
+  const b = map.getBounds(), n = 2 ** zt, tx = lng => Math.floor((lng + 180) / 360 * n), ty = lat => Math.floor((1 - Math.asinh(Math.tan(lat * Math.PI / 180)) / Math.PI) / 2 * n);
+  const lng2 = x => x / n * 360 - 180, lat2 = y => Math.atan(Math.sinh(Math.PI * (1 - 2 * y / n))) * 180 / Math.PI;
+  const want = new Set;
+  for (let x = tx(b.getMin().x); x <= tx(b.getMax().x); x++) for (let y = ty(b.getMax().y); y <= ty(b.getMin().y); y++) {
+   const k = zt + "/" + x + "/" + y; want.add(k);
+   if (SLOPE_GO.has(k) || SLOPE_PEND.has(k)) continue;
+   SLOPE_PEND.add(k);
+   slopeBlob("칠", zt, x, y).then((bl => {
+    SLOPE_PEND.delete(k);
+    if (!bl || !SLOPE.on || SLOPE_Z !== zt || !SLOPE_WANT.has(k) || SLOPE_GO.has(k)) return;
+    const u = URL.createObjectURL(bl), C2 = slopeImgClass(), o = new C2(u, new NV.LatLngBounds(new NV.LatLng(lat2(y + 1), lng2(x)), new NV.LatLng(lat2(y), lng2(x + 1))));
+    o.__u = u; o.setMap(map); SLOPE_GO.set(k, o);
+   }));
+  }
+  SLOPE_WANT = want;
+  SLOPE_GO.forEach(((o, k) => { if (!want.has(k)) { o.setMap(null); URL.revokeObjectURL(o.__u); SLOPE_GO.delete(k); } }));
+ }
+ function slopeSync() {
+  const btn = document.getElementById("tbSlope"); SLOPE.on = btn.getAttribute("aria-pressed") === "true";
+  const lg = document.getElementById("slopeLg");
+  if (!SLOPE.on) {
+   SLOPE.layers.forEach(l => l.setMap(null)); lg.hidden = true; slopeBubClose(); slopeHovHide(); slopeOver();
+   document.getElementById("map").classList.remove("slopegrey");
+   if (panel.classList.contains("on") && panelMode === "detail") renderPanel();
+   return;
+  }
+  slopeLoad(() => {
+   if (!window.MAP_SLOPE || !SLOPE.on) return;
+   if (!SLOPE.layers.length) SLOPE.layers = slopeLayers();
+   SLOPE.layers.forEach(l => l.setMap(map)); slopeLegend(); lg.hidden = false; slopeOver();
+   if (SLOPE.grey) document.getElementById("map").classList.add("slopegrey");
+   sources();
+   if (panel.classList.contains("on") && panelMode === "detail") renderPanel();
+  });
+ }
+ document.getElementById("tbSlope").addEventListener("click", (e => {
+  const b = e.currentTarget; b.setAttribute("aria-pressed", b.getAttribute("aria-pressed") !== "true"); slopeSync();
+ }));
+ function slopeBubClose() { if (SLOPE.bub) { SLOPE.bub.close(); SLOPE.bub = null; } }
+ async function slopeAt(lat, lng) {
+  const C = MAP_SLOPE.설정, z = C.값타일_확대, n = 2 ** z;
+  const fx = (lng + 180) / 360 * n, fy = (1 - Math.asinh(Math.tan(lat * Math.PI / 180)) / Math.PI) / 2 * n;
+  const x = Math.floor(fx), y = Math.floor(fy), px = Math.min(255, Math.floor((fx - x) * 256)), py = Math.min(255, Math.floor((fy - y) * 256));
+  try {
+   const key = z + "/" + x + "/" + y; if (!SLOPE.val) SLOPE.val = new Map;
+   let px8 = SLOPE.val.get(key);
+   if (!px8) {
+    px8 = (async () => { const bl = await slopeBlob("값", z, x, y); if (!bl) return null; const im = await createImageBitmap(bl);
+     const cv = document.createElement("canvas"); cv.width = cv.height = 256; const cx = cv.getContext("2d", { willReadFrequently: true }); cx.drawImage(im, 0, 0); return cx.getImageData(0, 0, 256, 256).data; })();
+    SLOPE.val.set(key, px8); if (SLOPE.val.size > 64) SLOPE.val.delete(SLOPE.val.keys().next().value);
+   }
+   const d = await px8; if (!d) return null; return d[(py * 256 + px) * 4] / C.값타일_곱;
+  } catch (e) { if (SLOPE.val) SLOPE.val.delete(z + "/" + x + "/" + y); return null; }
+ }
+ function slopeText(v) {   // 칠한 곳만 글자, 평지·자료 없음은 ""
+  const C = MAP_SLOPE.설정;
+  if (v === null || v < C["칠_시작%"]) return "";
+  const deg = Math.atan(v / 100) * 180 / Math.PI;
+  return C.말풍선.replace("{s}", Math.round(v)).replace("{d}", deg < 10 ? deg.toFixed(1) : Math.round(deg)).replace("{h}", (Math.round(v / 10 * 10) / 10).toString());
+ }
+ /* ② PC 마우스 올리면 툴팁(칠한 곳만) */
+ let hovT = 0, hovSeq = 0;
+ function slopeHovHide() { clearTimeout(hovT); hovSeq++; const h = document.getElementById("slopeHov"); if (h) h.classList.remove("on"); }
+ function slopeHover(e) {
+  if (!SLOPE.on || !window.MAP_SLOPE || mq.matches || !e || !e.coord) { slopeHovHide(); return; }
+  clearTimeout(hovT); const seq = ++hovSeq, la = e.coord.lat(), ln = e.coord.lng();
+  hovT = setTimeout((async () => {
+   const v = await slopeAt(la, ln); if (seq !== hovSeq) return;
+   const h = document.getElementById("slopeHov"), t = slopeText(v);
+   if (!t) { h.classList.remove("on"); return; }
+   const mx = SLOPE.mx || 0, my = SLOPE.my || 0;
+   h.textContent = t; h.classList.add("on");
+   const w = h.offsetWidth, hh = h.offsetHeight; let x = mx + 14, y = my + 16;
+   if (x + w > window.innerWidth - 8) x = mx - w - 12;
+   if (y + hh > window.innerHeight - 8) y = my - hh - 12;
+   h.style.left = x + "px"; h.style.top = y + "px";
+  }), 90);
+ }
+ async function slopeTip(coord) {
+  if (!SLOPE.on || !window.MAP_SLOPE) return;
+  const C = MAP_SLOPE.설정, v = await slopeAt(coord.lat(), coord.lng());
+  slopeBubClose();
+  const t = slopeText(v);
+  if (!t) return;
+  SLOPE.bub = new NV.InfoWindow({ content: `<div class="sbub">${esc(t)}</div>`, borderWidth: 0, backgroundColor: "transparent", disableAnchor: false, anchorSize: new NV.Size(10, 8), anchorColor: "#fff", pixelOffset: new NV.Point(0, -4) });
+  SLOPE.bub.open(map, coord);
+ }
  function sources() {
   const li = [];
   if (BND) Object.values(BND.src).forEach((s => li.push(`구역 테두리: ${esc(s)} — 모양을 바꾸지 않고 지도 좌표 형식만 바꿔 표시했어요.`)));
@@ -3722,6 +3896,7 @@
   if (CAND) Object.values(CAND.src).forEach((s => li.push(`후보지 선정 당시 범위(참고): ${esc(s)}`)));
   li.push("구역계는 고시·공개 자료를 바탕으로 그린 참고용 선이며, 실제 경계와 다를 수 있어요. 정확한 경계는 고시문을 확인하세요.");
   li.push("배경지도·거리뷰: 네이버 지도(NAVER Corp.)");
+  if (window.MAP_SLOPE) li.push("경사도(참고용): " + esc(MAP_SLOPE.설정.출처) + (MAP_SLOPE.설정.출처_조건 ? "<br><small>" + esc(MAP_SLOPE.설정.출처_조건) + "</small>" : ""));
   li.push("단지 위치·시세(34평 기준): 부의 레시피 저평가 계산기·시세보정 단지 자료" + (CXD && CXD.month ? ` · ${monthTxt()} 기준` : ""));
   li.push("비교 단지 선정·구역 정보·상세: 부의 레시피 재개발 목록표");
   li.push("가까운 역·도보 시간: 지도 데이터 © OpenStreetMap contributors · 경로 계산 FOSSGIS");
@@ -3792,6 +3967,18 @@
    }
    document.getElementById("cxcard").classList.remove("on");
    sres.classList.remove("on");
+   slopeBubClose();
+  }));
+  NV.Event.addListener(map, "idle", (() => { if (SLOPE.on) slopeOver(); }));
+  NV.Event.addListener(map, "mousemove", slopeHover);
+  document.getElementById("map").addEventListener("mousemove", (ev => { SLOPE.mx = ev.clientX; SLOPE.my = ev.clientY; }), { passive: true, capture: true });
+  document.getElementById("map").addEventListener("mouseleave", slopeHovHide);
+  NV.Event.addListener(map, "mouseout", slopeHovHide);
+  NV.Event.addListener(map, "dragstart", slopeHovHide);
+  NV.Event.addListener(map, "zoom_changed", slopeHovHide);
+  NV.Event.addListener(map, "longtap", (e => {
+   if (Date.now() - overlayClickAt < 600) return;
+   if (SLOPE.on && e && e.coord) slopeTip(e.coord);
   }));
   draw();
   lastMode = (zoom() >= POLY_ZOOM) + ":" + (zoom() >= LABEL_ZOOM) + ":" + (zoom() >= SUB_LABEL_ZOOM);
