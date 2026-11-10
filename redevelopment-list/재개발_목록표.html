@@ -3800,8 +3800,14 @@ const RT21 = {"meta":{"src":"목록표_연결_v3_4_pub.json · 목록표_시계�
     document.addEventListener('pointermove', (e) => { if (!drag) return; const [lo, hi] = SPLIM[drag.k]; SPW[drag.k] = Math.max(lo, Math.min(hi, drag.w + e.clientX - drag.x)); spLayout(); });
     document.addEventListener('pointerup', () => { if (!drag) return; lsSet(drag.k === 'z' ? 'rtSpZoneW' : 'rtSpJibunW', SPW[drag.k]); drag = null; document.documentElement.classList.remove('rt-spdrag'); });
   })();
+  function gsFitFrame(ov){   // A 32차: 바깥 화면보다 긴 iframe(지도 휴대폰 구역 창 등) 안이면 패널을 지금 보이는 부분에 맞춤
+    ov.style.position = ''; ov.style.top = ''; ov.style.height = ''; ov.style.bottom = ''; const bx = ov.querySelector('.rt-gsbox'); if (bx) bx.style.maxHeight = '';
+    if (SP_TOP) return; try { const fe = window.frameElement, pw = window.parent; if (!fe || !pw) return; const pr = fe.getBoundingClientRect(), ph = pw.innerHeight;
+      if (pr.height <= ph + 2) return; const vt = Math.max(0, -pr.top), vh = Math.max(200, Math.min(ph, pr.bottom) - Math.max(0, pr.top));
+      ov.style.position = 'absolute'; ov.style.top = (vt + (window.scrollY || 0)) + 'px'; ov.style.bottom = 'auto'; ov.style.height = vh + 'px'; if (bx) bx.style.maxHeight = Math.round(vh * 0.88) + 'px'; } catch (e) { /* 다른 출처 창이면 그대로 */ }
+  }
   function gsOpen(b, x, sc, r){
-    const ov = jpEnsure(); if (ov.classList.contains('rt-fold')) ov.classList.remove('rt-fold'); ov.hidden = false; const bd = ov.querySelector('[data-rt-gsbody]'); bd.innerHTML = '<div class="rt-sub">불러오는 중…</div>'; ov.querySelector('.rt-gsbox').scrollTop = 0;
+    const ov = jpEnsure(); if (ov.classList.contains('rt-fold')) ov.classList.remove('rt-fold'); ov.hidden = false; gsFitFrame(ov); const bd = ov.querySelector('[data-rt-gsbody]'); bd.innerHTML = '<div class="rt-sub">불러오는 중…</div>'; ov.querySelector('.rt-gsbox').scrollTop = 0;
     loadGs(b).then(() => { bd.innerHTML = gsHtml(b, x, sc, r); }, () => { bd.innerHTML = '<div class="rt-sub">공시가 자료를 불러오지 못했어요.</div>'; });
   }
   document.addEventListener('keydown', (e) => { const ov = document.getElementById('rtGsOv'); if (e.key === 'Escape' && ov && !ov.hidden) { jpClose(); e.stopPropagation(); } }, true);
