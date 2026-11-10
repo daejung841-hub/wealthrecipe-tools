@@ -33,7 +33,7 @@
 // 묶음 L52·L53(83단계): 아래 정적 스크립트 주소의 ?v=와 이 표는 build_l52_versions.py가 빌드 때 실제 파일 해시로 채운다(손으로 쓰지 않음).
 // 표는 25평 seed 지연 로딩(loadSeed25)이 실행 중에 쓴다. EARLY_FLAGS_L52는 xlsx 태그(L53)를 쓸지 정하려고 주소 플래그를 먼저 읽는다
 // (applyBundlesFromUrl과 같은 규칙, 로컬 주소에서만: 값이 없으면 모두 켬, 있으면 적힌 묶음만 — 묶음 이름 'L' 포함).
-var ASSET_VERSIONS_L52 = /*L52_VERSIONS*/{"shared.js":"8e8ee813","seedComplexes.js":"123bdffb","seedChips.js":"21287378","m2Series.js":"acc3bcaa","seedComplexes25.js":"0dee2642","feedback-widget.js":"52cf1fae","station_walk.js":"d1744c95","school_elem.js":"e368c3b0","calc_map.js":"4b735419","map_light.js":"c838e836","map_trade_idx.js":"c94b3db1"}/*END_L52_VERSIONS*/;
+var ASSET_VERSIONS_L52 = /*L52_VERSIONS*/{"shared.js":"8e8ee813","seedComplexes.js":"123bdffb","seedChips.js":"21287378","m2Series.js":"acc3bcaa","seedComplexes25.js":"0dee2642","feedback-widget.js":"52cf1fae","station_walk.js":"d1744c95","school_elem.js":"e368c3b0"}/*END_L52_VERSIONS*/;
 var EARLY_FLAGS_L52 = (function(){
   var on = { L52: true, L53: true, L86: true, L88: true };   // L86(시세 이력 미루기)은 지도 중심 화면(L85)이 켜져 있을 때만 — L85를 끄면 여기 L86도 false
   try {
@@ -442,6 +442,9 @@ body.l85-map #mapSectionL84{position:fixed;left:0;right:0;top:48px;bottom:0;marg
 .map-head-l85 .mh-tabs button{border:1px solid var(--border);background:var(--surface);color:var(--ink);font:inherit;font-size:13px;font-weight:700;padding:6px 10px;border-radius:999px;cursor:pointer;white-space:nowrap;min-height:34px;}
 .map-head-l85 .mh-tabs button.active{background:var(--accent);border-color:var(--accent);color:#fff;}
 .map-head-l85 .mh-links{margin-left:auto;display:flex;gap:4px;align-items:center;}
+/* 묶음 L98B: 머리줄 이동 버튼은 🏠 초기화면 하나만(급지표·비례율·목록표·임장은 첫 화면에 있음) */
+html.l98b .map-head-l85 .mh-links a[href="급지표.html"], html.l98b .map-head-l85 .mh-links a[href="../rate-simulator/비례율_시뮬레이터.html"], html.l98b .map-head-l85 .mh-links a[href="../redevelopment-list/재개발_목록표.html"], html.l98b .map-head-l85 .mh-links a[href="../imjang/"],
+html.l98b .topbar-actions a[href="급지표.html"], html.l98b .topbar-actions a[href="../rate-simulator/비례율_시뮬레이터.html"], html.l98b .topbar-actions a[href^="../redevelopment-list/"], html.l98b .topbar-actions a[href^="../imjang/"]{display:none!important;}
 .map-head-l85 .mh-links a, .map-head-l85 .mh-links button{border:1px solid var(--border);background:var(--surface);color:var(--ink);font:inherit;font-size:12.5px;padding:5px 8px;border-radius:8px;text-decoration:none;cursor:pointer;white-space:nowrap;min-height:32px;display:inline-flex;align-items:center;}
 .map-head-l85 [hidden]{display:none!important;}
 .seed-wait-l86{position:fixed;left:50%;top:58px;transform:translateX(-50%);z-index:9500;background:#1E3A8A;color:#fff;font-size:13px;font-weight:600;padding:8px 14px;border-radius:999px;box-shadow:0 4px 14px rgba(0,0,0,.2);max-width:calc(100% - 32px);text-align:center;}
@@ -472,6 +475,12 @@ body.l87f #singleDiagSection [data-twin-toggle], body.l87f #singleDiagSection [d
 .tt-pop-l89 .twin-kind-caption,.tt-pop-l89 .twin-legend{margin:0 0 6px;}
 .tt-tg-l89{margin-left:auto;display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-end;}
 .tt-tg-l89 .chart-mode-toggle{margin:0;font-size:12px;padding:3px 8px;}
+/* 묶음 L98B: 제목("쌍둥이 단지"·"괴리 쌍둥이")은 단어 중간에서 끊기지 않게 한 줄 고정, ⓘ는 제목 바로 옆 작은 아이콘, 줄이 좁으면 보기 단추끼리만 다음 줄로 */
+.l98b .tt-row-l89{align-items:flex-start;}
+.l98b .tt-row-l89 > b{flex:0 0 auto;white-space:nowrap;word-break:keep-all;font-size:clamp(13px,3.6vw,14px);line-height:22px;}
+.l98b .tt-i-l89{flex:0 0 auto;width:18px;height:18px;margin:2px 0 0 -2px;font-size:11px;line-height:16px;}
+.l98b .tt-tg-l89{flex:1 1 0;min-width:0;}
+.l98b .tt-tg-l89 .chart-mode-toggle{white-space:nowrap;}
 body.twin-open-l87{overflow:hidden;}
 .map-fail-l85{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;margin:0 0 10px;padding:12px 14px;border:2px solid #C2410C;border-radius:12px;background:#FFF7ED;color:#7C2D12;font-size:14.5px;font-weight:700;line-height:1.45;}
 .map-fail-l85 button{border:0;background:#C2410C;color:#fff;font:inherit;font-size:13.5px;padding:7px 14px;border-radius:999px;cursor:pointer;}
@@ -644,6 +653,7 @@ body.twin-open-l87{overflow:hidden;}
 .r94-g ul{list-style:none;margin:0;padding:0;flex:1;min-width:0;}
 .r94-g li{display:flex;flex-wrap:wrap;gap:2px 6px;align-items:baseline;padding:1px 0;}
 .r94-g li > span:first-child{min-width:64px;}
+.r94-g li .og98b{display:inline-block;font-size:10px;font-weight:700;color:#B45309;background:#FFF4E6;border-radius:4px;padding:0 4px;}   /* 묶음 L98B: 단지 학군 밖 학교 */
 .r94-x{color:var(--ink-faint, #9CA3AF);font-size:10.5px;font-weight:400;}
 /* 묶음 L95: 표 고정 머리는 불투명(스크롤해도 아래 글씨가 비치지 않게 — 창 위 여백까지 덮음) · 시도 안 상위 % 크게 · 지도로 가는 버튼 */
 html.l95 .r94-t{border-collapse:separate;border-spacing:0;}
@@ -3052,9 +3062,9 @@ function seoulHistoricalAvg(){
 // 라이브는 주소 플래그를 읽지 않으므로 이 기본값이 그대로 동작한다.
 const BUNDLES = { A:false, B:false, C:false, D1:false, D2:false, D3:false, D4:false, E1:true, E2:false, E3:true, F1:true, F2:true, F3:true, F4:true, F5:true, F6:true,
   H1:false, H2:true, H3:true, H4:true, H5:true, H6:true, H7:true,
-  L1:true, L2:true, L3:true, L4:true, L5:true, L6:false, L7:true, L8:true, L9:true, L10:true, L11:true, L12:true, L13:true, L14:true, L15:true, L16:true, L17:true, L18:true, L19:true, L19B:true, L20:true, L22:true, L23:true, L24:true, L25:true, L26:true, L27:!!window.POOL_EXCLUDE_ON, L31:!!window.NEW_NAME_RULE_ON, L32:true, L33:true, L34:true, L37:true, L28:true, L38:true, L40:true, L39:true, L41:true, L42:true, L43:true, L44:true, L45:true, L46:true, L47:true, L49:true, L48:true, L50:true, L51:true, L52:true, L53:true, L54:true, L55:true, L56:true, L57:true, L58:true, L59:true, L59_DND:true, L59_INFOCARD:true, L59_STATION:true, L59_SCHOOL:true, L59_FAVSEARCH:true, L60:true, L60_REL:false, L60_WHY:false, L60_NOTE:true, L61:true, L64:true, L64_LINK:true, L64_NEWBUILD:false, L65:true, L69:true, L70:true, L71:true, L74:true, L75:true, L76:true, L77:true, L78:true, L79:true, L80:true, L81:true, L82:true, L84:true, L85:true, L85_CROSS:true, L85_LEFT:true, L85_INFO:true, L85_LBL:true, L85_FULL:true, L86:(typeof EARLY_FLAGS_L52 === 'undefined' || !!EARLY_FLAGS_L52.L86), L87:true, L88:true, L88_EMBED:true, L88_SHARE:true, L89:true, L84_RT:true, L84_SC:true, L91:true, L92:true, L93:true, L94:true, L95:true, L96:true, L97:true, L97B:true, L98:true, L98H:true, L35:true, L36:true, L30:true, L29:true, L29R:false, K1:false, K2:true, K4:false };
+  L1:true, L2:true, L3:true, L4:true, L5:true, L6:false, L7:true, L8:true, L9:true, L10:true, L11:true, L12:true, L13:true, L14:true, L15:true, L16:true, L17:true, L18:true, L19:true, L19B:true, L20:true, L22:true, L23:true, L24:true, L25:true, L26:true, L27:!!window.POOL_EXCLUDE_ON, L31:!!window.NEW_NAME_RULE_ON, L32:true, L33:true, L34:true, L37:true, L28:true, L38:true, L40:true, L39:true, L41:true, L42:true, L43:true, L44:true, L45:true, L46:true, L47:true, L49:true, L48:true, L50:true, L51:true, L52:true, L53:true, L54:true, L55:true, L56:true, L57:true, L58:true, L59:true, L59_DND:true, L59_INFOCARD:true, L59_STATION:true, L59_SCHOOL:true, L59_FAVSEARCH:true, L60:true, L60_REL:false, L60_WHY:false, L60_NOTE:true, L61:true, L64:true, L64_LINK:true, L64_NEWBUILD:false, L65:true, L69:true, L70:true, L71:true, L74:true, L75:true, L76:true, L77:true, L78:true, L79:true, L80:true, L81:true, L82:true, L84:true, L85:true, L85_CROSS:true, L85_LEFT:true, L85_INFO:true, L85_LBL:true, L85_FULL:true, L86:(typeof EARLY_FLAGS_L52 === 'undefined' || !!EARLY_FLAGS_L52.L86), L87:true, L88:true, L88_EMBED:true, L88_SHARE:true, L89:true, L84_RT:true, L84_SC:true, L91:true, L92:true, L93:true, L94:true, L95:true, L96:true, L97:true, L97B:true, L98:true, L98H:true, L98B:true, L35:true, L36:true, L30:true, L29:true, L29R:false, K1:false, K2:true, K4:false };
 const BUNDLE_GROUPS = { D:['D1','D2','D3','D4'], E:['E1','E2','E3'], F:['F1','F2','F3','F4','F5','F6'], H:['H1','H2','H3','H4','H5','H6','H7'],
-  L:['L1','L2','L3','L4','L5','L6','L7','L8','L9','L10','L11','L12','L13','L14','L15','L16','L17','L18','L19','L19B','L20','L22','L23','L24','L25','L26','L27','L29','L30','L31','L32','L33','L34','L37','L35','L36','L28','L38','L40','L39','L41','L42','L43','L44','L45','L46','L47','L49','L48','L50','L51','L52','L53','L54','L55','L56','L57','L58','L59','L60','L61','L64','L65','L69','L70','L71','L74','L75','L76','L77','L78','L79','L80','L81','L82','L84','L85','L86','L87','L88','L89','L91','L92','L93','L94','L95','L96','L97','L97B','L98','L98H'], K:['K1','K2','K4'] };
+  L:['L1','L2','L3','L4','L5','L6','L7','L8','L9','L10','L11','L12','L13','L14','L15','L16','L17','L18','L19','L19B','L20','L22','L23','L24','L25','L26','L27','L29','L30','L31','L32','L33','L34','L37','L35','L36','L28','L38','L40','L39','L41','L42','L43','L44','L45','L46','L47','L49','L48','L50','L51','L52','L53','L54','L55','L56','L57','L58','L59','L60','L61','L64','L65','L69','L70','L71','L74','L75','L76','L77','L78','L79','L80','L81','L82','L84','L85','L86','L87','L88','L89','L91','L92','L93','L94','L95','L96','L97','L97B','L98','L98H','L98B'], K:['K1','K2','K4'] };
 // 묶음 L46(69단계): 그래프 점선 모양 통일 — 모든 점선을 "선도단지 대비 적정가" 선(FAIR_LINE_STYLE.borderDash)과 같은 긴 점선으로.
 // 촘촘한 점("좁쌀")·점-선 섞인 패턴을 없앤다. 새 점선은 항상 dashL46(예전 값)을 쓴다 — L46을 끄면 예전 값 그대로.
 const DASH_L46 = [5, 4];
@@ -11965,8 +11975,8 @@ function kmL96(a, b, c, d){ const r = Math.PI / 180, x = (d - b) * r * Math.cos(
 // 학교 위치 = 지도 학교 위치 파일(이름 → 설립·남녀·위도·경도·시도), 시도가 다르면 같은 이름 다른 학교라 거리 안 붙임. 남·여 = 나이스 남녀(진학률 이름표)
 function nearMidL96(list, sd, from){
   const P = window[SCHOOL_PTS_VAR_L92]; if (!P || !P.mid || !from || !isFinite(from.lat) || !isFinite(from.lng)) return null;
-  const all = (list || []).map(n => { const p = Object.prototype.hasOwnProperty.call(P.mid, n) ? P.mid[n] : null, q = rateOfL94(sd, n);
-    return [n, p && p[4] === sd && isFinite(p[2]) && isFinite(p[3]) ? kmL96(from.lat, from.lng, p[2], p[3]) : null, q && !q.miss ? q.sex : null]; });
+  const all = (list || []).map(n => { const p = ptMidL98B(P, n, sd, from), q = rateOfL94(sd, n), okSd = p && (p[4] === sd || (BUNDLES.L98B && !!P.midBySido));   // 묶음 L98B: 시도별 자료로 고른 학교는 학군이 시 경계를 넘어도 거리 계산
+    return [n, okSd && isFinite(p[2]) && isFinite(p[3]) ? kmL96(from.lat, from.lng, p[2], p[3]) : null, q && !q.miss ? q.sex : null]; });
   const has = all.filter(x => x[1] != null).sort((a, b) => a[1] - b[1]); if (!has.length) return null;
   const top = (sx) => has.filter(x => x[2] === sx || x[2] === '공학').slice(0, 3), b = top('남'), g = top('여'), used = new Set(b.concat(g).map(x => x[0]));
   return [['남학생 · 단지에서 가까운 3곳', b], ['여학생 · 단지에서 가까운 3곳', g], ['그 밖의 학교 · 가까운 순', has.filter(x => !used.has(x[0])).concat(all.filter(x => x[1] == null))]];
@@ -11975,7 +11985,41 @@ function nearMidL96(list, sd, from){
 function fromL96(id){ try { const M = window.parent !== window && window.parent.CALC_MAP_L84, it = M && M.items ? M.items().find(x => x.id === id) : null; return it ? { lat: it.lat, lng: it.lng, nm: it.name || it.nm || '' } : null; } catch (e) { return null; } }
 function rateStateL94(sd){ return RATE_L94[sd] ? RATE_L94[sd].st : 'idle'; }
 const RATE_BITS_L94 = [[1, '소규모'], [2, '참고'], [4, '개교 예정'], [8, '자료 없음']];
-function rateOfL94(sd, name){ const o = RATE_L94[sd], d = o && o.d; if (!d) return null; const q = d.nm.mid[name]; if (!q) return { miss: true }; return { code: q[0], sex: q[1], est: q[2], v: d.rate.중학교[q[0]] || null }; }
+// 묶음 L98B: 학교 이름은 가운뎃점·공백을 무시하고도 찾음(이화・금란 ↔ 이화금란), 학교 위치는 시도별(midBySido)·학교 코드별(midByCode) 자료가 있으면 그것 먼저 — 이름만으로 저장된 옛 자료는 같은 이름 학교가 덮여 있음
+const nameKeyL98B = (s) => String(s).replace(/[・·ㆍ\s]/g, '');
+// 묶음 L98B: 단지에서 연 초등 "가까운 중학교(추정)" — 그 단지의 중학교 학군 목록에 없는 학교에 "다른 학군"(경계 단지: 단지와 배정 초교가 서로 다른 학군)
+function markOtherZoneL98B(html, id){
+  if (!BUNDLES.L98B || !html || !id) return html;
+  try {
+    const M = window[MID_ZONE_VAR_L91], zid = M && Object.prototype.hasOwnProperty.call(M, id) ? M[id] : null, z = zid && M._zones ? M._zones[zid] : null; if (!z) return html;
+    const sk = (n) => nameKeyL98B(String(n).replace(/중학교$/, '중'));
+    const own = new Set((z[2] || []).map(sk)), any = new Set(), d = document.createElement('div'); d.innerHTML = html; let k = 0;
+    Object.keys(M._zones).forEach(q => (M._zones[q][2] || []).forEach(n => any.add(sk(n))));   // 어느 학군 목록에도 없는 학교(학구도 자료에 없음: 서울 반포중·연서중 등)는 "학군 자료 없음"
+    d.querySelectorAll('.r94-g li').forEach(li => { const s = li.querySelector('span'), t = s && s.firstChild ? String(s.firstChild.textContent || '').trim() : '';
+      if (t && !own.has(sk(t))){ const nz = !any.has(sk(t)); li.insertAdjacentHTML('beforeend', ' <small class="og98b">' + (nz ? '학군 자료 없음' : '다른 학군') + '</small>'); if (!nz) k++; } });
+    if (k){ const n = d.querySelector('.r94-n'); if (n) n.insertAdjacentHTML('afterbegin', '"다른 학군" = 이 단지의 중학교 학군('+esc(z[0])+') 밖 학교예요. 단지와 배정 초등학교가 서로 다른 학군에 걸쳐 있어요. '); }
+    return d.innerHTML;
+  } catch (e) { return html; }
+}
+//   찾는 순서(분석 탭 11-09 권장): 단지 시도의 그 이름 → 없으면 다른 시도에서 그 이름이 하나뿐이면 그것(학군이 시 경계를 넘는 경우) → 여럿이면 단지(from)에서 가까운 것
+function ptMidL98B(P, n, sd, from){
+  const own = (o, k) => !!o && Object.prototype.hasOwnProperty.call(o, k);
+  if (BUNDLES.L98B && P){
+    const B = P.midBySido;
+    if (B){
+      if (own(B[sd], n)) return B[sd][n];
+      const cs = Object.keys(B).filter(k => own(B[k], n)).map(k => B[k][n]);
+      if (cs.length === 1) return cs[0];
+      if (cs.length > 1 && from && isFinite(from.lat)) return cs.slice().sort((a, b) => ((a[2] - from.lat) ** 2 + (a[3] - from.lng) ** 2) - ((b[2] - from.lat) ** 2 + (b[3] - from.lng) ** 2))[0];
+      if (cs.length > 1) return null;
+    }
+    if (P.midByCode){ const q = rateOfL94(sd, n); if (q && !q.miss && own(P.midByCode, q.code)) return P.midByCode[q.code]; }
+  }
+  return P && own(P.mid, n) ? P.mid[n] : null;
+}
+function rateOfL94(sd, name){ const o = RATE_L94[sd], d = o && o.d; if (!d) return null; let q = d.nm.mid[name];
+  if (!q && BUNDLES.L98B){ if (!d.nmKeyL98B){ d.nmKeyL98B = {}; Object.keys(d.nm.mid || {}).forEach(n => { d.nmKeyL98B[nameKeyL98B(n)] = n; }); } const k = d.nmKeyL98B[nameKeyL98B(name)]; if (k) q = d.nm.mid[k]; }
+  if (!q) return { miss: true }; return { code: q[0], sex: q[1], est: q[2], v: d.rate.중학교[q[0]] || null }; }
 const sexTxL94 = (x) => x === '남' ? '남중' : x === '여' ? '여중' : x === '공학' ? '공학' : '-';
 const n1L94 = (x) => x == null ? '-' : (Math.round(x * 10) / 10).toFixed(1);
 function rateCellL94(sd, v, code){
@@ -12026,14 +12070,26 @@ function midPopL94(id, sido){
 }
 // ---- 묶음 L95: 단지 정보 "초등학교" 줄 툴팁 + 줄 누르기 → 지도 ----
 if (BUNDLES.L95 && typeof document !== 'undefined') document.documentElement.classList.add('l95');
+if (BUNDLES.L98B && typeof document !== 'undefined') document.documentElement.classList.add('l98b');   // 묶음 L98B: 머리줄 이동 버튼 정리(CSS)
 function hoverPcL95(){ try { return window.matchMedia('(hover:hover) and (pointer:fine)').matches; } catch (e) { return false; } }
 function elemZoneHtmlL95(id, seed, t){
   return '<span class="mz92 ez95" tabindex="0" role="button" aria-expanded="false" aria-label="'+esc(t)+' — 가까운 중학교 보기" data-ez95="'+esc(id)+'" data-mz92-sd="'+esc(midSidoL92(seed))+'">'+esc(t)+'<i class="mz92-i" aria-hidden="true">ⓘ</i>'+
     '<span class="mz92-pop" role="tooltip"></span></span>';
 }
 // 배정 초등학교 이름 → 학교 위치(지도 학교 이름표와 같은 파일). 같은 시도에 같은 이름이 여럿이면 지도 패널 안에서는 단지와 가까운 곳, 아니면 고르지 않음
+// 묶음 L98B: 단지 배정 초교를 학교ID로(분석 탭 11-09: school_elem._학교ID[단지] → school_points.elemIdx[학교ID] → elem[순번]) — 같은 이름 초교(수도권 23개 이름, 52단지)도 정확히
+function elemByIdL98B(id){
+  if (!BUNDLES.L98B || !id) return null;
+  try {
+    const P = window[SCHOOL_PTS_VAR_L92]; if (!P || !P.elemIdx || !P.elem) return null;
+    const pick = (w) => { const E = w && w.SCHOOL_ELEM_202609; return E && E._학교ID && Object.prototype.hasOwnProperty.call(E._학교ID, id) ? E._학교ID[id] : null; };
+    let sid = pick(window); if (!sid && window.parent !== window){ try { sid = pick(window.parent); } catch (e) {} }
+    return sid && Object.prototype.hasOwnProperty.call(P.elemIdx, sid) ? P.elem[P.elemIdx[sid]] || null : null;
+  } catch (e) { return null; }
+}
 function elemPtL95(name, sd, id){
   const P = window[SCHOOL_PTS_VAR_L92]; if (!P || !P.elem) return null;
+  const bid = elemByIdL98B(id); if (bid && bid[0] === name) return bid;   // 묶음 L98B
   let c = P.elem.filter(x => x[0] === name && x[3] === sd); if (!c.length) c = P.elem.filter(x => x[0] === name); if (!c.length) return null;
   if (c.length > 1){ let it = null; try { const M = window.parent !== window && window.parent.CALC_MAP_L84; it = M && M.items ? M.items().find(x => x.id === id) : null; } catch (e) {}
     if (!it) return { amb: c.length };
@@ -12047,7 +12103,7 @@ function elemPopL95(id, sd){
   if (rateStateL94(sd) === 'idle') loadRateL94(sd).then(() => { fillMidPopsL92(); document.querySelectorAll('.mz92.open').forEach(el => showMidPopL92(el)); });
   const pt = schoolPtsStateL92 === 'loaded' ? elemPtL95(v[0], sd, id) : null;
   const near = pt && pt.amb ? '<div class="r94-q">같은 이름 학교가 '+pt.amb+'곳이라 가까운 중학교는 지도에서 학교를 눌러 확인해 주세요.</div>'
-    : pt ? elemNearL94(pt[0], pt[1], pt[2], pt[3])
+    : pt ? markOtherZoneL98B(elemNearL94(pt[0], pt[1], pt[2], pt[3]), id)   // 묶음 L98B: 단지 학군 밖 학교 표시
     : (schoolPtsStateL92 === 'error' ? '<div class="r94-q">학교 위치 자료를 받지 못했어요.</div>' : '<div class="r94-q">가까운 중학교를 불러오는 중이에요…</div>');
   return '<b>'+esc(v[0])+'</b><div class="mz92-s">배정 초등학교(통학구역 기준) · 단지에서 직선 '+Math.round(Number(v[1]) || 0).toLocaleString('ko-KR')+'m</div>'+near;
 }

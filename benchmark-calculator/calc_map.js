@@ -72,6 +72,16 @@
   const L98CFG = { jDir: '전세_단지별/', j4: 'jeonse4_panel.json', listN: 20, boxMonths: [3, 6], boxMin: 3,
     src: '국토교통부 전월세 실거래가 공개 자료', srcOffi: '국토교통부 오피스텔 실거래가 공개 자료', codeTx: { 2: '임대 비중 높아 참고', 3: '임대 섞임 의심, 참고', 4: 'KB 시세 확인 중, 참고' } };
   const l98 = () => { try { return !!(BUNDLES.L98 && l97b()); } catch (e) { return false; } };
+  // 묶음 L98B(11-09): ① 실거래 그래프(매매·전세) 선 = 그달 포함 최근 3개월 거래 중앙값(3개월 이동 중앙값), 그달 중앙값은 점(크기 = 거래 건수, 3건 미만은 흐리게)
+  //   ② 실거래 평형 고르기 — 실거래 파일의 거래를 전용㎡로 묶은 단추(기본 = 판정 평형). 판정 평형(34·25)이 아닌 평형은 실거래만(KB 선·차이·4지표 없음) + "판정 기준 평형"
+  const L98BCFG = { rollMonths: 3, fewN: 3, otherMonths: 6, mergeGap: 2, dot: [2.2, 1.35, 9] };   // dot = 점 반지름(기본, 건수 제곱근에 곱하는 값, 최대)
+  const l98b = () => { try { return !!(BUNDLES.L98B && l98()); } catch (e) { return false; } };
+  let pick98b = null;   // 판정 평형이 아닌 평형을 고른 때만 { id, lo, hi }(전용㎡ 반올림 값)
+  let elemFrom98b = null;   // 초등 학구 상자를 단지 정보 줄에서 연 경우 그 단지 id(단지 학군 밖 학교 "다른 학군" 표시용)
+  const other98b = (id) => !!(l98b() && pick98b && pick98b.id === id);
+  function bandRT(id, p){ return other98b(id) ? [pick98b.lo - .5, pick98b.hi + .49] : slotBandRT(id, p); }
+  const area98b = (lo, hi) => '전용 ' + (lo === hi ? lo : lo + '~' + hi) + '㎡';
+  const bandName98b = (id, p) => other98b(id) ? area98b(pick98b.lo, pick98b.hi) : p + '평 칸';
   const panelKey94 = () => l95() ? L95CFG.key : L94CFG.key;
   // 지금 쓰는 확대 단계(묶음 L89를 끄면 L88 값 그대로)
   const ZM = () => l89() ? { dist: L89CFG.distZoom, open: L89CFG.distOpenZoom, cx: L89CFG.cxMinZoom, detail: l97() ? L97CFG.detailZoom : L89CFG.detailZoom, info: l97() ? L97CFG.infoZoom : L89CFG.infoZoom, cxOpen: L89CFG.openZoom }
@@ -347,6 +357,54 @@
   /* 묶음 L97B: 작은 상자 — PC 오른쪽 위 폭 320px, 폰 폭 60%·높이 최대 30%(오른쪽 세로 단추 왼쪽). [자세히]는 상자 안에서 스크롤 */
   .cm84-scc.l97b{left:auto;right:78px;top:92px;width:320px;max-height:calc(100% - 110px);padding:9px 11px;font-size:12.5px;box-shadow:0 4px 14px rgba(0,0,0,.16)}
   @media (max-width:767px){ .cm84-scc.l97b{right:66px;top:118px;width:60%;max-height:30%} }
+  .cm84.vb98b .cm84-vbtns{align-items:flex-end;gap:6px}   /* 묶음 L98B: 오른쪽 단추 = 한 줄 짧은 이름, 폭은 글자만큼, 켬은 색 채움으로만 */
+  .cm84.vb98b .cm84-vbtns button{width:auto;min-width:0;white-space:nowrap;line-height:1.2;padding:6px 10px;font-size:12px;font-weight:700;border-radius:999px}
+  .cm84.vb98b .cm84-vbtns button small{display:none}
+  .cm84.vb98b #cm84Sv[aria-pressed="true"]{background:#1C7ED6;border-color:#1C7ED6;color:#fff}
+  .cm84.vb98b #cm84Cad[aria-pressed="true"]{background:#5F3DC4;border-color:#5F3DC4;color:#fff}
+  @media (max-width:767px){ .cm84.vb98b .cm84-vbtns button{width:auto;font-size:11.5px;padding:5px 9px} }
+  .vtip98b{position:absolute;z-index:300;transform:translateY(-50%);background:#111827;color:#fff;font-size:12px;font-weight:700;padding:5px 9px;border-radius:8px;white-space:nowrap;pointer-events:none;box-shadow:0 2px 8px rgba(0,0,0,.25)}
+  .cm84-sv{position:absolute;z-index:260;left:0;top:0;bottom:0;right:34%;background:#111;overflow:hidden}   /* 묶음 L98B: 거리뷰 화면 나누기(PC 왼쪽 크게 · 폰 위) */
+  .cm84-sv[hidden],.cm84-svh[hidden]{display:none}
+  .cm84-sv .pano{position:absolute;inset:0;width:100%;height:100%}
+  .cm84-sv .msg{position:absolute;z-index:6;left:50%;top:50%;transform:translate(-50%,-50%);max-width:84%;background:rgba(17,24,39,.86);color:#fff;font-size:14px;font-weight:700;line-height:1.5;text-align:center;padding:12px 16px;border-radius:12px;pointer-events:none}   /* 거리뷰 그림 층 위 */
+  .cm84-sv .msg[hidden]{display:none}
+  .cm84-sv .cl{position:absolute;left:50%;transform:translateX(-50%);top:8px;z-index:5;border:0;background:rgba(255,255,255,.95);color:#111;border-radius:999px;font:inherit;font-size:13px;font-weight:800;padding:7px 12px;cursor:pointer;box-shadow:0 1px 6px rgba(0,0,0,.25)}
+  .cm84-svh{position:absolute;z-index:255;left:50%;top:12px;transform:translateX(-50%);background:#1C7ED6;color:#fff;font-size:12.5px;font-weight:700;border-radius:999px;padding:6px 12px;box-shadow:0 2px 10px rgba(0,0,0,.2);pointer-events:none;white-space:nowrap}
+  .cm84-map.sv98b .cm84-svh{display:none}
+  .me98b{width:64px;height:64px;pointer-events:none}.me98b svg{transform-origin:50% 50%}
+  @media (max-width:767px){ .cm84-sv{right:0;bottom:45%} .cm84-map.sv98b .cm84-vbtns{display:none} .cm84-svh{top:56px;white-space:normal;max-width:80%;text-align:center} }
+  /* 묶음 L98B: 거리 재기 — 위 가운데 안내 띠([마지막 점 지우기][전체 지우기]), 점·선·구간 길이·총 길이 */
+  .cm84.vb98b #cm84Ms[aria-pressed="true"]{background:#2B8A3E;border-color:#2B8A3E;color:#fff}
+  .cm84-ms{position:absolute;z-index:258;left:50%;bottom:28px;transform:translateX(-50%);width:max-content;max-width:calc(100% - 150px);background:#fff;border:2px solid #2B8A3E;border-radius:12px;padding:6px 10px;box-shadow:0 2px 10px rgba(0,0,0,.2);font-size:12px;color:#1f2937;text-align:center}
+  .cm84-ms[hidden]{display:none}
+  .cm84-ms .tx{font-weight:700;line-height:1.5}
+  .cm84-ms .bt{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-top:5px}
+  .cm84-ms .bt button{border:1px solid #2B8A3E;background:#fff;color:#2B8A3E;font:inherit;font-size:12px;font-weight:700;border-radius:999px;padding:4px 10px;cursor:pointer;min-height:28px}
+  .cm84-ms .bt button:disabled{opacity:.4;cursor:default}
+  /* 묶음 L98B(L98i): 패널 머리 임대 경고 배지 — PC는 이름 바로 옆, 폰은 이름 아래 줄(긴 이름이 잘리지 않게) */
+  .cm84-ph .nm98{display:flex;align-items:center;gap:6px;min-width:0;flex:1 1 auto}
+  .cm84-panel.fsv .cm84-ph .nm98{order:1}
+  .cm84-ph .nm98 h2,.cm84.l87 .cm84-ph .nm98 h2{flex:0 1 auto;min-width:0}
+  .cm84-ph .rc98b{flex:0 0 auto;font-size:11px;padding:1px 7px;cursor:default;outline:none}
+  @media (max-width:767px){ .cm84-ph .nm98{flex-direction:column;align-items:flex-start;gap:1px} .cm84-ph .rc98b{font-size:10.5px;padding:0 6px;line-height:16px} }
+  .cm84-ms .ls{list-style:none;margin:6px 0 0;padding:4px 0 0;border-top:1px solid #e9ecef;max-height:132px;overflow:auto;text-align:left}
+  .cm84-ms .ls[hidden]{display:none}
+  .cm84-ms .ls li{display:flex;align-items:center;gap:5px;padding:2px 0;font-weight:700;white-space:nowrap}
+  .cm84-ms .ls li i{flex:0 0 auto;width:14px;height:4px;border-radius:2px}
+  .cm84-ms .ls li em{font-style:normal;font-weight:600;font-size:11px;color:#868e96}
+  .cm84-ms .ls li button{margin-left:auto;border:1px solid #ced4da;background:#fff;color:#495057;font:inherit;font-size:11.5px;font-weight:700;border-radius:999px;padding:2px 9px;cursor:pointer;min-height:24px}
+  .ms98d{width:12px;height:12px;border-radius:50%;background:#fff;border:3px solid #2B8A3E;box-sizing:border-box;pointer-events:none}
+  .ms98l{transform:translate(-50%,-50%);background:rgba(255,255,255,.92);border:1px solid #2B8A3E;color:#2B8A3E;font-size:11px;font-weight:800;border-radius:6px;padding:0 4px;white-space:nowrap;pointer-events:none}
+  .ms98t{transform:translate(-50%,calc(-100% - 10px));background:#2B8A3E;color:#fff;font-size:12.5px;font-weight:800;border-radius:8px;padding:3px 8px;white-space:nowrap;box-shadow:0 1px 5px rgba(0,0,0,.25);pointer-events:none}
+  .cm84-map.ms98b{cursor:crosshair}
+  @media (max-width:767px){ .cm84-ms{left:64px;right:62px;bottom:14px;transform:none;width:auto;max-width:none;padding:5px 8px} .cm84-ms .bt button{min-height:34px;padding:5px 8px} .cm84-ms .ls{max-height:96px} .cm84-ms .ls li button{min-height:30px} }
+  .cm84-rt .pk98b{display:flex;flex-wrap:wrap;gap:5px;margin:0 0 8px}   /* 묶음 L98B: 실거래 평형 단추 */
+  .cm84-rt .pk98b button{border:1px solid var(--cm-line);background:#fff;border-radius:999px;font:inherit;font-size:12px;font-weight:700;color:#495057;padding:4px 10px;cursor:pointer;white-space:nowrap}
+  .cm84-rt .pk98b button.jd{color:var(--cm-navy)}
+  .cm84-rt .pk98b button small{font-size:11px;font-weight:600;opacity:.75}
+  .cm84-rt .pk98b button[aria-pressed="true"]{background:var(--cm-navy);border-color:var(--cm-navy);color:#fff}
+  .cm84-rt .pn98b{margin:7px 0 0;font-size:12px;color:#6B7280;line-height:1.5}.cm84-rt .pn98b b{color:#B45309}
   .cm84-rt .md98{display:flex;gap:6px;margin:0 0 8px}   /* 묶음 L98: 실거래 칸 [매매 | 전세] */
   .cm84-rt .md98 button{flex:0 0 auto;border:1px solid var(--cm-line);background:#fff;border-radius:999px;font:inherit;font-size:12.5px;font-weight:700;color:#495057;padding:5px 16px;cursor:pointer}
   .cm84-rt .md98 button[aria-pressed="true"]{background:var(--cm-navy);border-color:var(--cm-navy);color:#fff}
@@ -358,7 +416,7 @@
   .cm84-rt .j4l98 small{color:var(--cm-faint);font-size:11px}
   .cm84-rt .rtt.cd98{color:#B45309;font-weight:700}
   .cm84-rt .jt98 th:nth-child(1){width:25%}.cm84-rt .jt98 th:nth-child(2){width:18%}.cm84-rt .jt98 th:nth-child(3){width:10%}
-  .cm84-rt .jt98 td{white-space:nowrap;overflow:hidden;text-overflow:clip}.cm84-rt .jt98 td:last-child{white-space:normal;overflow:visible;word-break:keep-all;line-height:1.45}
+  .cm84-rt .jt98 td{white-space:nowrap;overflow:hidden;text-overflow:clip}.cm84-rt .jt98 td:last-child{white-space:normal;overflow:visible;word-break:keep-all;line-height:1.5}
   .cm84-rt .jt98 tr.su98 td{color:#ADB5BD}
   .cm84-rt .jt98 td small{display:inline-block;font-size:10.5px;border-radius:4px;padding:0 4px;font-weight:700;line-height:1.5}
   .cm84-rt .jt98 .nw98{background:#EBFBEE;color:#2B8A3E}.cm84-rt .jt98 .gs98{background:#F1F3F5;color:#495057}.cm84-rt .jt98 .nk98{background:#F8F9FA;color:#868E96}.cm84-rt .jt98 .sb98{background:#FFF0F6;color:#C2255C}
@@ -585,6 +643,7 @@
     sec.querySelector('#cm84Zone').addEventListener('click', toggleZones);
     const se = sec.querySelector('#cm84ScE'), sm = sec.querySelector('#cm84ScM'); if (se) se.addEventListener('click', () => toggleSchool('elem')); if (sm) sm.addEventListener('click', () => toggleSchool('mid'));   // 지도 1-3
     const hb = sec.querySelector('#cm84Hide'); if (hb) hb.addEventListener('click', toggleHideCx);   // 묶음 L92
+    if (l98b()) svWire98b(sec);   // 묶음 L98B: [거리뷰] [지적도]
     wireMore();
   }
   // 묶음 L88: 폰 [⋯ 더보기] — 고르면 숨겨 둔 원래 버튼(⭐ 즐겨찾기·📂 엑셀)을 그대로 누름
@@ -634,7 +693,7 @@
     const naver = loadScript(MAP_CONFIG_URL).then(() => {
       const id = (window.MAP_CONFIG || {}).naverClientId; if (!id) throw new Error('config');
       window.navermap_authFailure = () => fail('auth', '네이버 지도 인증에 실패했어요.<br><span style="font-size:12px">네이버 클라우드 콘솔의 Web 서비스 URL에 이 주소가 등록돼 있는지 확인해 주세요.</span>');
-      return loadScript('https://oapi.map.naver.com/openapi/v3/maps.js?ncpKeyId=' + encodeURIComponent(id));
+      return loadScript('https://oapi.map.naver.com/openapi/v3/maps.js?ncpKeyId=' + encodeURIComponent(id) + (l98b() ? '&submodules=panorama' : ''));   // 묶음 L98B: 거리뷰(공식 권장 — 처음부터 같이)
     });
     return Promise.all([coords, naver]).then(() => {
       if (!window.naver || !window.naver.maps) throw new Error('naver');
@@ -715,6 +774,7 @@
     cxHidden = !cxHidden; const b = root.querySelector('#cm84Hide');
     if (b){ b.setAttribute('aria-pressed', String(cxHidden)); b.innerHTML = cxHidden ? '단지<br>보이기' : '단지<br>숨기기'; b.title = cxHidden ? '단지 가격 말풍선 다시 보이기' : '단지 가격 말풍선 숨기기'; }
     window.CALC_MAP_L84.cxHidden = cxHidden; drawCx();
+    if (l98b()) relabel98b();   // 묶음 L98B
   }
   function drawCx(){
     if (!map) return;
@@ -746,7 +806,7 @@
       }
       boxes.push(bx);
       const m = new NV.Marker({ map, position: new NV.LatLng(it.lat, it.lng), zIndex: it === sel ? 300 : 60, title: l96() ? '' : it.name, icon: { content: bubble(it, f, dt, ii), anchor: new NV.Point(0, 0) } });
-      NV.Event.addListener(m, 'click', () => openPanel(it, l89() ? f.p : undefined));   // 묶음 L89: 고른 평형으로 연다
+      NV.Event.addListener(m, 'click', (ev) => msTake98b(ev, m.getPosition()) || openPanel(it, l89() ? f.p : undefined));   // 묶음 L89: 고른 평형으로 연다
       marks.push(m);
     }
     window.CALC_MAP_L84.last = { zoom: zm, shown: marks.length, info, flt: fltCount(), ms: Math.round(performance.now() - t0), W: mapEl.clientWidth, H: mapEl.clientHeight };
@@ -944,7 +1004,7 @@
       if (!bx) return;
       boxes.push(bx); shownNames.push(g.name);
       const m = new NV.Marker({ map, position: new NV.LatLng(g.y, g.x), zIndex: 70, title: g.name + ' 단지 ' + g.n + '곳', icon: { content: distBubble(g, small), anchor: new NV.Point(-bx.ox, -bx.oy) } });
-      NV.Event.addListener(m, 'click', () => openGroup(g));
+      NV.Event.addListener(m, 'click', (ev) => msTake98b(ev, m.getPosition()) || openGroup(g));
       marks.push(m);
     });
     window.CALC_MAP_L84.last = { zoom: map.getZoom(), shown: marks.length, dist: sido ? 'sido' : small ? 'small' : 'dist', names: shownNames, ms: Math.round(performance.now() - t0), W: mapEl.clientWidth, H: mapEl.clientHeight };
@@ -1273,8 +1333,17 @@
     } else mount();
   }
   // 묶음 L87-3: 단지 패널 머리 — 단지명 하나(조금 크게) + 바로 옆 [비교 단지 추가], 폰은 글자 없는 작은 버튼으로 한 줄
+  // 묶음 L98B(L98i 임대 경고 배지, 11-09): 지도 1차 뒤 계산기 안 이름 칸(배지 포함)이 숨어 배지가 안 보이던 것 → 패널 머리 이름 옆에 같은 함수(rentalHeavyChip, 같은 기준·색·문구)로 붙임
+  //   폰(좁은 머리)은 이름 아래 줄에 같은 배지(긴 이름이 잘리지 않게), PC는 이름 바로 옆·마우스 말풍선 = 기존 title. 판정 계산과 무관
+  function rentChip98b(it){
+    if (!l98b()) return '';
+    let h = ''; try { h = typeof rentalHeavyChip === 'function' ? rentalHeavyChip(it.name) : ''; } catch (e) { h = ''; }
+    if (!h) return '';
+    return h.trim().replace('<span class="rental-heavy-chip', '<span class="rc98b rental-heavy-chip');
+  }
   function headCx(it, p, url){
-    return `<div class="cm84-ph cx"><span class="ty">단지</span>${l97() && back97.length ? '<button type="button" class="bk97" title="바로 전에 보던 단지로">← 이전 단지</button>' : ''}<h2 title="${esc(it.name)}">${esc(it.name + (p === 25 ? '(25평)' : ''))}</h2>`
+    const rc = rentChip98b(it), h2 = `<h2 title="${esc(it.name)}">${esc(it.name + (p === 25 ? '(25평)' : ''))}</h2>`;   // 배지가 있으면 이름과 한 묶음(폰은 이름 아래 줄)
+    return `<div class="cm84-ph cx"><span class="ty">단지</span>${l97() && back97.length ? '<button type="button" class="bk97" title="바로 전에 보던 단지로">← 이전 단지</button>' : ''}${rc ? '<span class="nm98">' + h2 + rc + '</span>' : h2}`
       + `<button type="button" class="ad" disabled title="비교 단지 추가">➕<span class="tx"> 비교 단지</span></button>`
       + (fullOn() ? '<button type="button" class="bk">← 지도로</button>' : '') + (itemsById.has(it.id) ? '' : '<span class="nomap">' + (l97() ? '지도 위치 없음' : '위치 없음') + '</span>')
       + `<a href="${url}" target="_blank" rel="opener">새 탭</a>`
@@ -1430,6 +1499,7 @@
     const b = root.querySelector('#cm84Zone');
     zonesOn = !zonesOn; b.setAttribute('aria-pressed', String(zonesOn));
     if (l91()){ b.innerHTML = '재개발<br>구역' + (zonesOn ? '<small>끄기</small>' : ''); b.title = zonesOn ? '재개발 구역 끄기' : '재개발 구역 켜기'; }   // 묶음 L91: 켬/끔이 한눈에
+    if (l98b()) relabel98b();   // 묶음 L98B: 한 줄 짧은 이름, 켬은 색으로만
     if (!zonesOn){ drawZones(); return; }
     loadZones().then(drawZones, () => { zonesOn = false; zoneLoad = null; b.setAttribute('aria-pressed', 'false'); b.hidden = true; });
   }
@@ -1444,7 +1514,7 @@
       if (!p){
         const zo = l89() ? { fillOpacity: .22, strokeWeight: 2, strokeOpacity: 1 } : { fillOpacity: .12, strokeWeight: 2, strokeOpacity: .9 };   // 묶음 L89: 재개발 지도와 같은 진하기(면 22%·선 2px)
         p = new NV.Polygon({ paths: f.ll.flatMap(poly => poly.map(r => r.map(([y, x]) => new NV.LatLng(y, x)))), fillColor: k[2], fillOpacity: zo.fillOpacity, strokeColor: k[2], strokeWeight: zo.strokeWeight, strokeOpacity: zo.strokeOpacity, clickable: true, zIndex: 20 });
-        NV.Event.addListener(p, 'click', () => openZone(f.keys[0]));
+        NV.Event.addListener(p, 'click', (ev) => msTake98b(ev) || openZone(f.keys[0]));
         zPolys.set(i, p);
       }
       if (!p.getMap()) p.setMap(map);
@@ -1452,14 +1522,14 @@
         const nm = String(ZD.get(z, REDEV.fields.name) || ''), sg = stageName(ZD.get(z, REDEV.fields.stage));
         const m = new NV.Marker({ map, position: new NV.LatLng((f.bb.s + f.bb.n) / 2, (f.bb.w + f.bb.e) / 2), zIndex: 40, title: nm,
           icon: { content: `<div class="cm84-zl" style="--z:${k[2]}"><small>${esc(k[0] === 'st' ? '정비' : k[1])}</small>${esc(nm)}${sg ? `<span>${esc(sg)}</span>` : ''}</div>`, anchor: new NV.Point(0, 0) } });
-        NV.Event.addListener(m, 'click', () => openZone(f.keys[0])); zMarks.push(m);
+        NV.Event.addListener(m, 'click', (ev) => msTake98b(ev, m.getPosition()) || openZone(f.keys[0])); zMarks.push(m);
       }
     });
     if (zm >= 13){   // 경계 자료가 없는 구역은 점으로
       ZD.byKey.forEach((o, key) => {
         if (ZD.bounded.has(key) || !inView(v, o.y, o.x) || zMarks.length > 400) return;
         const m = new NV.Marker({ map, position: new NV.LatLng(o.y, o.x), zIndex: 30, title: String(ZD.get(o.z, REDEV.fields.name) || ''), icon: { content: `<div class="cm84-zp" style="--z:${zKind(o.z)[2]}"></div>`, anchor: new NV.Point(0, 0) } });
-        NV.Event.addListener(m, 'click', () => openZone(key)); zMarks.push(m);
+        NV.Event.addListener(m, 'click', (ev) => msTake98b(ev, m.getPosition()) || openZone(key)); zMarks.push(m);
       });
     }
     window.CALC_MAP_L84.zoneLast = { polys: [...zPolys.values()].filter(p => p.getMap()).length, marks: zMarks.length };
@@ -1569,10 +1639,11 @@
   const median = (a) => { if (!a.length) return null; const s = a.slice().sort((x, y) => x - y), h = s.length >> 1; return s.length % 2 ? s[h] : (s[h - 1] + s[h]) / 2; };
   // 가격 상자 오른쪽: 최근 3개월(자료 끝 달 포함) 같은 평형대 실거래 — 해제 뺌, 중앙값·건수·마지막 거래일
   function boxStats(d, id, p){
-    const C = colsOf(d), [lo, hi] = slotBandRT(id, p), end = +String(d.기간 || '').split('~')[1] || 0, from = ymAdd(end, -(RT.boxMonths - 1));
+    const mo = other98b(id) ? L98BCFG.otherMonths : RT.boxMonths;   // 묶음 L98B: 판정 평형 아닌 평형은 최근 6개월
+    const C = colsOf(d), [lo, hi] = bandRT(id, p), end = +String(d.기간 || '').split('~')[1] || 0, from = ymAdd(end, -(mo - 1));
     const ts = (d.거래 || []).filter(t => !t[C.x] && !dg95(t, C) && t[C.a] >= lo && t[C.a] <= hi && t[C.ym] >= from && t[C.ym] <= end);
     const last = ts.reduce((m, t) => Math.max(m, t[C.ym] * 100 + t[C.d]), 0);
-    return { n: ts.length, med: median(ts.map(t => t[C.p])), last, from, end, lo, hi };
+    return { n: ts.length, med: median(ts.map(t => t[C.p])), last, from, end, lo, hi, mo };
   }
   const ymd = (v) => { const s = String(v); return s.slice(0, 4) + '.' + s.slice(4, 6) + (s.length > 6 ? '.' + s.slice(6, 8) : ''); };
   const eokTx = (man) => man == null ? '-' : (typeof fmtEok === 'function' ? fmtEok(man) : eok(man));
@@ -1614,23 +1685,26 @@
     const host = panel.querySelector('#cm84Rt'); if (!host) return;
     const id = it.id, L91 = l91();
     if (L91 && seedsPending() && typeof whenSeedsL86 === 'function' && !host._seed91){ host._seed91 = true; whenSeedsL86(ok => { if (ok && selId === id && +panel.dataset.p === p && panel.contains(host)) renderRT(it, p, kb); }); }   // 묶음 L91: 시세 이력(146 예외 칸 면적·KB 선)을 받은 뒤 한 번 더
+    if (pick98b && pick98b.id !== id) pick98b = null;   // 묶음 L98B: 다른 단지를 열면 판정 평형으로
+    host._kb98b = kb;
     getTrades(id, false).then(d => {
       if (selId !== id || !panel.contains(host)) return;
-      const st = d ? boxStats(d, id, p) : null;
+      const st = d ? boxStats(d, id, p) : null, oth = other98b(id), mo = st ? st.mo : RT.boxMonths;
       const L94 = l94(), sYmd = (v) => String(v).slice(2, 4) + '.' + String(v).slice(4, 6) + '.' + String(v).slice(6, 8);   // 묶음 L94: 줄바꿈 없게 짧은 문구(평형 칸 면적은 최고점 칸 설명에)
       const box = (L94 ? `<div class="rtx"><div class="bx kb"><small>KB 시세 · 판정 기준</small><b>${eokTx(kb)}</b><small>${p}평</small></div>`
-        + `<div class="bx tr"><small>최근 실거래 ${p}평대</small>`
-        + (st && st.n >= RT.boxMin ? `<b>${eokTx(st.med)}</b><small>3개월 중앙값 · ${st.n}건</small><small>마지막 ${sYmd(st.last)}</small>` : `<b class="few">거래 적음</b><small>최근 3개월 ${st ? st.n : 0}건</small>${st && st.last ? `<small>마지막 ${sYmd(st.last)}</small>` : ''}`)
+        + `<div class="bx tr"><small>최근 실거래 ${oth ? area98b(pick98b.lo, pick98b.hi) : p + '평대'}</small>`
+        + (st && st.n >= RT.boxMin ? `<b>${eokTx(st.med)}</b><small>${mo}개월 중앙값 · ${st.n}건</small><small>마지막 ${sYmd(st.last)}</small>` : `<b class="few">거래 적음</b><small>최근 ${mo}개월 ${st ? st.n : 0}건</small>${st && st.last ? `<small>마지막 ${sYmd(st.last)}</small>` : ''}`)
         : `<div class="rtx"><div class="bx kb"><small>KB 시세 · 판정 기준</small><b>${eokTx(kb)}</b><small>${p}평</small></div>`
         + `<div class="bx tr"><small>최근 실거래 · ${p}평대(전용 ${st ? Math.round(st.lo) + '~' + Math.round(st.hi) : '-'}㎡)</small>`
         + (st && st.n >= RT.boxMin ? `<b>${eokTx(st.med)}</b><small>최근 3개월 중앙값 · ${st.n}건 · 마지막 ${ymd(st.last)}</small>` : `<b class="few">거래 적음</b><small>최근 3개월 ${st ? st.n : 0}건${st && st.last ? ' · 마지막 ' + ymd(st.last) : ''}</small>`))
         + '</div></div>' + (l93() && d ? '<div class="nhb93" hidden></div><div class="rth93"><div class="rld">최고점을 찾는 중이에요…</div></div>' : '');   // 묶음 L93: 최근 신고가 한 줄 · 최고점 두 줄
       const more = d && !L91 ? `<button type="button" class="rtm" aria-expanded="false">실거래 자세히 ▾</button>` : '';   // 묶음 L91: 접지 않고 늘 펼침
       const L98 = l98(), jm = L98 && rtMode98 === 'jeon', offi = L98 && !!d && d.원자료 === '오피스텔', shTx = L98 && !d && RTX && RTX.show ? RTX.show[id] : null;   // 묶음 L98: 오피스텔 자료·못 맞춘 단지 문구
-      const sale = `${offi ? '<div class="of98">오피스텔 실거래</div>' : ''}${box}${st ? diffLine(kb, st) : ''}${d ? tagLine(d.꼬리표) : ''}${d ? '' : (shTx ? `<div class="rts sh98">${esc(shTx)}</div>` : '<div class="rts">이 단지는 맞춘 실거래 자료가 없어요.</div>')}<div class="rtj-w"></div>${more}<div class="rtv" hidden></div>`
+      const sale = `${offi ? '<div class="of98">오피스텔 실거래</div>' : ''}${l98b() && d ? '<div class="pk98b-w"></div>' : ''}${box}${oth ? note98b(p) : (st ? diffLine(kb, st) : '') + (d ? tagLine(d.꼬리표) : '')}${d ? '' : (shTx ? `<div class="rts sh98">${esc(shTx)}</div>` : '<div class="rts">이 단지는 맞춘 실거래 자료가 없어요.</div>')}<div class="rtj-w"></div>${more}<div class="rtv" hidden></div>`
         + `<div class="rts">${esc(offi ? L98CFG.srcOffi : RT.src)} · ${esc(d ? ymd(String(d.기간).split('~')[1]) : (RTX && RTX.meta ? RTX.meta.month.replace('-', '.') : ''))} 기준 · 참고용(판정은 KB 시세로만)${l95() ? ' · 중앙값은 계약 해제·직거래 뺌' : ''}</div>`;
       host.innerHTML = (l93() ? head93('rt') : '') + '<div class="rtb">' + (L98 ? md98Html(jm) + `<div class="sv98"${jm ? ' hidden' : ''}>${sale}</div><div class="jv98"${jm ? '' : ' hidden'}></div>` : sale) + '<div class="sc-w"></div></div>';
       if (L98) wire98(host, it, p);
+      if (l98b() && d){ const C = colsOf(d); fillChips98b(host.querySelector('.sv98 .pk98b-w') || host.querySelector('.pk98b-w'), it, p, kb, d, C.a, (t) => !!t[C.x]); }   // 묶음 L98B: 평형 단추
       const fillJ = () => { const w = host.querySelector('.rtj-w'); if (w) w.innerHTML = jeonseHtml(id); };
       if (seedsPending() && typeof whenSeedsL86 === 'function') whenSeedsL86(ok => { if (ok && selId === id) fillJ(); }); else fillJ();
       renderSchool(host.querySelector('.sc-w'), id);
@@ -1643,6 +1717,215 @@
       host.innerHTML = rtFailHtml97(); window.CALC_MAP_L84.rtFailShown97 = performance.now();
       const b = host.querySelector('.rtre97'); if (b) b.onclick = () => { host.innerHTML = (l93() ? head93('rt') : '') + '<div class="rtb"><div class="rld">실거래를 불러오는 중이에요…</div></div>'; renderRT(it, p, kb); };
     });
+  }
+  // ---- 묶음 L98B: 거리뷰·지적도(재개발 지도와 같은 방식 — 네이버 지도 공식 층) ----
+  //   [거리뷰] = 거리뷰 길 표시(StreetLayer, 15단계로 확대) → 파란 길을 누르면 화면을 나눠 거리뷰(Panorama: PC 왼쪽 크게 · 폰 위) + 지도(PC 오른쪽 34% · 폰 아래)
+  //   작은 지도에 내 위치·보는 방향(부채꼴), 거리뷰에서 움직이면 지도가 따라감. [지적도] = 지적편집도(CadastralLayer), 16단계보다 멀면 "확대하면 보여요"
+  const SV98 = { on: false, cad: false, street: null, cadL: null, pano: null, me: null, cadMin: 16, svZoom: 15 };
+  const FAN98 = '<div class="me98b"><svg width="64" height="64" viewBox="-32 -32 64 64"><path d="M0 0 L-18 -27 A32 32 0 0 1 18 -27 Z" fill="rgba(28,126,214,.38)" stroke="#1C7ED6" stroke-width="1.5"/><circle r="7" fill="#1C7ED6" stroke="#fff" stroke-width="2"/></svg></div>';
+  const mob98b = () => window.innerWidth < 768;
+  function svWire98b(sec){
+    const vb = sec.querySelector('.cm84-vbtns'); if (!vb || !mapEl) return;
+    vb.insertAdjacentHTML('beforeend', '<button type="button" id="cm84Sv" aria-pressed="false">거리뷰</button><button type="button" id="cm84Cad" aria-pressed="false">지적도</button><button type="button" id="cm84Ms" aria-pressed="false">거리</button>');
+    mapEl.insertAdjacentHTML('beforeend', '<div class="cm84-ms" id="cm84Ms98" hidden><div class="tx"></div><div class="bt"><button type="button" data-ms="undo">마지막 점 지우기</button><button type="button" data-ms="new">새 거리</button><button type="button" data-ms="clear">전체 지우기</button></div><ul class="ls" hidden></ul></div>');
+    vb.querySelector('#cm84Ms').addEventListener('click', () => msSet98b(!MS98.on));
+    mapEl.querySelector('#cm84Ms98').addEventListener('click', (e) => { e.stopPropagation(); const d = e.target.closest('[data-msdel]'); if (d){ msDel98b(+d.dataset.msdel); return; }
+      const b = e.target.closest('[data-ms]'); if (!b) return; const k = b.dataset.ms;
+      if (k === 'new') return msNew98b(); if (k === 'undo'){ MS98.pts.pop(); if (!MS98.pts.length) MS98.curCol = null; } else { MS98.pts = []; MS98.lines = []; MS98.curCol = null; } msDraw98b(); });
+    mapEl.insertAdjacentHTML('beforeend', '<div class="cm84-svh" id="cm84SvH" hidden></div><div class="cm84-sv" id="cm84Sv98" hidden><div class="pano"></div><div class="msg" hidden></div><button type="button" class="cl">✕ 거리뷰 닫기</button></div>');
+    vb.querySelector('#cm84Sv').addEventListener('click', () => svLayer98b(!SV98.on));
+    vb.querySelector('#cm84Cad').addEventListener('click', () => cadSet98b(!SV98.cad));
+    mapEl.querySelector('#cm84Sv98 .cl').addEventListener('click', svClose98b);
+    window.addEventListener('resize', () => setTimeout(panoFit98b, 60));
+    const top = sec.querySelector('.cm84'); if (top) top.classList.add('vb98b');
+    relabel98b(); tipWire98b(vb);
+  }
+  // 오른쪽 단추 줄: 한 줄 짧은 이름(켬은 색 채움으로만), 원래 긴 이름은 말풍선(PC 마우스 올림 = title, 폰 = 길게 누름)
+  const VB98 = [['#cm84Zone', '재개발', '재개발 구역'], ['#cm84ScE', '초등', '초등 학구도'], ['#cm84ScM', '중학', '중학교 학군'], ['#cm84Hide', '단지 숨김', '단지 가격 말풍선 숨기기'], ['#cm84Sv', '거리뷰', '거리뷰'], ['#cm84Cad', '지적도', '지적도(지적편집도)'], ['#cm84Ms', '거리', '거리 재기']];
+  function relabel98b(){
+    VB98.forEach(([q, s, l]) => { const b = root && root.querySelector(q); if (!b) return; const on = b.getAttribute('aria-pressed') === 'true';
+      b.textContent = s; b.title = l + (on ? ' — 켜짐(다시 누르면 꺼짐)' : ''); b.setAttribute('aria-label', l); });
+  }
+  function tipWire98b(vb){
+    let t = null, tip = null, long = false;
+    const hide = () => { clearTimeout(t); if (tip){ const x = tip; tip = null; setTimeout(() => x.remove(), 900); } };
+    vb.addEventListener('touchstart', (e) => { const b = e.target.closest('button'); if (!b) return; long = false; clearTimeout(t);
+      t = setTimeout(() => { long = true; tip = document.createElement('div'); tip.className = 'vtip98b'; tip.textContent = b.getAttribute('aria-label') || b.title || b.textContent;
+        const r = b.getBoundingClientRect(), m = mapEl.getBoundingClientRect(); tip.style.right = Math.round(m.right - r.left + 6) + 'px'; tip.style.top = Math.round(r.top - m.top + r.height / 2) + 'px'; mapEl.appendChild(tip); }, 500); }, { passive: true });
+    ['touchend', 'touchcancel', 'touchmove'].forEach(k => vb.addEventListener(k, hide, { passive: true }));
+    vb.addEventListener('click', (e) => { if (long){ long = false; e.preventDefault(); e.stopPropagation(); } }, true);   // 길게 누른 것은 켜고 끄지 않음
+  }
+  function hint98b(){
+    const h = mapEl && mapEl.querySelector('#cm84SvH'); if (!h || !map) return;
+    const t = MS98.on ? '' : SV98.on && !SV98.pano ? '지도에서 파란 길을 누르세요 — 그 자리 거리뷰가 열려요' : (SV98.cad && map.getZoom() < SV98.cadMin ? '지적도는 확대하면 보여요' : '');
+    h.textContent = t; h.hidden = !t;
+  }
+  function svLayer98b(on){
+    if (!map) return; if (on && MS98.on) msSet98b(false);   // 거리 재기와 거리뷰는 하나만
+    SV98.on = on; const b = root.querySelector('#cm84Sv'); if (b) b.setAttribute('aria-pressed', String(on));
+    if (on && !SV98.street){ try { SV98.street = new NV.StreetLayer(); } catch (e) { SV98.street = null; } }
+    if (SV98.street) SV98.street.setMap(on ? map : null);
+    if (on && map.getZoom() < SV98.svZoom) map.setZoom(SV98.svZoom);
+    if (!on) svClose98b(); hint98b(); relabel98b();
+    window.CALC_MAP_L84.sv98b = { on, street: !!SV98.street };
+  }
+  function cadSet98b(on){
+    if (!map) return; SV98.cad = on; const b = root.querySelector('#cm84Cad'); if (b) b.setAttribute('aria-pressed', String(on));
+    if (on && !SV98.cadL){ try { SV98.cadL = new NV.CadastralLayer(); } catch (e) { SV98.cadL = null; } }
+    if (SV98.cadL) SV98.cadL.setMap(on ? map : null); hint98b(); relabel98b();
+    window.CALC_MAP_L84.cad98b = { on, layer: !!SV98.cadL };
+  }
+  // 거리뷰 칸이 가린 만큼 지도 가운데를 옮겨, 그 자리가 보이는 쪽(PC 오른쪽 · 폰 아래) 가운데에 오게
+  function svCenter98b(ll){
+    try { map.setCenter(ll); const s = mapEl.querySelector('#cm84Sv98'); if (s && !s.hidden) map.panBy(mob98b() ? new NV.Point(0, -Math.round(s.offsetHeight / 2)) : new NV.Point(-Math.round(s.offsetWidth / 2), 0)); } catch (e) {}
+  }
+  function panoFit98b(){ const s = mapEl && mapEl.querySelector('#cm84Sv98'), pe = s && s.querySelector('.pano'); if (SV98.pano && s && !s.hidden && pe.clientWidth) try { SV98.pano.setSize(new NV.Size(pe.clientWidth, pe.clientHeight)); } catch (e) {} }
+  function me98b(){
+    if (!SV98.pano || !map) return; let pos = null, pan = 0;
+    try { pos = SV98.pano.getPosition(); pan = (SV98.pano.getPov() || {}).pan || 0; } catch (e) {} if (!pos) return;
+    if (!SV98.me) SV98.me = new NV.Marker({ map, position: pos, zIndex: 400, clickable: false, icon: { content: FAN98, anchor: new NV.Point(32, 32) } }); else { SV98.me.setMap(map); SV98.me.setPosition(pos); }
+    const svg = mapEl.querySelector('.me98b svg'); if (svg) svg.style.transform = 'rotate(' + pan + 'deg)';
+  }
+  function svAt98b(ll){
+    const s = mapEl.querySelector('#cm84Sv98'); if (!s) return; const pe = s.querySelector('.pano'), msg = s.querySelector('.msg'), say = (t) => { msg.textContent = t || ''; msg.hidden = !t; };
+    if (s.hidden){ s.hidden = false; mapEl.classList.add('sv98b'); }
+    if (map.getZoom() < 16) map.setZoom(17);
+    svCenter98b(ll); hint98b();
+    const t0 = Date.now(), NONE = mob98b() ? '이 자리는 거리뷰가 없어요. 아래 지도에서 파란 길 위를 눌러 주세요.' : '이 자리는 거리뷰가 없어요. 오른쪽 지도에서 파란 길 위를 눌러 주세요.';
+    // 길이 아닌 곳을 누르면 거리뷰 사진이 오지 않아 빗금 칸만 남던 것 — 4초 안에 사진이 안 오면 안내(안내 글은 거리뷰 그림 층 위)
+    SV98.ok = false; clearTimeout(SV98.wait); SV98.wait = setTimeout(() => { if (!SV98.ok && !s.hidden) say(NONE); }, 4000);
+    const go = () => {
+      if (!NV.Panorama){ if (Date.now() - t0 < 8000) return setTimeout(go, 150); say('거리뷰를 불러오지 못했어요.'); return; }
+      const size = new NV.Size(Math.max(pe.clientWidth, 300), Math.max(pe.clientHeight, 200));
+      if (SV98.pano){ say('그 자리로 옮기는 중이에요…'); SV98.pano.setSize(size); SV98.pano.setPosition(ll); return; }
+      say('거리뷰를 불러오는 중이에요…');
+      try {
+        SV98.pano = new NV.Panorama(pe, { position: ll, pov: { pan: 0, tilt: 0, fov: 100 }, size, flightSpot: false, aroundControl: true, zoomControl: true });
+        [150, 600].forEach(t => setTimeout(panoFit98b, t));
+        NV.Event.addListener(SV98.pano, 'pano_status', (st) => { if (st === 'OK'){ SV98.ok = true; say(''); panoFit98b(); me98b(); window.CALC_MAP_L84.sv98b = Object.assign({}, window.CALC_MAP_L84.sv98b, { pano: 'OK' }); } else { SV98.ok = false; say(NONE); window.CALC_MAP_L84.sv98b = Object.assign({}, window.CALC_MAP_L84.sv98b, { pano: String(st) }); } });
+        NV.Event.addListener(SV98.pano, 'pano_changed', () => { me98b(); const p = SV98.pano.getPosition(); if (p && map && !map.getBounds().hasLatLng(p)) svCenter98b(p); });
+        NV.Event.addListener(SV98.pano, 'pov_changed', me98b);
+      } catch (e) { say('거리뷰를 불러오지 못했어요.'); }
+    };
+    setTimeout(() => { resize(); requestAnimationFrame(go); }, 30);
+    window.CALC_MAP_L84.sv98b = Object.assign({}, window.CALC_MAP_L84.sv98b, { at: [ll.lat(), ll.lng()], split: true });
+  }
+  function svClose98b(){
+    const s = mapEl && mapEl.querySelector('#cm84Sv98'); if (!s || s.hidden) return;
+    s.hidden = true; mapEl.classList.remove('sv98b'); s.querySelector('.pano').innerHTML = ''; SV98.pano = null; if (SV98.me) SV98.me.setMap(null);
+    setTimeout(resize, 30); hint98b(); window.CALC_MAP_L84.sv98b = Object.assign({}, window.CALC_MAP_L84.sv98b, { split: false });
+  }
+  // ---- 묶음 L98B: 거리 재기 — 켜면 지도를 찍을 때마다 점·선, 구간 길이, 마지막 점 옆 "총 ○m · 도보 약 ○분"(직선 거리 합) ----
+  //   도보 분 = 목록표(재개발 지도) "역까지 도보"와 같은 보행 속도 분당 67m(4km/h), 올림. 켠 동안 단지·학교·구역을 눌러도 열리지 않고 그 자리에 점을 찍음
+  //   폰: 두 번 톡 확대를 끄고(두 손가락 확대·끌기는 그대로) 한 번 톡 = 점 하나
+  //   여러 개(11-09 추가): [새 거리] = 지금 선을 고정하고 새 선 시작. 선마다 다른 색·마지막 점에 "① 580m · 도보 9분", 아래 재기 목록(번호·거리·도보 분·[지우기]).
+  //   개수 제한 없음(색 12개를 돌려 씀). [거리]를 끄면 모두 숨기고, 다시 켜면 그대로 보임
+  const MS98 = { on: false, pts: [], lines: [], polys: [], marks: [], walkM: 67, last: 0, dz: null };
+  const MS_COL = ['#2B8A3E', '#1C7ED6', '#E8590C', '#AE3EC9', '#C2255C', '#0B7285', '#5C940D', '#364FC7', '#B7791F', '#862E9C', '#D6336C', '#495057'];
+  function msLen98b(a, b){   // 두 점 사이 직선 거리(m, 하버사인)
+    const R = 6371008.8, r = Math.PI / 180, la1 = a.lat() * r, la2 = b.lat() * r, dla = la2 - la1, dln = (b.lng() - a.lng()) * r;
+    const h = Math.sin(dla / 2) ** 2 + Math.cos(la1) * Math.cos(la2) * Math.sin(dln / 2) ** 2; return 2 * R * Math.asin(Math.min(1, Math.sqrt(h)));
+  }
+  const msFmt98b = (m) => m >= 1000 ? (Math.round(m / 100) / 10).toFixed(1) + 'km' : Math.round(m) + 'm';
+  const msWalk98b = (m) => Math.max(1, Math.ceil(m / MS98.walkM));
+  const MS_TIP = '길을 따라 여러 번 찍을수록 실제 도보 거리에 가까워요(직선 거리 기준)';
+  function msSet98b(on){
+    if (!map) return; if (on && SV98.on) svLayer98b(false);
+    MS98.on = on; const b = root.querySelector('#cm84Ms'); if (b) b.setAttribute('aria-pressed', String(on));
+    try { if (on){ MS98.dz = { a: map.getOptions('disableDoubleClickZoom'), b: map.getOptions('disableDoubleTapZoom') }; map.setOptions({ disableDoubleClickZoom: true, disableDoubleTapZoom: true }); }
+      else if (MS98.dz){ map.setOptions({ disableDoubleClickZoom: !!MS98.dz.a, disableDoubleTapZoom: !!MS98.dz.b }); MS98.dz = null; } } catch (e) {}
+    mapEl.classList.toggle('ms98b', on); msDraw98b(); hint98b(); relabel98b();   // 끄면 숨기기만(지우지 않음) — 다시 켜면 그대로
+  }
+  // 번호: ①~⑳, 그 뒤는 (21)
+  const msNo98b = (i) => i < 20 ? String.fromCharCode(0x2460 + i) : '(' + (i + 1) + ')';
+  const msTot98b = (P) => { let t = 0; for (let i = 1; i < P.length; i++) t += msLen98b(P[i - 1], P[i]); return t; };
+  // 재기 목록 = 고정된 선 + 그리는 중인 선(점 2개 이상)
+  const msAll98b = () => MS98.lines.map(l => ({ pts: l.pts, col: l.col, cur: false })).concat(MS98.pts.length ? [{ pts: MS98.pts, col: MS98.curCol || msNextCol98b(), cur: true }] : []);
+  function msNextCol98b(){ const used = MS98.lines.map(l => l.col); return MS_COL.find(c => !used.includes(c)) || MS_COL[MS98.lines.length % MS_COL.length]; }
+  function msNew98b(){   // [새 거리]: 지금 선(점 2개 이상)을 고정, 점 1개뿐이면 버리고 새로
+    if (MS98.pts.length > 1) MS98.lines.push({ pts: MS98.pts, col: MS98.curCol || msNextCol98b() });
+    MS98.pts = []; MS98.curCol = null; msDraw98b();
+  }
+  function msDel98b(i){   // 목록 [지우기]
+    const n = MS98.lines.length; if (i < n) MS98.lines.splice(i, 1); else { MS98.pts = []; MS98.curCol = null; } msDraw98b();
+  }
+  // 켜져 있으면 그 자리에 점을 찍고 true(단지·학교·구역 누르기 대신) — 지도 빈 곳·말풍선·학교·구역 모두 이 함수를 먼저 부름
+  function msTake98b(ev, fallback){
+    if (!MS98.on) return false;
+    const ll = ev && ev.coord ? ev.coord : (fallback || null); const now = Date.now();
+    if (ll && now - MS98.last > 120){ MS98.last = now; if (!MS98.pts.length) MS98.curCol = msNextCol98b(); MS98.pts.push(ll); msDraw98b(); }   // 같은 누름이 두 번 들어오는 것 막기
+    return true;
+  }
+  function msDraw98b(){
+    MS98.marks.forEach(m => m.setMap(null)); MS98.marks = []; MS98.polys.forEach(p => p.setMap(null)); MS98.polys = [];
+    const P = MS98.pts, bar = mapEl && mapEl.querySelector('#cm84Ms98'), all = msAll98b();
+    const mk = (pos, html, z, ax, ay) => { const m = new NV.Marker({ map, position: pos, clickable: false, zIndex: z, icon: { content: html, anchor: new NV.Point(ax, ay) } }); MS98.marks.push(m); };
+    const lab = (L, i) => msNo98b(i) + ' ' + msFmt98b(msTot98b(L.pts)) + ' · 도보 ' + msWalk98b(msTot98b(L.pts)) + '분';
+    if (MS98.on) all.forEach((L, k) => {   // 꺼져 있으면 아무것도 안 그림(자료는 남김)
+      const Q = L.pts, c = L.col;
+      if (Q.length > 1) MS98.polys.push(new NV.Polyline({ map, path: Q, strokeColor: c, strokeWeight: 4, strokeOpacity: .9, clickable: false, zIndex: 300 + k }));
+      Q.forEach((p, i) => { mk(p, '<div class="ms98d" style="border-color:' + c + '"></div>', 410, 6, 6);
+        if (i) mk(new NV.LatLng((Q[i - 1].lat() + p.lat()) / 2, (Q[i - 1].lng() + p.lng()) / 2), '<div class="ms98l" style="border-color:' + c + ';color:' + c + '">' + msFmt98b(msLen98b(Q[i - 1], p)) + '</div>', 405, 0, 0); });
+      if (Q.length > 1) mk(Q[Q.length - 1], '<div class="ms98t" style="background:' + c + '">' + lab(L, k) + '</div>', 420 + k, 0, 0);
+    });
+    const tot = msTot98b(P), done = all.filter(L => L.pts.length > 1);
+    if (bar){ bar.hidden = !MS98.on; bar.querySelector('.tx').textContent = P.length ? MS_TIP : (MS98.lines.length ? '새 출발점을 찍으세요 · ' : '지도에서 출발점을 찍으세요 · ') + MS_TIP;
+      bar.querySelector('[data-ms="undo"]').disabled = !P.length; bar.querySelector('[data-ms="new"]').disabled = P.length < 2; bar.querySelector('[data-ms="clear"]').disabled = !P.length && !MS98.lines.length;
+      const ls = bar.querySelector('.ls');
+      ls.innerHTML = all.map((L, k) => L.pts.length < 2 ? '' : '<li><i style="background:' + L.col + '"></i><b>' + msNo98b(k) + '</b> ' + msFmt98b(msTot98b(L.pts)) + ' · 도보 ' + msWalk98b(msTot98b(L.pts)) + '분' + (L.cur ? ' <em>그리는 중</em>' : '') + '<button type="button" data-msdel="' + k + '">지우기</button></li>').join('');
+      ls.hidden = !done.length; }
+    window.CALC_MAP_L84.ms98b = { on: MS98.on, n: P.length, pts: P.map(p => [+p.lat().toFixed(6), +p.lng().toFixed(6)]), total: Math.round(tot), txt: P.length > 1 ? lab({ pts: P }, all.length - 1) : '', walkM: MS98.walkM,
+      lines: all.map((L, k) => ({ no: msNo98b(k), col: L.col, n: L.pts.length, total: Math.round(msTot98b(L.pts)), walk: L.pts.length > 1 ? msWalk98b(msTot98b(L.pts)) : 0, cur: L.cur, txt: L.pts.length > 1 ? lab(L, k) : '' })),
+      shown: { polys: MS98.polys.length, marks: MS98.marks.length } };
+  }
+  // ---- 묶음 L98B: 3개월 이동 중앙값 선 + 그달 점 · 실거래 평형 고르기 ----
+  // labels = 연속 월(YYYYMM), by = 월 → 그달 거래 값 목록(이미 걸러진 것). 선 = 그달 포함 최근 3개월 거래를 모은 중앙값(3개월 안에 1건이라도 있으면 그림)
+  function roll98b(labels, by){
+    const n = labels.map(ym => (by.get(ym) || []).length), mon = labels.map(ym => by.has(ym) ? median(by.get(ym)) : null), rn = [];
+    const roll = labels.map((ym, i) => { const pool = []; for (let k = Math.max(0, i - L98BCFG.rollMonths + 1); k <= i; k++){ const x = by.get(labels[k]); if (x) pool.push(...x); } rn.push(pool.length); return pool.length ? median(pool) : null; });
+    return { n, mon, roll, rn };
+  }
+  // 선(이동 중앙값) + 점(그달 중앙값 — 크기 = 건수, 3건 미만은 흐리게)
+  function ds98b(R, rgb, lineLabel){
+    const few = (x) => x < L98BCFG.fewN, D = L98BCFG.dot;
+    return [{ label: lineLabel, _l98b: 'line', data: R.roll, borderColor: 'rgb(' + rgb + ')', backgroundColor: 'rgb(' + rgb + ')', borderWidth: 2.5, pointRadius: 0, pointHoverRadius: 3, tension: .2, spanGaps: false },
+      { label: '월별 중앙값(점)', _l98b: 'pt', data: R.mon, showLine: false, pointStyle: 'circle', borderWidth: 1, borderColor: 'rgba(' + rgb + ',.9)', backgroundColor: 'rgba(' + rgb + ',.6)',
+        pointBackgroundColor: R.n.map(x => few(x) ? 'rgba(' + rgb + ',.2)' : 'rgba(' + rgb + ',.7)'), pointBorderColor: R.n.map(x => few(x) ? 'rgba(' + rgb + ',.35)' : 'rgba(' + rgb + ',1)'),
+        pointRadius: R.n.map(x => x ? Math.min(D[2], D[0] + D[1] * Math.sqrt(x)) : 0), pointHoverRadius: R.n.map(x => x ? Math.min(D[2] + 1, D[0] + 1 + D[1] * Math.sqrt(x)) : 0), spanGaps: false }];
+  }
+  // 말풍선 줄: 점 = "10월 신규 2건: 2.1억 (3건 미만)", 선 = "3개월 이동 중앙값(5건): 1.5억", 나머지는 그래프 기본 문구
+  function tip98b(opt, labels, R, word, fmt){
+    opt.plugins = opt.plugins || {}; opt.plugins.tooltip = opt.plugins.tooltip || {}; const cb = opt.plugins.tooltip.callbacks = opt.plugins.tooltip.callbacks || {}, base = cb.label;
+    cb.label = (ctx) => { const k = ctx.dataset._l98b, i = ctx.dataIndex;
+      if (k === 'pt') return (labels[i] % 100) + '월 ' + word + ' ' + R.n[i] + '건: ' + fmt(ctx.parsed.y) + (R.n[i] < L98BCFG.fewN ? ' (3건 미만)' : '');
+      if (k === 'line') return '3개월 이동 중앙값(' + R.rn[i] + '건): ' + fmt(ctx.parsed.y);
+      return base ? base(ctx) : ctx.dataset.label + ': ' + fmt(ctx.parsed.y); };
+  }
+  const graphNote98b = (id, p) => `${esc(bandName98b(id, p))} · 선 = 최근 3개월 중앙값, 점 = 그달 중앙값(클수록 거래 많음 · 흐린 점 3건 미만)`;
+  const note98b = (p) => `<div class="pn98b"><b>판정 기준 평형: ${p}평</b> · 이 평형은 KB 시세 판정이 없어 실거래만 보여 줘요</div>`;
+  // 거래를 전용㎡(반올림)로 묶음 — 2㎡ 이내 이웃은 한 묶음. skip(t)가 참인 거래(계약 해제 등)는 셈에서 뺌
+  function groups98b(d, aIdx, skip){
+    const g = new Map(); (d.거래 || []).forEach(t => { if (skip && skip(t)) return; const k = Math.round(t[aIdx]); g.set(k, (g.get(k) || 0) + 1); });
+    const out = []; [...g.keys()].sort((a, b) => a - b).forEach(k => { const L = out[out.length - 1]; if (L && k - L.hi <= L98BCFG.mergeGap){ L.hi = k; L.n += g.get(k); } else out.push({ lo: k, hi: k, n: g.get(k) }); });
+    return out;
+  }
+  // 평형 단추 줄(매매·전세 둘 다): 판정 평형 = 기본, 다른 판정 평형(34↔25, 그 시세가 있을 때)을 누르면 패널 평형을 바꿈, 나머지는 실거래만
+  function fillChips98b(w, it, p, kb, d, aIdx, skip){
+    if (!w) return; const id = it.id, gs = groups98b(d, aIdx, skip); if (gs.length < 2){ w.innerHTML = ''; return; }
+    const ch = window.SEED_CHIPS && window.SEED_CHIPS[id];   // 25평 시세 파일을 아직 안 받았어도 칩 자료로 25평 칸이 있는지 앎
+    const oP = p === 34 ? 25 : 34, hasO = oP === 25 ? !!(seed25TextRT(id) || (ch && ch[5] && ch[5][0])) : !!((seedEntryById(id) || {}).text);
+    const [a, b] = slotBandRT(id, p), [c, e] = slotBandRT(id, oP), mid = (x) => (x.lo + x.hi) / 2;
+    const tag = (x) => mid(x) >= a && mid(x) <= b ? p : (hasO && mid(x) >= c && mid(x) <= e ? oP : 0);
+    const cur = other98b(id) ? pick98b : null;
+    w.innerHTML = '<div class="pk98b" role="group" aria-label="실거래 평형">' + gs.map((x, i) => { const t = tag(x), on = cur ? (x.lo === cur.lo && x.hi === cur.hi) : t === p;
+      return `<button type="button" data-pk98b="${i}" aria-pressed="${on}"${t ? ' class="jd"' : ''}>${t ? t + '평 ' : ''}${area98b(x.lo, x.hi)} <small>${x.n.toLocaleString('ko-KR')}건</small></button>`; }).join('') + '</div>';
+    w.querySelectorAll('[data-pk98b]').forEach(bt => bt.onclick = () => {
+      const x = gs[+bt.dataset.pk98b], t = tag(x);
+      if (t === p){ if (!pick98b) return; pick98b = null; renderRT(it, p, kb); return; }
+      if (t === oP){ pick98b = null; openById(id, oP, {}); return; }
+      pick98b = { id, lo: x.lo, hi: x.hi }; renderRT(it, p, kb);
+    });
+    window.CALC_MAP_L84.pk98b = { id, n: gs.length, groups: gs.map(x => [x.lo, x.hi, x.n, tag(x)]), pick: cur ? [cur.lo, cur.hi] : null };
   }
   // ---- 묶음 L98: 실거래 칸 [매매 | 전세] — 고른 쪽은 다른 단지를 열어도 그대로(이 창 안에서만 기억) ----
   //   자료: 지도자료_<기준월>\전세_단지별\<seed id>.json(분석 탭 결과_전세거래_<기준월>_보강판\단지별 그대로, 최근 5년), jeonse4_panel.json(전세 4지표 보강판, 칸별 값 12개)
@@ -1671,7 +1954,7 @@
   const isNew98 = (t, C) => t[C.k] === 0 && !t[C.s] && !t[C.r];   // 신규 · 임대 의심 아님 · 전세(월세 0)
   // 최근 신규 전세: 끝 달 포함 3개월 신규 3건 이상이면 3개월, 아니면 6개월 3건 이상, 아니면 없음(분석 탭 4지표 '화면용 신규 전세가'와 같은 규칙)
   function jBox98(d, id, p){
-    const C = jcols98(d), [lo, hi] = slotBandRT(id, p), end = +String(d.기간 || '').split('~')[1] || 0;
+    const C = jcols98(d), [lo, hi] = bandRT(id, p), end = +String(d.기간 || '').split('~')[1] || 0;
     const nw = (d.거래 || []).filter(t => isNew98(t, C) && t[C.a] >= lo && t[C.a] <= hi), lastOf = (ts) => ts.reduce((x, t) => Math.max(x, t[C.ym] * 100 + t[C.d]), 0);
     for (const m of L98CFG.boxMonths){ const from = ymAdd(end, -(m - 1)), ts = nw.filter(t => t[C.ym] >= from && t[C.ym] <= end); if (ts.length >= L98CFG.boxMin) return { m, n: ts.length, med: median(ts.map(t => t[C.p])), last: lastOf(ts), lo, hi, end }; }
     const from6 = ymAdd(end, -5); return { m: 0, n: nw.filter(t => t[C.ym] >= from6 && t[C.ym] <= end).length, med: null, last: lastOf(nw), lo, hi, end };
@@ -1682,24 +1965,26 @@
       if (!w.isConnected || selId !== id) return;
       const kr = jeonseRows(id).find(x => x.p === p), kbj = kr ? kr.jeon : null;
       const cell = j4 && j4.칸 && j4.칸[id] ? j4.칸[id][String(p)] || null : null, code = cell ? cell[11] || 0 : 0, offi = !!d && d.원자료 === '오피스텔';
-      const b = d ? jBox98(d, id, p) : null, sY = (v) => String(v).slice(2, 4) + '.' + String(v).slice(4, 6) + '.' + String(v).slice(6, 8);
-      let h = `<div class="rtx"><div class="bx kb"><small>KB 전세 시세</small><b>${kbj != null ? eokTx(kbj) : '-'}</b><small>${p}평${kr ? ' · ' + yymm(kr.ym) : ''}</small></div>`
-        + `<div class="bx tr jn98"><small>최근 신규 전세 ${p}평대</small>`
+      const b = d ? jBox98(d, id, p) : null, sY = (v) => String(v).slice(2, 4) + '.' + String(v).slice(4, 6) + '.' + String(v).slice(6, 8), oth = other98b(id);   // 묶음 L98B: 판정 평형 아닌 평형
+      let h = (l98b() && d ? '<div class="pk98b-w"></div>' : '') + `<div class="rtx"><div class="bx kb"><small>KB 전세 시세</small><b>${kbj != null ? eokTx(kbj) : '-'}</b><small>${p}평${kr ? ' · ' + yymm(kr.ym) : ''}</small></div>`
+        + `<div class="bx tr jn98"><small>최근 신규 전세 ${oth ? area98b(pick98b.lo, pick98b.hi) : p + '평대'}</small>`
         + (b && b.med != null ? `<b>${eokTx(b.med)}</b><small>${b.m}개월 중앙값 · ${b.n}건</small><small>마지막 ${sY(b.last)}</small>`
           : `<b class="few">거래 적음</b><small>최근 6개월 신규 ${b ? b.n : 0}건</small>${b && b.last ? `<small>마지막 ${sY(b.last)}</small>` : ''}`) + '</div></div>';
-      if (kbj && b && b.med != null){ const pc = (b.med - kbj) / kbj * 100, sm = Math.abs(pc) <= RT.same;
+      if (oth) h += note98b(p);
+      if (!oth && kbj && b && b.med != null){ const pc = (b.med - kbj) / kbj * 100, sm = Math.abs(pc) <= RT.same;
         h += `<div class="rtd ${sm ? 'same' : pc > 0 ? 'up' : 'dn'}">${sm ? `신규 전세가 KB 전세와 비슷 (±${RT.same}% 안, ${b.n}건)` : `신규 전세가 KB 전세보다 ${pc > 0 ? '+' : '−'}${Math.abs(pc).toFixed(1)}% (${b.n}건)`}</div>`; }
-      if (code >= 2 && L98CFG.codeTx[code]) h += `<div class="rtt cd98">${esc(L98CFG.codeTx[code])}</div>`;
-      if (cell && (cell[0] != null || cell[2] != null)){
+      if (!oth && code >= 2 && L98CFG.codeTx[code]) h += `<div class="rtt cd98">${esc(L98CFG.codeTx[code])}</div>`;
+      if (!oth && cell && (cell[0] != null || cell[2] != null)){
         const win = j4.메타 && j4.메타.창 ? String(j4.메타.창).split('~').map(yymm).join('~') : '최근 12개월';
         h += `<div class="j4l98">${cell[0] != null ? `갱신 비율 <b>${cell[0]}%</b>${cell[1] != null ? ` <small>(직전 12개월보다 ${cell[1] >= 0 ? '+' : '−'}${Math.abs(cell[1])}%p)</small>` : ''}` : ''}${cell[0] != null && cell[2] != null ? ' · ' : ''}${cell[2] != null ? `월세 비중 <b>${cell[2]}%</b>` : ''}</div>`
           + `<div class="rts">전세 4지표 ${esc(win)}(최근 12개월) · 참고용(판정에 안 씀)</div>`;
       }
       if (!d) h += '<div class="rts">이 단지는 맞춘 전세 거래 자료가 없어요.</div>';
-      else h += `<div class="rtg-h"><b>전세 그래프</b><small>${p}평 칸 · 신규 전세 월별 중앙값</small></div><div class="rtc c91"><div class="chart-canvas-wrap"><canvas aria-label="KB 전세와 신규 전세"></canvas></div></div><div class="jl98-w"></div>`;
+      else h += `<div class="rtg-h"><b>전세 그래프</b><small>${l98b() ? graphNote98b(id, p) : p + '평 칸 · 신규 전세 월별 중앙값'}</small></div><div class="rtc c91"><div class="chart-canvas-wrap"><canvas aria-label="KB 전세와 신규 전세"></canvas></div></div><div class="jl98-w"></div>`;
       h += `<div class="rts">${esc(offi ? L98CFG.srcOffi : L98CFG.src)} · ${esc(d ? ymd(String(d.기간).split('~')[1]) : (RTX && RTX.meta ? RTX.meta.month.replace('-', '.') : ''))} 기준${d ? ' · 최근 5년' : ''} · 전세만(월세 뺌) · 그래프·가격은 신규 거래만(갱신·구분없음·임대 의심 뺌) · 참고용(판정은 KB 시세로만)</div>`;
       w.innerHTML = (offi ? '<div class="of98">오피스텔 실거래</div>' : '') + h;
-      if (d){ const C = jcols98(d); drawJChart98(w.querySelector('canvas'), id, p, d, C); drawJList98(w.querySelector('.jl98-w'), id, p, d, C); }
+      if (d){ const C = jcols98(d); drawJChart98(w.querySelector('canvas'), id, p, d, C); drawJList98(w.querySelector('.jl98-w'), id, p, d, C);
+        if (l98b()){ const hs = panel.querySelector('#cm84Rt'); fillChips98b(w.querySelector('.pk98b-w'), it, p, hs ? hs._kb98b : null, d, C.a, null); } }
       window.CALC_MAP_L84.j98 = { id, p, box: b, kbj, code, cell, n: d ? (d.거래 || []).length : 0, offi };
     }).catch(() => {
       if (!w.isConnected || selId !== id) return;
@@ -1711,7 +1996,7 @@
   function drawJChart98(cv, id, p, d, C){
     if (!cv || !window.Chart) return;
     if (jChart98){ try { jChart98.$crossIdxL85 = -1; jChart98.destroy(); } catch (e) {} jChart98 = null; }
-    const [lo, hi] = slotBandRT(id, p), by = new Map();
+    const [lo, hi] = bandRT(id, p), by = new Map();
     (d.거래 || []).forEach(t => { if (!isNew98(t, C) || t[C.a] < lo || t[C.a] > hi) return; (by.get(t[C.ym]) || by.set(t[C.ym], []).get(t[C.ym])).push(t[C.p]); });
     let kbRows = [];
     try { const e = seedEntryById(id), text = p === 25 ? seed25TextRT(id) : e && e.text, nm = e ? e.name + (p === 25 ? PYEONG25_SUFFIX : '') : ''; if (text) kbRows = buildComplex(text, nm, nm).rows.filter(r => r.jeonseMid != null); } catch (e) {}
@@ -1724,17 +2009,18 @@
     const ds = [
       { label: 'KB 전세 시세', data: labels.map(ym => kbMap.has(ym) ? kbMap.get(ym) : null), borderColor: '#1E3A8A', backgroundColor: '#1E3A8A', borderWidth: 2.5, pointRadius: 0, tension: .15, spanGaps: false },
       { label: '신규 전세 월별 중앙값(' + p + '평 칸)', data: labels.map(ym => by.has(ym) ? median(by.get(ym)) : null), borderColor: '#2B8A3E', backgroundColor: '#2B8A3E', borderWidth: 2, pointRadius: 2, pointHoverRadius: 4, tension: 0, spanGaps: false } ];
+    if (l98b()){ const R = roll98b(labels, by); ds.splice(1, 1, ...ds98b(R, '43,138,62', '신규 전세(3개월 이동 중앙값)')); if (other98b(id)) ds.splice(0, 1); tip98b(opt, labels, R, '신규', fmt); }   // 묶음 L98B
     jChart98 = new Chart(cv, { type: 'line', data: { labels: labels.map(ym => typeof fmtYm === 'function' ? fmtYm(ym) : ymd(ym)), datasets: ds }, options: opt });
     window.CALC_MAP_L84.jChart98 = { kb: kbRows.length, months: by.size, labels: labels.length, from: start, to: end };
   }
   // 전세 거래 목록: 같은 평형 칸 전부(신규·갱신·구분없음), 갱신은 "갱신(종전 ○억 → ○억)", 임대 의심은 흐리게 + 표시
   function drawJList98(w, id, p, d, C){
     if (!w) return;
-    const [lo, hi] = slotBandRT(id, p); let shown = L98CFG.listN;
+    const [lo, hi] = bandRT(id, p); let shown = L98CFG.listN;
     const list = (d.거래 || []).filter(t => t[C.a] >= lo && t[C.a] <= hi).sort((a, b) => (b[C.ym] * 100 + b[C.d]) - (a[C.ym] * 100 + a[C.d]));
     const kind = (t) => t[C.k] === 1 ? `<small class="gs98">갱신${t[C.o] ? `(종전 ${eokTx(t[C.o])} → ${eokTx(t[C.p])})` : ''}</small>` : t[C.k] === 2 ? '<small class="nk98">구분없음</small>' : '<small class="nw98">신규</small>';
     const draw = () => {
-      w.innerHTML = `<div class="rtg-h"><b>최근 전세 거래</b><small>${p}평 칸(전용 ${Math.round(lo)}~${Math.round(hi)}㎡) · 임대 의심은 흐리게(계산에서 뺌)</small></div>`
+      w.innerHTML = `<div class="rtg-h"><b>최근 전세 거래</b><small>${other98b(id) ? esc(bandName98b(id, p)) : p + '평 칸(전용 ' + Math.round(lo) + '~' + Math.round(hi) + '㎡)'} · 임대 의심은 흐리게(계산에서 뺌)</small></div>`
         + `<table class="rtl jt98"><thead><tr><th>계약일</th><th>전용</th><th>층</th><th>보증금</th></tr></thead><tbody>`
         + list.slice(0, shown).map(t => `<tr${t[C.s] ? ' class="su98"' : ''}><td>${ymd(t[C.ym] * 100 + t[C.d])}</td><td>${t[C.a]}㎡</td><td>${t[C.f]}층</td><td>${eokTx(t[C.p])} ${kind(t)}${t[C.s] ? ' <small class="sb98">임대 의심</small>' : ''}</td></tr>`).join('') + '</tbody></table>'
         + (list.length > shown ? `<button type="button" class="rtmore">더보기 (${(list.length - shown).toLocaleString('ko-KR')}건 더)</button>` : '')
@@ -1753,7 +2039,7 @@
   }
   const h93cache = new Map();
   function hist93(id, p, d){
-    const [lo, hi] = slotBandRT(id, p), key = id + '|' + p + '|' + lo + '|' + hi;
+    const [lo, hi] = bandRT(id, p), key = id + '|' + p + '|' + lo + '|' + hi;
     if (h93cache.has(key)) return h93cache.get(key);
     const hasOld = !(RTX && RTX._noOld && RTX._noOld.has(id));
     const pr = (hasOld ? getTrades(id, true) : Promise.resolve(null)).then(o => {
@@ -1778,8 +2064,8 @@
     h93cache.set(key, pr); return pr;
   }
   function fillHigh93(host, H){
-    const C = H.C, w = host.querySelector('.rth93'), nb = host.querySelector('.nhb93');
-    if (w) w.innerHTML = `<div class="hr93"><span class="k kb">KB 최고점</span>${H.kbTop ? `<b>${eokTx(H.kbTop.saleMid)}</b><small>(${ymd(H.kbTop.ym)})</small>` : '<small>KB 시세 이력 없음</small>'}</div>`
+    const C = H.C, w = host.querySelector('.rth93'), nb = host.querySelector('.nhb93'), oth = other98b(selId);   // 묶음 L98B: 판정 평형 아닌 평형은 KB 최고점 줄 없음
+    if (w) w.innerHTML = (oth ? '' : `<div class="hr93"><span class="k kb">KB 최고점</span>${H.kbTop ? `<b>${eokTx(H.kbTop.saleMid)}</b><small>(${ymd(H.kbTop.ym)})</small>` : '<small>KB 시세 이력 없음</small>'}</div>`)
       + `<div class="hr93"><span class="k rt">실거래 최고가</span>${H.top ? `<b>${eokTx(H.top[C.p])}</b><small>(${ymd(H.top[C.ym])}, ${H.top[C.f]}층)</small>` : '<small>이 평형 칸 거래 없음</small>'}</div>`
       + (l95() && H.top && H.top[C.ym] < L95CFG.noCancelBefore ? '<div class="hx95">(해제 여부 확인 불가 시기)</div>' : '')   // 묶음 L95: 2019년 이전 계약은 원자료에 해제 칸이 없음
       + (H.topG ? `<div class="hr93 g"><span class="k">직거래 최고</span><b>${eokTx(H.topG[C.p])}</b><small>(${ymd(H.topG[C.ym])}, ${H.topG[C.f]}층) · 신고가 판정에서 뺌</small></div>` : '')
@@ -1790,7 +2076,7 @@
   function renderRtView(v, it, p, d){
     const id = it.id, C = colsOf(d), hasOld = !(RTX && RTX._noOld && RTX._noOld.has(id));
     let all = (d.거래 || []).slice(), shown = RT.listN, oldOn = false, per = L92CFG.defPeriod, oldBusy = false, keep92 = null;
-    const L91 = l91(), L92 = l92(), [blo, bhi] = slotBandRT(id, p), L93 = l93();
+    const L91 = l91(), L92 = l92(), [blo, bhi] = bandRT(id, p), L93 = l93(), oth98 = other98b(id);   // 묶음 L98B: 고른 평형
     let H93 = null, hl93 = null;
     // 묶음 L93: 거래 목록 — 계약 해제는 빼고, 직거래·신고가 표시, 줄마다 계약 달(data-ym: 그래프를 누르면 그 달로)
     function drawList93(){
@@ -1798,7 +2084,7 @@
       const hasG = C.g >= 0, nh = H93 ? H93.nh : null;
       const list = all.filter(t => !t[C.x] && t[C.a] >= blo && t[C.a] <= bhi).sort((a, b) => (b[C.ym] * 100 + b[C.d]) - (a[C.ym] * 100 + a[C.d]));
       const tag = (t) => (nh && nh.has(t) ? ' <small class="nh93">신고가</small>' : '') + (hasG && t[C.g] ? ' <small class="dg93">직거래</small>' : '');
-      w.innerHTML = `<div class="rtg-h"><b>최근 거래</b><small>${p}평 칸(전용 ${Math.round(blo)}~${Math.round(bhi)}㎡) · 계약 해제는 뺌${hasG ? (l95() ? ' · 직거래는 신고가·중앙값에서 뺌' : ' · 직거래는 신고가 판정에서 뺌') : ' · 직거래 여부 자료 없음'}</small></div>`
+      w.innerHTML = `<div class="rtg-h"><b>최근 거래</b><small>${oth98 ? esc(bandName98b(id, p)) : p + '평 칸(전용 ' + Math.round(blo) + '~' + Math.round(bhi) + '㎡)'} · 계약 해제는 뺌${hasG ? (l95() ? ' · 직거래는 신고가·중앙값에서 뺌' : ' · 직거래는 신고가 판정에서 뺌') : ' · 직거래 여부 자료 없음'}</small></div>`
         + '<div class="rtj93" hidden></div>'
         + `<table class="rtl"><thead><tr><th>계약일</th><th>전용</th><th>층</th><th>금액</th></tr></thead><tbody>`
         + list.slice(0, shown).map(t => `<tr data-ym="${t[C.ym]}"${hl93 === t[C.ym] ? ' class="hl93"' : ''}><td>${ymd(t[C.ym] * 100 + t[C.d])}</td><td>${t[C.a]}㎡</td><td>${t[C.f]}층</td><td>${eokTx(t[C.p])}${tag(t)}</td></tr>`).join('') + '</tbody></table>'
@@ -1823,7 +2109,7 @@
     }
     const draw = () => {
       const list = all.filter(t => !L91 || (t[C.a] >= blo && t[C.a] <= bhi)).sort((a, b) => (b[C.ym] * 100 + b[C.d]) - (a[C.ym] * 100 + a[C.d]));   // 묶음 L91: 지금 보는 평형 칸(전용㎡ ±3)의 거래만
-      v.innerHTML = (L92 ? `<div class="rtg-h"><b>실거래 그래프</b><small>${p}평 칸 · 월별 중앙값${l95() && C.g >= 0 ? '(직거래 뺌)' : ''}</small></div><div class="rtp92" role="group" aria-label="그래프 기간">${L92CFG.periods.map(([k, t]) => `<button type="button" data-per92="${k}" aria-pressed="${k === per}">${oldBusy && k === 'all' ? '받는 중…' : t}</button>`).join('')}</div>`
+      v.innerHTML = (L92 ? `<div class="rtg-h"><b>실거래 그래프</b><small>${l98b() ? graphNote98b(id, p) : p + '평 칸 · 월별 중앙값'}${l95() && C.g >= 0 ? '(직거래 뺌)' : ''}</small></div><div class="rtp92" role="group" aria-label="그래프 기간">${L92CFG.periods.map(([k, t]) => `<button type="button" data-per92="${k}" aria-pressed="${k === per}">${oldBusy && k === 'all' ? '받는 중…' : t}</button>`).join('')}</div>`
           : L91 ? `<div class="rtg-h"><b>실거래 그래프</b><small>${p}평 칸 · 월별 중앙값</small>${hasOld && !oldOn ? '<button type="button" class="rto">전체 기간</button>' : ''}</div>`
           : `<div class="rtg-h"><b>실거래 그래프</b><span class="lg"><i class="ln"></i>KB 시세(선) <i class="pt"></i>실거래(점)</span>${hasOld && !oldOn ? '<button type="button" class="rto">전체 기간</button>' : ''}</div>`)
         + (L92 ? `<div class="rtc c91"><div class="chart-canvas-wrap"><canvas aria-label="KB 시세와 실거래"></canvas><div class="drag-select-box" hidden></div><div class="drag-result" hidden><div class="drag-result-head"><span data-role="dragRange"></span><button type="button" class="clear-link" aria-label="구간 지우기">✕</button></div><div class="drag-result-list" data-role="dragList"></div></div></div></div>`
@@ -1902,7 +2188,7 @@
     if (!cv || !window.Chart) return;
     if (rtDragOff){ try { rtDragOff(); } catch (e) {} rtDragOff = null; }   // 묶음 L92: 끌어 고르기 연결 풀기
     if (rtChart){ try { rtChart.$crossIdxL85 = -1; rtChart.destroy(); } catch (e) {} rtChart = null; }   // 지운 그래프에 가격 상자 자리 맞춤이 늦게 오지 않게
-    const [lo, hi] = slotBandRT(it.id, p), by = new Map();
+    const [lo, hi] = bandRT(it.id, p), by = new Map();
     trades.forEach(t => { if (t[C.x] || dg95(t, C) || t[C.a] < lo || t[C.a] > hi) return; (by.get(t[C.ym]) || by.set(t[C.ym], []).get(t[C.ym])).push(t[C.p]); });
     let kbRows = [];
     try {
@@ -1931,6 +2217,12 @@
         const sx = ch.scales.x, i = Math.round(sx.getValueForPixel(e.x)); if (!(i >= 0 && i < labels.length)) return;
         if (o93.pick) o93.pick(labels[i]);
       };
+    }
+    if (l98b()){   // 묶음 L98B: 실거래 선 = 3개월 이동 중앙값 + 그달 점, 판정 평형 아닌 평형은 KB 선 없음(끌어 고르기 실거래 줄은 그대로 양 끝 3개월 묶음)
+      const R = roll98b(labels, by), i1 = ds.findIndex(x => x.borderColor === '#E8590C');
+      if (i1 >= 0) ds.splice(i1, 1, ...ds98b(R, '232,89,12', '실거래(3개월 이동 중앙값)'));
+      if (other98b(it.id)) ds.splice(0, 1);
+      tip98b(opt, labels, R, '거래', fmt);
     }
     rtChart = new Chart(cv, { type: 'line', data: { labels: lab, datasets: ds }, options: opt });
     window.CALC_MAP_L84.rtChart = { kb: kbRows.length, months: by.size, labels: labels.length, from: start, to: end };
@@ -2009,6 +2301,7 @@
   function toggleSchool(kind){
     scOn[kind] = !scOn[kind]; const b = root.querySelector(kind === 'elem' ? '#cm84ScE' : '#cm84ScM'); if (b) b.setAttribute('aria-pressed', String(scOn[kind]));
     if (scOn[kind] && !scAttr[kind]) scJson(SC.attr[kind]).then(a => { scAttr[kind] = a || {}; drawSchool(); });
+    if (l98b()) setTimeout(relabel98b, 0);   // 묶음 L98B: 아래 L91 글자를 한 줄 짧은 이름으로 다시
     if (l91()){ const b2 = root.querySelector(kind === 'elem' ? '#cm84ScE' : '#cm84ScM'); if (b2) b2.innerHTML = (kind === 'elem' ? '초등<br>학구도' : '중학교<br>학군') + (scOn[kind] ? '<small>끄기</small>' : '');
       if (!scOn[kind]){ if (kind === 'elem') scSel = null; if (kind === 'mid' && midSel93){ midSel93 = null; styleMid93(); } scCard(null, kind); } else { loadSchoolPts(); if (kind === 'mid') loadAssign(); } }
     drawSchool();
@@ -2070,9 +2363,9 @@
       if (n >= L91CFG.schoolMax) break; if (!inView(v, e[1], e[2])) continue; n++;
       const on = scSel && scSel.name === e[0];
       const m = new NV.Marker({ map, position: new NV.LatLng(e[1], e[2]), zIndex: on ? 90 : 36, title: e[0], icon: { content: `<div class="cm84-sch${on ? ' on' : ''}" style="--s:${S.c}">${esc(shortSch(e[0]))}</div>`, anchor: new NV.Point(0, 0) } });
-      NV.Event.addListener(m, 'click', () => {
+      NV.Event.addListener(m, 'click', (ev) => { if (msTake98b(ev, m.getPosition())) return;
         if (scSel && scSel.name === e[0]){ scSel = null; scCard(null, 'elem'); }
-        else { elemSel91(e); scFit97b = l97b(); }   // 묶음 L97B: 누른 학교의 학구가 보이게(그린 뒤 맞춤)
+        else { elemFrom98b = null; elemSel91(e); scFit97b = l97b(); }   // 묶음 L97B: 누른 학교의 학구가 보이게(그린 뒤 맞춤) · L98B: 지도에서 누른 학교는 단지 기준 표시 없음
         drawSchool(); });
       scMarks.push(m);
     }
@@ -2081,9 +2374,10 @@
   function elemSel91(e){   // 초등학교 하나 고르기(지도에서 학교 누르기 · 묶음 L95 단지 정보 줄 누르기가 같이 씀)
     scSel = { name: e[0], sd: e[3], zones: e[4], lat: e[1], lng: e[2] };
     const zs = e[4].map(z => (scAttr.elem || {})[z]).filter(Boolean).map(a => String(a[0]));
-    const near = (k) => rate94() && typeof elemNearL94 === 'function' ? `<div class="sc94">${elemNearL94(e[0], e[1], e[2], e[3])}</div>` : '';   // 묶음 L94: 가까운 중학교(추정) 남 3·여 3과 진학률
+    const og = (h) => l98b() && elemFrom98b && typeof markOtherZoneL98B === 'function' ? markOtherZoneL98B(h, elemFrom98b) : h;   // 묶음 L98B: 단지에서 연 경우 단지 학군 밖 학교에 "다른 학군"
+    const near = (k) => rate94() && typeof elemNearL94 === 'function' ? `<div class="sc94">${og(elemNearL94(e[0], e[1], e[2], e[3]))}</div>` : '';   // 묶음 L94: 가까운 중학교(추정) 남 3·여 3과 진학률
     const range = `배정 범위: ${zs.length ? zs.map(esc).join(', ') : '학구도 자료에 연결된 통학구역 없음'}${e[4].length > 1 ? ' <small>(여러 구역)</small>' : ''}`;
-    const card = () => { if (l97b()){ const nh = rate94() && typeof elemNearL94 === 'function' ? elemNearL94(e[0], e[1], e[2], e[3]) : '', ns = nearSum97b(nh);   // 묶음 L97B: 작은 상자
+    const card = () => { if (l97b()){ const nh = rate94() && typeof elemNearL94 === 'function' ? og(elemNearL94(e[0], e[1], e[2], e[3])) : '', ns = nearSum97b(nh);   // 묶음 L97B: 작은 상자
         scCard97b('elem', { title: String(e[0]).replace(/^(서울|인천|경기)(?=.)/, ''), sum: ns.sum || `<div class="scs">${range}</div>`, info: `<p>${range}</p>${ns.note ? `<p>${ns.note}</p>` : ''}<p>${esc(SC.note)}</p>`,
           detail: `<div class="scs">${range}</div>${near()}<div class="scn">${esc(SC.note)}</div>` }); window.CALC_MAP_L84.elemCard97b = { same: !!ns.same }; return; }
       scCard(`<b>${esc(e[0])}</b><div class="scs">${range}</div>${near()}<div class="scn">${esc(SC.note)}</div>`, 'elem'); };
@@ -2123,10 +2417,11 @@
     Promise.all([loadSchoolPts(), scAttr.elem ? null : scJson(SC.attr.elem).then(a => { scAttr.elem = a || {}; })]).then(() => {
       if (!SCP) return;
       let c = SCP.elem.filter(x => x[0] === name && (!sd || x[3] === sd)); if (!c.length) c = SCP.elem.filter(x => x[0] === name);
+      const bid = l98b() && typeof elemByIdL98B === 'function' ? elemByIdL98B(id) : null; if (bid && bid[0] === name) c = [bid];   // 묶음 L98B: 단지 배정 초교 = 학교ID로(같은 이름 초교)
       if (!c.length){ window.CALC_MAP_L84.go95 = { kind: 'elem', name, miss: true }; return; }
       const it = itemsById.get(id), d2 = (x) => it ? (x[1] - it.lat) * (x[1] - it.lat) + (x[2] - it.lng) * (x[2] - it.lng) : 0;
       const e = c.slice().sort((a, b) => d2(a) - d2(b))[0];   // 같은 이름 학교가 여럿이면 단지에서 가까운 곳
-      elemSel91(e); drawSchool();
+      elemFrom98b = id || null; elemSel91(e); drawSchool();   // 묶음 L98B: 단지 정보 줄에서 연 경우 그 단지 기준 "다른 학군"
       const f = SC.zone.elem.replace('%s', e[3]);
       scJson(f).then(j => { scDec(j, f); const zs = j && j._dec ? j._dec.filter(z => e[4].includes(z.zid)) : [];
         const bb = zs.length ? zs.reduce((m, z) => ({ s: Math.min(m.s, z.bb.s), w: Math.min(m.w, z.bb.w), n: Math.max(m.n, z.bb.n), e: Math.max(m.e, z.bb.e) }), { s: 90, w: 180, n: -90, e: -180 }) : { s: e[1], w: e[2], n: e[1], e: e[2] };
@@ -2139,6 +2434,7 @@
     if (!scOn.mid) toggleSchool('mid');
     loadAssign().then(([, M]) => {
       const zid = M && id && String(id)[0] !== '_' && Object.prototype.hasOwnProperty.call(M, id) ? M[id] : null; if (!zid){ window.CALC_MAP_L84.go95 = { kind: 'mid', id, miss: true }; return; }
+      if (!sd && l98b()){ try { const c = (seedEntryById(id) || {}).regionCity; if (c) sd = c === '서울' || c === '인천' ? c : '경기'; } catch (e) {} }   // 묶음 L98B: 단지 시도는 seed 기준(시 경계 단지가 지도 네모로는 옆 시도로 잡히던 것)
       const it = itemsById.get(id); sd = sd || (it ? (SC.sido.find(([, b]) => it.lat >= b[0] && it.lat <= b[2] && it.lng >= b[1] && it.lng <= b[3]) || ['서울'])[0] : '서울');
       midSel93 = zid; styleMid93(); midCard(zid, sd, l96() && it ? { lat: it.lat, lng: it.lng, nm: it.name } : null);   // 묶음 L96: 단지에서 연 경우만 단지 좌표
       const f = SC.zone.mid.replace('%s', sd);
@@ -2155,11 +2451,14 @@
         const M = AM ? AM[1] : null, zn = M && M._zones ? M._zones[zid] : null, nm = zn ? zn[0] : (((scAttr.mid || {})[zid] || [])[0] || '중학교 학군'), list = zn ? zn[2] || [] : [];
         const gu = /중학구$/.test(nm) ? '중학구' : '학교군', R = SC.rule;
         if (l97b()){   // 묶음 L97B: 작은 상자 — 요약은 표 위 3곳(+ 나머지 수), 배정 원리·출처는 ⓘ, [자세히]는 지금의 전체 내용
-          const tb = rateTableL94(list, sd, from || null), d = document.createElement('div'); d.innerHTML = tb; const rows = [...d.querySelectorAll('tbody tr')];
+          const tb = rateTableL94(list, sd, from || null), d = document.createElement('div'); d.innerHTML = tb; const all98 = [...d.querySelectorAll('tbody tr')];
+          // 묶음 L98B: 머리줄("남학생 · 단지에서 가까운 3곳")은 학교로 세지 않음 — 첫 묶음 머리줄은 요약 위에 한 줄, "외 N곳" = 학군 학교 수 − 요약에 보인 학교 수
+          const B98 = l98b(), rows = B98 ? all98.filter(r => !r.classList.contains('r96-h') && !r.classList.contains('r94-sub')) : all98, head98 = B98 && all98[0] && all98[0].classList.contains('r96-h') ? all98[0].innerText.trim() : '';
           const li = rows.slice(0, 3).map(r => { const td = [...r.cells]; return `<li><b>${td[0] ? td[0].innerHTML : ''}</b>${td.length > 1 ? td[td.length - 1].innerHTML : ''}</li>`; }).join('');   // 학교 · 상위 % · 진학률 한 줄씩
-          const more = rows.length > 3 ? `<div class="scs">외 ${rows.length - 3}곳은 [자세히]</div>` : '';
+          const left98 = B98 ? list.length - new Set(rows.slice(0, 3).map(r => r.cells[0] ? (r.cells[0].firstChild || {}).textContent : '')).size : rows.length - 3;
+          const more = (B98 ? left98 > 0 : rows.length > 3) ? `<div class="scs">외 ${B98 ? left98 : rows.length - 3}곳은 [자세히]</div>` : '';
           d.querySelectorAll('table').forEach(t => t.remove()); const foot = d.innerHTML.trim();   // 표 아래 진학률 설명은 ⓘ로
-          scCard97b('mid', { title: nm + (zn && zn[1] ? ' (공동)' : ''), sum: `<div class="t97b">소속 중학교 ${list.length}곳</div>${li ? `<ul class="u97b">${li}</ul>` : ''}${more}`,
+          scCard97b('mid', { title: nm + (zn && zn[1] ? ' (공동)' : ''), sum: `<div class="t97b">소속 중학교 ${list.length}곳</div>${head98 ? `<div class="scs">${esc(head98)}</div>` : ''}${li ? `<ul class="u97b">${li}</ul>` : ''}${more}`,
             info: (foot ? `<div>${foot}</div>` : '') + `<p><b>배정 원리</b> ${esc(R[gu])}</p>${gu === '학교군' ? `<p>${esc(R.중학구)}</p>` : ''}<p>${esc(R[sd] || '')}</p><p>출처: ${esc([R.src.공통, R.src[sd]].filter(Boolean).join(' · '))} · ${esc(SC.note)}</p>`,
             detail: `<div class="scs">소속 중학교 ${list.length}곳</div>${tb}<div class="scr"><b>배정 원리</b><p>${esc(R[gu])}</p>${gu === '학교군' ? `<p>${esc(R.중학구)}</p>` : ''}<p>${esc(R[sd] || '')}</p></div><div class="scn">출처: ${esc([R.src.공통, R.src[sd]].filter(Boolean).join(' · '))} · ${esc(SC.note)}</div>` });
           window.CALC_MAP_L84.midCard = { zid, nm, n: list.length, rate: rateStateL94(sd), from96: !!from, l97b: true };
@@ -2211,7 +2510,7 @@
             if (!vis2(z.bb) || z2 < SC.minZoom){ if (p) p.setMap(null); return; }
             if (!p){ const ck = kind === 'mid' && l91();   // 묶음 L91: 학군을 누르면 소속 중학교·배정 원리
               p = new NV.Polygon({ paths: z.ll.map(r => r.map(([y, x]) => new NV.LatLng(y, x))), fillColor: S.c, fillOpacity: ck ? .01 : 0, strokeColor: S.c, strokeWeight: kind === 'mid' ? 2.4 : 1.6, strokeOpacity: .9, strokeStyle: S.dash, clickable: ck, zIndex: 15 }); scPolys.set(k, p);
-              if (ck) NV.Event.addListener(p, 'click', () => { if (l93()){ if (midSel93 === z.zid){ midSel93 = null; styleMid93(); scCard(null, 'mid'); return; } midSel93 = z.zid; styleMid93(); } midCard(z.zid, sd, null, l97b() ? z.bb : null); });
+              if (ck) NV.Event.addListener(p, 'click', (ev) => { if (msTake98b(ev)) return; if (l93()){ if (midSel93 === z.zid){ midSel93 = null; styleMid93(); scCard(null, 'mid'); return; } midSel93 = z.zid; styleMid93(); } midCard(z.zid, sd, null, l97b() ? z.bb : null); });
               if (kind === 'mid' && l93()) styleMid93One(p, z.zid); }
             if (!p.getMap()) p.setMap(map);
             if ((z2 >= SC.labelZoom || (l95() && kind === 'mid' && z.zid === midSel93)) && scMarks.length < SC.labelMax){   // 묶음 L95: 고른 학군은 한 단계 멀리서도 이름표
@@ -2243,7 +2542,8 @@
     NV = naver.maps;
     map = new NV.Map(mapEl, { center: new NV.LatLng(37.5665, 126.978), zoom: 13, minZoom: 8, maxZoom: 19, zoomControl: true,
       zoomControlOptions: { position: l89() ? NV.Position.RIGHT_CENTER : NV.Position.LEFT_CENTER, style: NV.ZoomControlStyle.SMALL }, scaleControl: false, mapDataControl: false });   // 묶음 L89: 확대·축소 버튼은 재개발 지도처럼 오른쪽 가운데
-    NV.Event.addListener(map, 'idle', () => { clearTimeout(lt); lt = setTimeout(drawAll, 60); });
+    NV.Event.addListener(map, 'idle', () => { clearTimeout(lt); lt = setTimeout(drawAll, 60); if (l98b()) hint98b(); });
+    if (l98b()) NV.Event.addListener(map, 'click', (e) => { if (msTake98b(e)) return; if (SV98.on && e && e.coord) svAt98b(e.coord); });   // 묶음 L98B: 거리뷰 길 위를 누르면 그 자리 거리뷰
     window.addEventListener('resize', () => setTimeout(() => { if (map && !root.closest('[hidden]')) resize(); }, 50));
     root.querySelector('#cm84Basis').textContent = '가격 34평 기준(34평 시세가 없는 단지는 25평) · ' + seedMonthText() + ' 시세 · 좌표 있는 단지 ' + items.length.toLocaleString('ko-KR') + '곳';
     ready = true; clearTimeout(failTimer);
