@@ -188,6 +188,17 @@
   .srcbtn{position:absolute;right:12px;bottom:14px;z-index:900;border:1px solid var(--line);background:#fff;border-radius:999px;font-size:12px;padding:5px 10px;cursor:pointer;color:var(--ink-sub);box-shadow:0 1px 4px rgba(0,0,0,.08)}
   .srcpop{position:absolute;right:12px;bottom:50px;z-index:1050;width:min(400px,calc(100% - 24px));max-height:70%;overflow:auto;background:#fff;border:1px solid var(--line);border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,.16);padding:12px 14px;font-size:12.5px;line-height:1.6;display:none}
   .srcpop.on{display:block}
+  #tbSchE[aria-pressed=true]{background:#1864AB;border-color:#1864AB;color:#fff}#tbSchM[aria-pressed=true]{background:#C2255C;border-color:#C2255C;color:#fff}
+  #tbSchE small,#tbSchM small{display:block;font-size:10px;opacity:.85}
+  .sch-p{background:rgba(255,255,255,.92);border:1.5px solid var(--s);border-radius:999px;padding:1px 7px;font-size:11px;font-weight:700;color:var(--s);white-space:nowrap;cursor:pointer;transform:translate(-50%,-50%)}
+  .sch-p.on{background:var(--s);color:#fff}
+  .sch-l{background:rgba(255,255,255,.88);border:1px dashed var(--s);border-radius:6px;padding:1px 6px;font-size:10.5px;font-weight:700;color:var(--s);white-space:nowrap;transform:translate(-50%,-50%);pointer-events:none}
+  .schc{position:absolute;left:12px;top:12px;z-index:1060;width:min(380px,calc(100% - 90px));max-height:72%;overflow:auto;background:#fff;border:1px solid var(--line);border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,.16);padding:10px 12px;font-size:12.5px;line-height:1.55;display:none}
+  .schc.on{display:block}.schc .scx{float:right;border:0;background:none;font-size:17px;cursor:pointer;color:var(--ink-faint);margin:-4px -4px 0 6px}
+  .schc .scs{color:var(--ink-sub,#475569);margin:2px 0 4px}.schc .scn{color:var(--ink-faint,#6B7280);font-size:11.5px;margin-top:6px}.schc .scr p{margin:3px 0}
+  .schc table{border-collapse:collapse;width:100%;margin:4px 0;font-size:12px}.schc th,.schc td{border-bottom:1px solid #EEF0F3;padding:3px 4px;text-align:left;vertical-align:top}.schc th{color:var(--ink-sub,#475569);font-weight:600}
+  .schc .r-f{color:#B54708;font-size:11px}
+  @media (max-width:767px){.schc{top:64px;left:10px;width:calc(100% - 82px)}}
   .slg{position:absolute;left:12px;bottom:58px;z-index:1040;background:rgba(255,255,255,.95);border:1px solid var(--line);border-radius:10px;padding:8px 10px 6px;font-size:11.5px;line-height:1.35;box-shadow:0 4px 14px rgba(0,0,0,.12);width:min(330px,calc(100% - 24px))}
   .slg .bar{height:10px;border-radius:5px;margin:4px 0 2px;position:relative}
   .slg .tk{position:relative;height:30px}.slg .tk span{position:absolute;transform:translateX(-50%);white-space:nowrap;font-size:10.5px;color:var(--ink-soft,#475569)}
@@ -483,11 +494,14 @@
     <button type="button" class="tb" id="tbSv" aria-pressed="false">거리뷰</button>
     <button type="button" class="tb" id="tbCad" aria-pressed="false">지적도</button>
     <button type="button" class="tb" id="tbSlope" aria-pressed="false" title="땅의 경사(참고용)">경사도</button>
+    <button type="button" class="tb" id="tbSchE" aria-pressed="false" title="초등학교 통학구역(참고용)">초등<br>학구도</button>
+    <button type="button" class="tb" id="tbSchM" aria-pressed="false" title="중학교 학교군·중학구(참고용)">중학교<br>학군</button>
     <button type="button" class="tb tbhome" id="tbHome" title="계산기 첫 화면으로" aria-label="처음 화면(계산기 첫 화면으로)">🏠<br>처음</button>
     <button type="button" class="tb" id="tbBar" hidden aria-pressed="false" title="강·하천·지상 철도·큰길·산(서울만, 참고)">생활권 경계</button>
   </div>
   <div class="cadhint" id="cadhint" hidden>확대하면 보여요(지도를 더 키워 주세요)</div>
   <div class="slg" id="slopeLg" hidden></div>
+  <div class="schc" id="schCard" role="dialog" aria-label="학구도"></div>
   <div class="shov" id="slopeHov" role="tooltip"></div>
   <div class="svhint" id="svhint" hidden>파란 길을 누르면 그 자리 거리뷰가 열려요</div>
   <div class="basis" id="basis"></div>
@@ -509,7 +523,7 @@
   <button type="button" class="ftab r" id="ftabR" hidden>◂ 단지 펼치기</button>
   <div class="sv" id="sv"><div class="pano" id="pano"></div><div class="msg" id="svmsg"></div><button type="button" class="cl" id="svx">닫기 ✕</button></div>
 </div>
-<script src="지도_설정.js?v=20261109-1955"></script>
+<script src="지도_설정.js?v=20261110-0839"></script>
 <script>
 (function() {
  var id = (window.MAP_CONFIG || {}).naverClientId;
@@ -527,7 +541,7 @@
  document.head.appendChild(s);
 })();
 </script>
-<script src="지도_구역.js?v=20261109-1955"></script>
+<script src="지도_구역.js?v=20261110-0839"></script>
 <script>
 (function() {
  const T0 = performance.now();
@@ -1171,7 +1185,7 @@
   }));
   return Math.abs(a / 2) * 111e3 * 88e3;
  }
- const MAP_VER = "20261109-1955";
+ const MAP_VER = "20261110-0839";
  function loadScript(src) {
   return new Promise((res => {
    const s = document.createElement("script");
@@ -2968,6 +2982,7 @@
   const bdn = get(z, "bd"), bdd = get(z, "bdd");
   const bldTxt = "";
   const slopeTxt = slopeLine(st.sel);
+  const schTxt = st.townSel ? "" : schLine(st.sel);
   const loc = !st.townSel && window.MAP_LOCMAP && window.MAP_LOCMAP[get(z, "k")];
   const locBtn = loc ? '<div class="chgbox"><button type="button" class="locbtn" id="locbtn">위치도 보기</button></div>' : "";
   const warnTop = window.MAP_WARN && window.MAP_WARN[get(z, "k")] && !st.townSel ? '<div class="warnbar" id="warnbar">세부 경계 확인 필요 — 참고용 선이에요. 정확한 경계는 아래 위치도·고시문을 확인하세요.</div>' : "";
@@ -2987,8 +3002,8 @@
    townSum = '<div class="tsum">' + [ ...gm ].map((([lab, nm]) => `<div><b>${nm.map(esc).join("·")}</b> ${esc(lab)}</div>`)).join("") + "</div>";
   }
   const noRowTxt = st.subF ? "이 하위구역은 목록표에 행이 없어요. 아래 상세·비교 단지는 같은 타운의 다른 행(" + get(z, "n") + ")이에요." : "";
-  P$(".acts").innerHTML = warnTop + '<button type="button" class="mapgo">지도에서 이 구역 보기</button>' + (bldTxt ? `<div class="bld">${esc(bldTxt)}</div>` : "") + (slopeTxt ? `<div class="bld" id="slopeLine">${esc(slopeTxt)}</div>` : "") + townSum + chgBtn + (noRowTxt ? `<div class="nowsee">${esc(noRowTxt)}</div>` : "") + (nowTxt ? `<div class="nowsee">지금 보는 곳: <b>${esc(nowTxt)}</b></div>` : "") + (why ? `<span class="why">${esc(why)}</span>` : "") + locBtn;
-  P$(".acts").hidden = !why && !nowTxt && !hasChg && !noRowTxt && !townSum && !bldTxt && !slopeTxt && !locBtn && !warnTop && !mq.matches;
+  P$(".acts").innerHTML = warnTop + '<button type="button" class="mapgo">지도에서 이 구역 보기</button>' + (bldTxt ? `<div class="bld">${esc(bldTxt)}</div>` : "") + (slopeTxt ? `<div class="bld" id="slopeLine">${esc(slopeTxt)}</div>` : "") + (schTxt ? `<div class="bld" id="schLine">${esc(schTxt)}</div>` : "") + townSum + chgBtn + (noRowTxt ? `<div class="nowsee">${esc(noRowTxt)}</div>` : "") + (nowTxt ? `<div class="nowsee">지금 보는 곳: <b>${esc(nowTxt)}</b></div>` : "") + (why ? `<span class="why">${esc(why)}</span>` : "") + locBtn;
+  P$(".acts").hidden = !why && !nowTxt && !hasChg && !noRowTxt && !townSum && !bldTxt && !slopeTxt && !schTxt && !locBtn && !warnTop && !mq.matches;
   const lb = document.getElementById("locbtn");
   if (lb) lb.onclick = () => openLoc(get(z, "n"), loc);
   const cb = document.getElementById("chgbtn");
@@ -3752,7 +3767,7 @@
   if (!S) return;
   document.getElementById("slopeLg").innerHTML = `<div class="t">경사도 (참고용) · ${C["칠_시작%"]}% 미만 평지는 칠하지 않아요</div>` + S.map(([lo, c, al, lab, mean]) => `<div class="sw"><i style="background:rgba(${c},${(al / 255).toFixed(2)})"></i><b>${esc(lab)}</b><span>${esc(mean)}</span></div>`).join("");
  }
- const SLOPE_V = "20261109-1955";
+ const SLOPE_V = "20261110-0839";
  /* 39차: 타일 묶음 — 'SLB1' + 개수 + [x,y,시작,길이]… + PNG들. 블록은 처음 쓸 때 한 번 받아 기억 */
  const SLB = new Map;
  function slbLoad(file) {
@@ -3889,6 +3904,187 @@
   SLOPE.bub = new NV.InfoWindow({ content: `<div class="sbub">${esc(t)}</div>`, borderWidth: 0, backgroundColor: "transparent", disableAnchor: false, anchorSize: new NV.Size(10, 8), anchorColor: "#fff", pixelOffset: new NV.Point(0, -4) });
   SLOPE.bub.open(map, coord);
  }
+
+ /* 40차: 초등 학구도·중학교 학군 — 계산기 지도와 같은 자료·표시(자료는 계산기 라이브 주소 그대로 읽기) */
+ const SC = {
+  base: "../benchmark-calculator/지도자료_202609/학구도/", rate: "../benchmark-calculator/지도자료_202609/진학률/",
+  rateOn: false,   // 진학률: 계산기 진학률 자료(지도자료_202609/진학률/)가 라이브에 올라오면 true — 그 전엔 요청 안 함(404·콘솔 오류 막기)
+  minZoom: 13, labelZoom: 15, labelMax: 40, pillZoom: 14, pillMax: 150,
+  col: { e: "#1864AB", m: "#C2255C" },
+  sido: [ [ "서울", [ 37.41, 126.76, 37.72, 127.19 ] ], [ "인천", [ 37.0, 126.0, 37.85, 126.80 ] ], [ "경기", [ 36.89, 126.37, 38.30, 127.86 ] ] ],
+  note: "학구도는 참고용이며 실제 배정은 교육지원청 고시를 따릅니다.",
+  rule: {
+   학교군: "학교군: 교육지원청이 학교군 안의 중학교 가운데 한 곳으로 추첨(전산)해 배정해요. 같은 학교군 안에서는 어느 학교에 갈지 미리 정해지지 않아요.",
+   중학구: "중학구: 거리·교통이 통학하기에 매우 불편한 곳은 정해진 중학교로 바로 배정해요.",
+   서울: "서울: 학교군 추첨이 기본이고, 근거리 통학 대상자 심사·지정 같은 예외는 서울특별시교육청이 해마다 정해 안내해요.",
+   경기: "경기: 교육감이 학교군·중학구와 추첨 방법을 해마다 고시해요(2026학년도 경기도교육청 고시 제2025-576호, 추첨은 컴퓨터 또는 수동식 추첨기).",
+   인천: "인천: 교육감이 정한 학교군·중학구와 추첨 방법에 따라 교육지원청이 배정해요.",
+   src: { 공통: "초·중등교육법 시행령 제68조(중학교 입학방법)", 서울: "서울특별시교육청 고입자료실 「2026학년도 중입 재배정 … 근거리 통학 대상자 심사·지정 계획」", 경기: "경기도교육청 고시 제2025-576호(2025. 9. 23.)", 인천: "" }
+  }
+ };
+ const SCS = { e: false, m: false, attr: {}, pts: null, mid: null, delta: {}, rate: {}, polys: [], marks: [], selE: null, selM: null, line: new Map };
+ const scGet = (u => { if (!SCS.get) SCS.get = new Map; if (!SCS.get.has(u)) SCS.get.set(u, fetch(u).then((r => r.ok ? r.json() : null)).catch((() => null))); return SCS.get.get(u); });
+ const scJs = ((f, g) => { if (window[g]) return Promise.resolve(window[g]); if (!SCS.js) SCS.js = {}; if (!SCS.js[g]) SCS.js[g] = new Promise((res => { const t = document.createElement("script"); t.src = SC.base + encodeURIComponent(f); t.onload = () => res(window[g] || null); t.onerror = () => res(null); document.head.appendChild(t); })); return SCS.js[g]; });
+ const scDecode = (ring => { const out = []; let x = 0, y = 0; for (let i = 0; i < ring.length; i += 2) { x += ring[i]; y += ring[i + 1]; out.push([ y / 1e5, x / 1e5 ]); } return out; });
+ function scZones(kind, sd) {   // kind e|m → Promise<[{id, joint, rings, bb}]>
+  const k = kind + sd;
+  if (!SCS.delta[k]) SCS.delta[k] = scGet(SC.base + encodeURIComponent((kind === "e" ? "초등_" : "중학_") + sd + "_델타.json")).then((d => !d ? null : (d.학구 || []).map((([id, joint, rings]) => {
+   const rr = rings.map(scDecode); let s = 90, n = -90, w = 180, e = -180;
+   rr.forEach((r => r.forEach((([y, x]) => { if (y < s) s = y; if (y > n) n = y; if (x < w) w = x; if (x > e) e = x; }))));
+   return { id, joint, rings: rr, bb: { s, n, w, e } };
+  }))));
+  return SCS.delta[k];
+ }
+ const scAttr = (kind => { if (!SCS.attr[kind]) SCS.attr[kind] = scGet(SC.base + encodeURIComponent(kind === "e" ? "초등_속성.json" : "중학_속성.json")); return SCS.attr[kind]; });
+ const scPts = (() => scJs("school_points_202610.js", "SCHOOL_POINTS_202610"));
+ const scMid = (() => scJs("school_mid_202609.js", "SCHOOL_MID_202609"));
+ function scIn(rr, y, x) { let c = false; rr.forEach((r => { for (let i = 0, j = r.length - 1; i < r.length; j = i++) { const yi = r[i][0], xi = r[i][1], yj = r[j][0], xj = r[j][1]; if (yi > y !== yj > y && x < (xj - xi) * (y - yi) / (yj - yi) + xi) c = !c; } })); return c; }
+ const scSidoOf = ((y, x) => { const h = SC.sido.find((([, b]) => y >= b[0] && y <= b[2] && x >= b[1] && x <= b[3])); return h ? h[0] : null; });
+ function scVisSido() { const b = map.getBounds(), s = b.getMin().y, w = b.getMin().x, n = b.getMax().y, e = b.getMax().x; return SC.sido.filter((([, q]) => !(q[2] < s || q[0] > n || q[3] < w || q[1] > e))).map((([sd]) => sd)); }
+ const scShort = (n => String(n || "").replace(/^(서울|인천|경기)/, "").replace(/초등학교$/, "초").replace(/중학교$/, "중"));
+ function scClear() { SCS.polys.forEach((p => p.setMap(null))); SCS.marks.forEach((m => m.setMap(null))); SCS.polys = []; SCS.marks = []; }
+ function scCardClose() { const c = document.getElementById("schCard"); c.classList.remove("on"); c.innerHTML = ""; if (SCS.selE || SCS.selM) { SCS.selE = SCS.selM = null; scDraw(); } }
+ function scCard(html) { const c = document.getElementById("schCard"); c.innerHTML = '<button type="button" class="scx" aria-label="닫기">✕</button>' + html; c.classList.add("on"); c.querySelector(".scx").onclick = scCardClose; }
+ function scLabelPos(z, b) {   // 화면 안 그 구역 안쪽 점(가로세로 7칸 격자, 계산기 labelPos95와 같은 생각)
+  const s = Math.max(z.bb.s, b.s), n = Math.min(z.bb.n, b.n), w = Math.max(z.bb.w, b.w), e = Math.min(z.bb.e, b.e);
+  if (s >= n || w >= e) return null;
+  const c = [ (s + n) / 2, (w + e) / 2 ]; if (scIn(z.rings, c[0], c[1])) return c;
+  for (let i = 1; i < 7; i++) for (let j = 1; j < 7; j++) { const y = s + (n - s) * i / 7, x = w + (e - w) * j / 7; if (scIn(z.rings, y, x)) return [ y, x ]; }
+  return null;
+ }
+ let scSeq = 0;
+ async function scDraw() {
+  const seq = ++scSeq;
+  if (!map || !SCS.e && !SCS.m) { scClear(); return; }
+  const zm = zoom(); if (zm < SC.minZoom) { scClear(); return; }
+  const bb = map.getBounds(), b = { s: bb.getMin().y, w: bb.getMin().x, n: bb.getMax().y, e: bb.getMax().x };
+  const sds = scVisSido(), inV = (z => !(z.bb.n < b.s || z.bb.s > b.n || z.bb.e < b.w || z.bb.w > b.e));
+  const polys = [], marks = [];
+  if (SCS.m) {
+   const at = await scAttr("m"); const all = (await Promise.all(sds.map((sd => scZones("m", sd))))).flat().filter(Boolean);
+   if (seq !== scSeq) return;
+   all.filter(inV).forEach((z => {
+    const sel = SCS.selM === z.id, dim = SCS.selM && !sel;
+    polys.push(new NV.Polygon({ paths: z.rings.map((r => r.map((([y, x]) => LL(y, x))))), clickable: false, fillColor: dim ? "#868E96" : SC.col.m, fillOpacity: sel ? .16 : dim ? .06 : .01, strokeColor: dim ? "#868E96" : SC.col.m, strokeOpacity: sel ? 1 : dim ? .28 : .9, strokeWeight: sel ? 3.2 : dim ? 1.5 : 2.4, strokeStyle: sel ? "solid" : "longdash", zIndex: sel ? 17 : 15 }));
+   }));
+   const lab = all.filter((z => inV(z) && (zm >= SC.labelZoom || SCS.selM === z.id))).slice(0, SC.labelMax);
+   lab.forEach((z => { const p = scLabelPos(z, b); if (!p) return; const nm = at && at[z.id] ? at[z.id][0] : ""; if (!nm) return;
+    marks.push(new NV.Marker({ position: LL(p[0], p[1]), clickable: false, zIndex: 35, icon: { content: `<div class="sch-l" style="--s:${SC.col.m}">${esc(nm)}</div>`, anchor: new NV.Point(0, 0) } })); }));
+  }
+  if (SCS.e) {
+   const P = await scPts(); if (seq !== scSeq) return;
+   if (SCS.selE) {
+    const row = (P && P.elem || []).find((r => r[0] === SCS.selE)), ids = new Set(row ? row[4] || [] : []);
+    const all = (await Promise.all(sds.map((sd => scZones("e", sd))))).flat().filter(Boolean); if (seq !== scSeq) return;
+    all.filter((z => ids.has(z.id))).forEach((z => polys.push(new NV.Polygon({ paths: z.rings.map((r => r.map((([y, x]) => LL(y, x))))), clickable: false, fillColor: SC.col.e, fillOpacity: .10, strokeColor: SC.col.e, strokeWeight: 2.4, strokeOpacity: .95, strokeStyle: "solid", zIndex: 16 }))));
+   }
+   if (zm >= SC.pillZoom && P) {
+    (P.elem || []).filter((r => r[1] >= b.s && r[1] <= b.n && r[2] >= b.w && r[2] <= b.e)).slice(0, SC.pillMax).forEach((r => {
+     const on = SCS.selE === r[0];
+     const m = new NV.Marker({ position: LL(r[1], r[2]), zIndex: on ? 90 : 36, icon: { content: `<div class="sch-p${on ? " on" : ""}" style="--s:${SC.col.e}">${esc(scShort(r[0]))}</div>`, anchor: new NV.Point(0, 0) } });
+     NV.Event.addListener(m, "click", (() => { overlayClickAt = Date.now(); scPickElem(r); }));
+     marks.push(m);
+    }));
+   }
+  }
+  if (seq !== scSeq) { return; }
+  scClear(); polys.forEach((p => p.setMap(map))); marks.forEach((m => m.setMap(map))); SCS.polys = polys; SCS.marks = marks;
+ }
+ async function scPickElem(r) {
+  SCS.selE = r[0]; scDraw();
+  const at = await scAttr("e"), names = (r[4] || []).map((id => at && at[id] ? at[id][0] : "")).filter(Boolean);
+  scCard(`<b>${esc(r[0])}</b><div class="scs">배정 범위: ${esc(names.join(", ") || "학구도 자료에 연결된 통학구역 없음")}${names.length > 1 ? " <small>(여러 구역)</small>" : ""}</div><div class="scn">${esc(SC.note)}</div>`);
+ }
+ const RATE_BITS = [ [ 1, "소규모" ], [ 2, "참고" ], [ 4, "개교 예정" ], [ 8, "자료 없음" ] ];
+ const n1 = (x => x == null ? "-" : (Math.round(x * 10) / 10).toFixed(1));
+ function scRate(sd) {
+  if (!SC.rateOn) return Promise.resolve(null);
+  if (!SCS.rate[sd]) SCS.rate[sd] = Promise.all([ scGet(SC.rate + encodeURIComponent("진학률_지도_" + sd + ".json")), scGet(SC.rate + encodeURIComponent("학교이름표_" + sd + ".json")) ]).then((([rate, nm]) => {
+   if (!rate || !nm) return null;
+   let sp = 0, sn = 0, k = 0; const a = [ 0, 0, 0 ];
+   Object.values(rate.중학교 || {}).forEach((v => { if (v && v[0] != null) { sp += v[0]; sn++; } if (v && v[6] != null) { k++; a[0] += v[6]; a[1] += v[7] || 0; a[2] += v[8] || 0; } }));
+   return { rate, nm, avg: sn ? sp / sn : null, per: k ? a.map((x => x / k)) : null };
+  }));
+  return SCS.rate[sd];
+ }
+ function scRateTable(list, sd, d) {
+  const sexTx = (x => x === "남" ? "남중" : x === "여" ? "여중" : x === "공학" ? "공학" : "-");
+  const rows = (list || []).map((n => {
+   const q = d && d.nm.mid && d.nm.mid[n], v = q ? d.rate.중학교[q[0]] || null : null;
+   const kind = q ? esc(q[2] || "") + "·" + esc(sexTx(q[1])) : d || !SC.rateOn ? "-" : "…";
+   let cell;
+   if (!d) cell = SC.rateOn ? '<span class="r-f">못 받음</span>' : '-';
+   else if (!v || v[0] == null) cell = '<span class="r-f">자료 없음</span>';
+   else { const bits = RATE_BITS.filter((([bb]) => v[4] & bb)).map((([, t]) => t)); cell = (v[2] != null ? "<b>" + esc(sd) + " 상위 " + (v[2] < 1 ? "1% 안" : Math.round(v[2]) + "%") + "</b> " : "") + "<small>진학률 " + n1(v[0]) + "%</small>" + (bits.length ? ' <span class="r-f">' + bits.map(esc).join("·") + "</span>" : ""); }
+   return "<tr><td>" + esc(scShort(n)) + "</td><td>" + kind + "</td><td>" + cell + "</td></tr>";
+  })).join("");
+  return (rows ? '<table><thead><tr><th>학교</th><th>설립·구분</th><th>특목·자사고 진학률</th></tr></thead><tbody>' + rows + "</tbody></table>" : "") +
+   (d && d.avg != null ? '<div class="scs">' + esc(sd) + " 평균 " + n1(d.avg) + "%" + (d.per ? " · 학교당 과학고 " + n1(d.per[0]) + " · 외고·국제고 " + n1(d.per[1]) + " · 자사고 " + n1(d.per[2]) + "명" : "") + "</div>" : "") +
+   (d ? '<div class="scn">특목·자사고 진학률 = 2023~2025년 졸업생 가운데 과학고·외고·국제고·자사고 진학자 비율(3년 합산). ' + esc(sd) + " 상위 %는 같은 시도 중학교끼리 비교한 값(소규모·참고 학교는 빼고)이며 순위표가 아니라 참고용이에요. 출처: 학교알리미 졸업생 진로 공시 · 남·여·공학은 나이스 학교기본정보(2026-11-05)</div>" : (SC.rateOn ? '<div class="scn">진학률 자료를 받지 못했어요.</div>' : '<div class="scn">특목·자사고 진학률은 계산기 진학률 자료가 올라오면 같이 보여요.</div>'));
+ }
+ async function scPickMid(y, x) {
+  const sd = scSidoOf(y, x); if (!sd) return false;
+  const zs = await scZones("m", sd); if (!zs) return false;
+  const z = zs.find((q => y >= q.bb.s && y <= q.bb.n && x >= q.bb.w && x <= q.bb.e && scIn(q.rings, y, x))); if (!z) return false;
+  SCS.selM = z.id; scDraw();
+  const [at, M] = await Promise.all([ scAttr("m"), scMid() ]);
+  const nm = at && at[z.id] ? at[z.id][0] : "(이름 없음)", zz = M && M._zones && M._zones[z.id], list = zz ? zz[2] || [] : [];
+  const gu = /중학구$/.test(nm) ? "중학구" : "학교군", R = SC.rule;
+  const body = d => `<b>${esc(nm)}</b>${z.joint ? " <small>(공동)</small>" : ""}<div class="scs">소속 중학교 ${list.length}곳</div>` + scRateTable(list, sd, d) +
+   `<div class="scr"><b>배정 원리</b><p>${esc(R[gu])}</p>${gu === "학교군" ? `<p>${esc(R.중학구)}</p>` : ""}<p>${esc(R[sd])}</p></div>` +
+   `<div class="scn">출처: ${esc([ R.src.공통, R.src[sd] ].filter(Boolean).join(" · "))} · 학구도안내서비스 · ${esc(SC.note)}</div>`;
+  scCard(body(undefined).replace('<div class="scn">진학률 자료를 받지 못했어요.</div>', '<div class="scn">진학률 불러오는 중…</div>').replace(/<span class="r-f">못 받음<\/span>/g, "…"));
+  const d = await scRate(sd); if (SCS.selM === z.id) scCard(body(d));
+  return true;
+ }
+ function scClick(e) {   // 지도 빈 곳 누름: 학군이 켜져 있으면 그 학군 창(구역·단지·이름표 누르기가 먼저)
+  if (!SCS.m || !e || !e.coord || Date.now() - overlayClickAt < 600 || zoom() < SC.minZoom) return;
+  scPickMid(e.coord.lat(), e.coord.lng());
+ }
+ function scToggle(kind, btn) {
+  const on = btn.getAttribute("aria-pressed") !== "true";
+  btn.setAttribute("aria-pressed", on); btn.innerHTML = (kind === "e" ? "초등<br>학구도" : "중학교<br>학군") + (on ? "<small>끄기</small>" : "");
+  SCS[kind] = on;
+  if (!on) { if (kind === "e") SCS.selE = null; else SCS.selM = null; const c = document.getElementById("schCard"); c.classList.remove("on"); }
+  else { scAttr(kind); if (kind === "e") scPts(); else scMid(); }
+  scDraw();
+ }
+ document.getElementById("tbSchE").addEventListener("click", (e => scToggle("e", e.currentTarget)));
+ document.getElementById("tbSchM").addEventListener("click", (e => scToggle("m", e.currentTarget)));
+ document.addEventListener("keydown", (e => { if (e.key === "Escape" && document.getElementById("schCard").classList.contains("on")) scCardClose(); }));
+ /* 구역 창 한 줄: 배정 초등학교 · 중학교 학군 */
+ function scGeomOf(k) {
+  const sub = SUBZ && SUBZ.feats.find((f => f.keys.length === 1 && f.keys[0] === k)); if (sub && sub.ll) return sub;
+  const f = BND && BND.byKey.get(k); if (f && f.ll && !f.moa) return f;
+  const c = CAND && CAND.byKey && CAND.byKey.get(k); return c && c.ll ? c : null;   // 후보지·지정전 선(사당16 등)
+ }
+ async function scCalc(k) {
+  const o = BYKEY.get(k); if (!o) return "";
+  const g = scGeomOf(k), sd = get(o.z, "sd") && SC.sido.some((([n]) => n === get(o.z, "sd"))) ? get(o.z, "sd") : scSidoOf(o.y, o.x);
+  if (!sd) return "배정 학교: 학구도 자료 없음";
+  let pts = [];
+  if (g) {
+   const rr = []; g.ll.forEach((poly => poly.forEach((r => rr.push(r)))));
+   let s = 90, n = -90, w = 180, e = -180; rr.forEach((r => r.forEach((([y, x]) => { if (y < s) s = y; if (y > n) n = y; if (x < w) w = x; if (x > e) e = x; }))));
+   const N = 28; for (let i = 0; i < N; i++) for (let j = 0; j < N; j++) { const y = s + (n - s) * (i + .5) / N, x = w + (e - w) * (j + .5) / N; if (scIn(rr, y, x)) pts.push([ y, x ]); }
+  }
+  const byPt = !pts.length; if (byPt) pts = [ [ o.y, o.x ] ];
+  const [ze, zm, ae, am, P] = await Promise.all([ scZones("e", sd), scZones("m", sd), scAttr("e"), scAttr("m"), scPts() ]);
+  if (!ze || !zm) return "배정 학교: 학구도 자료 없음";
+  const share = (zs => { const c = new Map; pts.forEach((([y, x]) => { const z = zs.find((q => y >= q.bb.s && y <= q.bb.n && x >= q.bb.w && x <= q.bb.e && scIn(q.rings, y, x))); if (z) c.set(z.id, (c.get(z.id) || 0) + 1); })); const t = pts.length; return [ ...c.entries() ].map((([id, v]) => [ id, v / t ])).filter((([, r]) => r >= .05 || c.size === 1)).sort(((a, b) => b[1] - a[1])); });
+  const z2s = new Map; (P && P.elem || []).forEach((r => (r[4] || []).forEach((id => { if (!z2s.has(id)) z2s.set(id, []); z2s.get(id).push(scShort(r[0])); }))));
+  const fmt = (L, nameOf) => !L.length ? "" : L.length === 1 ? nameOf(L[0][0]) : L.map((([id, r]) => nameOf(id) + "(" + Math.round(r * 100) + "%)")).join("·");
+  const eTxt = fmt(share(ze), (id => (z2s.get(id) || []).join("·") || (ae && ae[id] ? ae[id][0] : "?")));
+  const mTxt = fmt(share(zm), (id => am && am[id] ? am[id][0] : "?"));
+  if (!eTxt && !mTxt) return "배정 학교: 학구도 자료 없음";
+  return "배정 초등학교 " + (eTxt || "자료 없음") + " · 중학교 학군 " + (mTxt || "자료 없음") + (byPt ? " (위치 기준)" : "");
+ }
+ function schLine(k) {
+  if (!k) return "";
+  const c = SCS.line.get(k); if (c && c.t !== undefined) return c.t;
+  if (!c) { const o = { t: undefined }; SCS.line.set(k, o); scCalc(k).then((t => { o.t = t; const el = document.getElementById("schLine"); if (el && st.sel === k) el.textContent = t; })).catch((() => { o.t = "배정 학교: 학구도 자료 없음"; })); }
+  return "배정 학교 확인 중…";
+ }
  function sources() {
   const li = [];
   if (BND) Object.values(BND.src).forEach((s => li.push(`구역 테두리: ${esc(s)} — 모양을 바꾸지 않고 지도 좌표 형식만 바꿔 표시했어요.`)));
@@ -3968,8 +4164,9 @@
    document.getElementById("cxcard").classList.remove("on");
    sres.classList.remove("on");
    slopeBubClose();
+   scClick(e);
   }));
-  NV.Event.addListener(map, "idle", (() => { if (SLOPE.on) slopeOver(); }));
+  NV.Event.addListener(map, "idle", (() => { if (SLOPE.on) slopeOver(); if (SCS.e || SCS.m) scDraw(); }));
   NV.Event.addListener(map, "mousemove", slopeHover);
   document.getElementById("map").addEventListener("mousemove", (ev => { SLOPE.mx = ev.clientX; SLOPE.my = ev.clientY; }), { passive: true, capture: true });
   document.getElementById("map").addEventListener("mouseleave", slopeHovHide);
