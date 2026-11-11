@@ -33,7 +33,7 @@
 // 묶음 L52·L53(83단계): 아래 정적 스크립트 주소의 ?v=와 이 표는 build_l52_versions.py가 빌드 때 실제 파일 해시로 채운다(손으로 쓰지 않음).
 // 표는 25평 seed 지연 로딩(loadSeed25)이 실행 중에 쓴다. EARLY_FLAGS_L52는 xlsx 태그(L53)를 쓸지 정하려고 주소 플래그를 먼저 읽는다
 // (applyBundlesFromUrl과 같은 규칙, 로컬 주소에서만: 값이 없으면 모두 켬, 있으면 적힌 묶음만 — 묶음 이름 'L' 포함).
-var ASSET_VERSIONS_L52 = /*L52_VERSIONS*/{"shared.js":"8e8ee813","seedComplexes.js":"7d7e417e","seedChips.js":"70c405ed","m2Series.js":"acc3bcaa","seedComplexes25.js":"25bb9b37","feedback-widget.js":"52cf1fae","station_walk.js":"d1744c95","school_elem.js":"e368c3b0","calc_map.js":"296f1b07","map_light.js":"dff5079b","map_trade_idx.js":"c94b3db1"}/*END_L52_VERSIONS*/;
+var ASSET_VERSIONS_L52 = /*L52_VERSIONS*/{"shared.js":"8e8ee813","seedComplexes.js":"7d7e417e","seedChips.js":"70c405ed","m2Series.js":"acc3bcaa","seedComplexes25.js":"25bb9b37","feedback-widget.js":"52cf1fae","station_walk.js":"d1744c95","school_elem.js":"e368c3b0","calc_map.js":"57640609","map_light.js":"dff5079b","map_trade_idx.js":"c94b3db1"}/*END_L52_VERSIONS*/;
 var EARLY_FLAGS_L52 = (function(){
   var on = { L52: true, L53: true, L86: true, L88: true };   // L86(시세 이력 미루기)은 지도 중심 화면(L85)이 켜져 있을 때만 — L85를 끄면 여기 L86도 false
   try {
@@ -3081,9 +3081,9 @@ function seoulHistoricalAvg(){
 // 라이브는 주소 플래그를 읽지 않으므로 이 기본값이 그대로 동작한다.
 const BUNDLES = { A:false, B:false, C:false, D1:false, D2:false, D3:false, D4:false, E1:true, E2:false, E3:true, F1:true, F2:true, F3:true, F4:true, F5:true, F6:true,
   H1:false, H2:true, H3:true, H4:true, H5:true, H6:true, H7:true,
-  L1:true, L2:true, L3:true, L4:true, L5:true, L6:false, L7:true, L8:true, L9:true, L10:true, L11:true, L12:true, L13:true, L14:true, L15:true, L16:true, L17:true, L18:true, L19:true, L19B:true, L20:true, L22:true, L23:true, L24:true, L25:true, L26:true, L27:!!window.POOL_EXCLUDE_ON, L31:!!window.NEW_NAME_RULE_ON, L32:true, L33:true, L34:true, L37:true, L28:true, L38:true, L40:true, L39:true, L41:true, L42:true, L43:true, L44:true, L45:true, L46:true, L47:true, L49:true, L48:true, L50:true, L51:true, L52:true, L53:true, L54:true, L55:true, L56:true, L57:true, L58:true, L59:true, L59_DND:true, L59_INFOCARD:true, L59_STATION:true, L59_SCHOOL:true, L59_FAVSEARCH:true, L60:true, L60_REL:false, L60_WHY:false, L60_NOTE:true, L61:true, L64:true, L64_LINK:true, L64_NEWBUILD:false, L65:true, L69:true, L70:true, L71:true, L74:true, L75:true, L76:true, L77:true, L78:true, L79:true, L80:true, L81:true, L82:true, L84:true, L85:true, L85_CROSS:true, L85_LEFT:true, L85_INFO:true, L85_LBL:true, L85_FULL:true, L86:(typeof EARLY_FLAGS_L52 === 'undefined' || !!EARLY_FLAGS_L52.L86), L87:true, L88:true, L88_EMBED:true, L88_SHARE:true, L89:true, L84_RT:true, L84_SC:true, L91:true, L92:true, L93:true, L94:true, L95:true, L96:true, L97:true, L97B:true, L98:true, L98H:true, L98B:true, L35:true, L36:true, L30:true, L29:true, L29R:false, L90N:true, L90G:true, L98J:true, L99A:true, K1:false, K2:true, K4:false };
+  L1:true, L2:true, L3:true, L4:true, L5:true, L6:false, L7:true, L8:true, L9:true, L10:true, L11:true, L12:true, L13:true, L14:true, L15:true, L16:true, L17:true, L18:true, L19:true, L19B:true, L20:true, L22:true, L23:true, L24:true, L25:true, L26:true, L27:!!window.POOL_EXCLUDE_ON, L31:!!window.NEW_NAME_RULE_ON, L32:true, L33:true, L34:true, L37:true, L28:true, L38:true, L40:true, L39:true, L41:true, L42:true, L43:true, L44:true, L45:true, L46:true, L47:true, L49:true, L48:true, L50:true, L51:true, L52:true, L53:true, L54:true, L55:true, L56:true, L57:true, L58:true, L59:true, L59_DND:true, L59_INFOCARD:true, L59_STATION:true, L59_SCHOOL:true, L59_FAVSEARCH:true, L60:true, L60_REL:false, L60_WHY:false, L60_NOTE:true, L61:true, L64:true, L64_LINK:true, L64_NEWBUILD:false, L65:true, L69:true, L70:true, L71:true, L74:true, L75:true, L76:true, L77:true, L78:true, L79:true, L80:true, L81:true, L82:true, L84:true, L85:true, L85_CROSS:true, L85_LEFT:true, L85_INFO:true, L85_LBL:true, L85_FULL:true, L86:(typeof EARLY_FLAGS_L52 === 'undefined' || !!EARLY_FLAGS_L52.L86), L87:true, L88:true, L88_EMBED:true, L88_SHARE:true, L89:true, L84_RT:true, L84_SC:true, L91:true, L92:true, L93:true, L94:true, L95:true, L96:true, L97:true, L97B:true, L98:true, L98H:true, L98B:true, L35:true, L36:true, L30:true, L29:true, L29R:false, L90N:true, L90G:true, L98J:true, L99A:true, L99C:true, L99B:true, K1:false, K2:true, K4:false };
 const BUNDLE_GROUPS = { D:['D1','D2','D3','D4'], E:['E1','E2','E3'], F:['F1','F2','F3','F4','F5','F6'], H:['H1','H2','H3','H4','H5','H6','H7'],
-  L:['L1','L2','L3','L4','L5','L6','L7','L8','L9','L10','L11','L12','L13','L14','L15','L16','L17','L18','L19','L19B','L20','L22','L23','L24','L25','L26','L27','L29','L30','L31','L32','L33','L34','L37','L35','L36','L28','L38','L40','L39','L41','L42','L43','L44','L45','L46','L47','L49','L48','L50','L51','L52','L53','L54','L55','L56','L57','L58','L59','L60','L61','L64','L65','L69','L70','L71','L74','L75','L76','L77','L78','L79','L80','L81','L82','L84','L85','L86','L87','L88','L89','L91','L92','L93','L94','L95','L96','L97','L97B','L98','L98H','L98B','L90N','L90G','L98J','L99A'], K:['K1','K2','K4'] };
+  L:['L1','L2','L3','L4','L5','L6','L7','L8','L9','L10','L11','L12','L13','L14','L15','L16','L17','L18','L19','L19B','L20','L22','L23','L24','L25','L26','L27','L29','L30','L31','L32','L33','L34','L37','L35','L36','L28','L38','L40','L39','L41','L42','L43','L44','L45','L46','L47','L49','L48','L50','L51','L52','L53','L54','L55','L56','L57','L58','L59','L60','L61','L64','L65','L69','L70','L71','L74','L75','L76','L77','L78','L79','L80','L81','L82','L84','L85','L86','L87','L88','L89','L91','L92','L93','L94','L95','L96','L97','L97B','L98','L98H','L98B','L90N','L90G','L98J','L99A','L99C','L99B'], K:['K1','K2','K4'] };
 // 묶음 L46(69단계): 그래프 점선 모양 통일 — 모든 점선을 "선도단지 대비 적정가" 선(FAIR_LINE_STYLE.borderDash)과 같은 긴 점선으로.
 // 촘촘한 점("좁쌀")·점-선 섞인 패턴을 없앤다. 새 점선은 항상 dashL46(예전 값)을 쓴다 — L46을 끄면 예전 값 그대로.
 const DASH_L46 = [5, 4];
@@ -12317,6 +12317,7 @@ function favLocationTextL59(seed){
 //         경기·인천은 자료가 없어 재건축 대상(25년+)이면 "재건축 · 자료 준비 중".
 // 분양 정보: 청약홈 243곳 + 기사 68곳, 숫자는 원자료 그대로(반올림·환산 없음), 값이 없는 줄은 숨김. 판정·계산과 무관(글자 줄만).
 const L99A_URL = { jaegun: '지도자료_202611/jaegun_l99a_1110.json', daeji: '지도자료_202611/daeji_l99_1110.json', bunyang: '지도자료_202611/bunyang_l99_1111b.json', academy: '지도자료_202611/academy_l99_1110c.json', elem: '지도자료_202611/elem_multi_l99_1111.json' };   // 학원가 = 분석 탭 1110c 판
+if (BUNDLES.L99C) L99A_URL.jgtab = '지도자료_202611/jaegun_tab_l99c_1111_v4.json';   // 묶음 L99C: 재건축 탭 자료(단지 정보 한 줄 '진행 정보 준비 중' 판단에도 씀)
 const L99A_AGE = 25;   // (서울 재건축 자료 대상 25년+, 참고용)
 const L99A_AGE_GG = 28;   // 11-11 대표님 결정 4: 경기·인천 "재건축 · 자료 준비 중"은 준공 28년 이상만(계산기 다른 재건축 안내와 같은 28년)
 const L99A_TIP_REBUILD = '진행 단계는 서울시 정비사업 정보몽땅의 사업장 진행단계, 괄호 날짜는 추진경과의 가장 최근 인가 기록(년.월). 대지지분은 정비계획 고시의 정비구역 면적 ÷ 세대수(단지 평균 추정), 추정 비례율은 같은 고시의 추정값(관리처분 확정값 아님).';
@@ -12324,14 +12325,24 @@ let l99aStateL99A = 'idle'; const L99A = {};
 function loadL99A(){
   if (!BUNDLES.L99A || l99aStateL99A !== 'idle' || typeof fetch !== 'function') return;
   l99aStateL99A = 'loading';
-  Promise.all(Object.keys(L99A_URL).map(k => { const p = fetch(L99A_URL[k]).then(r => { if (!r.ok) throw new Error(r.status); return r.json(); }).then(j => { L99A[k] = j; }); return k === 'academy' || k === 'elem' ? p.catch(() => { L99A[k] = null; }) : p; }))   // 학원가 파일만 못 받으면 그 줄만 빠짐
+  Promise.all(Object.keys(L99A_URL).map(k => { const p = fetch(L99A_URL[k]).then(r => { if (!r.ok) throw new Error(r.status); return r.json(); }).then(j => { L99A[k] = j; }); return k === 'academy' || k === 'elem' || k === 'jgtab' ? p.catch(() => { L99A[k] = null; }) : p; }))   // 학원가 파일만 못 받으면 그 줄만 빠짐
     .then(() => { l99aStateL99A = 'loaded'; try { refreshDiagInfoCardL59(); } catch (e) {} })
     .catch(() => { l99aStateL99A = 'error'; });
 }
 const ymDotL99A = (s) => s ? String(s).slice(0, 7).replace('-', '.') : '';
 const tipL99A = (t) => '<span class="info-icon'+(BUNDLES.L17 ? ' tip-unified' : '')+'" tabindex="0" data-tip="'+esc(t)+'">ⓘ</span>';   // L17 통일 ⓘ: 닫혀 있을 땐 자리 차지 없음(폰 가로 넘침 0), 누르면 화면 안 자리
 // 재건축 줄: [글자, html] 또는 null
+// 묶음 L99C: 재건축 한 줄 — 재건축 탭 자료가 있는 단지는 그대로, 자료가 없는 재건축 대상 단지(28년 이상, 또는 서울 재건축 자료에 있으나 단계 정보 없음)는 "재건축 · 진행 정보 준비 중"
+const L99C_AGE = 28;
+function jgHasL99C(e){ return !!(e && e.상태 !== '숨김' && (e.지금단계 || Object.values(e.단계날짜 || {}).some(Boolean) || e.평균대지지분 || e.추정비례율 || e.계획세대수 || e.용적률 || e.선도지구 || e.세대구성 || e.시공사)); }
 function rebuildRowL99A(id, seed){
+  const r = rebuildRowL99ABase(id, seed); if (!BUNDLES.L99C || !L99A.jgtab || !id || !seed || id[0] === '_') return r;
+  const T = L99A.jgtab, e = Object.prototype.hasOwnProperty.call(T, id) ? T[id] : null; if (jgHasL99C(e)) return r;
+  const age = complexAge(seed.builtYear), J = L99A.jaegun || {}, j = Object.prototype.hasOwnProperty.call(J, id) ? J[id] : null;
+  if ((age != null && age >= L99C_AGE) || (j && j.상태 !== '숨김' && r)) return ['재건축 · 진행 정보 준비 중', '<span class="l99a-l">재건축 · 진행 정보 준비 중</span>'];
+  return r;
+}
+function rebuildRowL99ABase(id, seed){
   if (!BUNDLES.L99A || l99aStateL99A !== 'loaded' || !id || !seed) return null;
   const J = L99A.jaegun || {}, D = L99A.daeji || {}, e = Object.prototype.hasOwnProperty.call(J, id) && id[0] !== '_' ? J[id] : null;
   if (!e){
