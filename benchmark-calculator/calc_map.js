@@ -78,11 +78,17 @@
   const l98b = () => { try { return !!(BUNDLES.L98B && l98()); } catch (e) { return false; } };
   // 묶음 L99A(11-10): 1억 미만 "9,800만" · [학원가] 필터(분석 탭 1110c 등급) · 행정구역 경계 선 — 끄면 L98b 지도 그대로
   const l99a = () => { try { return !!(BUNDLES.L99A && l98b()); } catch (e) { return false; } };
+  const l99b = () => { try { return !!(BUNDLES.L99B && l99a()); } catch (e) { return false; } };   // 묶음 L99B(계산기 7차): [개발 호재]·[경사도] + 공공 색·학군 출처 줄(재개발 지도와 같게)
+  // 공용 개발 호재 = 두 지도 공용 폴더(재개발 지도 46차 v2, 읽기만) · 경사도 = 재개발 지도 h10c 자료(라이브 /redevelopment-map/ 그 자리에서 읽기만). 판(v)은 재개발 지도가 쓰는 값과 같게
+  const L99B_MAP = { shared: '../map-shared/', hjJs: 'dev_hojae_v2.js', hjV: '20261110-46', slopeJs: '지도_경사.js', slopeDir: '경사도', slopeV: '20261109-1955', hjShow: false };
+  const l99c = () => { try { return !!(BUNDLES.L99C && l99a()); } catch (e) { return false; } };   // 묶음 L99C(11-11): 학원 덩어리 층·패널 [재건축] 탭
   const L99A_MAP = { acad: '지도자료_202611/academy_l99_1110c.json', sgg: '지도자료_202611/sgg_tol10m.geojson', emd: '지도자료_202611/emd_tol10m.geojson', emdZoom: 14,   // 법정동 선은 14부터(첫 지도 확대 13에서 1.3MB를 바로 받지 않게)
     src: '행정구역 경계: 국토교통부 법정구역정보(2026.10.09 기준)',
     sggLabZoom: 10, labMax: 220,   // 11-10 피드백: 시군구 이름표 확대 10~13, 14부터 법정동 이름표(같은 화면 이름표 최대 개수)
     acadFilter: false,   // 11-10 피드백 2: [학원가▾] 필터 뺌(코드는 둠, true면 다시 보임)
-    acadZone: '지도자료_202611/academy_zone_1110.geojson', azLabMin: .25, azLabZoom: 11, azShow: false };   // 11-11 배포 수정 3: [학원가] 단추·층은 이번 배포에서 숨김(L99c 새 방식)   // 학원 밀집 영역(분석 탭 1110, 대형 35·학원가 170) — 0.25㎢ 미만 조각은 이름표 없이 칠만, 이름표는 확대 11부터
+    acadZone: '지도자료_202611/academy_zone_1110.geojson', azLabMin: .25, azLabZoom: 11, azShow: false,
+    acadCluster: '지도자료_202611/academy_cluster_1111.geojson', acadRegion: '지도자료_202611/academy_region_1111.geojson', acSmallZoom: 14, acLabZoom: 12,   // 묶음 L99C: 학원 덩어리(분석 탭 1111) — 동네 학원 밀집은 확대 14부터, 이름표는 12부터
+    jgTab: '지도자료_202611/jaegun_tab_l99c_1111_v4.json', jgAge: 28 };   // 묶음 L99C: 재건축 탭 자료·나이 기준   // 11-11 배포 수정 3: [학원가] 단추·층은 이번 배포에서 숨김(L99c 새 방식)   // 학원 밀집 영역(분석 탭 1110, 대형 35·학원가 170) — 0.25㎢ 미만 조각은 이름표 없이 칠만, 이름표는 확대 11부터
   const wonAx99 = (v) => Math.abs(v) >= 1 ? v + '억' : v ? Math.round(v * 10000).toLocaleString('ko-KR') + '만' : '0';   // 억 단위 값 눈금
   let pick98b = null;   // 판정 평형이 아닌 평형을 고른 때만 { id, lo, hi }(전용㎡ 반올림 값)
   let elemFrom98b = null;   // 초등 학구 상자를 단지 정보 줄에서 연 경우 그 단지 id(단지 학군 밖 학교 "다른 학군" 표시용)
@@ -385,6 +391,64 @@
   @media (max-width:767px){ .cm84-sv{right:0;bottom:45%} .cm84-map.sv98b .cm84-vbtns{display:none} .cm84-svh{top:56px;white-space:normal;max-width:80%;text-align:center} }
   /* 묶음 L98B: 거리 재기 — 위 가운데 안내 띠([마지막 점 지우기][전체 지우기]), 점·선·구간 길이·총 길이 */
   .cm84.vb98b #cm84Ms[aria-pressed="true"]{background:#2B8A3E;border-color:#2B8A3E;color:#fff}
+  /* 묶음 L99B: [개발 호재]·[경사도] — 단추 켬 색·상자·범례(재개발 지도 h10c·46차와 같은 값) */
+  .cm84.vb98b #cm84Hj[aria-pressed="true"]{background:#0B7285;border-color:#0B7285;color:#fff}
+  .cm84.vb98b #cm84Slope[aria-pressed="true"]{background:#2B8A3E;border-color:#2B8A3E;color:#fff}
+  .hj99b .cm84-bb,.hj99b .cm84-zl,.hj99b .cm84-dg{display:none!important}
+  .hj99b svg path{fill-opacity:.06!important}
+  .cm84-scc.cm84-hjc99{left:auto;right:96px;top:12px;width:320px;max-height:calc(100% - 30px);z-index:268;font-size:12.5px;line-height:1.55}
+  .cm84-scc.cm84-hjc99:not(.on){display:none}
+  .cm84-hjc99 .scs{margin:2px 0;font-size:12.5px}
+  .cm84-hjlg99{position:absolute;left:10px;top:178px;z-index:262;width:min(300px,calc(100% - 130px));max-height:calc(100% - 260px);overflow:auto;background:rgba(255,255,255,.96);border:1px solid var(--cm-line);border-radius:10px;padding:8px 10px;font-size:11.5px;line-height:1.45;box-shadow:0 4px 14px rgba(0,0,0,.12)}
+  .cm84-slg99{position:absolute;left:10px;bottom:30px;z-index:261;background:rgba(255,255,255,.95);border:1px solid var(--cm-line);border-radius:10px;padding:8px 10px 6px;font-size:11.5px;line-height:1.35;box-shadow:0 4px 14px rgba(0,0,0,.12);width:min(330px,calc(100% - 24px))}
+  .cm84-slg99 .t{font-weight:700;font-size:12px}
+  .cm84-slg99 .sw{display:flex;align-items:center;gap:6px;margin-top:3px;white-space:nowrap}.cm84-slg99 .sw i{flex:none;width:20px;height:12px;border-radius:3px;border:1px solid rgba(0,0,0,.12)}.cm84-slg99 .sw b{font-weight:700;min-width:58px}.cm84-slg99 .sw span{color:var(--cm-sub)}
+  .cm84-slg99 .src{margin-top:4px;font-size:10.5px;color:var(--cm-faint);line-height:1.4}.cm84-slg99 .src summary{cursor:pointer}
+  .cm84-shov99{position:fixed;z-index:1500;pointer-events:none;background:#fff;border:1px solid #CBD5E1;border-radius:8px;padding:5px 9px;font-size:12.5px;box-shadow:0 4px 12px rgba(0,0,0,.15);white-space:nowrap;display:none}.cm84-shov99.on{display:block}
+  .cm84-sbub99{background:#fff;border:1px solid #CBD5E1;border-radius:9px;padding:6px 9px;font-size:12.5px;box-shadow:0 4px 12px rgba(0,0,0,.15);white-space:nowrap}
+  @media (max-width:767px){ .cm84-scc.cm84-hjc99{right:84px;top:118px;width:60%;max-height:30%} .cm84-hjlg99{left:10px;top:auto;bottom:96px;width:calc(100% - 110px);max-height:38%} .cm84-slg99{bottom:46px} }
+  /* 묶음 L99C: 학원 덩어리 이름표·말풍선, [재건축] 탭(PC 오른쪽 칸 · 폰 위쪽 탭) */
+  .cm84-acl99{position:absolute;left:0;top:0;transform:translate(-50%,-50%);white-space:nowrap;pointer-events:none;border-radius:999px;padding:1px 8px;font-size:11px;font-weight:700;line-height:1.5}
+  .cm84-acl99.g3{background:#E03131;color:#fff;border:1px solid #E03131;font-size:11.5px;font-weight:800}
+  .cm84-acl99.g2{background:rgba(255,255,255,.92);color:#C2410C;border:1px solid #F76707}
+  .cm84-acl99.g1{background:rgba(255,255,255,.85);color:#8A6100;border:1px solid #FAB005;font-weight:600;font-size:10.5px}
+  .cm84-actip99{position:fixed;z-index:1500;pointer-events:none;background:#fff;border:1px solid #F5B86B;border-radius:8px;padding:5px 9px;font-size:12.5px;line-height:1.5;box-shadow:0 4px 12px rgba(0,0,0,.15);white-space:nowrap;display:none;color:#1F2937}.cm84-actip99.on{display:block}
+  .cm84-actip99 small{color:#868E96}
+  .cm84-actip99 .sc{display:block;white-space:normal;max-width:300px;line-height:1.45}
+  .cm84-acl99.rg{background:#fff;color:#C92A2A;border:2px solid #E03131;font-size:12.5px;font-weight:800;padding:2px 10px}
+  .cm84-azlg99 .t2{margin-top:6px;font-weight:700;font-size:11.5px}.cm84-azlg99 .t2 small{font-weight:500;color:var(--cm-faint)}
+  .cm84-azlg99 .rgsw{display:flex;flex-wrap:wrap;gap:3px 10px;margin-top:3px}.cm84-azlg99 .rgsw span{display:inline-flex;align-items:center;gap:4px;white-space:nowrap}.cm84-azlg99 .rgsw i{flex:none;width:16px;height:10px;border-radius:3px;border:1px solid}
+  .cm84-azlg99 .sc2{margin-top:5px;font-size:10.5px;line-height:1.45;color:var(--cm-sub)}
+  .cm84-ph .jg99b{border:1px solid #1C7ED6;background:#fff;color:#1C7ED6;border-radius:9px;font:inherit;font-size:12.5px;font-weight:700;padding:4px 9px;cursor:pointer;white-space:nowrap}
+  .cm84-ph .jg99b[aria-pressed="true"]{background:#1C7ED6;color:#fff}
+  .cm84-ph .jg99b[hidden]{display:none}
+  .cm84-tabs91 button[hidden]{display:none}
+  .cm84-split91 > .cm84-jg99{flex:1 1 auto;min-width:0;display:flex;flex-direction:column;background:#fff;overflow:auto}
+  .cm84-split91 > .cm84-jg99[hidden]{display:none}
+  .cm84-panel.jgs99 .cm84-split91 > .cm84-rt,.cm84-panel.jgs99 .cm84-split91 > .cm84-tw94{display:none}
+  .cm84-jg99 .jg99-h{display:flex;align-items:center;gap:6px;padding:10px 12px;border-bottom:1px solid var(--cm-line);font-size:14px}
+  .cm84-jg99 .jg99-h .i99{border:0;background:none;font:inherit;font-size:13px;color:var(--cm-faint);cursor:pointer;padding:0 2px}
+  .cm84-jg99 .jg99-x{margin-left:auto;border:1px solid var(--cm-line);background:#fff;border-radius:9px;font:inherit;font-size:12.5px;font-weight:700;padding:5px 10px;cursor:pointer}
+  .cm84-jg99 .jg99-b{padding:12px}
+  .cm84-jg99 .jg99-now{font-size:13px;color:var(--cm-sub);margin-bottom:8px}.cm84-jg99 .jg99-now b{color:#1C7ED6;font-size:15px}
+  .cm84-jg99 .jg99-bar{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px 4px}
+  .cm84-jg99 .jg99-bar li{display:flex;flex-direction:column;align-items:center;gap:2px;text-align:center;min-width:0}
+  .cm84-jg99 .jg99-bar li b{display:block;width:100%;box-sizing:border-box;border-radius:6px;padding:7px 2px;font-size:12px;white-space:nowrap;font-weight:700;word-break:keep-all;line-height:1.25;background:#F1F3F5;color:#868E96;border:1px solid #E9ECEF}
+  .cm84-jg99 .jg99-bar li.dn b{background:#D0EBFF;color:#1864AB;border-color:#A5D8FF}
+  .cm84-jg99 .jg99-bar li.cur b{background:#1C7ED6;color:#fff;border-color:#1C7ED6;box-shadow:0 0 0 2px rgba(28,126,214,.25)}
+  .cm84-jg99 .jg99-bar li span{font-size:10.5px;color:var(--cm-sub);font-weight:600}
+  .cm84-jg99 .jg99-n{margin-top:6px;font-size:11px;color:var(--cm-faint)}
+  .cm84-jg99 .jg99-r{margin:12px 0 0;display:grid;grid-template-columns:1fr;gap:6px}
+  .cm84-jg99 .jg99-r div{display:flex;gap:6px;align-items:baseline;font-size:13px;min-width:0}.cm84-jg99 .jg99-r dt{color:var(--cm-faint);flex:0 0 auto}.cm84-jg99 .jg99-r dd{margin:0;font-weight:700;color:var(--cm-ink);min-width:0;white-space:nowrap}
+  .cm84-jg99 .jg99-r dd small{font-weight:500;color:var(--cm-faint)}
+  .cm84-jg99 .jg99-src{margin-top:10px;font-size:11px;line-height:1.55;color:var(--cm-sub);background:#F8F9FA;border-radius:8px;padding:7px 9px}
+  .cm84-jg99 .jg99-w{color:var(--cm-faint);font-weight:500}
+  .cm84-jg99 .jg99-gs{margin-top:14px;padding-top:10px;border-top:1px solid var(--cm-line);font-size:12px;line-height:1.65;color:var(--cm-sub)}.cm84-jg99 .jg99-gs a{color:#1C7ED6;font-weight:700;white-space:nowrap}
+  @media (max-width:767px){
+    .cm84-panel.l93[data-t91="jg"] .cm84-split91 > .cm84-body,.cm84-panel.l93[data-t91="jg"] .cm84-split91 > .cm84-rt,.cm84-panel[data-t91="jg"] .cm84-split91 > .cm84-body,.cm84-panel[data-t91="jg"] .cm84-split91 > .cm84-rt,.cm84-panel[data-t91="jg"] .cm84-split91 > .cm84-tw94{display:none}
+    .cm84-panel:not([data-t91="jg"]) .cm84-split91 > .cm84-jg99{display:none}
+    .cm84-ph .jg99b{display:none}
+  }
   /* 묶음 L99A(11-10 피드백): [경계]·[학원가] 켬 색, 경계 이름표·말풍선, 학원가 이름표, 안내 띠, 경계 출처 ⓘ */
   .cm84.vb98b #cm84Bd[aria-pressed="true"]{background:#495057;border-color:#495057;color:#fff}
   .cm84.vb98b #cm84Az[aria-pressed="true"]{background:#E67700;border-color:#E67700;color:#fff}
@@ -672,6 +736,7 @@
     const se = sec.querySelector('#cm84ScE'), sm = sec.querySelector('#cm84ScM'); if (se) se.addEventListener('click', () => toggleSchool('elem')); if (sm) sm.addEventListener('click', () => toggleSchool('mid'));   // 지도 1-3
     const hb = sec.querySelector('#cm84Hide'); if (hb) hb.addEventListener('click', toggleHideCx);   // 묶음 L92
     if (l98b()) svWire98b(sec);   // 묶음 L98B: [거리뷰] [지적도]
+    if (l99b()) vbWire99b(sec);   // 묶음 L99B: [개발 호재] [경사도]
     if (l99a()) vbWire99a(sec);   // 묶음 L99A: [경계] [학원가] · [거리 재기]
     wireMore();
   }
@@ -840,7 +905,7 @@
     }
     window.CALC_MAP_L84.last = { zoom: zm, shown: marks.length, info, flt: fltCount(), ms: Math.round(performance.now() - t0), W: mapEl.clientWidth, H: mapEl.clientHeight };
   }
-  function drawAll(){ drawCx(); drawZones(); if (SC.on()) drawSchool(); if (l99a()){ drawBounds99(); azDraw99(); } }   // 지도 1-3: 학구도
+  function drawAll(){ drawCx(); drawZones(); if (SC.on()) drawSchool(); if (l99a()){ drawBounds99(); azDraw99(); if (l99c()) azDraw99c(); } }   // 지도 1-3: 학구도
 
   // ---------- 묶음 L88: 연식·세대수 필터 ----------
   // 연식 = 계산기 나이 규칙(L76: seed 시세 기준월의 연도 − 준공연도). 연식은 여러 개(어느 하나라도 맞으면), 세대수는 하나.
@@ -1269,8 +1334,10 @@
   //   그 자리 폭에 맞춰 그려지므로 왼쪽 진단 화면의 배치는 흔들리지 않는다. 닫으면 두 번째 계산기는 지운다(메모리)
   function setTab94(k){
     if (k !== 'tw' && panel.classList.contains('tws94')) closeTwin94(true);
+    if (k !== 'jg' && panel.classList.contains('jgs99')) closeJg99c(true);   // 묶음 L99C
     panel.dataset.t91 = k; panel.querySelectorAll('[data-t91]').forEach(x => x.setAttribute('aria-selected', String(x.dataset.t91 === k)));
     if (k === 'tw') openTwin94();
+    if (k === 'jg') openJg99c();   // 묶음 L99C
     if (k === 'rt' && rtChart) setTimeout(() => { try { rtChart.resize(); } catch (e) {} }, 30);
   }
   function twinCount94(){ try { const d = panel.querySelector('.cm84-body iframe').contentDocument; return d.querySelector('[data-twin-l87]') ? 1 : 0; } catch (e) { return 0; } }
@@ -1340,11 +1407,12 @@
     panel.dataset.id = it.id; panel.dataset.p = p;
     recordRecent(it.id, p);
     panel.classList.remove('twv');
-    const L91 = l91(); panel.classList.toggle('l91', L91); panel.classList.toggle('l93', l93()); panel.classList.toggle('l94', l94()); panel.classList.remove('tws94'); panel.dataset.t91 = 'diag';
+    const L91 = l91(); panel.classList.toggle('l91', L91); panel.classList.toggle('l93', l93()); panel.classList.toggle('l94', l94()); panel.classList.remove('tws94'); panel.classList.remove('jgs99'); JG.open = false; panel.dataset.t91 = 'diag';
     if (L91){   // 묶음 L91: PC = 저평가 진단(왼쪽)·실거래(오른쪽) 2칸, 폰 = 위쪽 탭 [저평가 진단 | 실거래](기본 저평가). 패널 안 계산기는 다 그려질 때까지 가림
-      panel.innerHTML = headCx(it, p, url) + '<div class="cm84-tabs91" role="tablist"><button type="button" role="tab" data-t91="diag" aria-selected="true">저평가 진단</button><button type="button" role="tab" data-t91="rt" aria-selected="false">실거래</button>' + (l94() ? '<button type="button" role="tab" data-t91="tw" aria-selected="false">쌍둥이</button>' : '') + '</div>'
-        + '<div class="cm84-split91"><div class="cm84-body">' + (l93() ? head93('kb') : '') + '<div class="ld">우리 단지 진단하기를 불러오는 중이에요…</div></div>' + (RT.on() ? rtHtmlShell() : '') + (l94() ? '<div class="cm84-tw94" hidden></div>' : '') + (l92() && RT.on() ? '<button type="button" class="rtfold92">◀</button>' : '') + '</div>';
+      panel.innerHTML = headCx(it, p, url) + '<div class="cm84-tabs91" role="tablist"><button type="button" role="tab" data-t91="diag" aria-selected="true">저평가 진단</button><button type="button" role="tab" data-t91="rt" aria-selected="false">실거래</button>' + (l94() ? '<button type="button" role="tab" data-t91="tw" aria-selected="false">쌍둥이</button>' : '') + (l99c() ? '<button type="button" role="tab" data-t91="jg" aria-selected="false" hidden>재건축</button>' : '') + '</div>'
+        + '<div class="cm84-split91"><div class="cm84-body">' + (l93() ? head93('kb') : '') + '<div class="ld">우리 단지 진단하기를 불러오는 중이에요…</div></div>' + (RT.on() ? rtHtmlShell() : '') + (l94() ? '<div class="cm84-tw94" hidden></div>' : '') + (l99c() ? '<div class="cm84-jg99" hidden></div>' : '') + (l92() && RT.on() ? '<button type="button" class="rtfold92">◀</button>' : '') + '</div>';
       wireRtFold();   // 묶음 L92
+      if (l99c()) jgWire99c(it);   // 묶음 L99C: 재건축 탭 보일지
       panel.querySelectorAll('[data-t91]').forEach(b => b.onclick = () => { if (l94()){ setTab94(b.dataset.t91); return; } panel.dataset.t91 = b.dataset.t91; panel.querySelectorAll('[data-t91]').forEach(x => x.setAttribute('aria-selected', String(x === b))); if (b.dataset.t91 === 'rt' && rtChart) setTimeout(() => { try { rtChart.resize(); } catch (e) {} }, 30); });
     } else
     panel.innerHTML = (l87() ? headCx(it, p, url) : panelHead('단지', '', it.name + (p === 25 ? '(25평)' : ''), (fullOn() ? '<button type="button" class="bk">← 지도로</button>' : '') + (itemsById.has(it.id) ? '' : '<span class="nomap">지도 위치 없음</span>') + `<a href="${url}" target="_blank" rel="opener">계산기 새 탭으로 열기</a>` + (fullOn() ? '<button type="button" class="fs">⛶ 전체 화면으로 보기</button>' : '')))
@@ -1398,6 +1466,7 @@
     const rc = rentChip98b(it), h2 = `<h2 title="${esc(it.name)}">${esc(it.name + (p === 25 ? '(25평)' : ''))}</h2>`;   // 배지가 있으면 이름과 한 묶음(폰은 이름 아래 줄)
     return `<div class="cm84-ph cx"><span class="ty">단지</span>${l97() && back97.length ? '<button type="button" class="bk97" title="바로 전에 보던 단지로">← 이전 단지</button>' : ''}${rc ? '<span class="nm98">' + h2 + rc + '</span>' : h2}`
       + `<button type="button" class="ad" disabled title="비교 단지 추가">➕<span class="tx"> 비교 단지</span></button>`
+      + (l99c() ? '<button type="button" class="jg99b" hidden aria-pressed="false" title="재건축 진행 단계·대지지분">🏗 재건축</button>' : '')   // 묶음 L99C(PC)
       + (fullOn() ? '<button type="button" class="bk">← 지도로</button>' : '') + (itemsById.has(it.id) ? '' : '<span class="nomap">' + (l97() ? '지도 위치 없음' : '위치 없음') + '</span>')
       + `<a href="${url}" target="_blank" rel="opener">새 탭</a>`
       + (fullOn() ? '<button type="button" class="fs" title="전체 화면으로 보기">⛶<span class="tx"> 전체 화면</span></button>' : '')
@@ -1955,13 +2024,13 @@
   }
   function vbWire99a(sec){
     const vb = sec.querySelector('.cm84-vbtns'); if (!vb) return;
-    const html = (L99A_MAP.azShow ? '<button type="button" id="cm84Az" aria-pressed="false">학원가</button>' : '') + '<button type="button" id="cm84Bd" aria-pressed="false">경계</button>';   // 최종 지시 3: [중학] 다음 [학원가], 그다음 [경계]
+    const html = (L99A_MAP.azShow || l99c() ? '<button type="button" id="cm84Az" aria-pressed="false">학원가</button>' : '') + '<button type="button" id="cm84Bd" aria-pressed="false">경계</button>';   // 최종 지시 3: [중학] 다음 [학원가], 그다음 [경계]
     const at = vb.querySelector('#cm84ScM') || vb.querySelector('#cm84Zone');
     if (at) at.insertAdjacentHTML('afterend', html); else vb.insertAdjacentHTML('afterbegin', html);
-    mapEl.insertAdjacentHTML('beforeend', '<div class="cm84-bdtip99" id="cm84BdTip99" role="tooltip"></div><div class="cm84-toast99" id="cm84Toast99" role="status" hidden></div><div class="cm84-azlg99" id="cm84AzLg99" hidden></div>');
+    mapEl.insertAdjacentHTML('beforeend', '<div class="cm84-bdtip99" id="cm84BdTip99" role="tooltip"></div><div class="cm84-toast99" id="cm84Toast99" role="status" hidden></div><div class="cm84-azlg99" id="cm84AzLg99" hidden></div><div class="cm84-actip99" id="cm84AcTip99" role="tooltip"></div>');
     vb.querySelector('#cm84Bd').addEventListener('click', () => bdSet99(!BD.on));
-    if (L99A_MAP.azShow) vb.querySelector('#cm84Az').addEventListener('click', azToggle99);
-    const i = VB98.findIndex(x => x[0] === '#cm84Hide'), add = [['#cm84Az', '학원가', '학원가(학원이 몰린 곳)'], ['#cm84Bd', '경계', '행정구역 경계(시군구·법정동)']].filter(x => L99A_MAP.azShow || x[0] !== '#cm84Az');
+    if (L99A_MAP.azShow || l99c()) vb.querySelector('#cm84Az').addEventListener('click', l99c() ? azToggle99c : azToggle99);   // 묶음 L99C: 새 덩어리 층
+    const i = VB98.findIndex(x => x[0] === '#cm84Hide'), add = [['#cm84Az', '학원가', '학원가(학원이 몰린 곳)'], ['#cm84Bd', '경계', '행정구역 경계(시군구·법정동)']].filter(x => L99A_MAP.azShow || l99c() || x[0] !== '#cm84Az');
     VB98.splice(i < 0 ? VB98.length : i, 0, ...add);
     const ms = VB98.find(x => x[0] === '#cm84Ms'); if (ms) ms[1] = '거리 재기';   // 대표님 피드백 3: [거리] → [거리 재기]
     const src = root.querySelector('#cm84Bsrc99 .i99'); if (src) src.addEventListener('click', () => toast99(L99A_MAP.src));
@@ -1973,6 +2042,384 @@
     mapEl.addEventListener('mouseleave', bdHide99);
     ['mouseout', 'dragstart', 'zoom_changed'].forEach(k => NV.Event.addListener(map, k, bdHide99));
     NV.Event.addListener(map, 'click', (e) => { if (MS98.on || SV98.on) return; bdTap99(e); });
+  }
+  // ---- 묶음 L99C(11-11 대표님 결정): [학원가] 새 방식 = 학원가(분석 탭 덩어리_전체_1111, 862곳) ----
+  //   학원가마다 실제 모양(점 50m 둥글게 합친 범위) + 이름표 "길음역 · 34곳", 색은 등급별(대형 학원가 진하게 · 학원가 중간 · 동네 학원 밀집 옅게)
+  //   말풍선(PC 마우스 올림·누름, 폰 누름) "34곳 · 학원가 수준 / 참고: 대치(한티역) 1,120곳". 확대 13 이하는 대형·학원가만, 14부터 동네 학원 밀집까지
+  //   처음 화면에서는 받지 않고 [학원가]를 켤 때만 받음. 등급 문턱(100·30·10곳)은 분석 탭 잠정안
+  const AC = { on: false, d: null, ld: null, polys: new Map(), labs: [], ref: null, tip: null, rg: null, rgPolys: new Map(), rgLabs: [], rgList: [] };
+  const AC_RG = [[1000, '#A51111'], [500, '#E03131'], [300, '#FF6B6B'], [0, '#FFA8A8']];   // 권역 합계 규모별 색(진한 빨강→연한 빨강)
+  const rgColor99c = (n) => (AC_RG.find(r => n >= r[0]) || AC_RG[3])[1];
+  const rgRound99c = (n) => n >= 100 ? '약 ' + (Math.round(n / 10) * 10).toLocaleString('ko-KR') : String(n);
+  const AC_G = { '대형 학원가': ['#E03131', .5, .95, 3], '학원가': ['#F76707', .38, .85, 2], '동네 학원 밀집': ['#FAB005', .34, .85, 1] };   // 색·칠 진하기·선 진하기·층
+  const acName99c = (P) => String(P.이름 || P.역 || P.법정동 || '').replace(/\s*주변$/, '');
+  function acLoad99c(){
+    if (!AC.ld) AC.ld = Promise.all([fetch(L99A_MAP.acadCluster).then(r => r.ok ? r.json() : null), fetch(L99A_MAP.acadRegion).then(r => r.ok ? r.json() : null).catch(() => null)]).then(([G, RG]) => {
+      if (RG && RG.features){ RG.features.forEach(f => { const g = f.geometry || {}, polys = g.type === 'Polygon' ? [g.coordinates] : g.type === 'MultiPolygon' ? g.coordinates : [];
+        let s = 90, w = 180, n = -90, e = -180; polys.forEach(p => p[0].forEach(([x, y]) => { if (y < s) s = y; if (y > n) n = y; if (x < w) w = x; if (x > e) e = x; })); f.__p = polys; f.__bb = { s, w, n, e }; });
+        AC.rg = RG; AC.rgList = RG.features.map(f => ({ n: f.properties.권역, v: f.properties.학원수합계 })).sort((a, b) => b.v - a.v); }
+      if (!G || !G.features) return (AC.d = null);
+      G.features.forEach(f => { const g = f.geometry || {}, polys = g.type === 'Polygon' ? [g.coordinates] : g.type === 'MultiPolygon' ? g.coordinates : [];
+        let s = 90, w = 180, n = -90, e = -180; polys.forEach(p => p[0].forEach(([x, y]) => { if (y < s) s = y; if (y > n) n = y; if (x < w) w = x; if (x > e) e = x; })); f.__p = polys; f.__bb = { s, w, n, e }; });
+      AC.ref = G.features.reduce((a, f) => !a || f.properties.학원수 > a.properties.학원수 ? f : a, null);
+      return (AC.d = G);
+    }, () => { AC.ld = null; return null; });
+    return AC.ld;
+  }
+  const fmt99c = (n) => Number(n).toLocaleString('ko-KR');
+  function acScale99c(){ return AC.rgList.length ? '참고 눈금(권역 합계): ' + AC.rgList.map(r => r.n + ' ' + fmt99c(r.v)).join(' · ') : ''; }
+  const near1 = (v) => v >= 100 ? '약 ' + fmt99c(Math.round(v / 10) * 10) + '곳' : '약 ' + (Math.floor(v / 10) * 10) + '곳대';
+  function acNear99c(n, self, grp){   // 학원 수가 ±30% 안인 다른 학원가·권역 2~3곳(이름은 서로 다르게, 가까운 순)
+    const c = []; (AC.rg ? AC.rg.features : []).forEach(f => { const p = f.properties; if (p.이름 !== self && p.권역 !== grp && p.학원수합계 >= n * .7 && p.학원수합계 <= n * 1.3) c.push({ nm: p.이름, v: p.학원수합계 }); });
+    (AC.d ? AC.d.features : []).forEach(f => { const p = f.properties, nm = acName99c(p); if (nm !== self && (!grp || p.통칭 !== grp) && nm !== grp && p.학원수 >= n * .7 && p.학원수 <= n * 1.3) c.push({ nm, v: p.학원수 }); });
+    c.sort((a, b) => Math.abs(a.v - n) - Math.abs(b.v - n)); const out = [], seen = new Set(); c.forEach(x => { if (out.length < 3 && !seen.has(x.nm)){ seen.add(x.nm); out.push(x); } });
+    return out.length ? '비슷한 학원가: ' + out.map(x => x.nm).join(' · ') + ' (' + near1(n) + ')' : '';
+  }
+  function acTipText99c(P){
+    const sc = AC.rgList.length ? '<br><small class="sc">' + esc(acScale99c()) + '</small>' : '';
+    if (P.학원수합계 != null){
+      const L = AC.rgList, k = L.findIndex(r => r.n === P.권역) + 1, nr = acNear99c(P.학원수합계, P.이름, P.권역);
+      return fmt99c(P.학원수합계) + '곳 (학원가 ' + P.덩어리수 + '곳 묶음) · 수도권 학원가 권역 ' + L.length + '곳 중 ' + k + '위' + (nr ? '<br>' + esc(nr) : '') + sc;
+    }
+    const tot = AC.d ? AC.d.features.length : 0, up = AC.d ? AC.d.features.filter(f => f.properties.학원수 >= P.학원수).length : 0, nr = acNear99c(P.학원수, acName99c(P), P.통칭);
+    return fmt99c(P.학원수) + '곳' + (tot ? ' · 수도권 학원가 상위 약 ' + Math.max(1, Math.round(up / tot * 100)) + '%' : '') + (nr ? '<br>' + esc(nr) : '') + sc;
+  }
+  function acTipShow99c(P, ev){
+    const t = mapEl && mapEl.querySelector('#cm84AcTip99'); if (!t) return;
+    t.innerHTML = '<b>' + esc(acName99c(P)) + '</b> <small>' + esc(String(P.시군구 || '').replace(/^(서울특별시|인천광역시|경기도)\s*/, '')) + '</small><br>' + acTipText99c(P);
+    t.classList.add('on'); const x = (ev && ev.domEvent && ev.domEvent.clientX) || BD.mx, y = (ev && ev.domEvent && ev.domEvent.clientY) || BD.my, w = t.offsetWidth, h = t.offsetHeight;
+    let L = x + 14, T = y + 16; if (L + w > window.innerWidth - 8) L = x - w - 12; if (T + h > window.innerHeight - 8) T = y - h - 12; t.style.left = Math.max(6, L) + 'px'; t.style.top = Math.max(6, T) + 'px';
+  }
+  function acTipHide99c(){ const t = mapEl && mapEl.querySelector('#cm84AcTip99'); if (t) t.classList.remove('on'); }
+  function acLegend99c(){
+    const el = mapEl && mapEl.querySelector('#cm84AzLg99'); if (!el) return;
+    if (!AC.on || !AC.d){ el.hidden = true; return; }
+    const R = AC.ref && AC.ref.properties;
+    el.innerHTML = '<div class="t">학원가 <small>(참고용)</small> <button type="button" class="i99" aria-expanded="false" aria-label="학원가 칠 만든 방법·출처">ⓘ</button></div>'
+      + '<div class="sw"><i style="background:rgba(224,49,49,.55);border-color:#E03131"></i>빨강 · 100곳 이상 <small>대형 학원가</small></div>'
+      + '<div class="sw"><i style="background:rgba(247,103,7,.45);border-color:#F76707"></i>주황 · 30~99곳 <small>학원가</small></div>'
+      + '<div class="sw"><i style="background:rgba(250,176,5,.4);border-color:#FAB005"></i>노랑 · 10~29곳 <small>동네 학원 밀집 · 확대하면 보여요</small></div>'
+      + '<div class="t2">권역 합계 <small>(확대 13 이하)</small></div>'
+      + '<div class="rgsw"><span><i style="background:rgba(165,17,17,.6);border-color:#A51111"></i>1,000곳~</span><span><i style="background:rgba(224,49,49,.55);border-color:#E03131"></i>500~999</span><span><i style="background:rgba(255,107,107,.5);border-color:#FF6B6B"></i>300~499</span><span><i style="background:rgba(255,168,168,.5);border-color:#FFA8A8"></i>~299</span></div>'
+      + (AC.rgList.length ? '<div class="sc2">' + esc(acScale99c()) + '</div>' : '')
+      + '<div class="inf" hidden>입시·보습·국제화 학원과 교습소가 100m 안에 서로 이어져 모인 곳을 학원가로 보고 그 실제 범위대로 칠했어요(학원 10곳 이상인 곳만). 숫자는 그 학원가 안 학원 수예요.'
+      + (R ? ' 가장 큰 곳은 ' + esc(acName99c(R)) + ' ' + Number(R.학원수).toLocaleString('ko-KR') + '곳이에요.' : '') + ' 단지 정보의 학원가 줄(단지에서 1km 안 학원 수)과는 세는 방법이 달라요. 권역은 같은 이름(통칭)의 학원가와 500m 안 이웃 학원가를 합친 것이고, 합계는 분석 탭 값이에요. 등급 문턱은 잠정이에요.'
+      + '<br>출처: 나이스 학원·교습소 정보(2026년 11월), 행정안전부 위치정보요약DB</div>';
+    el.hidden = false;
+    el.querySelector('.i99').onclick = () => { const f = el.querySelector('.inf'), o = f.hidden; f.hidden = !o; el.querySelector('.i99').setAttribute('aria-expanded', String(o)); };
+  }
+  function azDraw99c(){
+    AC.labs.forEach(m => m.setMap(null)); AC.labs = [];
+    const on = AC.on && AC.d && map;
+    if (!on){ AC.polys.forEach(ps => ps.forEach(p => p.setMap(null))); return; }
+    const zm = map.getZoom(), v = view(), vis = (bb) => !(bb.n < v.sw.lat() || bb.s > v.ne.lat() || bb.e < v.sw.lng() || bb.w > v.ne.lng());
+    const showG = (g) => zm >= L99A_MAP.acSmallZoom || g !== '동네 학원 밀집';
+    AC.rgLabs.forEach(mk => mk.setMap(null)); AC.rgLabs = [];
+    if (AC.rg && zm < L99A_MAP.acSmallZoom){ AC.polys.forEach(ps => ps.forEach(p => p.setMap(null))); rgDraw99c(zm, v, vis); return; }
+    AC.rgPolys.forEach(ps => ps.forEach(p => p.setMap(null)));
+    AC.d.features.forEach((f, i) => {
+      const P = f.properties, G = AC_G[P.등급] || AC_G['동네 학원 밀집'], want = showG(P.등급) && vis(f.__bb); let ps = AC.polys.get(i);
+      if (!want){ if (ps) ps.forEach(p => p.setMap(null)); return; }
+      if (!ps){
+        ps = f.__p.map(p => { const pg = new NV.Polygon({ paths: p.map(r => r.map(([x, y]) => new NV.LatLng(y, x))), fillColor: G[0], fillOpacity: G[1], strokeColor: G[0], strokeOpacity: G[2], strokeWeight: 1, clickable: true, zIndex: 4 + G[3] });
+          NV.Event.addListener(pg, 'mouseover', (e) => { if (window.innerWidth >= 768 && !MS98.on) acTipShow99c(P, e); });
+          NV.Event.addListener(pg, 'mousemove', (e) => { if (window.innerWidth >= 768 && !MS98.on) acTipShow99c(P, e); });
+          NV.Event.addListener(pg, 'mouseout', acTipHide99c);
+          NV.Event.addListener(pg, 'click', (e) => { if (msTake98b(e)) return; if (SV98.on && e && e.coord){ svAt98b(e.coord); return; } if (window.innerWidth < 768) toast99(acName99c(P) + ' — ' + acTipText99c(P).replace(/<br>/g, ' / ').replace(/<[^>]+>/g, '')); else acTipShow99c(P, e); });   // 거리 재기·거리뷰가 켜져 있으면 그쪽 먼저
+          return pg; });
+        AC.polys.set(i, ps);
+      }
+      ps.forEach(p => { if (!p.getMap()) p.setMap(map); });
+    });
+    if (zm < L99A_MAP.acLabZoom) return;
+    const pr = map.getProjection(), placed = [];
+    AC.d.features.filter(f => showG(f.properties.등급)).sort((a, b) => b.properties.학원수 - a.properties.학원수).forEach(f => {
+      const P = f.properties, pt = P.이름표위치; if (!pt || AC.labs.length >= 160) return;
+      if (pt[1] < v.sw.lat() || pt[1] > v.ne.lat() || pt[0] < v.sw.lng() || pt[0] > v.ne.lng()) return;
+      const t = acName99c(P) + ' · ' + Number(P.학원수).toLocaleString('ko-KR') + '곳', pos = new NV.LatLng(pt[1], pt[0]), o = pr.fromCoordToOffset(pos), w = t.length * 10.5 + 16;
+      const r = { x1: o.x - w / 2, x2: o.x + w / 2, y1: o.y - 11, y2: o.y + 11 }; if (placed.some(q => !(r.x2 < q.x1 || r.x1 > q.x2 || r.y2 < q.y1 || r.y1 > q.y2))) return; placed.push(r);
+      AC.labs.push(new NV.Marker({ map, position: pos, zIndex: 8, clickable: false, icon: { content: `<div class="cm84-acl99 g${(AC_G[P.등급] || [0, 0, 0, 1])[3]}">${esc(t)}</div>`, anchor: new NV.Point(0, 0) } }));
+    });
+    window.CALC_MAP_L84.ac99c = { on: true, n: AC.d.features.length, polys: [...AC.polys.values()].filter(ps => ps[0].getMap()).length, labs: AC.labs.length, names: AC.labs.slice(0, 30).map(m => { const el = m.getElement && m.getElement(); return el ? el.textContent : ''; }) };
+  }
+  function rgDraw99c(zm, v, vis){   // 권역(분석 탭 학원가별 합계) 칠·이름표 — 확대 13 이하
+    AC.rg.features.forEach((f, i) => {
+      const P = f.properties, c = rgColor99c(P.학원수합계); let ps = AC.rgPolys.get(i);
+      if (!vis(f.__bb)){ if (ps) ps.forEach(p => p.setMap(null)); return; }
+      if (!ps){
+        ps = f.__p.map(p => { const pg = new NV.Polygon({ paths: p.map(r => r.map(([x, y]) => new NV.LatLng(y, x))), fillColor: c, fillOpacity: .42, strokeColor: c, strokeOpacity: .95, strokeWeight: 1.5, clickable: true, zIndex: 5 });
+          NV.Event.addListener(pg, 'mouseover', (e) => { if (window.innerWidth >= 768 && !MS98.on) acTipShow99c(P, e); });
+          NV.Event.addListener(pg, 'mousemove', (e) => { if (window.innerWidth >= 768 && !MS98.on) acTipShow99c(P, e); });
+          NV.Event.addListener(pg, 'mouseout', acTipHide99c);
+          NV.Event.addListener(pg, 'click', (e) => { if (msTake98b(e)) return; if (SV98.on && e && e.coord){ svAt98b(e.coord); return; } if (window.innerWidth < 768) toast99(P.이름 + ' — ' + acTipText99c(P).replace(/<br>/g, ' / ').replace(/<[^>]+>/g, '')); else acTipShow99c(P, e); });
+          return pg; });
+        AC.rgPolys.set(i, ps);
+      }
+      ps.forEach(p => { if (!p.getMap()) p.setMap(map); });
+    });
+    const pr = map.getProjection(), placed = [];
+    AC.rg.features.slice().sort((a, b) => b.properties.학원수합계 - a.properties.학원수합계).forEach(f => {
+      const P = f.properties, pt = P.이름표위치; if (!pt || pt[1] < v.sw.lat() || pt[1] > v.ne.lat() || pt[0] < v.sw.lng() || pt[0] > v.ne.lng()) return;
+      const t = P.이름 + ' · ' + rgRound99c(P.학원수합계) + '곳', pos = new NV.LatLng(pt[1], pt[0]), o = pr.fromCoordToOffset(pos), w = t.length * 11.5 + 24;
+      const r = { x1: o.x - w / 2, x2: o.x + w / 2, y1: o.y - 13, y2: o.y + 13 }; if (placed.some(q => !(r.x2 < q.x1 || r.x1 > q.x2 || r.y2 < q.y1 || r.y1 > q.y2))) return; placed.push(r);
+      AC.rgLabs.push(new NV.Marker({ map, position: pos, zIndex: 9, clickable: false, icon: { content: `<div class="cm84-acl99 rg" style="border-color:${rgColor99c(P.학원수합계)}">${esc(t)}</div>`, anchor: new NV.Point(0, 0) } }));
+    });
+    window.CALC_MAP_L84.ac99c = { on: true, mode: '권역', n: AC.rg.features.length, polys: [...AC.rgPolys.values()].filter(ps => ps[0].getMap()).length, labs: AC.rgLabs.length, names: AC.rgLabs.map(mk => { const el = mk.getElement && mk.getElement(); return el ? el.textContent : ''; }) };
+  }
+  async function azToggle99c(){
+    const b = root.querySelector('#cm84Az'), on = !AC.on;
+    if (!on){ AC.on = false; b.setAttribute('aria-pressed', 'false'); acTipHide99c(); AC.rgPolys.forEach(ps => ps.forEach(p => p.setMap(null))); AC.rgLabs.forEach(mk => mk.setMap(null)); AC.rgLabs = []; azDraw99c(); acLegend99c(); relabel98b(); window.CALC_MAP_L84.ac99c = { on: false }; return; }
+    AC.on = true; b.setAttribute('aria-pressed', 'true'); relabel98b();
+    const d = await acLoad99c();
+    if (!d){ AC.on = false; b.setAttribute('aria-pressed', 'false'); relabel98b(); toast99('학원가 지도 자료를 받지 못했어요. 잠시 뒤 다시 눌러 주세요.'); return; }
+    if (!AC.on) return; azDraw99c(); acLegend99c();
+  }
+
+  // ---- 묶음 L99C: 패널 [재건축] 탭 — 준공 28년 이상이고 재건축 탭 자료(분석 탭 jaegun_tab_l99c_1111)가 있는 단지에만 ----
+  //   PC = 패널 머리 [🏗 재건축] 단추 → 오른쪽 칸(실거래 자리)에, 폰 = 위쪽 탭 [재건축]. 단계 막대 9칸(지금 단계 강조, 날짜는 있는 칸 아래만),
+  //   평균 대지지분·추정 비례율·계획 세대수·용적률·선도지구는 값 있는 줄만, 출처(고시 번호·정보몽땅)는 ⓘ 안
+  const JG_STAGES = ['안전진단', '구역지정', '추진위', '조합설립', '사업시행', '관리처분', '이주철거', '착공', '준공'];
+  const JG = { d: null, ld: null, open: false };
+  function jgLoad99c(){ if (!JG.ld) JG.ld = fetch(L99A_MAP.jgTab).then(r => r.ok ? r.json() : null).then(j => (JG.d = j), () => { JG.ld = null; return null; }); return JG.ld; }
+  function jgHas99c(e){ return !!(e && e.상태 !== '숨김' && (e.지금단계 || Object.values(e.단계날짜 || {}).some(Boolean) || e.평균대지지분 || e.추정비례율 || e.계획세대수 || e.용적률 || e.선도지구 || e.세대구성 || e.시공사)); }
+  function jgOk99c(it){
+    if (!JG.d || !it || !Object.prototype.hasOwnProperty.call(JG.d, it.id) || it.id[0] === '_') return false;
+    const age = it.built ? new Date().getFullYear() - it.built : null;
+    return age != null && age >= L99A_MAP.jgAge && jgHas99c(JG.d[it.id]);
+  }
+  function jgCur99c(e){   // 지금 단계 칸 번호와 덧붙일 말
+    const s = String(e.지금단계 || ''), i = JG_STAGES.indexOf(s);
+    if (i >= 0) return [i, ''];
+    if (/선도지구/.test(s)) return [1, '선도지구 선정 — 구역지정 전'];
+    if (/구역지정 전/.test(s)) return [1, '정비계획 수립 중'];
+    let last = -1; JG_STAGES.forEach((k, j) => { if (e.단계날짜 && e.단계날짜[k]) last = j; }); return [last, ''];
+  }
+  const jgYm99c = (d) => d ? String(d).slice(2, 7).replace('-', '.') : '';
+  function jgGosi99c(e, sg, sc){   // 맨 아래 '근거 고시' 줄: 고시 번호·날짜 + [고시문 보기](토지이음 주소가 있는 곳만) + 정보몽땅
+    let items = [];
+    if (Array.isArray(e.고시목록) && e.고시목록.length) items = e.고시목록.map(g => esc(g.번호 + (g.날짜 ? '(' + g.날짜 + ')' : '')) + (g.토지이음주소 && /^https?:\/\//.test(g.토지이음주소) ? ' <a href="' + esc(g.토지이음주소) + '" target="_blank" rel="noopener">〔고시문 보기〕</a>' : ''));
+    else { const txt = [e.정비계획고시, e.계획세대수 && e.계획세대수.출처, sg.출처].filter(Boolean).join(' '); items = [...new Set(txt.match(/서울시 제\d+-\d+호\(\d{4}-\d{2}-\d{2}\)/g) || [])].map(esc); }
+    if (/정보몽땅/.test((e.출처 || []).join(' ') + ' ' + (sc && sc.출처 || ''))) items.push('서울시 정비사업 정보몽땅');
+    if (e.선도지구) items.push('국토교통부 보도자료(2024.11)');
+    return '<div class="jg99-gs">근거 고시 · ' + (items.length ? items.join(' · ') : '<span class="jg99-w">확인 중</span>') + '</div>';
+  }
+  function jgHtml99c(it, e){
+    const [cur, note] = jgCur99c(e), D = e.단계날짜 || {};
+    const cells = JG_STAGES.map((k, j) => '<li class="' + (j < cur ? 'dn' : j === cur ? 'cur' : 'td') + '"><b>' + (k === '이주철거' ? '이주·철거' : k) + '</b>' + (D[k] ? '<span>' + esc(jgYm99c(D[k])) + '</span>' : '') + '</li>').join('');
+    const rows = [];
+    const a = e.평균대지지분; if (a && a.평 != null) rows.push(['평균 대지지분', esc(a.평) + '평' + (a['㎡'] != null ? ' (' + esc(a['㎡']) + '㎡)' : '') + (a.표시 && a.표시 !== '고시 원문' ? ' <small>' + esc(a.표시) + '</small>' : '')]);
+    const b = e.추정비례율; if (b && b.값 != null) rows.push(['추정 비례율', esc(b.값) + '%' + (b.상태 && b.상태 !== '원문' ? ' <small>' + esc(b.상태) + '</small>' : '')]);
+    const sg = e.세대구성 || {}, nm = (v) => Number(v).toLocaleString('ko-KR') + '세대', k0 = sg.상태 === '대조 전' ? ' <small>대조 전</small>' : '', W = '<span class="jg99-w">확인 중</span>';
+    const tot = sg.총계획세대 != null ? sg.총계획세대 : (e.계획세대수 != null ? (typeof e.계획세대수 === 'object' ? e.계획세대수.값 : e.계획세대수) : null);
+    const fa = e.용적률 != null ? (typeof e.용적률 === 'object' ? e.용적률.값 : e.용적률) : null, kb = /기사/.test(sg.상태 || '') ? ' <small>기사 기준</small>' : '';
+    rows.push(['총 계획 세대수', tot != null ? nm(tot) + k0 : W]);
+    rows.push(['용적률', fa != null ? esc(fa) + (/%$/.test(String(fa)) ? '' : '%') : W]);
+    rows.push(['조합원 분양', sg.조합원분양 != null ? nm(sg.조합원분양) + k0 + kb : W]);
+    rows.push(['일반 분양', sg.일반분양 != null ? nm(sg.일반분양) + (/^계산/.test(sg.일반분양_표시 || '') ? ' <small>계산</small>' : '') + kb + k0 : W]);
+    rows.push(['임대', sg.임대 != null ? nm(sg.임대) + k0 + kb : W]);
+    const sc = e.시공사; if (sc && sc.이름) rows.push(['시공사 선정', (sc.선정일 ? esc(String(sc.선정일).slice(0, 7).replace('-', '.')) + ' · ' : '') + esc(sc.이름) + (/기사/.test(sc.상태 || '') ? ' <small>기사 기준</small>' : '') + (/확인 필요/.test(sc.출처 || '') ? ' <small>재선정 확인 필요</small>' : '')]);
+    const g = e.선도지구; if (g) rows.push(['선도지구', esc((g.신도시 || '') + ' 선도지구') + (g.구역 ? ' · ' + esc(g.구역) : '') + (g.구역세대 ? ' (' + Number(g.구역세대).toLocaleString('ko-KR') + '세대)' : '') + (g.연결 && g.연결 !== '확실' ? ' <small>' + esc(g.연결) + '</small>' : '')]);
+    const src = (e.출처 || []).concat(e.정비계획고시 ? ['정비계획 고시 ' + e.정비계획고시] : []).concat(e.사업장 ? ['사업장: ' + e.사업장] : []).concat(g ? ['선도지구: 국토교통부 보도자료(2024.11)'] : []).concat(sg.출처 ? ['세대: ' + sg.출처] : []).concat(sc && sc.출처 ? ['시공사: ' + sc.출처] : []);
+    const memo = Object.entries(e.단계날짜_메모 || {}).map(([k, v]) => k + ': ' + v);
+    const now = cur >= 0 ? (JG_STAGES[cur] === '이주철거' ? '이주·철거' : JG_STAGES[cur]) + (note ? ' · ' + note : '') + (D[JG_STAGES[cur]] && !note ? ' (' + jgYm99c(D[JG_STAGES[cur]]) + ')' : '') : '단계 정보 없음';
+    return '<div class="jg99-h"><b>🏗 재건축 진행</b><button type="button" class="i99" aria-expanded="false" aria-label="재건축 자료 출처">ⓘ</button><button type="button" class="jg99-x">✕ 실거래로 돌아가기</button></div>'
+      + '<div class="jg99-b"><div class="jg99-now">지금 <b>' + esc(now) + '</b></div><ol class="jg99-bar">' + cells + '</ol>'
+      + '<div class="jg99-n">날짜는 확인된 단계만 적었어요(년.월).</div>'
+      + (rows.length ? '<dl class="jg99-r">' + rows.map(([k, v]) => '<div><dt>' + k + '</dt><dd>' + v + '</dd></div>').join('') + '</dl>' : '')
+      + jgGosi99c(e, sg, sc)
+      + '<div class="jg99-src" hidden>' + src.concat(memo).map(esc).join('<br>') + (a && a.뜻 ? '<br>평균 대지지분 = ' + esc(a.뜻) : '') + '<br>추정 비례율은 정비계획 고시의 추정값이에요(관리처분 확정값 아님).</div></div>';
+  }
+  function openJg99c(){
+    const host = panel.querySelector('.cm84-jg99'), it = itemsById.get(panel.dataset.id); if (!host || !it || !JG.d) return false;
+    if (panel.classList.contains('tws94')) closeTwin94(true);
+    host.innerHTML = jgHtml99c(it, JG.d[it.id]); host.hidden = false; panel.classList.add('jgs99'); JG.open = true;
+    host.querySelector('.jg99-x').onclick = () => closeJg99c();
+    host.querySelector('.i99').onclick = () => { const s = host.querySelector('.jg99-src'), o = s.hidden; s.hidden = !o; host.querySelector('.i99').setAttribute('aria-expanded', String(o)); };
+    const b = panel.querySelector('.jg99b'); if (b) b.setAttribute('aria-pressed', 'true');
+    if (window.innerWidth < 768 && panel.dataset.t91 !== 'jg'){ panel.dataset.t91 = 'jg'; panel.querySelectorAll('[data-t91]').forEach(x => x.setAttribute('aria-selected', String(x.dataset.t91 === 'jg'))); }
+    window.CALC_MAP_L84.jg99c = { open: true, id: it.id, cur: jgCur99c(JG.d[it.id])[0] }; setTimeout(resize, 30); return true;
+  }
+  function closeJg99c(keepTab){
+    const host = panel.querySelector('.cm84-jg99'); panel.classList.remove('jgs99'); JG.open = false;
+    if (host){ host.hidden = true; host.innerHTML = ''; }
+    const b = panel.querySelector('.jg99b'); if (b) b.setAttribute('aria-pressed', 'false');
+    if (!keepTab && panel.dataset.t91 === 'jg') setTab94('rt');
+    window.CALC_MAP_L84.jg99c = { open: false }; setTimeout(() => { resize(); if (rtChart){ try { rtChart.resize(); } catch (e) {} } }, 30);
+  }
+  function jgWire99c(it){
+    const id = it && it.id;
+    jgLoad99c().then(() => {
+      if (!panel || panel.dataset.id !== id) return;
+      const ok = jgOk99c(it), b = panel.querySelector('.jg99b'), t = panel.querySelector('[data-t91="jg"]');
+      if (b){ b.hidden = !ok; b.onclick = () => { if (panel.classList.contains('jgs99')) closeJg99c(); else openJg99c(); }; }
+      if (t) t.hidden = !ok;
+      window.CALC_MAP_L84.jgTab99c = { id, ok };
+    });
+  }
+  // ---- 묶음 L99B(계산기 7차, 11-10): 재개발 지도와 기능 맞추기 — [개발 호재](공용 map-shared/dev_hojae_v2.js) · [경사도](재개발 지도 h10c 경사도 층 그대로) ----
+  //   둘 다 처음 화면에서는 아무것도 받지 않고, 단추를 켤 때만 받는다. 공용 파일·경사도 자료는 고치지 않고 읽기만(재개발 지도 쪽이 원본).
+  //   단추 글자는 재개발 지도와 같은 한 줄 단어: '개발 호재'(켬 #0B7285, [재개발] 바로 아래) · '경사도'(켬 #2B8A3E, [지적도] 아래)
+  const HJ99 = { dh: null, p: null };
+  function phone99b(){ return window.innerWidth < 768; }
+  function hjLoad99b(){
+    if (window.DevHojae2) return Promise.resolve(true);
+    if (!HJ99.p) HJ99.p = new Promise(res => { const t = document.createElement('script'); t.src = L99B_MAP.shared + L99B_MAP.hjJs + '?v=' + L99B_MAP.hjV; t.onload = () => res(!!window.DevHojae2); t.onerror = () => { HJ99.p = null; res(false); }; document.head.appendChild(t); });
+    return HJ99.p;
+  }
+  function hjState99b(on){
+    if (mapEl) mapEl.classList.toggle('hj99b', on);   // 재개발 지도와 같게: 켜면 가격 말풍선·구역 이름표·자치구 말풍선을 숨기고 구역 칠을 옅게
+    const b = root && root.querySelector('#cm84Hj'); if (b) b.setAttribute('aria-pressed', String(on));
+    relabel98b(); window.CALC_MAP_L84.hj99b = { on };
+  }
+  async function hjToggle99b(){
+    const b = root.querySelector('#cm84Hj'), on = b.getAttribute('aria-pressed') !== 'true';
+    if (!on){ if (HJ99.dh) HJ99.dh.toggle(false); else hjState99b(false); return; }
+    hjState99b(true);
+    if (!(await hjLoad99b())){ hjState99b(false); return; }
+    if (!HJ99.dh) HJ99.dh = window.DevHojae2(map, { base: L99B_MAP.shared, v: L99B_MAP.hjV, card: mapEl.querySelector('#cm84Hjc99'), legend: mapEl.querySelector('#cm84HjLg99'), phone: phone99b, onState: hjState99b, onOverlay: () => {} });
+    if (b.getAttribute('aria-pressed') !== 'true') return;
+    await HJ99.dh.toggle(true);
+    const lg = mapEl.querySelector('#cm84HjLg99'), t = lg && lg.querySelector('.t');   // 대표님 결정 3: 노선 목록 상자는 접힌 상태로
+    if (t && !lg.classList.contains('fold')) t.click();
+  }
+
+  const SLOPE99 = { on: false, bub: null, val: null, mx: 0, my: 0, z: -1, go: new Map(), pend: new Set(), want: new Set(), slb: new Map(), Img: null, p: null };
+  function slopeLoad99b(){
+    if (window.MAP_SLOPE) return Promise.resolve(true);
+    if (!SLOPE99.p) SLOPE99.p = new Promise(res => { const s = document.createElement('script'); s.src = REDEV_URL(L99B_MAP.slopeJs) + '?v=' + L99B_MAP.slopeV; s.onload = () => res(!!window.MAP_SLOPE); s.onerror = () => { SLOPE99.p = null; res(false); }; document.head.appendChild(s); });
+    return SLOPE99.p;
+  }
+  function slopeLegend99b(){
+    const C = MAP_SLOPE.설정, S = C.칠_단계, lg = mapEl.querySelector('#cm84SlopeLg99'); if (!S || !lg) return;
+    lg.innerHTML = `<div class="t">경사도 (참고용) · ${esc(C['칠_시작%'])}% 미만 평지는 칠하지 않아요</div>` + S.map(([lo, c, al, lab, mean]) => `<div class="sw"><i style="background:rgba(${c},${(al / 255).toFixed(2)})"></i><b>${esc(lab)}</b><span>${esc(mean)}</span></div>`).join('')
+      + `<details class="src"><summary>출처</summary>${esc(C.출처)}${C.출처_조건 ? '<br>' + esc(C.출처_조건) : ''}</details>`;
+  }
+  function slbLoad99b(file){   // 재개발 지도 39차 타일 묶음: 'SLB1' + 개수 + [x,y,시작,길이]… + PNG들 — 블록은 처음 쓸 때 한 번 받아 기억
+    if (!SLOPE99.slb.has(file)) SLOPE99.slb.set(file, fetch(REDEV.base + encodeURIComponent(L99B_MAP.slopeDir) + '/' + encodeURIComponent(file) + '?v=' + L99B_MAP.slopeV).then(r => { if (!r.ok) throw new Error(r.status); return r.arrayBuffer(); }).then(buf => {
+      const dv = new DataView(buf), n = dv.getUint32(4, true), base = 8 + n * 12, m = new Map();
+      for (let i = 0; i < n; i++){ const o = 8 + i * 12; m.set(dv.getUint16(o, true) * 65536 + dv.getUint16(o + 2, true), [base + dv.getUint32(o + 4, true), dv.getUint32(o + 8, true)]); }
+      return { buf, m };
+    }).catch(() => { SLOPE99.slb.delete(file); return null; }));
+    return SLOPE99.slb.get(file);
+  }
+  async function slopeBlob99b(kind, z, x, y){   // 그 타일 PNG(Blob), 없으면(평지만인 곳) null — 요청도 안 함
+    const T = MAP_SLOPE.타일묶음 && MAP_SLOPE.타일묶음[kind] && MAP_SLOPE.타일묶음[kind][z]; if (!T) return null;
+    const [sh, names] = T, bk = (x >> sh) + '_' + (y >> sh); if (!names.includes(bk)) return null;
+    const b = await slbLoad99b(`${kind}_${z}_${bk}.bin`); if (!b) return null;
+    const e = b.m.get(x * 65536 + y); if (!e) return null;
+    return new Blob([new Uint8Array(b.buf, e[0], e[1])], { type: 'image/png' });
+  }
+  function slopeImg99b(){   // 경사도 그림을 구역 칠 아래에 깔기(overlayLayer 맨 앞)
+    if (SLOPE99.Img) return SLOPE99.Img;
+    SLOPE99.Img = class extends NV.OverlayView {
+      constructor(u, bd){ super(); this.u = u; this.bd = bd; }
+      onAdd(){ const im = document.createElement('img'); im.src = this.u; im.alt = ''; im.draggable = false;
+        im.style.cssText = 'position:absolute;pointer-events:none;user-select:none;max-width:none;margin:0;padding:0;border:0';
+        const p = this.getPanes().overlayLayer; p.insertBefore(im, p.firstChild); this.im = im; }
+      draw(){ if (!this.im) return; const pr = this.getProjection(), a = pr.fromCoordToOffset(this.bd.getSW()), b = pr.fromCoordToOffset(this.bd.getNE());
+        const st = this.im.style; st.left = Math.round(a.x) + 'px'; st.top = Math.round(b.y) + 'px'; st.width = Math.round(b.x - a.x) + 'px'; st.height = Math.round(a.y - b.y) + 'px'; }
+      onRemove(){ if (this.im){ this.im.remove(); this.im = null; } }
+    };
+    return SLOPE99.Img;
+  }
+  function slopeClear99b(){ SLOPE99.go.forEach(o => { o.setMap(null); URL.revokeObjectURL(o.__u); }); SLOPE99.go.clear(); }
+  function slopeOver99b(){   // 확대 12~16: 그 단계 타일, 17 이상: 16단계 타일을 늘려서 — 화면에 보이는 것만
+    const C = window.MAP_SLOPE && MAP_SLOPE.설정;
+    if (!SLOPE99.on || !C || !map){ slopeClear99b(); SLOPE99.z = -1; return; }
+    const [z0, z1] = C.확대, mz = Math.round(map.getZoom());
+    if (mz < z0){ slopeClear99b(); SLOPE99.z = -1; return; }
+    const zt = Math.min(z1, mz); if (zt !== SLOPE99.z){ slopeClear99b(); SLOPE99.z = zt; }
+    const b = map.getBounds(), n = 2 ** zt, tx = lng => Math.floor((lng + 180) / 360 * n), ty = lat => Math.floor((1 - Math.asinh(Math.tan(lat * Math.PI / 180)) / Math.PI) / 2 * n);
+    const lng2 = x => x / n * 360 - 180, lat2 = y => Math.atan(Math.sinh(Math.PI * (1 - 2 * y / n))) * 180 / Math.PI, want = new Set();
+    for (let x = tx(b.getMin().x); x <= tx(b.getMax().x); x++) for (let y = ty(b.getMax().y); y <= ty(b.getMin().y); y++){
+      const k = zt + '/' + x + '/' + y; want.add(k);
+      if (SLOPE99.go.has(k) || SLOPE99.pend.has(k)) continue;
+      SLOPE99.pend.add(k);
+      slopeBlob99b('칠', zt, x, y).then(bl => {
+        SLOPE99.pend.delete(k);
+        if (!bl || !SLOPE99.on || SLOPE99.z !== zt || !SLOPE99.want.has(k) || SLOPE99.go.has(k)) return;
+        const u = URL.createObjectURL(bl), C2 = slopeImg99b(), o = new C2(u, new NV.LatLngBounds(new NV.LatLng(lat2(y + 1), lng2(x)), new NV.LatLng(lat2(y), lng2(x + 1))));
+        o.__u = u; o.setMap(map); SLOPE99.go.set(k, o);
+      });
+    }
+    SLOPE99.want = want;
+    SLOPE99.go.forEach((o, k) => { if (!want.has(k)){ o.setMap(null); URL.revokeObjectURL(o.__u); SLOPE99.go.delete(k); } });
+  }
+  async function slopeSet99b(on){
+    SLOPE99.on = on; const b = root.querySelector('#cm84Slope'), lg = mapEl.querySelector('#cm84SlopeLg99');
+    if (b) b.setAttribute('aria-pressed', String(on)); relabel98b(); window.CALC_MAP_L84.slope99b = { on };
+    if (!on){ if (lg) lg.hidden = true; slopeBubClose99b(); slopeHovHide99b(); slopeOver99b(); return; }
+    if (!(await slopeLoad99b()) || !SLOPE99.on){ if (!window.MAP_SLOPE){ SLOPE99.on = false; if (b) b.setAttribute('aria-pressed', 'false'); relabel98b(); } return; }
+    slopeLegend99b(); if (lg) lg.hidden = false; slopeOver99b();
+    window.CALC_MAP_L84.slope99b = { on: true, loaded: true };
+  }
+  function slopeBubClose99b(){ if (SLOPE99.bub){ SLOPE99.bub.close(); SLOPE99.bub = null; } }
+  async function slopeAt99b(lat, lng){
+    const C = MAP_SLOPE.설정, z = C.값타일_확대, n = 2 ** z;
+    const fx = (lng + 180) / 360 * n, fy = (1 - Math.asinh(Math.tan(lat * Math.PI / 180)) / Math.PI) / 2 * n;
+    const x = Math.floor(fx), y = Math.floor(fy), px = Math.min(255, Math.floor((fx - x) * 256)), py = Math.min(255, Math.floor((fy - y) * 256)), key = z + '/' + x + '/' + y;
+    try {
+      if (!SLOPE99.val) SLOPE99.val = new Map();
+      let px8 = SLOPE99.val.get(key);
+      if (!px8){
+        px8 = (async () => { const bl = await slopeBlob99b('값', z, x, y); if (!bl) return null; const im = await createImageBitmap(bl);
+          const cv = document.createElement('canvas'); cv.width = cv.height = 256; const cx = cv.getContext('2d', { willReadFrequently: true }); cx.drawImage(im, 0, 0); return cx.getImageData(0, 0, 256, 256).data; })();
+        SLOPE99.val.set(key, px8); if (SLOPE99.val.size > 64) SLOPE99.val.delete(SLOPE99.val.keys().next().value);
+      }
+      const d = await px8; if (!d) return null; return d[(py * 256 + px) * 4] / C.값타일_곱;
+    } catch (e) { if (SLOPE99.val) SLOPE99.val.delete(key); return null; }
+  }
+  function slopeText99b(v){   // 칠한 곳만 글자, 평지·자료 없음은 '' — 문구는 재개발 지도 자료(설정.말풍선) 그대로
+    const C = MAP_SLOPE.설정; if (v === null || v < C['칠_시작%']) return '';
+    const deg = Math.atan(v / 100) * 180 / Math.PI;
+    return C.말풍선.replace('{s}', Math.round(v)).replace('{d}', deg < 10 ? deg.toFixed(1) : Math.round(deg)).replace('{h}', (Math.round(v / 10 * 10) / 10).toString());
+  }
+  let hovT99 = 0, hovSeq99 = 0;
+  function slopeHovHide99b(){ clearTimeout(hovT99); hovSeq99++; const h = mapEl && mapEl.querySelector('#cm84SlopeHov99'); if (h) h.classList.remove('on'); }
+  function slopeHover99b(e){   // PC: 마우스 올리면 툴팁(칠한 곳만)
+    if (!SLOPE99.on || !window.MAP_SLOPE || phone99b() || MS98.on || !e || !e.coord){ slopeHovHide99b(); return; }
+    clearTimeout(hovT99); const seq = ++hovSeq99, la = e.coord.lat(), ln = e.coord.lng();
+    hovT99 = setTimeout(async () => {
+      const v = await slopeAt99b(la, ln); if (seq !== hovSeq99) return;
+      const h = mapEl.querySelector('#cm84SlopeHov99'), t = slopeText99b(v); if (!h) return;
+      if (!t){ h.classList.remove('on'); return; }
+      h.textContent = t; h.classList.add('on');
+      const w = h.offsetWidth, hh = h.offsetHeight; let x = SLOPE99.mx + 14, y = SLOPE99.my + 16;
+      if (x + w > window.innerWidth - 8) x = SLOPE99.mx - w - 12;
+      if (y + hh > window.innerHeight - 8) y = SLOPE99.my - hh - 12;
+      h.style.left = x + 'px'; h.style.top = y + 'px';
+    }, 90);
+  }
+  async function slopeTip99b(coord){   // 폰: 길게 누르면 그 자리 말풍선
+    if (!SLOPE99.on || !window.MAP_SLOPE || !coord) return;
+    const t = slopeText99b(await slopeAt99b(coord.lat(), coord.lng())); slopeBubClose99b(); if (!t) return;
+    SLOPE99.bub = new NV.InfoWindow({ content: `<div class="cm84-sbub99">${esc(t)}</div>`, borderWidth: 0, backgroundColor: 'transparent', disableAnchor: false, anchorSize: new NV.Size(10, 8), anchorColor: '#fff', pixelOffset: new NV.Point(0, -4) });
+    SLOPE99.bub.open(map, coord);
+  }
+  // 단추·상자 넣기(지도 만들 때 한 번) — [개발 호재]는 [재개발] 바로 아래, [경사도]는 [지적도] 아래
+  function vbWire99b(sec){
+    const vb = sec.querySelector('.cm84-vbtns'); if (!vb) return;
+    const zb = vb.querySelector('#cm84Zone'), hb = L99B_MAP.hjShow ? '<button type="button" id="cm84Hj" aria-pressed="false">개발 호재</button>' : '';   // 11-11 배포 승인 수정: D탭 새 판이 올 때까지 [개발 호재] 숨김(코드는 유지, hjShow:true로 다시 보임)
+    if (hb){ if (zb) zb.insertAdjacentHTML('afterend', hb); else vb.insertAdjacentHTML('afterbegin', hb); }
+    const cb = vb.querySelector('#cm84Cad'), sb = '<button type="button" id="cm84Slope" aria-pressed="false">경사도</button>';
+    if (cb) cb.insertAdjacentHTML('afterend', sb); else vb.insertAdjacentHTML('beforeend', sb);
+    mapEl.insertAdjacentHTML('beforeend', '<div class="cm84-scc cm84-hjc99" id="cm84Hjc99" role="dialog" aria-label="개발 호재"></div><div class="cm84-hjlg99" id="cm84HjLg99" hidden></div><div class="cm84-slg99" id="cm84SlopeLg99" hidden></div><div class="cm84-shov99" id="cm84SlopeHov99" role="tooltip"></div>');
+    if (hb) vb.querySelector('#cm84Hj').addEventListener('click', hjToggle99b);
+    vb.querySelector('#cm84Slope').addEventListener('click', () => slopeSet99b(!SLOPE99.on));
+    if (hb) VB98.splice(1, 0, ['#cm84Hj', '개발 호재', '개발 호재(공사 중·계획 철도, 참고용)']);
+    VB98.push(['#cm84Slope', '경사도', '경사도(땅의 경사, 참고용)']);
+    relabel98b();
+  }
+  // 지도 이벤트(지도 만든 뒤 한 번)
+  function mapWire99b(){
+    NV.Event.addListener(map, 'idle', () => { if (SLOPE99.on) slopeOver99b(); if (HJ99.dh && HJ99.dh.on) HJ99.dh.draw(); });
+    NV.Event.addListener(map, 'click', (e) => { slopeBubClose99b(); if (MS98.on || SV98.on) return; if (HJ99.dh && HJ99.dh.on && e && e.coord) HJ99.dh.click(e.coord); });
+    NV.Event.addListener(map, 'mousemove', slopeHover99b);
+    mapEl.addEventListener('mousemove', (ev) => { SLOPE99.mx = ev.clientX; SLOPE99.my = ev.clientY; }, { passive: true, capture: true });
+    mapEl.addEventListener('mouseleave', slopeHovHide99b);
+    ['mouseout', 'dragstart', 'zoom_changed'].forEach(k => NV.Event.addListener(map, k, slopeHovHide99b));
+    NV.Event.addListener(map, 'longtap', (e) => { if (SLOPE99.on && e && e.coord) slopeTip99b(e.coord); });
+    document.addEventListener('keydown', (e) => { if (e.key !== 'Escape') return; slopeBubClose99b(); const c = mapEl.querySelector('#cm84Hjc99'); if (HJ99.dh && c && c.classList.contains('on')) HJ99.dh.close(); });
   }
   // 오른쪽 단추 줄: 한 줄 짧은 이름(켬은 색 채움으로만), 원래 긴 이름은 말풍선(PC 마우스 올림 = title, 폰 = 길게 누름)
   const VB98 = [['#cm84Zone', '재개발', '재개발 구역'], ['#cm84ScE', '초등', '초등 학구도'], ['#cm84ScM', '중학', '중학교 학군'], ['#cm84Hide', '단지 숨김', '단지 가격 말풍선 숨기기'], ['#cm84Sv', '거리뷰', '거리뷰'], ['#cm84Cad', '지적도', '지적도(지적편집도)'], ['#cm84Ms', '거리', '거리 재기']];
@@ -2778,6 +3225,7 @@
       zoomControlOptions: { position: l89() ? NV.Position.RIGHT_CENTER : NV.Position.LEFT_CENTER, style: NV.ZoomControlStyle.SMALL }, scaleControl: false, mapDataControl: false });   // 묶음 L89: 확대·축소 버튼은 재개발 지도처럼 오른쪽 가운데
     NV.Event.addListener(map, 'idle', () => { clearTimeout(lt); lt = setTimeout(drawAll, 60); if (l98b()) hint98b(); });
     if (l98b()) NV.Event.addListener(map, 'click', (e) => { if (msTake98b(e)) return; if (SV98.on && e && e.coord) svAt98b(e.coord); });   // 묶음 L98B: 거리뷰 길 위를 누르면 그 자리 거리뷰
+    if (l99b()) mapWire99b();   // 묶음 L99B: 개발 호재 그리기·누르기, 경사도 깔기·툴팁
     if (l99a()) mapWire99a();   // 묶음 L99A: 경계 이름 말풍선
     window.addEventListener('resize', () => setTimeout(() => { if (map && !root.closest('[hidden]')) resize(); }, 50));
     root.querySelector('#cm84Basis').textContent = '가격 34평 기준(34평 시세가 없는 단지는 25평) · ' + seedMonthText() + ' 시세 · 좌표 있는 단지 ' + items.length.toLocaleString('ko-KR') + '곳';
