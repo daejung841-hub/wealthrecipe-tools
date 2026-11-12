@@ -33,7 +33,7 @@
 // 묶음 L52·L53(83단계): 아래 정적 스크립트 주소의 ?v=와 이 표는 build_l52_versions.py가 빌드 때 실제 파일 해시로 채운다(손으로 쓰지 않음).
 // 표는 25평 seed 지연 로딩(loadSeed25)이 실행 중에 쓴다. EARLY_FLAGS_L52는 xlsx 태그(L53)를 쓸지 정하려고 주소 플래그를 먼저 읽는다
 // (applyBundlesFromUrl과 같은 규칙, 로컬 주소에서만: 값이 없으면 모두 켬, 있으면 적힌 묶음만 — 묶음 이름 'L' 포함).
-var ASSET_VERSIONS_L52 = /*L52_VERSIONS*/{"shared.js":"8e8ee813","seedComplexes.js":"7d7e417e","seedChips.js":"70c405ed","m2Series.js":"acc3bcaa","seedComplexes25.js":"25bb9b37","feedback-widget.js":"52cf1fae","station_walk.js":"d1744c95","school_elem.js":"e368c3b0","calc_map.js":"57640609","map_light.js":"dff5079b","map_trade_idx.js":"c94b3db1"}/*END_L52_VERSIONS*/;
+var ASSET_VERSIONS_L52 = /*L52_VERSIONS*/{"shared.js":"8e8ee813","seedComplexes.js":"7d7e417e","seedChips.js":"70c405ed","m2Series.js":"acc3bcaa","seedComplexes25.js":"25bb9b37","feedback-widget.js":"52cf1fae","station_walk.js":"d1744c95","school_elem.js":"e368c3b0","calc_map.js":"5c9769c3","map_light.js":"dff5079b","map_trade_idx.js":"c94b3db1"}/*END_L52_VERSIONS*/;
 var EARLY_FLAGS_L52 = (function(){
   var on = { L52: true, L53: true, L86: true, L88: true };   // L86(시세 이력 미루기)은 지도 중심 화면(L85)이 켜져 있을 때만 — L85를 끄면 여기 L86도 false
   try {
@@ -429,6 +429,33 @@ button.pyeong-chip{font:inherit;font-size:11.5px;}
 /* 묶음 L84: 지도 탭 자리(지도 화면 모양은 calc_map.js가 넣는다) */
 .map-wrap-l84{margin-top:8px;}
 .map-load-l84{padding:40px 12px;text-align:center;color:var(--ink-muted);font-size:14px;}
+/* 묶음 L100: [공지] 탭(업데이트 기록·저평가 기록) — 지도 머리줄의 탭에서 여는 전체 화면 */
+.nt100{position:fixed;left:0;right:0;top:48px;bottom:0;z-index:62;background:var(--bg);color:var(--ink);overflow:auto;box-sizing:border-box;padding:14px 16px 40px;}
+.nt100[hidden]{display:none;}
+.nt100 .nt-in{max-width:880px;margin:0 auto;}
+.nt100 h2{font-size:18px;margin:0 0 10px;}
+.nt100 .nt-sub{display:flex;gap:6px;margin:0 0 12px;flex-wrap:wrap;}
+.nt100 .nt-sub button{border:1px solid var(--border);background:var(--surface);color:var(--ink);font:inherit;font-size:13px;font-weight:700;padding:6px 12px;border-radius:999px;cursor:pointer;min-height:34px;}
+.nt100 .nt-sub button.active{background:var(--accent);border-color:var(--accent);color:#fff;}
+.nt100 .nt-sec[hidden]{display:none;}
+.nt100 table{width:100%;min-width:0!important;border-collapse:collapse;background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden;font-size:13px;}
+.nt100 th{text-align:left;font-size:11.5px;color:var(--ink-muted);font-weight:700;background:var(--surface-alt);padding:7px 9px;}
+.nt100 td{padding:8px 9px;border-top:1px solid var(--border);vertical-align:top;line-height:1.5;}
+.nt100 td.d{white-space:nowrap;color:var(--ink-muted);width:56px;}
+.nt100 td.t{font-weight:700;width:30%;}
+.nt100 td.n{white-space:nowrap;text-align:right;}
+.nt100 .nt-note{font-size:12px;color:var(--ink-muted);margin:6px 0 10px;line-height:1.55;}
+.nt100 .nt-h3{font-size:15px;margin:16px 0 6px;}.nt100 .nt-h3 small{font-weight:500;color:var(--ink-muted);margin-left:6px;font-size:12px;}
+.nt100 a{color:var(--info);font-weight:700;text-decoration:none;}.nt100 a:hover{text-decoration:underline;}
+.nt100 .nt-tag{display:inline-block;margin-left:5px;font-size:10.5px;font-weight:700;color:var(--warn);background:var(--warn-bg);border-radius:4px;padding:0 4px;}
+.nt100 .nt-sm{display:block;font-size:11px;color:var(--ink-faint);font-weight:500;}
+.nt100 .nt-foot{margin-top:14px;font-size:12px;color:var(--ink-muted);line-height:1.55;}
+@media (max-width:767px){.nt100{padding:10px 10px 40px;}.nt100 td,.nt100 th{padding:6px 6px;font-size:12px;}.nt100 td.d{width:30px;}.nt100 td.t{width:auto;overflow-wrap:anywhere;}.nt100 td.n{padding-right:8px;}.nt100 .hide-m{display:none;}.nt100 table.nt-fix{table-layout:fixed;}.nt100 table.nt-fix th:nth-child(1){width:34px;}.nt100 table.nt-fix th:nth-child(4){width:84px;}.nt100 table.nt-fix th:nth-child(5){width:104px;}.nt100 table.nt-fix th:nth-child(6){width:52px;}.nt100 table.nt-fix td.n{padding-left:2px;padding-right:4px;font-size:11.5px;}.nt100 table.nt-fix td.g{font-size:11.5px;text-align:left;}.nt100 table.nt-fix td{overflow-wrap:anywhere;}}
+.nt100 .nt-tag{position:relative;cursor:help;}
+.nt100 .nt-tag:hover::after,.nt100 .nt-tag:focus::after{content:attr(data-tip);position:absolute;left:0;top:100%;margin-top:4px;z-index:5;width:220px;white-space:normal;background:var(--surface);color:var(--ink);border:1px solid var(--border);border-radius:8px;padding:6px 8px;font-size:12px;font-weight:500;line-height:1.5;box-shadow:0 4px 14px rgba(0,0,0,.18);}
+.nt100 td.g{font-weight:700;}.nt100 .gl{display:inline-block;white-space:nowrap;}
+.map-head-l85 .mh-links button[data-l100-notice].active{background:var(--accent);border-color:var(--accent);color:#fff;}
+.nt100 .show-m{display:none;}@media (max-width:767px){.nt100 .show-m{display:block;font-weight:500;color:var(--ink-muted);}}
 /* 묶음 L85: 지도 중심 화면 — 탭은 [지도][여러 단지 보기], 지도 화면은 머리줄 한 줄 + 화면 전체 지도 */
 .map-head-l85{display:none;}
 body.l85 #topModeTabs .top-mode-btn[data-top-mode="single"], body.l85 #topModeTabs .top-mode-btn[data-top-mode="favorites"]{display:none;}
@@ -686,6 +713,11 @@ html.l95 .fav-info-l59 .mz92-pop .r94-g{display:flex;gap:8px;}
 .diag-info-l59 .fav-info-l92 > .fav-info-wide-l59{grid-column:auto;width:auto;min-width:0;}
 .diag-info-l59 .fav-info-l92 > div dd{white-space:normal;}
 @media (max-width:419px){ .diag-info-l59 .fav-info-l92{grid-template-columns:minmax(0, 1fr);} }
+/* 묶음 L100: 단지 정보 카드 학군·가까운 중학교 — 지도 패널 안에서는 학교 이름이 눌러져요(상위 %·진학률·꼬리표는 그대로) */
+html.l100-map .mz92-pop .r94-t tr:not(.r96-h):not(.r94-sub) td:first-child, html.l100-map .mz92-pop .mz92-t td:first-child, html.l100-map .mz92-pop .r94-g li > span:first-child:not(.r96-i){cursor:pointer;}
+html.l100-map .mz92-pop .r94-t tr:not(.r96-h):not(.r94-sub) td:first-child:hover, html.l100-map .mz92-pop .mz92-t td:first-child:hover, html.l100-map .mz92-pop .r94-g li > span:first-child:not(.r96-i):hover{color:var(--info);text-decoration:underline;}
+html.l100-map .mz92-pop small{cursor:default;}html.l100-map .mz92-pop .r96-i small{cursor:help;}
+.mz92-pop{cursor:default;}.mz92-pop .r96-i,.mz92-pop .r96-i *{cursor:help;}   /* 단지 정보 말풍선 안 글(상위 %·진학률·꼬리표)은 줄의 손가락 모양을 물려받지 않음 */
 /* 묶음 L92: 중학교 학군 툴팁(PC 올리기·폰 누르기) */
 .mz92{position:relative;display:inline-flex;align-items:center;gap:3px;cursor:pointer;border-bottom:1px dashed var(--border-strong);outline:none;}
 .mz92:focus-visible{box-shadow:0 0 0 2px var(--accent);border-radius:4px;}
@@ -1711,6 +1743,10 @@ body.l36 #baseLibSelect, body.l36 .lib-row:has(> #baseLibSelect){display:none !i
     <button class="top-mode-btn" data-top-mode="map" id="topModeMapBtnL84" hidden>🗺️ 지도로 보기</button>
     <button class="top-mode-btn" data-top-mode="favorites">⭐ 즐겨찾기</button>
   </div>
+  <!-- 묶음 L100: [공지] 탭 -->
+  <div class="nt100" id="noticeL100" role="region" aria-label="공지" hidden><div class="nt-in"><h2>📢 공지</h2>
+    <div class="nt-sub"><button type="button" data-nt-tab="up" class="active">업데이트 기록</button><button type="button" data-nt-tab="track">저평가 기록</button></div>
+    <div class="nt-sec" data-nt-sec="up"></div><div class="nt-sec" data-nt-sec="track" hidden></div></div></div>
   <!-- 묶음 L85: 지도 중심 화면의 최소 머리줄(지도 화면에서만 보임) -->
   <div class="map-head-l85" id="mapHeadL85">
     <h1>저평가 단지 계산기</h1>
@@ -1721,7 +1757,7 @@ body.l36 #baseLibSelect, body.l36 .lib-row:has(> #baseLibSelect){display:none !i
       <a href="../rate-simulator/비례율_시뮬레이터.html">🧮<span class="tx"> 비례율</span></a>
       <a href="../redevelopment-list/재개발_목록표.html" data-l58-l85 hidden>🏗️<span class="tx"> 목록표</span></a>
       <a href="../imjang/" data-l58-l85 hidden>🧭<span class="tx"> 임장</span></a>
-      <a href="../index.html">🏠<span class="tx"> 초기화면</span></a>
+      <button type="button" data-l100-notice="1" aria-pressed="false">📢<span class="tx"> 공지</span></button><a href="../index.html">🏠<span class="tx"> 초기화면</span></a>
       <button type="button" id="mapHeadThemeL85" title="다크 모드로 전환">🌙</button>
       <button type="button" id="mapHeadResetL85">초기화</button>
     </div>
@@ -1756,8 +1792,8 @@ body.l36 #baseLibSelect, body.l36 .lib-row:has(> #baseLibSelect){display:none !i
             <button class="tab-btn active" data-schart="sale">매매가 추이</button>
             <button class="tab-btn" data-schart="jeonse">전세가 추이</button>
             <button class="tab-btn" data-schart="jeonseRatioSelf">전세가율 추이</button>
-            <button class="tab-btn" data-schart="saleRatio">매매 배율 추이</button>
-            <button class="tab-btn" data-schart="jeonseRatio">전세 배율 추이</button>
+            <button class="tab-btn" data-schart="saleRatio">매매 비율 추이</button>
+            <button class="tab-btn" data-schart="jeonseRatio">전세 비율 추이</button>
           </div>
           <div class="toggle-group">
             <button class="btn small fair-cta" id="singleFairLineToggle">📈 적정가 확인하기</button>
@@ -1900,9 +1936,9 @@ body.l36 #baseLibSelect, body.l36 .lib-row:has(> #baseLibSelect){display:none !i
               <button class="tab-btn active" data-chart="sale">매매가 추이</button>
               <button class="tab-btn" data-chart="jeonse">전세가 추이</button>
               <button class="tab-btn" data-chart="jeonseRatioSelf">전세가율 추이</button>
-              <button class="tab-btn" data-chart="saleRatio">매매 배율 추이</button>
-              <button class="tab-btn" data-chart="jeonseRatio">전세 배율 추이</button>
-              <button class="tab-btn" data-chart="overlay">배율 오버레이</button>
+              <button class="tab-btn" data-chart="saleRatio">매매 비율 추이</button>
+              <button class="tab-btn" data-chart="jeonseRatio">전세 비율 추이</button>
+              <button class="tab-btn" data-chart="overlay">비율 오버레이</button>
               <button class="tab-btn" data-chart="multi">통합 비교</button>
             </div>
             <div class="toggle-group">
@@ -1936,8 +1972,8 @@ body.l36 #baseLibSelect, body.l36 .lib-row:has(> #baseLibSelect){display:none !i
         <div class="section-title"><h2>비교 요약 테이블</h2></div>
         <div class="table-wrap"><table id="summaryTable"><thead><tr>
           <th>단지명</th>
-          <th class="num">현재 매매가 (배율)</th><th class="num">적정가 (평균 배율)</th><th class="num">매매 배율 갭</th>
-          <th class="num">현재 전세가 (배율)</th><th class="num">적정가 (평균 배율)</th><th class="num">전세 배율 갭</th>
+          <th class="num">현재 매매가 (비율)</th><th class="num">적정가 (평균 비율)</th><th class="num">매매 비율 갭</th>
+          <th class="num">현재 전세가 (비율)</th><th class="num">적정가 (평균 비율)</th><th class="num">전세 비율 갭</th>
           <th>진단</th>
         </tr></thead><tbody></tbody></table></div>
       </section>
@@ -4170,10 +4206,10 @@ function badgeRulesL75(base, comp, diag){
 function fairBasisTextL75(r){
   if (!BUNDLES.L75 || !r || !r.fairBasisL75 || r.fairSale == null || isShortHistoryL28(r)) return '';
   const b = r.fairBasisL75, eok = v => (v / 10000).toFixed(1) + '억';
-  if (b.code === 1) return '배율 기준 ' + eok(b.l71Fair) + ' → 전고점 회복 기준으로 보정';
+  if (b.code === 1) return '비율 기준 ' + eok(b.l71Fair) + ' → 전고점 회복 기준으로 보정';
   if (b.code === 2) return '주변 ' + (b.partnerName || '단지') + ' 대비 평소 가격 차이로 보정';
-  if (b.code === 3) return '배율 기준 ' + eok(b.l71Fair) + ' → 보정 후 전세가 기준으로 상한 적용';
-  return '배율 기준';
+  if (b.code === 3) return '비율 기준 ' + eok(b.l71Fair) + ' → 보정 후 전세가 기준으로 상한 적용';
+  return '비율 기준';
 }
 // 묶음 L99A(11-10 대표님 결정 1): 근거 줄 이름을 "주변 단지 가격 관계 기준"으로(계산 방식 이름을 화면에 드러내지 않음), 금액은 L99A 표기
 function fairBasisTextL99A(r){
@@ -7929,22 +7965,22 @@ function renderEstSplitRefs(diagEl, syncEl, comp, estimate, key){
 // 앞에 현재·평균 배율 숫자(ratioDetailText)와 실측 상승률 문장을 먼저 붙인다.
 const SYNC_INTERPRETATION = {
   '저평가': {
-    veryHigh: '지난 상승장에서 기준단지 흐름을 매우 잘 따라왔던 단지라, 이 흐름이 이어진다면 낮아진 배율이 회복될 여지가 큰 편이에요.',
-    high: '지난 상승장에서 기준단지 흐름을 잘 따라왔던 단지라, 이 흐름이 이어진다면 낮아진 배율이 회복될 여지가 있어요.',
-    mid: '지난 상승장에서 기준단지 흐름을 어느 정도 따라왔던 단지라, 배율이 회복될 여지는 있지만 속도는 지켜볼 필요가 있어요.',
-    low: '지난 상승장에서 기준단지를 잘 따라오지 못했던 단지라, 이번에도 배율이 예전 수준까지 회복되지 않을 수 있어요.',
-    veryLow: '지난 상승장에서 기준단지를 거의 따라오지 못했던 단지라, 낮아진 배율이 그대로 이어질 수도 있어요.'
+    veryHigh: '지난 상승장에서 기준단지 흐름을 매우 잘 따라왔던 단지라, 이 흐름이 이어진다면 낮아진 비율이 회복될 여지가 큰 편이에요.',
+    high: '지난 상승장에서 기준단지 흐름을 잘 따라왔던 단지라, 이 흐름이 이어진다면 낮아진 비율이 회복될 여지가 있어요.',
+    mid: '지난 상승장에서 기준단지 흐름을 어느 정도 따라왔던 단지라, 비율이 회복될 여지는 있지만 속도는 지켜볼 필요가 있어요.',
+    low: '지난 상승장에서 기준단지를 잘 따라오지 못했던 단지라, 이번에도 비율이 예전 수준까지 회복되지 않을 수 있어요.',
+    veryLow: '지난 상승장에서 기준단지를 거의 따라오지 못했던 단지라, 낮아진 비율이 그대로 이어질 수도 있어요.'
   },
   '고평가': {
-    veryHigh: '지난 상승장에서 기준단지보다 더 크게 반응했던 단지라 지금 배율이 높아진 것도 그 연장일 수 있지만, 과열 가능성도 함께 봐야 해요.',
-    high: '지난 상승장에서 기준단지를 잘 따라왔던 단지라 지금 배율이 높아진 것도 그 연장일 수 있지만, 일시적인 과열일 가능성도 함께 봐야 해요.',
-    mid: '지난 상승장보다 다소 높은 배율까지 올라온 상태라, 이 수준이 유지되는지 지켜볼 필요가 있어요.',
-    low: '지난 상승장에서 기준단지를 잘 따라오지 못했던 단지가 지금은 배율이 높아진 상태예요. 이유는 별도로 확인이 필요해요.',
-    veryLow: '지난 상승장에서 기준단지와 거의 따로 움직였던 단지가 지금은 배율이 높아진 상태예요. 이유는 별도로 확인이 필요해요.'
+    veryHigh: '지난 상승장에서 기준단지보다 더 크게 반응했던 단지라 지금 비율이 높아진 것도 그 연장일 수 있지만, 과열 가능성도 함께 봐야 해요.',
+    high: '지난 상승장에서 기준단지를 잘 따라왔던 단지라 지금 비율이 높아진 것도 그 연장일 수 있지만, 일시적인 과열일 가능성도 함께 봐야 해요.',
+    mid: '지난 상승장보다 다소 높은 비율까지 올라온 상태라, 이 수준이 유지되는지 지켜볼 필요가 있어요.',
+    low: '지난 상승장에서 기준단지를 잘 따라오지 못했던 단지가 지금은 비율이 높아진 상태예요. 이유는 별도로 확인이 필요해요.',
+    veryLow: '지난 상승장에서 기준단지와 거의 따로 움직였던 단지가 지금은 비율이 높아진 상태예요. 이유는 별도로 확인이 필요해요.'
   },
   '적정': {
-    veryHigh: '지난 상승장에서 기준단지 흐름을 매우 잘 따라왔고 지금도 그 배율 근처에 있어, 기준단지와 가장 비슷하게 움직여온 단지로 볼 수 있어요.',
-    high: '지난 상승장에서 기준단지 흐름을 잘 따라왔고 지금도 그 배율 근처에 있어, 기준단지와 비슷하게 움직여온 단지로 볼 수 있어요.',
+    veryHigh: '지난 상승장에서 기준단지 흐름을 매우 잘 따라왔고 지금도 그 비율 근처에 있어, 기준단지와 가장 비슷하게 움직여온 단지로 볼 수 있어요.',
+    high: '지난 상승장에서 기준단지 흐름을 잘 따라왔고 지금도 그 비율 근처에 있어, 기준단지와 비슷하게 움직여온 단지로 볼 수 있어요.',
     mid: '지난 상승장에서 기준단지 흐름을 어느 정도 따라왔고, 지금도 평균 범위 안에 있어요.',
     low: '지난 상승장에서는 기준단지를 잘 따라오지 못했지만 지금은 평균 범위 안에 있어요. 기준단지와 다른 가격 흐름을 가진 단지일 수 있어요.',
     veryLow: '지난 상승장에서 기준단지와 거의 따로 움직였고 지금도 평균 범위 안이라, 기준단지와는 별개로 판단하는 게 나을 수 있어요.'
@@ -12299,6 +12335,99 @@ if (typeof document !== 'undefined'){
   document.addEventListener('keydown', (e) => { const el = e.target && e.target.closest ? e.target.closest('.mz92') : null; if (!el) return;
     if (e.key === 'Enter' || e.key === ' '){ e.preventDefault(); el.click(); } else if (e.key === 'Escape'){ el.classList.remove('open'); el.setAttribute('aria-expanded', 'false'); } });
 }
+// 묶음 L100: 단지 정보 카드 학군 줄의 학교 이름(표 첫 칸·가까운 중학교 목록) → 지도가 그 학교로(📍, 확대 16 미만이면 16) — 지도 패널 안에서만, 그 밖에서는 지금처럼
+try { if (window.parent !== window && window.parent.CALC_MAP_L84) document.documentElement.classList.add('l100-map'); } catch (e) {}
+if (typeof document !== 'undefined'){
+  document.addEventListener('click', (e) => {
+    const t = e.target; if (!t || !t.closest) return; const pop = t.closest('.mz92-pop'); if (!pop || t.closest('small, a, button')) return;
+    const el = t.closest('.r94-t tr:not(.r96-h):not(.r94-sub) td:first-child, .mz92-t td:first-child, .r94-g li > span:first-child:not(.r96-i)'); if (!el || !pop.contains(el)) return;
+    let P = null; try { P = window.parent !== window ? window.parent.CALC_MAP_L84 : null; } catch (er) {} if (!P || !P.pinSchool100) return;
+    const tn = [...el.childNodes].find(x => x.nodeType === 3 && x.textContent.trim()), nm = tn ? tn.textContent.trim() : ''; if (!nm) return;
+    const own = pop.closest('.mz92'); if (P.pinSchool100(nm, own ? own.dataset.mz92Sd : '')){ e.preventDefault(); e.stopPropagation(); }
+  }, true);
+}
+// ---- 묶음 L100: [공지] 탭 — 업데이트 기록(아래 표) + 저평가 기록(적정가 추적 선정 자료) ----
+// 업데이트 기록은 새 배포마다 이 목록 맨 위에 한 줄씩 더한다(글은 사용자 말로, 공식·계산식 문구 금지).
+const NOTICE_L100 = [
+  ['11-12', '학군 창 학교 위치', '학군 창과 단지 정보의 학교 이름을 누르면 지도가 그 학교로 이동하고 📍가 붙습니다. 학원가 말풍선의 "비슷한 학원가"는 이름마다 학원 수를 보여 줍니다.'],
+  ['11-12', '공지 탭', '업데이트 기록과 저평가·고평가 기록을 한곳에서 봅니다.'],
+  ['11-11', '학원가 권역·재건축 탭', '학원가를 색 3단계와 수도권 권역(대치·목동·평촌…)으로 보고, 단지 패널에 [🏗 재건축] 탭(진행 단계·세대 구성)을 추가했습니다.'],
+  ['11-11', '경사도', '지도에서 [경사도]로 오르막·내리막을 볼 수 있습니다.'],
+  ['11-11', '금액 표기 정리', '"15.0억"을 "15억"으로 보이게 했습니다.'],
+  ['11-11', '쌍둥이 상승률 선·분양 표시', '쌍둥이 단지 상승률 선이 바로 바뀌고, 분양 정보에 상한제 추정을 표시합니다.'],
+  ['11-10', '11월 시세 갱신', '2026년 10월 시세로 갱신했습니다.'],
+  ['11-09', '임대 배지·쌍둥이 전세 단추', '임대 배지와 쌍둥이 전세 단추를 추가했습니다.'],
+  ['11-08', '학구·학군 작은 창', '초등 학구·중학 학군을 오른쪽 작은 창으로 보고, 학교를 누르면 학구가 화면에 들어옵니다.'],
+  ['11-07', '지도 1차', '지도 중심 화면(구역·학교·학군·단지)을 처음 공개했습니다.'],
+  ['11-04', '첫 화면·임장 보충', '첫 화면과 임장 체크리스트를 보충했습니다.']
+];
+const NOTICE_URL_L100 = '지도자료_202611/공지_저평가기록_1112.json';
+let noticeStateL100 = 'idle', noticeDataL100 = null, noticePrevActiveL100 = null;
+function noticeEokL100(v){ if (v == null) return '—'; const e = v / 10000; return (e >= 10 ? String(Math.round(e * 10) / 10).replace(/\.0$/, '') : String(Math.round(e * 100) / 100)) + '억'; }
+// 저평가 = 적정가가 현재가보다 높은 만큼, 고평가 = 현재가가 적정가보다 높은 만큼(비율은 적정가 기준, 선정 때 값)
+function noticeGapL100(kind, r){
+  const c = r.선정현재가, f = r.선정적정가; if (!c || !f) return '—';
+  const d = kind === '저평가' ? f - c : c - f, pct = Math.round(d / f * 1000) / 10;
+  return '<span class="gl">' + esc(kind) + ' ' + String(pct).replace(/\.0$/, '') + '%</span> <span class="gl">· ' + noticeEokL100(d) + '</span>';
+}
+function noticeUpdatesL100(){
+  return '<table><thead><tr><th>날짜</th><th>내용</th><th class="hide-m">설명</th></tr></thead><tbody>' + NOTICE_L100.map(r => '<tr><td class="d">' + esc(r[0]) + '</td><td class="t">' + esc(r[1]) + '<span class="nt-sm show-m">' + esc(r[2]) + '</span></td><td class="hide-m">' + esc(r[2]) + '</td></tr>').join('') + '</tbody></table>';
+}
+function noticeTrackL100(){
+  const D = noticeDataL100; if (!D) return '<div class="nt-note">' + (noticeStateL100 === 'error' ? '기록을 받지 못했어요. 잠시 뒤 다시 열어 주세요.' : '기록을 불러오는 중이에요…') + '</div>';
+  const last = {}; (D.월별값 || []).forEach(r => { last[r.칸] = r; });
+  const sec = (kind, note) => {
+    const rows = (D.선정명단 || []).filter(r => r.구분 === kind);
+    return '<div class="nt-h3">' + esc(kind) + ' 단지<small>' + esc(note) + '</small></div>'
+      + '<table class="nt-fix"><thead><tr><th>순위</th><th>단지</th><th class="hide-m">지역</th><th class="hide-m">선정 시점 시세 → 적정가</th><th>'+esc(kind)+' 정도</th><th>변화</th></tr></thead><tbody>'
+      + rows.map(r => { const m = last[r.칸], ch = m && m['선정대비%'] != null ? (m['선정대비%'] > 0 ? '+' : '') + m['선정대비%'] + '%' : '—';
+        return '<tr><td class="d">' + esc(r.순위) + '</td><td class="t"><a href="' + esc(r.화면주소) + '">' + esc(r.이름) + '</a>' + (r.표시 ? '<span class="nt-tag" tabindex="0" role="note" data-tip="선도단지는 주변보다 먼저 오르는 단지라 고평가 판정을 그대로 믿기 어렵습니다">선도단지라 판정 참고용</span>' : '') + '<span class="nt-sm">' + esc(r.지역 || '') + ' ' + esc(r.구 || '') + ' · ' + esc(r.평형칸) + '평 칸</span></td><td class="hide-m">' + esc(r.지역 || '') + '</td><td class="hide-m">' + '<span class="gl">' + noticeEokL100(r.선정현재가) + '</span> <span class="gl">→ ' + noticeEokL100(r.선정적정가) + '</span></td><td class="n g">' + noticeGapL100(kind, r) + '</td><td class="n">' + ch + '</td></tr>'; }).join('')
+      + '</tbody></table>';
+  };
+  const n = D.수 || {}, sm = (D.요약 || []).filter(s => s.기준월 === D.최신월);
+  const line = sm.length ? sm.map(s => s.구분 + ' 평균 ' + (s['평균변화%'] > 0 ? '+' : '') + s['평균변화%'] + '%').join(' · ') : '';
+  return '<div class="nt-note">' + esc(D.안내 || '') + (line ? '<br>' + esc(line) : '') + '</div>' + sec('저평가', (n.저평가 != null ? n.저평가 + '곳' : '')) + sec('고평가', (n.고평가 != null ? n.고평가 + '곳' : '') + (D.부족 && D.부족.고평가 && Object.keys(D.부족.고평가).length ? ' (' + Object.keys(D.부족.고평가).map(k => k + ' 해당 없음').join(', ') + ')' : ''))
+    + '<div class="nt-foot">' + esc(D.주의문 || '') + '. 선정은 정해 둔 달의 계산기 판정 명단을 고치지 않고 그대로 보관한 것이고, "그 뒤 변화"는 선정 시점 시세 대비 최신 시세의 변화예요. 단지 이름을 누르면 그 단지 화면이 열려요.</div>';
+}
+function renderNoticeL100(){
+  const el = document.getElementById('noticeL100'); if (!el) return;
+  el.querySelector('[data-nt-sec="up"]').innerHTML = noticeUpdatesL100();
+  el.querySelector('[data-nt-sec="track"]').innerHTML = noticeTrackL100();
+}
+function loadNoticeL100(){
+  if (noticeStateL100 === 'loading' || noticeStateL100 === 'loaded') return;
+  noticeStateL100 = 'loading';
+  fetch(NOTICE_URL_L100, { cache: 'no-cache' }).then(r => { if (!r.ok) throw new Error(r.status); return r.json(); }).then(j => { noticeDataL100 = j; noticeStateL100 = 'loaded'; renderNoticeL100(); }).catch(() => { noticeStateL100 = 'error'; renderNoticeL100(); });
+}
+function closeNoticeL100(){
+  const el = document.getElementById('noticeL100'); if (!el || el.hidden) return; el.hidden = true;
+  const head = document.getElementById('mapHeadL85'), nb = head && head.querySelector('[data-l100-notice]');
+  if (nb){ nb.classList.remove('active'); nb.setAttribute('aria-pressed', 'false'); }
+  if (head && noticePrevActiveL100){ const b = head.querySelector('[data-l85-mode="' + noticePrevActiveL100 + '"]'); if (b) b.classList.add('active'); } noticePrevActiveL100 = null;
+}
+function openNoticeL100(sec){
+  const el = document.getElementById('noticeL100'), head = document.getElementById('mapHeadL85'); if (!el || !head) return;
+  const cur = head.querySelector('[data-l85-mode].active'); noticePrevActiveL100 = cur ? cur.dataset.l85Mode : 'map';
+  head.querySelectorAll('[data-l85-mode]').forEach(x => x.classList.remove('active'));
+  const nb = head.querySelector('[data-l100-notice]'); if (nb){ nb.classList.add('active'); nb.setAttribute('aria-pressed', 'true'); }
+  el.hidden = false; showNoticeSecL100(sec || 'up'); loadNoticeL100(); el.scrollTop = 0;
+}
+function showNoticeSecL100(sec){
+  const el = document.getElementById('noticeL100'); if (!el) return;
+  el.querySelectorAll('[data-nt-sec]').forEach(x => { x.hidden = x.dataset.ntSec !== sec; });
+  el.querySelectorAll('.nt-sub button').forEach(b => b.classList.toggle('active', b.dataset.ntTab === sec));
+  window.NOTICE_SEC_L100 = sec;
+}
+function wireNoticeL100(){
+  const head = document.getElementById('mapHeadL85'); if (!head || head._ntWired) return; head._ntWired = true;
+  renderNoticeL100();
+  head.addEventListener('click', (e) => { const nb = e.target.closest('[data-l100-notice]'); if (nb){ const el = document.getElementById('noticeL100'); if (el && !el.hidden) closeNoticeL100(); else openNoticeL100(); return; }
+    if (e.target.closest('[data-l85-mode]')) closeNoticeL100(); }, true);
+  const el = document.getElementById('noticeL100');
+  el.addEventListener('click', (e) => { const t = e.target.closest('.nt-sub button'); if (t) showNoticeSecL100(t.dataset.ntTab); });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeNoticeL100(); });
+}
+if (typeof document !== 'undefined'){ if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', wireNoticeL100); else wireNoticeL100(); }
 function favSchoolTextL59(id, kind){
   if (kind === 'elem') return favElemSchoolTextL59(id);   // 109단계
   const S = typeof window !== 'undefined' ? window.SCHOOL_INFO_L59 : null;
@@ -12386,6 +12515,14 @@ function saleBizNoteL99A(b, ext){
   if (k === '청약홈 공고문') return '근거: 청약홈 모집공고문' + (b.사업유형근거_설명 ? ' — ' + esc(b.사업유형근거_설명) : '');
   return '';
 }
+// 묶음 L100: 평당가(기사) → 대표 평수 25·34평 환산 = 평당가 × 평형, 억 한 자리(1억 미만은 "9,800만"). 기사마다 숫자가 둘이면 각각 환산해 " / "로 이음
+function saleConvL100(raw){
+  const parts = String(raw).split(/\s*\/\s*/).map(t => { const m = t.match(/^\s*([\d,]+)\s*(\(.*\))?\s*$/); return m ? { v: Number(m[1].replace(/,/g, '')), tag: m[2] || '' } : null; });
+  const base = '평당 ' + esc(raw) + '만 원';
+  if (!parts.length || parts.some(x => !x || !isFinite(x.v) || x.v <= 0)) return base;
+  const conv = (py) => parts.map(x => fmtWonL99A(Math.round(x.v * py)) + esc(x.tag)).join(' / ');
+  return base + ' · 25평 환산 약 ' + conv(25) + ' · 34평 환산 약 ' + conv(34) + ' ' + tipL99A('환산 = 평당 분양가에 평형을 곱한 값으로, 실제 주택형 분양가와 다를 수 있어요.');
+}
 function saleTipL99A(id){
   const b = saleOfL99A(id), meta = (L99A.bunyang || {})._meta || {};
   if (!b) return '<div class="mz92-n">분양 정보를 찾지 못했어요.</div>';
@@ -12394,7 +12531,7 @@ function saleTipL99A(id){
   const ch = b.출처 === '청약홈';
   const when = ch ? (b.모집공고일 ? esc(ymKorL99A(b.모집공고일)) + ' 모집공고' : '') : (b.분양연월 ? esc(ymKorL99A(b.분양연월)) + ' 분양' : '');
   let price = b.최고분양가 ? String(b.최고분양가).split(/\s*\/\s*/).map(esc).join('<br>') : '';
-  if (!price && b['평균분양가_3.3㎡_만원']) price = '<span class="si99-b">주택형별 최고가는 기사에 없음</span><br>평균 3.3㎡당 ' + esc(b['평균분양가_3.3㎡_만원']) + '만원';
+  if (!price && b['평균분양가_3.3㎡_만원']) price = '<span class="si99-b">주택형별 최고가는 기사에 없음</span><br>' + saleConvL100(b['평균분양가_3.3㎡_만원']);   // 묶음 L100: 평당 + 25·34평 환산(주택형별 최고 분양가가 있으면 price가 이미 차 있어 환산 없음)
   let comp = '';
   if (b.경쟁률){
     comp = esc(b.경쟁률) + (ch && b.경쟁률_해당지역 ? ' <small>(해당지역만 ' + esc(b.경쟁률_해당지역) + ')</small>' : '');
@@ -13423,7 +13560,7 @@ function priceWithRatioCell(price, ratio){
 function labelSummaryTableBasisL30(base){
   try {
     const ths = document.querySelectorAll('#summaryTable thead th');
-    if (ths && ths.length >= 6){ ths[2].textContent = '기준단지 대비 적정가 (평균 배율)'; ths[5].textContent = '기준단지 대비 적정가 (평균 배율)'; }
+    if (ths && ths.length >= 6){ ths[2].textContent = '기준단지 대비 적정가 (평균 비율)'; ths[5].textContent = '기준단지 대비 적정가 (평균 비율)'; }
     const table = document.getElementById('summaryTable');
     const wrap = table && table.parentNode;
     if (!wrap || !wrap.parentNode) return;
