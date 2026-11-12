@@ -1757,7 +1757,7 @@ body.l36 #baseLibSelect, body.l36 .lib-row:has(> #baseLibSelect){display:none !i
       <a href="../rate-simulator/비례율_시뮬레이터.html">🧮<span class="tx"> 비례율</span></a>
       <a href="../redevelopment-list/재개발_목록표.html" data-l58-l85 hidden>🏗️<span class="tx"> 목록표</span></a>
       <a href="../imjang/" data-l58-l85 hidden>🧭<span class="tx"> 임장</span></a>
-      <button type="button" data-l100-notice="1" aria-pressed="false">📢<span class="tx"> 공지</span></button><a href="../index.html">🏠<span class="tx"> 초기화면</span></a>
+      <a href="../index.html">🏠<span class="tx"> 초기화면</span></a>
       <button type="button" id="mapHeadThemeL85" title="다크 모드로 전환">🌙</button>
       <button type="button" id="mapHeadResetL85">초기화</button>
     </div>
@@ -12361,6 +12361,7 @@ const NOTICE_L100 = [
   ['11-07', '지도 1차', '지도 중심 화면(구역·학교·학군·단지)을 처음 공개했습니다.'],
   ['11-04', '첫 화면·임장 보충', '첫 화면과 임장 체크리스트를 보충했습니다.']
 ];
+const NOTICE_OFF_L100 = true;   // 11-13 긴급: 공지 탭 끔(버튼 없음·자료 안 받음)
 const NOTICE_URL_L100 = '지도자료_202611/공지_저평가기록_1112.json';
 let noticeStateL100 = 'idle', noticeDataL100 = null, noticePrevActiveL100 = null;
 function noticeEokL100(v){ if (v == null) return '—'; const e = v / 10000; return (e >= 10 ? String(Math.round(e * 10) / 10).replace(/\.0$/, '') : String(Math.round(e * 100) / 100)) + '억'; }
@@ -12395,6 +12396,7 @@ function renderNoticeL100(){
   el.querySelector('[data-nt-sec="track"]').innerHTML = noticeTrackL100();
 }
 function loadNoticeL100(){
+  if (NOTICE_OFF_L100) return;
   if (noticeStateL100 === 'loading' || noticeStateL100 === 'loaded') return;
   noticeStateL100 = 'loading';
   fetch(NOTICE_URL_L100, { cache: 'no-cache' }).then(r => { if (!r.ok) throw new Error(r.status); return r.json(); }).then(j => { noticeDataL100 = j; noticeStateL100 = 'loaded'; renderNoticeL100(); }).catch(() => { noticeStateL100 = 'error'; renderNoticeL100(); });
@@ -12406,6 +12408,7 @@ function closeNoticeL100(){
   if (head && noticePrevActiveL100){ const b = head.querySelector('[data-l85-mode="' + noticePrevActiveL100 + '"]'); if (b) b.classList.add('active'); } noticePrevActiveL100 = null;
 }
 function openNoticeL100(sec){
+  if (NOTICE_OFF_L100) return;
   const el = document.getElementById('noticeL100'), head = document.getElementById('mapHeadL85'); if (!el || !head) return;
   const cur = head.querySelector('[data-l85-mode].active'); noticePrevActiveL100 = cur ? cur.dataset.l85Mode : 'map';
   head.querySelectorAll('[data-l85-mode]').forEach(x => x.classList.remove('active'));
