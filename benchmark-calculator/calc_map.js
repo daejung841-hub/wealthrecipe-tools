@@ -449,6 +449,20 @@
     .cm84-panel:not([data-t91="jg"]) .cm84-split91 > .cm84-jg99{display:none}
     .cm84-ph .jg99b{display:none}
   }
+  /* 묶음 L100a: 학군 창 학교 이름 누르기 → 지도 이동(이름에만 — 상위 %·진학률·꼬리표는 누르기·밑줄·손가락 없음) */
+  .cm84-scc .sct td:first-child,.cm84-scc .r94-t tr:not(.r96-h):not(.r94-sub) td:first-child,.cm84-scc ul.u97b li > b:first-child:not(.r95-top),.cm84-scc ul.u97b li > span:first-child:not(.r96-i),.cm84-scc .r94-g li > span:first-child:not(.r96-i){cursor:pointer}
+  .cm84-scc .sct td:first-child:hover,.cm84-scc .r94-t tr:not(.r96-h):not(.r94-sub) td:first-child:hover,.cm84-scc ul.u97b li > b:first-child:not(.r95-top):hover,.cm84-scc ul.u97b li > span:first-child:not(.r96-i):hover,.cm84-scc .r94-g li > span:first-child:not(.r96-i):hover{color:#1C7ED6;text-decoration:underline}
+  .cm84-scc small{cursor:default}.cm84-scc .r96-i,.cm84-scc .r96-i *{cursor:help}
+  .cm84-pin100{position:absolute;left:0;top:0;transform:translate(-50%,-100%);white-space:nowrap;pointer-events:none;background:#fff;border:2px solid #C2255C;color:#C2255C;border-radius:999px;padding:1px 8px;font-size:12px;font-weight:800;box-shadow:0 2px 6px rgba(0,0,0,.2)}
+  /* 묶음 L100: 학군 이름표 — 아래 작은 줄 "서울 상위 ○%", 고른 학군은 1.3배·굵게 */
+  .cm84-scl small.pc100{display:block;font-size:9.5px;font-weight:600;line-height:1.3;opacity:.9}
+  .cm84-scl.sel{font-size:13.7px;font-weight:800;border-style:solid;border-width:1.5px;background:rgba(255,255,255,.95)}
+  .cm84-scl.sel small.pc100{font-size:12.3px;font-weight:700}
+  .cm84-sch.m100{font-size:10.5px;padding:0 6px;}
+  .cm84-sch.m100.dot100{width:9px;height:9px;padding:0;font-size:0;border-width:1.5px;background:var(--s);opacity:.85;}
+  .cm84-sch.m100.ins{box-shadow:0 0 0 2px rgba(194,37,92,.35),0 1px 3px rgba(0,0,0,.2);}
+  .cm84-sch.m100.on{font-size:12.5px;padding:1px 9px;z-index:3;}
+  .cm84-sch.m100.dot100.on{width:13px;height:13px;}
   /* 묶음 L99A(11-10 피드백): [경계]·[학원가] 켬 색, 경계 이름표·말풍선, 학원가 이름표, 안내 띠, 경계 출처 ⓘ */
   .cm84.vb98b #cm84Bd[aria-pressed="true"]{background:#495057;border-color:#495057;color:#fff}
   .cm84.vb98b #cm84Az[aria-pressed="true"]{background:#E67700;border-color:#E67700;color:#fff}
@@ -2073,13 +2087,13 @@
     const c = []; (AC.rg ? AC.rg.features : []).forEach(f => { const p = f.properties; if (p.이름 !== self && p.권역 !== grp && p.학원수합계 >= n * .7 && p.학원수합계 <= n * 1.3) c.push({ nm: p.이름, v: p.학원수합계 }); });
     (AC.d ? AC.d.features : []).forEach(f => { const p = f.properties, nm = acName99c(p); if (nm !== self && (!grp || p.통칭 !== grp) && nm !== grp && p.학원수 >= n * .7 && p.학원수 <= n * 1.3) c.push({ nm, v: p.학원수 }); });
     c.sort((a, b) => Math.abs(a.v - n) - Math.abs(b.v - n)); const out = [], seen = new Set(); c.forEach(x => { if (out.length < 3 && !seen.has(x.nm)){ seen.add(x.nm); out.push(x); } });
-    return out.length ? '비슷한 학원가: ' + out.map(x => x.nm).join(' · ') + ' (' + near1(n) + ')' : '';
+    return out.length ? '비슷한 학원가: ' + out.map(x => x.nm + '(' + near1(x.v) + ')').join(' · ') : '';
   }
   function acTipText99c(P){
     const sc = AC.rgList.length ? '<br><small class="sc">' + esc(acScale99c()) + '</small>' : '';
     if (P.학원수합계 != null){
       const L = AC.rgList, k = L.findIndex(r => r.n === P.권역) + 1, nr = acNear99c(P.학원수합계, P.이름, P.권역);
-      return fmt99c(P.학원수합계) + '곳 (학원가 ' + P.덩어리수 + '곳 묶음) · 수도권 학원가 권역 ' + L.length + '곳 중 ' + k + '위' + (nr ? '<br>' + esc(nr) : '') + sc;
+      return fmt99c(P.학원수합계) + '곳 (학원가 ' + P.덩어리수 + '곳 묶음) · 수도권 학원가 권역 ' + L.length + '곳 중 ' + k + '위 · 상위 ' + Math.max(1, Math.round(k / L.length * 100)) + '%' + (nr ? '<br>' + esc(nr) : '') + sc;
     }
     const tot = AC.d ? AC.d.features.length : 0, up = AC.d ? AC.d.features.filter(f => f.properties.학원수 >= P.학원수).length : 0, nr = acNear99c(P.학원수, acName99c(P), P.통칭);
     return fmt99c(P.학원수) + '곳' + (tot ? ' · 수도권 학원가 상위 약 ' + Math.max(1, Math.round(up / tot * 100)) + '%' : '') + (nr ? '<br>' + esc(nr) : '') + sc;
@@ -2955,7 +2969,7 @@
   // ---------- 지도 1-3(묶음 L84_SC): 초등 학구도·중학교 학군 — 오른쪽 세로 버튼(기본 꺼짐), 켜면 지금 보는 시도 파일만 받아 경계선 + 학구 이름, 패널에 배정 학교 ----------
   // 자료: 분석 탭 결과_학구도(지도용_10m 델타 판·school_elem_202609·school_mid_202609 — 기존 school_elem.js는 그대로). '_'로 시작하는 키(_meta·_표시·_zones)는 단지로 읽지 않는다
   const SC = { base: '지도자료_202609/학구도/', elem: ['school_elem_202609.js', 'SCHOOL_ELEM_202609'], mid: ['school_mid_202609.js', 'SCHOOL_MID_202609'],
-    zone: { elem: '초등_%s_델타.json', mid: '중학_%s_델타.json' }, attr: { elem: '초등_속성.json', mid: '중학_속성.json' }, minZoom: 13, labelZoom: 15, labelMax: 40,
+    zone: { elem: '초등_%s_델타.json', mid: '중학_%s_델타.json' }, attr: { elem: '초등_속성.json', mid: '중학_속성.json' }, minZoom: 13, minZoomMid: 11, labelZoom: 15, labelMax: 40,
     style: { elem: { c: '#1864AB', dash: 'shortdash', name: '초등 학구도' }, mid: { c: '#C2255C', dash: 'longdash', name: '중학교 학군' } },
     sido: [['서울', [37.41, 126.76, 37.72, 127.19]], ['인천', [37.0, 126.0, 37.85, 126.80]], ['경기', [36.89, 126.37, 38.30, 127.86]]],
     note: '학구도는 참고용이며 실제 배정은 교육지원청 고시를 따릅니다.', src: '학구도안내서비스',
@@ -2987,6 +3001,149 @@
       if (!scOn[kind]){ if (kind === 'elem') scSel = null; if (kind === 'mid' && midSel93){ midSel93 = null; styleMid93(); } scCard(null, kind); } else { loadSchoolPts(); if (kind === 'mid') loadAssign(); } }
     drawSchool();
   }
+  // 묶음 L100a(11-11~12): 학군 창·단지 정보의 학교 이름을 누르면 지도가 그 학교로(📍, 확대 16 미만이면 16). 위치는 학교 위치 파일(SCP) 그대로
+  //   링크는 학교 이름에만 — "서울 상위 87%"·진학률·작은 꼬리표(자사고·남녀)는 누르기 없음. 단지 정보 카드(계산기 HTML)는 window.CALC_MAP_L84.pinSchool100을 부름
+  let schPin100 = null;
+  function schPinOff100(){ if (schPin100){ try { schPin100.setMap(null); } catch (e) {} schPin100 = null; } }
+  function schFind100(nm, sd){
+    const nm0 = String(nm || '').trim(); if (!nm0 || !SCP) return null;
+    const c = [nm0]; if (/중$/.test(nm0)) c.push(nm0 + '학교'); else if (/초$/.test(nm0)) c.push(nm0 + '등학교');
+    const by = (SCP.midBySido && sd && SCP.midBySido[sd]) || null;
+    for (const n of c){ const q = (by && by[n]) || (SCP.mid && SCP.mid[n]); if (q && q[2] != null) return { name: n, lat: q[2], lng: q[3] }; }
+    return null;
+  }
+  function schPinTo100(nm, sd){
+    const go = () => {
+      const p = schFind100(nm, sd); if (!p || !map) return false;
+      schPinOff100();
+      schPin100 = new NV.Marker({ map, position: new NV.LatLng(p.lat, p.lng), zIndex: 95, clickable: false, icon: { content: '<div class="cm84-pin100">📍 ' + esc(shortSch(p.name)) + '</div>', anchor: new NV.Point(0, 0) } });
+      const mob = window.innerWidth < 768; if (mob && panel && panel.classList.contains('on')){ panel.classList.remove('full'); panel.classList.add('mini95'); setTimeout(resize, 220); }
+      const mv = () => { try { map.setCenter(new NV.LatLng(p.lat, p.lng)); if (map.getZoom() < 16) map.setZoom(16); } catch (e) {} };
+      if (mob) setTimeout(mv, 260); else mv();
+      window.CALC_MAP_L84.pin100 = { name: p.name, lat: p.lat, lng: p.lng };
+      return true;
+    };
+    if (SCP) return go();
+    loadSchoolPts().then(() => { go(); }); return true;
+  }
+  function schClick100(ev){
+    if (ev.target.closest('.scx, .more97b, .i97b, small')) return;
+    const c = ev.currentTarget, el = ev.target.closest('.sct td:first-child, .r94-t tr:not(.r96-h):not(.r94-sub) td:first-child, ul.u97b li > b:first-child:not(.r95-top), ul.u97b li > span:first-child:not(.r96-i), .r94-g li > span:first-child:not(.r96-i)'); if (!el || !c.contains(el)) return;
+    const tn = [...el.childNodes].find(n => n.nodeType === 3 && n.textContent.trim()), nm = tn ? tn.textContent : ''; if (!nm) return;
+    const sd = c.dataset.kind === 'elem' ? (scSel && scSel.sd) : c.dataset.sd; schPinTo100(nm, sd);
+  }
+  // 묶음 L100: [중학] 켜면 화면 안 학군 경계를 전부 — 확대 11부터, 멀수록 가는 선(11~12 얇게 · 13~14 보통 · 15~ 지금 굵기)
+  const midW100 = () => { const z = map ? map.getZoom() : 15; return z >= 15 ? 2.4 : z >= 13 ? 1.8 : 1.1; };
+  const midOp100 = () => { const z = map ? map.getZoom() : 15; return z >= 15 ? .9 : z >= 13 ? .8 : .6; };
+  // ---- 묶음 L100: 중학교 학군 이름표 — ① 이름 아래 작게 "서울 상위 ○%"(소속 중학교 진학률 평균을 시도 안 학군끼리 비교, 자료 없는 학군은 줄 생략) ② 각 학군 이름표를 자기 면 안쪽에 두고
+  //   이웃 경계를 넘으면 자기 면 안쪽으로 밀어 넣음(겹치면 숨기지 않고 자리 조정) ③ 고른 학군은 이름표 1.3배·굵게, 고른 학군 경계 안에는 다른 학군 이름표를 내지 않음
+  const zonesBySd100 = {}, zonePct100 = {};
+  let ml100 = [], mlT100 = null, assign100 = null;
+  function midLblClear100(){ ml100.forEach(m => { try { m.setMap(null); } catch (e) {} }); ml100 = []; midSchClear100(); }
+  function zonePctMap100(sd){
+    if (zonePct100[sd]) return zonePct100[sd];
+    const Z = zonesBySd100[sd], M = assign100;
+    if (!Z || !M || !M._zones || !rate94() || rateStateL94(sd) !== 'loaded') return null;
+    const sc = [];
+    Z.forEach(z => { const zn = M._zones[z.zid], list = zn ? zn[2] || [] : [], vs = [];
+      list.forEach(n => { const q = rateOfL94(sd, n); if (q && !q.miss && q.v && q.v[0] != null && q.v[2] != null) vs.push(q.v[0]); });
+      if (vs.length) sc.push([z.zid, vs.reduce((a, b) => a + b, 0) / vs.length]); });
+    sc.sort((a, b) => b[1] - a[1]);
+    const out = {}; sc.forEach(([zid], i) => { out[zid] = (i + 1) / sc.length * 100; });
+    return (zonePct100[sd] = out);
+  }
+  function midLabels100(){ if (mlT100) clearTimeout(mlT100); mlT100 = setTimeout(() => { mlT100 = null; midLabelsRun100(); }, 30); }
+  function midLabelsRun100(){
+    midLblClear100();
+    if (!map || !SC.on() || !scOn.mid || !scAttr.mid) return;
+    const zm = map.getZoom(); if (zm < SC.minZoomMid) return;
+    setTimeout(() => { if (scOn.mid && map) midSchDraw100(map.getZoom()); }, 0);   // 학교 점·이름표(c_l100sch)
+    if (!assign100){ loadAssign().then(([, M]) => { assign100 = M; midLabels100(); }); }
+    const sds = scVisSido();
+    if (rate94()) sds.forEach(sd => { if (rateStateL94(sd) !== 'loaded') loadRateL94(sd).then(() => { delete zonePct100[sd]; midLabels100(); }); });
+    const v = view(), W = v.oNE.x - v.oSW.x, H = v.oSW.y - v.oNE.y; if (!(W > 0 && H > 0)) return;
+    const S = v.sw.lat(), Nn = v.ne.lat(), Wl = v.sw.lng(), E = v.ne.lng(), kx = (E - Wl) / W, ky = (Nn - S) / H;   // 1픽셀 = 몇 도
+    const vis = (bb) => !(bb.n < S || bb.s > Nn || bb.e < Wl || bb.w > E);
+    const items = []; let selZ = null;
+    sds.forEach(sd => { const Z = zonesBySd100[sd]; if (!Z) return; const pm = zonePctMap100(sd);
+      Z.forEach(z => { if (z.zid === midSel93) selZ = z; if (!vis(z.bb)) return;
+        const a = (scAttr.mid || {})[z.zid], nm = a ? String(a[0]) : ''; if (!nm) return;
+        const p = pm && pm[z.zid] != null ? pm[z.zid] : null;
+        const w2 = Math.max(0, Math.min(z.bb.e, E) - Math.max(z.bb.w, Wl)), h2 = Math.max(0, Math.min(z.bb.n, Nn) - Math.max(z.bb.s, S));
+        items.push({ z, sd, nm, pct: p == null ? '' : sd + ' 상위 ' + (p < 1 ? '1% 안' : Math.round(p) + '%'), sel: z.zid === midSel93, area: w2 * h2 }); }); });
+    const cut = items.sort((a, b) => (b.sel - a.sel) || (b.area - a.area)).slice(0, zm >= 12 ? 70 : 40);   // 확대 11은 큰 학군 40곳만, 12부터 70곳
+    const stat = [], placed = [], cx0 = (Wl + E) / 2, cy0 = (S + Nn) / 2, G = 9;
+    cut.forEach(it => {
+      const fs = it.sel ? 13.7 : 10.5, sfs = it.sel ? 12.3 : 9.5, tw = (s, f) => [...s].reduce((a, ch) => a + (ch.charCodeAt(0) > 127 ? f : f * .6), 0);
+      const wpx = Math.max(tw(it.nm, fs), it.pct ? tw(it.pct, sfs) : 0) + 16, hpx = fs * 1.5 + (it.pct ? sfs * 1.3 : 0) + 6;
+      const hx = wpx / 2 * kx, hy = hpx / 2 * ky, z = it.z;
+      const ll = (y, x, sc) => [[y, x], [y + hy * sc, x + hx * sc], [y + hy * sc, x - hx * sc], [y - hy * sc, x + hx * sc], [y - hy * sc, x - hx * sc]];
+      const inOwn = (pts) => pts.reduce((n, p) => n + (inRings95(z.ll, p[0], p[1]) ? 1 : 0), 0);
+      const s1 = Math.max(z.bb.s, S + (Nn - S) * .06), n1 = Math.min(z.bb.n, Nn - (Nn - S) * .06), w1 = Math.max(z.bb.w, Wl + (E - Wl) * .06), e1 = Math.min(z.bb.e, E - (E - Wl) * .06);
+      let best = null, bs = -1e9;
+      if (s1 < n1 && w1 < e1){
+        for (const GG of [G, 25]){ if (best) break;   // 못 찾으면 더 촘촘히 한 번 더
+        for (let i = 0; i < GG; i++) for (let j = 0; j < GG; j++){
+          const y = s1 + (n1 - s1) * (i + .5) / GG, x = w1 + (e1 - w1) * (j + .5) / GG;
+          if (!inRings95(z.ll, y, x)) continue;
+          const p1 = ll(y, x, 1); if (selZ && selZ !== z && p1.some(p => inRings95(selZ.ll, p[0], p[1]))) continue;   // 고른 학군 경계 안에는 다른 학군 이름표 없음
+          let sc = inOwn(p1) * 10 + inOwn(ll(y, x, 1.6)) - (((y - cy0) / (Nn - S)) ** 2 + ((x - cx0) / (E - Wl)) ** 2) * 6;
+          const px = (x - Wl) / kx, py = (Nn - y) / ky;
+          placed.forEach(r => { if (Math.abs(px - r.x) < (wpx + r.w) / 2 + 2 && Math.abs(py - r.y) < (hpx + r.h) / 2 + 2) sc -= 40; });   // 겹치면 숨기지 않고 자리만 조정
+          if (sc > bs){ bs = sc; best = [y, x]; }
+        }
+        }
+      }
+      if (!best && it.sel){ const q = labelPos95(z, v); if (q) best = q; }
+      if (!best) return;
+      placed.push({ x: (best[1] - Wl) / kx, y: (Nn - best[0]) / ky, w: wpx, h: hpx });
+      stat.push({ zid: z.zid, y: best[0], x: best[1], own: inRings95(z.ll, best[0], best[1]), full: inOwn(ll(best[0], best[1], 1)) === 5, sel: it.sel, nm: it.nm, pct: it.pct });
+      ml100.push(new NV.Marker({ map, position: new NV.LatLng(best[0], best[1]), zIndex: it.sel ? 900 : 35, clickable: false,
+        icon: { content: '<div class="cm84-scl' + (it.sel ? ' sel' : '') + '" style="--s:' + SC.style.mid.c + '">' + esc(it.nm) + (it.pct ? '<small class="pc100">' + esc(it.pct) + '</small>' : '') + '</div>', anchor: new NV.Point(0, 0) } }));
+    });
+    window.CALC_MAP_L84.mlLast100 = { n: ml100.length, sel: selZ ? selZ.zid : null, zoom: zm, ownOut: stat.filter(t => !t.own).length, partIn: stat.filter(t => !t.full).length, inSel: selZ ? stat.filter(t => t.zid !== selZ.zid && inRings95(selZ.ll, t.y, t.x)).length : 0, withPct: stat.filter(t => t.pct).length, selNm: (stat.find(t => t.sel) || {}).nm, selPct: (stat.find(t => t.sel) || {}).pct, sample: stat.slice(0, 4).map(t => t.nm + (t.pct ? '|' + t.pct : '')) };
+  }
+  // ---- 묶음 L100: [중학]을 켜면 화면 안 중학교 위치(점 + 이름표)도 전부 — 확대 단계별로 개수 조절, 학교 점을 누르면 그 학교 창(소속 학군 목록) + 소속 학군 강조 ----
+  let msM100 = [], msSel100 = null, msZid100 = null;
+  function midSchClear100(){ msM100.forEach(m => { try { m.setMap(null); } catch (e) {} }); msM100 = []; }
+  function msZidMap100(){
+    const nk = Object.keys(zonesBySd100).length; if (!assign100 || !assign100._zones) return null; if (msZid100 && msZid100._k === nk) return msZid100;
+    const sdOf = {}; Object.keys(zonesBySd100).forEach(sd => (zonesBySd100[sd] || []).forEach(z => { sdOf[z.zid] = sd; }));
+    const o = {}; Object.keys(assign100._zones).forEach(zid => { const sd = sdOf[zid]; if (!sd) return; ((assign100._zones[zid] || [])[2] || []).forEach(n => { o[sd + '|' + n] = zid; }); });
+    Object.defineProperty(o, '_k', { value: nk, enumerable: false }); return (msZid100 = Object.keys(o).length ? o : null);
+  }
+  function midSchDraw100(zm){
+    if (!SCP){ loadSchoolPts().then(() => midLabels100()); return; }
+    const zmap = msZidMap100(); if (!zmap && !assign100) return;
+    const v = view(), by = SCP.midBySido || {}, S = SC.style.mid;
+    const caps = zm >= 14 ? 300 : zm >= 13 ? 200 : zm >= 12 ? 120 : 60, named = zm >= 14;
+    const cy = (v.sw.lat() + v.ne.lat()) / 2, cx = (v.sw.lng() + v.ne.lng()) / 2;
+    const list = [];
+    Object.keys(by).forEach(sd => Object.keys(by[sd]).forEach(n => { const q = by[sd][n]; if (!q || q[2] == null || !inView(v, q[2], q[3])) return;
+      const zid = zmap ? zmap[sd + '|' + n] || null : null, inSel = !!(midSel93 && zid === midSel93);
+      list.push({ n, sd, zid, q, inSel, d: (q[2] - cy) ** 2 + (q[3] - cx) ** 2 }); }));
+    list.sort((a, b) => (b.inSel - a.inSel) || (a.d - b.d));
+    const W = v.oNE.x - v.oSW.x, kx = (v.ne.lng() - v.sw.lng()) / W, ky = (v.ne.lat() - v.sw.lat()) / (v.oSW.y - v.oNE.y), placed = [];
+    const selKey = msSel100 && midSel93 && zmap && zmap[msSel100] === midSel93 ? msSel100 : null;
+    let nm = 0;
+    list.slice(0, caps).forEach(it => {
+      const px = (it.q[3] - v.sw.lng()) / kx, py = (v.ne.lat() - it.q[2]) / ky, on = selKey === it.sd + '|' + it.n;
+      let showName = named || on || it.inSel;
+      const tw = String(shortSch(it.n)).length * 11 + 16, th = 20;
+      if (showName && !on){ if (placed.some(r => Math.abs(px - r.x) < (tw + r.w) / 2 && Math.abs(py - r.y) < th)) showName = false; }
+      if (showName){ placed.push({ x: px, y: py, w: tw }); nm++; }
+      const m = new NV.Marker({ map, position: new NV.LatLng(it.q[2], it.q[3]), zIndex: on ? 95 : it.inSel ? 40 : 36, title: it.n,
+        icon: { content: '<div class="cm84-sch m100' + (showName ? '' : ' dot100') + (it.inSel ? ' ins' : '') + (on ? ' on' : '') + '" style="--s:' + S.c + '">' + (showName ? esc(shortSch(it.n)) : '') + '</div>', anchor: new NV.Point(0, 0) } });
+      NV.Event.addListener(m, 'click', (ev) => { try { if (msTake98b(ev, m.getPosition())) return; } catch (e) {}
+        const key = it.sd + '|' + it.n;
+        if (msSel100 === key && midSel93 === it.zid){ msSel100 = null; midSel93 = null; styleMid93(); scCard(null, 'mid'); return; }
+        msSel100 = key;
+        const go = (zid) => { if (!zid) { window.CALC_MAP_L84.msClick100 = { n: it.n, zid: null }; return; } midSel93 = zid; styleMid93(); midCard(zid, it.sd, null, null); window.CALC_MAP_L84.msClick100 = { n: it.n, zid }; };
+        if (it.zid) go(it.zid); else loadAssign().then(([, M]) => { assign100 = M; msZid100 = null; go((msZidMap100() || {})[key]); }); });
+      msM100.push(m);
+    });
+    window.CALC_MAP_L84.msMk100 = msM100; window.CALC_MAP_L84.msLast100 = { zoom: zm, total: list.length, shown: msM100.length, named: nm, noZone: list.filter(t => !t.zid).length, sel: selKey };
+  }
   // ---- 묶음 L91: 초등 = 학교 위치에 이름표만, 학교를 누르면 그 학교 배정 범위 하나만(다시 누르거나 다른 학교를 누르면 바뀜) / 중학교 = 학군을 누르면 소속 중학교·진학률·배정 원리 ----
   let SCP = null, scpLoad = null, scSel = null;
   function loadSchoolPts(){ if (scpLoad) return scpLoad; scpLoad = loadScript(SC.base + encodeURIComponent(SC.points[0])).then(() => { SCP = window[SC.points[1]] || null; if (scOn.elem) drawSchool(); return SCP; }, () => null); return scpLoad; }
@@ -2994,8 +3151,9 @@
   function scDec(j, f){ if (j && !j._dec){ j._dec = j.학구.map(([zid, joint, rings]) => { const ll = rings.map(scDecode); let s = 90, w = 180, n = -90, e = -180; ll.forEach(r => r.forEach(([y, x]) => { if (y < s) s = y; if (y > n) n = y; if (x < w) w = x; if (x > e) e = x; })); return { zid, joint, ll, bb: { s, w, n, e } }; }); window.CALC_MAP_L84.scLoaded = (window.CALC_MAP_L84.scLoaded || []).concat(f); } return j; }
   function scCard(html, kind){
     let c = mapEl.querySelector('#cm84Scc');
+    schPinOff100();   // 묶음 L100a
     if (!html){ if (c && (!kind || c.dataset.kind === kind)) c.hidden = true; return; }
-    if (!c){ c = document.createElement('div'); c.id = 'cm84Scc'; c.className = 'cm84-scc'; mapEl.appendChild(c); c.addEventListener('click', (ev) => { if (ev.target.closest('.scx')){ c.hidden = true; if (c.dataset.kind === 'elem' && scSel){ scSel = null; drawSchool(); } if (c.dataset.kind === 'mid' && midSel93){ midSel93 = null; styleMid93(); } }
+    if (!c){ c = document.createElement('div'); c.id = 'cm84Scc'; c.className = 'cm84-scc'; mapEl.appendChild(c); c.addEventListener('click', schClick100); c.addEventListener('click', (ev) => { if (ev.target.closest('.scx')){ schPinOff100(); c.hidden = true; if (c.dataset.kind === 'elem' && scSel){ scSel = null; drawSchool(); } if (c.dataset.kind === 'mid' && midSel93){ midSel93 = null; styleMid93(); } }
         const mb = ev.target.closest('.more97b'), ib = ev.target.closest('.i97b');   // 묶음 L97B: [자세히]/[간단히] · ⓘ 안내 펼치기
         if (mb){ const d = c.querySelector('.det97b'), sm = c.querySelector('.sum97b'), on = d && d.hidden; if (d){ d.hidden = !on; if (sm) sm.hidden = on; mb.textContent = on ? '간단히' : '자세히'; mb.setAttribute('aria-expanded', on ? 'true' : 'false'); c.scrollTop = 0; } }
         if (ib){ const f = c.querySelector('.inf97b'); if (f){ f.hidden = !f.hidden; ib.setAttribute('aria-expanded', f.hidden ? 'false' : 'true'); } } }); }
@@ -3142,13 +3300,15 @@
           scCard97b('mid', { title: nm + (zn && zn[1] ? ' (공동)' : ''), sum: `<div class="t97b">소속 중학교 ${list.length}곳</div>${head98 ? `<div class="scs">${esc(head98)}</div>` : ''}${li ? `<ul class="u97b">${li}</ul>` : ''}${more}`,
             info: (foot ? `<div>${foot}</div>` : '') + `<p><b>배정 원리</b> ${esc(R[gu])}</p>${gu === '학교군' ? `<p>${esc(R.중학구)}</p>` : ''}<p>${esc(R[sd] || '')}</p><p>출처: ${esc([R.src.공통, R.src[sd], l99a() ? '학구도안내서비스' : ''].filter(Boolean).join(' · '))} · ${esc(SC.note)}</p>`,
             detail: `<div class="scs">소속 중학교 ${list.length}곳</div>${tb}<div class="scr"><b>배정 원리</b><p>${esc(R[gu])}</p>${gu === '학교군' ? `<p>${esc(R.중학구)}</p>` : ''}<p>${esc(R[sd] || '')}</p></div><div class="scn">출처: ${esc([R.src.공통, R.src[sd], l99a() ? '학구도안내서비스' : ''].filter(Boolean).join(' · '))} · ${esc(SC.note)}</div>` });
-          window.CALC_MAP_L84.midCard = { zid, nm, n: list.length, rate: rateStateL94(sd), from96: !!from, l97b: true };
+          { const cc = mapEl.querySelector('#cm84Scc'); if (cc) cc.dataset.sd = sd; }   // 묶음 L100a
+      window.CALC_MAP_L84.midCard = { zid, nm, n: list.length, rate: rateStateL94(sd), from96: !!from, l97b: true };
           if (bb97) fitBB95(bb97);
           return;
         }
         scCard(`<b>${esc(nm)}</b>${zn && zn[1] ? ' <small>(공동)</small>' : ''}<div class="scs">소속 중학교 ${list.length}곳</div>` + rateTableL94(list, sd, from || null)
           + `<div class="scr"><b>배정 원리</b><p>${esc(R[gu])}</p>${gu === '학교군' ? `<p>${esc(R.중학구)}</p>` : ''}<p>${esc(R[sd] || '')}</p></div>`
           + `<div class="scn">출처: ${esc([R.src.공통, R.src[sd], l99a() ? '학구도안내서비스' : ''].filter(Boolean).join(' · '))} · ${esc(SC.note)}</div>`, 'mid');
+        { const cc = mapEl.querySelector('#cm84Scc'); if (cc) cc.dataset.sd = sd; }   // 묶음 L100a
         window.CALC_MAP_L84.midCard = { zid, nm, n: list.length, rate: rateStateL94(sd), from96: !!from };
         return;
       }
@@ -3160,6 +3320,7 @@
         + `<div class="scs"><span class="sl">진학률</span>준비 중(자료가 오면 채워요)</div>`
         + `<div class="scr"><b>배정 원리</b><p>${esc(R[gu])}</p>${gu === '학교군' ? `<p>${esc(R.중학구)}</p>` : ''}<p>${esc(R[sd] || '')}</p></div>`
         + `<div class="scn">출처: ${esc([R.src.공통, R.src[sd], l99a() ? '학구도안내서비스' : ''].filter(Boolean).join(' · '))} · 남·여·공학은 학교 위치 자료에 없어 이름에 '여자'·'남자'가 있는 학교만 표시 · ${esc(SC.note)}</div>`, 'mid');
+      { const cc = mapEl.querySelector('#cm84Scc'); if (cc) cc.dataset.sd = sd; }   // 묶음 L100a
       window.CALC_MAP_L84.midCard = { zid, nm, n: list.length };
     });
   }
@@ -3167,16 +3328,16 @@
   let midSel93 = null;
   function styleMid93One(p, zid){
     const c = SC.style.mid.c;
-    try { p.setOptions(!midSel93 ? { fillColor: c, fillOpacity: .01, strokeOpacity: .9, strokeWeight: 2.4, strokeStyle: SC.style.mid.dash, zIndex: 15 }
+    try { p.setOptions(!midSel93 ? { fillColor: c, fillOpacity: .01, strokeOpacity: midOp100(), strokeWeight: midW100(), strokeStyle: SC.style.mid.dash, zIndex: 15 }
       : zid === midSel93 ? { fillColor: c, fillOpacity: .16, strokeOpacity: 1, strokeWeight: 3.2, strokeStyle: 'solid', zIndex: 17 }
       : { fillColor: '#868E96', fillOpacity: .06, strokeOpacity: .28, strokeWeight: 1.5, strokeStyle: SC.style.mid.dash, zIndex: 15 }); } catch (e) {}
   }
-  function styleMid93(){ scPolys.forEach((p, k) => { if (k.startsWith('mid|')) styleMid93One(p, k.slice(4)); }); window.CALC_MAP_L84.midSel = midSel93; }
+  function styleMid93(){ scPolys.forEach((p, k) => { if (k.startsWith('mid|')) styleMid93One(p, k.slice(4)); }); window.CALC_MAP_L84.midSel = midSel93; midLabels100(); }
   let scTok95 = 0;   // 묶음 L95: 다시 그릴 때마다 하나씩 — 늦게 온 옛 그리기는 이름표를 놓지 않음
   function drawSchool(){
-    scMarks.forEach(m => m.setMap(null)); scMarks = []; scTok95++; const tok = scTok95;
+    scMarks.forEach(m => m.setMap(null)); scMarks = []; scTok95++; const tok = scTok95; if (!scOn.mid || (map && map.getZoom() < SC.minZoomMid)) midLblClear100();
     const zm = map ? map.getZoom() : 0;
-    if (!map || !SC.on() || zm < SC.minZoom || (!scOn.elem && !scOn.mid)){ scPolys.forEach(p => p.setMap(null)); return; }
+    if (!map || !SC.on() || zm < Math.min(SC.minZoom, scOn.mid ? SC.minZoomMid : 99) || (!scOn.elem && !scOn.mid)){ scPolys.forEach(p => p.setMap(null)); return; }
     const v = view(), vis = (bb) => !(bb.n < v.sw.lat() || bb.s > v.ne.lat() || bb.e < v.sw.lng() || bb.w > v.ne.lng()), want = new Set(), t0 = performance.now();
     ['elem', 'mid'].forEach(kind => {
       if (!scOn[kind]) return; const S = SC.style[kind];
@@ -3188,19 +3349,19 @@
           const z2 = map.getZoom(), v2 = view(), vis2 = (bb) => !(bb.n < v2.sw.lat() || bb.s > v2.ne.lat() || bb.e < v2.sw.lng() || bb.w > v2.ne.lng());
           j._dec.forEach(z => {
             const k = kind + '|' + z.zid; let p = scPolys.get(k);
-            if (!vis2(z.bb) || z2 < SC.minZoom){ if (p) p.setMap(null); return; }
+            if (!vis2(z.bb) || z2 < (kind === 'mid' ? SC.minZoomMid : SC.minZoom)){ if (p) p.setMap(null); return; }
             if (!p){ const ck = kind === 'mid' && l91();   // 묶음 L91: 학군을 누르면 소속 중학교·배정 원리
-              p = new NV.Polygon({ paths: z.ll.map(r => r.map(([y, x]) => new NV.LatLng(y, x))), fillColor: S.c, fillOpacity: ck ? .01 : 0, strokeColor: S.c, strokeWeight: kind === 'mid' ? 2.4 : 1.6, strokeOpacity: .9, strokeStyle: S.dash, clickable: ck, zIndex: 15 }); scPolys.set(k, p);
+              p = new NV.Polygon({ paths: z.ll.map(r => r.map(([y, x]) => new NV.LatLng(y, x))), fillColor: S.c, fillOpacity: ck ? .01 : 0, strokeColor: S.c, strokeWeight: kind === 'mid' ? midW100() : 1.6, strokeOpacity: kind === 'mid' ? midOp100() : .9, strokeStyle: S.dash, clickable: ck, zIndex: 15 }); scPolys.set(k, p);
               if (ck) NV.Event.addListener(p, 'click', (ev) => { if (msTake98b(ev)) return; if (l93()){ if (midSel93 === z.zid){ midSel93 = null; styleMid93(); scCard(null, 'mid'); return; } midSel93 = z.zid; styleMid93(); } midCard(z.zid, sd, null, l97b() ? z.bb : null); });
               if (kind === 'mid' && l93()) styleMid93One(p, z.zid); }
             if (!p.getMap()) p.setMap(map);
-            if ((z2 >= SC.labelZoom || (l95() && kind === 'mid' && z.zid === midSel93)) && scMarks.length < SC.labelMax){   // 묶음 L95: 고른 학군은 한 단계 멀리서도 이름표
+            if (kind !== 'mid' && (z2 >= SC.labelZoom || (l95() && kind === 'mid' && z.zid === midSel93)) && scMarks.length < SC.labelMax){   // 묶음 L95: 고른 학군은 한 단계 멀리서도 이름표
               const a = (scAttr[kind] || {})[z.zid], nm = a ? String(a[0]) : '';
               const L95m = l95() && kind === 'mid', q95 = L95m && nm && tok === scTok95 ? labelPos95(z, v2) : null;   // 묶음 L95: 중학교 학군 이름표 = 보이는 부분 안쪽
               if (nm && (!L95m || q95)){ const m = new NV.Marker({ map, position: q95 ? new NV.LatLng(q95[0], q95[1]) : new NV.LatLng((z.bb.s + z.bb.n) / 2, (z.bb.w + z.bb.e) / 2), zIndex: 35, clickable: false, icon: { content: `<div class="cm84-scl" style="--s:${S.c}">${esc(nm)}</div>`, anchor: new NV.Point(0, 0) } }); scMarks.push(m); }
             }
           });
-          window.CALC_MAP_L84.scLast = { polys: [...scPolys.values()].filter(p => p.getMap()).length, labels: scMarks.length, ms: Math.round(performance.now() - t0) };
+          if (kind === 'mid'){ zonesBySd100[sd] = j._dec; if (l93()) styleMid93(); midLabels100(); } window.CALC_MAP_L84.scLast = { polys: [...scPolys.values()].filter(p => p.getMap()).length, labels: scMarks.length, ms: Math.round(performance.now() - t0) };
         });
       });
     });
@@ -3259,7 +3420,7 @@
     setFilter: (o) => setFilter(o || {}), passFilter: (it) => passFilter(it), cfg88: L88CFG,
     cfg89: L89CFG, zm: () => ZM(), shownInfo: (it) => shownInfo(it), items: () => items,   // 묶음 L89(시험용)
     cfg91: L91CFG, midCard: (zid, sd, from) => midCard(zid, sd, from),   // 묶음 L91(시험용)
-    showElem95: (name, sd, id) => showElem95(name, sd, id), showMid95: (id, sd) => showMid95(id, sd), cfg95: L95CFG, labelPos95: (z, v) => labelPos95(z, v),   // 묶음 L95
+    showElem95: (name, sd, id) => showElem95(name, sd, id), showMid95: (id, sd) => showMid95(id, sd), pinSchool100: (nm, sd) => schPinTo100(nm, sd), cfg95: L95CFG, labelPos95: (z, v) => labelPos95(z, v),   // 묶음 L95
     twinWide: (on) => twinWide(on), twinClose94: () => closeTwin94(), twinShown94: () => twinShown94(), renderRecent: () => renderRecent(), setDistBar: (on) => { L87CFG.distBar = !!on; groupsBy.clear(); drawAll(); }, cfg: L87CFG, layout: () => { syncL87(); layoutL87(); renderRecent(); resize(); },
   };
 })();
