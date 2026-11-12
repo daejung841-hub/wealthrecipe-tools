@@ -826,10 +826,23 @@ window.SBJListLink = (function () {
     const off = H.filter((h) => h.status === 'done' && h.date && h.dateNote !== '기사 기준' && h !== c).sort((a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : 0)), o = off[off.length - 1];
     const tip = '이 단계는 기사로 확인했어요' + (r.art && r.art.off ? ' · 고시 기준 최신: ' + r.art.off : o ? ' · 고시 기준 최신: ' + o.stage + '(' + o.date + ')' : '');
     return ' <span class="rt-art" tabindex="0" data-rt-tip="' + tip.replace(/"/g, '&quot;') + '">기사 근거</span>' + (r.art && r.art.u ? ' <a class="rt-art-a" href="' + r.art.u + '" target="_blank" rel="noopener noreferrer" referrerpolicy="no-referrer" onclick="event.stopPropagation()">기사 ↗</a>' : ''); }
+  // 1111: 모아 관리계획 공람 끝·승인 고시 전 — 단계 칸 꼬리표(단계 글자·이력은 그대로). 승인 고시가 나오면 이 줄을 빼면 됨.
+  const GRAM = {
+    '수유동 141': ['강북구 공고 제2026-1003호', '2026-07-06', '2026-07-20', '수립(안)'],
+    '면목역 2의5': ['중랑구 공고 제2026-1261호', '2026-08-27', '2026-09-10', '수립(안)'],
+    '중화동 329-38': ['중랑구 공고 제2026-1212호', '2026-08-20', '2026-09-03', '변경(안)'],
+    '일원동 대청마을 북측구역': ['강남구 공고 제2026-1034호', '2026-04-17', '2026-05-01', '수립(안)']
+  };
+  function gramTag(r){
+    const g = r && GRAM[r.name]; if (!g || r.sheet !== '모아타운') return '';
+    const tip = '관리계획 ' + g[3] + ' 주민공람 · ' + g[0] + ' · 공람 ' + g[1] + '~' + g[2] + ' · 승인(변경) 고시는 아직 확인되지 않았어요(확인 2026-11-11)';
+    return ' <span class="rt-gram" tabindex="0" data-rt-gram data-rt-tip="' + tip.replace(/"/g, '&quot;') + '">공람 끝, 고시 전</span>';
+  }
+  (function(){ const s = document.createElement('style'); s.textContent = '.rt-gram{display:inline-block;font-size:10.5px;font-weight:800;border-radius:6px;padding:0 6px;line-height:1.7;background:#FEF3C7;color:#92400E;white-space:nowrap;cursor:help}'; document.head.appendChild(s); })();
   function stageCellHtml(r){
     const stage = cleanStage(r);
     const d = shortDate(r.lastDate);
-    return (d ? parenSplitHtml(`${stage} (${d})`) : esc(stage)) + (r.offChk ? ' <span class="muted-txt" data-rt-tip="고시 자료로 단계를 확인하는 중이에요">고시 확인 중</span>' : '') + artTag(r) + liveNtc(r) + progHtml(r);   // 20차: 아래 줄에 진행 기간(표·카드 같이 씀)
+    return (d ? parenSplitHtml(`${stage} (${d})`) : esc(stage)) + (r.offChk ? ' <span class="muted-txt" data-rt-tip="고시 자료로 단계를 확인하는 중이에요">고시 확인 중</span>' : '') + artTag(r) + liveNtc(r) + gramTag(r) + progHtml(r);   // 20차: 아래 줄에 진행 기간(표·카드 같이 씀)
   }
   // ---------- 사업성 등급: 일반분양비율(일반분양 ÷ 조합원) 단독 7단계 ----------
   // 경계값은 tools/ratio_grade_core.py 의 BOUNDS 한 곳에서 정하고, export_list_data.py 가 RATIO_GRADE 로 이 화면에 넣어 준다.
@@ -2705,6 +2718,7 @@ tr.dmp-me td{background:var(--accent-soft);font-weight:600;}
       + (L.some(([t]) => t === NAVER_LINK.label) && naverMobile() ? `<div class="dmp-links-note" data-nv-mnote>휴대폰 지도는 아파트로 열려요. 위쪽 필터에서 '빌라·주택'을 골라 주세요.</div>` : '')   // 19차 보완: 휴대폰에서만
       + `<div class="dmp-links-note">각 사이트의 자세한 정보는 해당 사이트 이용 조건에 따라 로그인이 필요할 수 있습니다.</div></div>`;
   }
+  window.__msLinks = { zoneLinks: zoneLinks, naverLabel: NAVER_LINK.label };   // 구역 거래 요약 상자가 위쪽 링크와 같은 주소를 쓰도록
   // ---------- 주변 아파트: 시세보정 추천 6곳(빌드 때 계산, tools/nearby/build_nearby.js · 원본 해시는 NEARBY.meta.src) ----------
   //   NEARBY_WARN·NEARBY_MAX 설정은 위 '주변 시세 칸' 묶음으로 옮김(목록-3-1, 목록 칸과 팝업이 같은 값을 씀)
   (function(){ const s = document.createElement('style'); s.textContent = '#dmpNearSec .nb-row{display:flex;flex-wrap:wrap;align-items:baseline;gap:2px 8px;padding:6px 0;border-top:1px dashed var(--border,#E2E7EC);font-size:13.5px;line-height:1.45;}#dmpNearSec .nb-row:first-of-type{border-top:none;}#dmpNearSec .nb-n{font-weight:700;overflow-wrap:anywhere;min-width:0;}#dmpNearSec .nb-m{color:var(--ink-muted,#61707D);}#dmpNearSec .nb-p{margin-left:auto;font-weight:700;white-space:nowrap;}#dmpNearSec .nb-w{font-size:11.5px;font-weight:700;padding:1px 7px;border-radius:999px;background:#B45309;color:#fff;white-space:nowrap;}'; document.head.appendChild(s); })();
@@ -3138,7 +3152,7 @@ const RT21 = {"meta":{"src":"목록표_연결_v3_4_pub.json · 목록표_시계�
   let aLoad = null;
   // 76차: 상세 보기 '공사비·분양가·보정률·비례율' 칸(실거래-82) — 화면 표시만, 계산에 쓰지 않음
   let cLoad = null;
-  const loadCost = () => cLoad || (cLoad = new Promise((ok, no) => { if (window.COST_INFO) return ok(); const s = document.createElement('script'); s.src = '공사비_분양가.js'; s.onload = () => ok(); s.onerror = () => { cLoad = null; no(); }; document.head.appendChild(s); }));
+  const loadCost = () => cLoad || (cLoad = new Promise((ok, no) => { if (window.COST_INFO) return ok(); const s = document.createElement('script'); s.src = '공사비_분양가_목록1111.js'; s.onload = () => ok(); s.onerror = () => { cLoad = null; no(); }; document.head.appendChild(s); }));
   const CS_ITEMS = [['공사비', '공사비'], ['조합원분양가', '조합원분양가'], ['일반분양가', '일반분양가'], ['보정률', '공동주택 보정률'], ['비례율', '비례율']];
   const CS_NOTE = '정비계획·기사 숫자는 발표 시점 기준이에요. 감정평가·분양신청·공사비 협상을 거치며 실제 값은 달라질 수 있어요.';
   function costSec(tb, r){
@@ -3665,6 +3679,88 @@ const RT21 = {"meta":{"src":"목록표_연결_v3_4_pub.json · 목록표_시계�
   const gsFile = (b) => '공시가/' + encodeURIComponent(String(b).replace(/[^0-9A-Za-z가-힣._-]/g, '_')) + '.js';
   const loadGs = (b) => GS_LOAD[b] || (GS_LOAD[b] = new Promise((ok, no) => { if ((window.RT_GS || {})[b]) return ok(); loadScript(gsFile(b), () => ok(), () => { delete GS_LOAD[b]; no(); }); }));
   const TX_PAGE = 10;   // 1108b: 거래 내역 처음 10건 + 더 보기 10건씩
+
+  // A 30차: 구역 거래 요약 — 최근 거래 요약 + 직접 입력 계산(입력은 이 기기에만 저장)
+  function msumHost(tb){   // A 36차: 실거래 칸(#rtSec)이 없는 구역 — '핵심 수치' 칸 뒤(없으면 상세 끝)에 구역 거래 요약 칸을 하나 만듦
+    if (!tb) return null; const h = tb.querySelector('#msumSec'); if (h) return h;
+    const secs = [...tb.querySelectorAll('.modal-section')]; if (!secs.length) return null;
+    const key = secs.find((x) => ((x.querySelector('h4') || {}).textContent || '').trim().startsWith('핵심 수치'));
+    const el = document.createElement('div'); el.className = 'modal-section'; el.id = 'msumSec';
+    (key || secs[secs.length - 1]).insertAdjacentElement('afterend', el); return el;
+  }
+  const MS_ASOF = '2026-10-24';   // 거래 내역 자료 기준일(거래내역/건수.js 머리말)
+  const msK = (rows, sc) => { const a = rows.filter((x) => txUsed(x, sc) && x[13] != null && x[19] && x[19][0] > 0).map((x) => (x[7] - x[13]) / x[19][0]).sort((p, q) => p - q); return a.length ? (a.length % 2 ? a[(a.length - 1) / 2] : (a[a.length / 2 - 1] + a[a.length / 2]) / 2) : null; };
+  const msKset = (el, k) => { const bx = el.closest('[data-msum]'); if (bx) { bx._k = k; bx._kd = 1; if (bx._calc) bx._calc(); } };
+  function msTable(el, r){   // 최근 6·3·1개월: 거래 내역에서 '대표값에 쓴 거래'만 — 투자금·프리미엄의 평균과 최저(프리미엄은 0원 아래면 0원)
+    if (!el) return;
+    loadTxN().catch(() => null).then(() => {
+      const sc = txScope(r);
+      if (!sc || !sc.all) { el.innerHTML = '<div class="ms-wait">이 구역은 거래 내역 자료가 없어 기간별 표를 만들 수 없어요.</div>'; msKset(el, null); return null; }
+      return loadTx(sc.b).then(() => ({ sc }));
+    }).then((o) => {
+      if (!o) return; const sc = o.sc, d = (window.RT_TX || {})[sc.b]; if (!d) throw 0;
+      const rows = txRows(d, sc, true); msKset(el, msK(rows, sc)); const now = new Date(MS_ASOF + 'T00:00:00'), pad = (n) => String(n).padStart(2, '0');
+      const cut = (m) => { const t = new Date(now.getFullYear(), now.getMonth() - m, now.getDate()); return t.getFullYear() + '-' + pad(t.getMonth() + 1) + '-' + pad(t.getDate()); };
+      const key = (x) => String(x[1]).slice(0, 7) + '-' + pad(x[20] || 1);
+      const avg = (a) => (a.length ? a.reduce((s, v) => s + v, 0) / a.length : null), mn = (a) => (a.length ? Math.min(...a) : null);
+      const tr = [6, 3, 1].map((m) => { const sel = rows.filter((x) => key(x) >= cut(m)), iv = sel.map((x) => x[11]).filter((v) => v != null), pv = sel.map((x) => (x[13] == null ? null : Math.max(0, x[13]))).filter((v) => v != null);
+        return `<tr><th scope="row">최근 ${m}개월</th><td>${sel.length}건</td><td>${eok(avg(iv))}</td><td>${eok(mn(iv))}</td><td>${eok(avg(pv))}</td><td>${eok(mn(pv))}</td></tr>`; }).join('');
+      el.innerHTML = `<div class="ms-tw"><table class="ms-tab"><thead><tr><th rowspan="2">기간</th><th rowspan="2">거래</th><th colspan="2">초기 투자금</th><th colspan="2">추정 프리미엄</th></tr><tr><th>평균</th><th>최저</th><th>평균</th><th>최저</th></tr></thead><tbody>${tr}</tbody></table></div>`
+        + `<div class="ms-note"><b>기준일 ${MS_ASOF}</b> · 거래 자료 기준일부터 거꾸로 센 기간이에요. 시세 산정에 쓴 거래만 셌어요(저가·제외 거래는 빠짐).</div>`;
+    }).catch(() => { el.innerHTML = '<div class="ms-wait">기간별 표를 불러오지 못했어요.</div>'; msKset(el, null); });
+  }
+  const MS_KEY = (r) => 'msum1:' + uid(r);
+  const msNum = (v) => { const s = String(v == null ? '' : v).replace(/[,\s억]/g, ''); if (s === '') return null; const n = Number(s); return isFinite(n) ? n : null; };
+  const msGet = (r) => { try { return JSON.parse(localStorage.getItem(MS_KEY(r)) || '{}') || {}; } catch (e) { return {}; } };
+  const msPut = (r, o) => { try { localStorage.setItem(MS_KEY(r), JSON.stringify(o)); } catch (e) { /* 저장 안 돼도 계산은 됨 */ } };
+  const msWon = (v) => { if (v == null) return '—'; const a = Math.abs(v), s = v < 0 ? '−' : ''; if (a < 1) return s + Math.round(a * 10000).toLocaleString('ko-KR') + '만'; return s + (Math.round(a * 100) / 100).toFixed(2).replace(/0$/, '').replace(/\.0?$/, '') + '억'; };
+  function msumAdd(sec, r){
+    if (!sec || sec.querySelector('[data-msum]')) return;
+    const o = rtOf(r), b = o && o.b, ok = b && b.inv && b.n;
+    const top = ok
+      ? `<div class="ms-sum">최근 ${b.per}개월 거래 <b>${b.n}건</b> 기준 · 초기 투자금 가운데 <b>${msWon(b.inv[0])}</b> <span class="ms-rg">(${msWon(b.inv[1])}~${msWon(b.inv[2])})</span>`
+        + (b.p ? ` · 추정 프리미엄 <b>${msWon(Math.max(0, b.p[0]))}</b> <span class="ms-rg">(${msWon(Math.max(0, b.p[1]))}~${msWon(Math.max(0, b.p[2]))})</span>` : '') + (b.s === 'few' ? ' <span class="ms-few">거래 적음 · 참고</span>' : '') + '</div>'
+      : '<div class="ms-sum ms-none">최근 거래가 적어 구역 요약이 없어요. 아래에 본 거래 값을 넣으면 계산은 돼요.</div>';
+    const F = [['m', '매매가', '필수'], ['j', '전세가(보증금)', '필수'], ['h', '공시가', '선택'], ['v', '비례율(%)', '선택'], ['u', '조합원분양가', '선택']];
+    const sv = msGet(r);
+    const inp = F.map(([k, l, need]) => `<label class="ms-f"><span>${l}<small>${need}</small></span><input inputmode="decimal" data-ms="${k}" placeholder="${k === 'v' ? '예 100' : '억 단위 예 7.5'}" value="${sv[k] != null ? esc(String(sv[k])) : ''}"></label>`).join('');
+    const ML = window.__msLinks, gl = ML ? ML.zoneLinks(r).find(([lb]) => lb === ML.naverLabel) : null, goHtml = gl ? `<a class="ms-go" data-ms-go href="${esc(gl[1])}" target="_blank" rel="noopener noreferrer" referrerpolicy="no-referrer">매물 보러 가기 ↗</a>` : '';
+    sec.insertAdjacentHTML('beforeend', `<div class="ms" data-msum><div class="ms-hd"><h4 class="ms-h">구역 거래 요약</h4>${goHtml}</div>${top}<div class="ms-trw" data-ms-tr><div class="ms-wait">최근 거래 표를 불러오는 중…</div></div><div class="ms-in"><div class="ms-ih">내가 본 거래 넣어 보기</div><div class="ms-grid">${inp}</div><div class="ms-out" data-ms-out></div>`
+      + '<div class="ms-note">넣은 값은 이 기기 브라우저에만 저장돼요. 계산은 단순 참고용이고, 실제 권리가액·분담금은 조합 안내를 따라요.</div><button type="button" class="ms-clr" data-ms-clr>입력 지우기</button></div></div>');
+    const box = sec.querySelector('[data-msum]'), out = box.querySelector('[data-ms-out]');
+    msTable(box.querySelector('[data-ms-tr]'), r);
+    const calc = () => {
+      const V = {}; box.querySelectorAll('[data-ms]').forEach((e) => { V[e.dataset.ms] = msNum(e.value); });
+      const keep = {}; box.querySelectorAll('[data-ms]').forEach((e) => { if (e.value.trim() !== '') keep[e.dataset.ms] = e.value.trim(); }); msPut(r, keep);
+      if (V.m == null || V.j == null) { out.innerHTML = '<div class="ms-wait">매매가와 전세가를 넣으면 갭이 나와요.</div>'; return; }
+      const gap = V.m - V.j, L = [];
+      let pos = '';
+      if (ok) pos = gap < b.inv[1] ? '최근 거래 범위보다 적게 들어감' : gap > b.inv[2] ? '최근 거래 범위보다 많이 들어감' : '최근 거래 범위 안';
+      L.push(`<div class="ms-row"><span>갭(매매가 − 전세가)</span><b>${msWon(gap)}</b>${pos ? `<em>${pos}</em>` : ''}</div>`);
+      if (V.h != null) {
+        if (!box._kd) L.push('<div class="ms-wait">비교 자료를 불러오는 중…</div>');
+        else if (box._k == null) L.push('<div class="ms-row"><span>예상 프리미엄</span><b>추정 불가</b><em>비교 자료 없음</em></div>');
+        else {
+          const est = V.h * box._k, rate = V.v != null ? V.v : 100, right = est * rate / 100;
+          L.push(`<div class="ms-row"><span>예상 프리미엄(매매가 − 추정 감정가)</span><b>${msWon(V.m - est)}</b></div>`);
+          if (V.v != null) L.push(`<div class="ms-row"><span>권리가액(추정 감정가에 비례율 ${rate}% 적용)</span><b>${msWon(right)}</b></div>`);
+          if (V.u != null) { const add = V.u - right;
+            L.push(`<div class="ms-row"><span>추가 분담금(${V.v != null ? '조합원분양가 − 권리가액' : '비례율 100%로 계산'})</span><b>${msWon(add)}</b>${add < 0 ? '<em>돌려받는 쪽</em>' : ''}</div>`);
+            L.push(`<div class="ms-row ms-tot"><span>총 매입 비용(매매가 + 추가 분담금)</span><b>${msWon(V.m + add)}</b></div>`); }
+        }
+      } else L.push('<div class="ms-wait">공시가를 넣으면 추정 감정가와 예상 프리미엄이, 조합원분양가까지 넣으면 추가 분담금과 총 매입 비용이 나와요.</div>');
+      out.innerHTML = L.join('');
+    };
+    box.addEventListener('input', (e) => { if (e.target.matches('[data-ms]')) calc(); });
+    box.querySelector('[data-ms-clr]').addEventListener('click', () => { box.querySelectorAll('[data-ms]').forEach((e) => { e.value = ''; }); try { localStorage.removeItem(MS_KEY(r)); } catch (e) {} calc(); });
+    box._calc = calc; calc();
+  }
+  (function(){ const s = document.createElement('style'); s.textContent = '.ms{margin:12px 0 4px;border:1px solid #E5E7EB;border-radius:10px;padding:10px 12px;background:#FAFBFC}.ms-h{margin:0 0 6px;font-size:14px;font-weight:800}.ms-sum{font-size:13px;line-height:1.6;color:#1F2937}.ms-rg{color:#6B7280;font-size:12px}.ms-few{font-size:11px;color:#6B7280;background:#F1F3F5;border-radius:4px;padding:0 4px}.ms-none{color:#6B7280}'
+    + '.ms-in{margin-top:8px;border-top:1px dashed #E5E7EB;padding-top:8px}.ms-ih{font-size:12.5px;font-weight:700;color:#4B5563;margin-bottom:6px}.ms-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:6px 8px}.ms-f{display:flex;flex-direction:column;gap:2px;font-size:12px;color:#4B5563}.ms-f small{margin-left:4px;color:#9CA3AF;font-size:10.5px}.ms-f input{font:inherit;font-size:14px;padding:5px 7px;border:1px solid #D1D5DB;border-radius:7px;min-width:0;background:#fff}'
+    + '.ms-out{margin-top:8px}.ms-row{display:flex;flex-wrap:wrap;align-items:baseline;gap:2px 8px;padding:3px 0;font-size:13px;border-bottom:1px solid #F1F3F5}.ms-row span{color:#4B5563;flex:1 1 180px}.ms-row b{font-size:14px;font-weight:800;color:#111827}.ms-row em{font-style:normal;font-size:11.5px;color:#1E3A8A;background:#EEF2FF;border-radius:6px;padding:0 6px}.ms-tot b{color:#0F766E}.ms-wait{font-size:12px;color:#6B7280;padding:3px 0}'
+    + '.ms-note{margin-top:6px;font-size:11px;color:#9CA3AF;line-height:1.5}.ms-clr{margin-top:6px;font:inherit;font-size:12px;border:1px solid #E5E7EB;background:#fff;border-radius:7px;padding:3px 10px;cursor:pointer;color:#4B5563}';
+    s.textContent += '.ms-hd{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px}.ms-hd .ms-h{margin:0}.ms-go{font-size:12px;font-weight:700;color:#1E3A8A;background:#EEF2FF;border-radius:8px;padding:3px 9px;text-decoration:none;white-space:nowrap}.ms-trw{margin-top:8px}.ms-tw{overflow-x:auto}.ms-tab{border-collapse:collapse;width:100%;font-size:12.5px;text-align:center}.ms-tab th,.ms-tab td{border:1px solid #E5E7EB;padding:4px 5px;white-space:nowrap}.ms-tab thead th{background:#F3F4F6;font-weight:700;color:#374151}.ms-tab tbody th{text-align:left;background:#FAFBFC;font-weight:700}';
+    document.head.appendChild(s); })();
   function txButton(sec, r){   // 96차: 버튼 없이 거래 목록을 바로 보여 줌
     if (!sec || sec.querySelector('[data-rt-tx]')) return; const sc = txScope(r); if (!sc || !sc.all) return;
     sec.insertAdjacentHTML('beforeend', `<div class="rt-tx" data-rt-tx="${esc(sc.b)}"><h4 class="rt-txh">거래 내역</h4><div class="rt-txbody" data-rt-txbody><div class="rt-sub">거래 내역을 불러오는 중…</div></div></div>`);
@@ -4194,6 +4290,7 @@ const RT21 = {"meta":{"src":"목록표_연결_v3_4_pub.json · 목록표_시계�
     try { addTownSum(r); } catch (e) { /* 101차 */ }
     try { areaTip(r); } catch (e) { /* 102차 */ }
     try { bldCell(r); } catch (e) { /* 105차 */ }
+    try { msumAdd(tb.querySelector('#rtSec') || msumHost(tb), r); } catch (e) { /* 구역 거래 요약 */ }
     const sec = tb.querySelector('#rtSec'); if (sec) { renderChart(sec); if (!sec.querySelector('[data-rt-tx]')) loadTxN().then(() => txButton(tb.querySelector('#rtSec'), r), () => {}); }   // 66차: 거래 내역 보기
   }).observe(box, {childList: true, subtree: true});
 })();
