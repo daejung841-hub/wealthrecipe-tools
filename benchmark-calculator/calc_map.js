@@ -88,7 +88,7 @@
     acadFilter: false,   // 11-10 피드백 2: [학원가▾] 필터 뺌(코드는 둠, true면 다시 보임)
     acadZone: '지도자료_202611/academy_zone_1110.geojson', azLabMin: .25, azLabZoom: 11, azShow: false,
     acadCluster: '지도자료_202611/academy_cluster_1111.geojson', acadRegion: '지도자료_202611/academy_region_1111.geojson', acSmallZoom: 14, acLabZoom: 12,   // 묶음 L99C: 학원 덩어리(분석 탭 1111) — 동네 학원 밀집은 확대 14부터, 이름표는 12부터
-    jgTab: '지도자료_202611/jaegun_tab_l99c_1111_v4.json', jgAge: 28 };   // 묶음 L99C: 재건축 탭 자료·나이 기준   // 11-11 배포 수정 3: [학원가] 단추·층은 이번 배포에서 숨김(L99c 새 방식)   // 학원 밀집 영역(분석 탭 1110, 대형 35·학원가 170) — 0.25㎢ 미만 조각은 이름표 없이 칠만, 이름표는 확대 11부터
+    jgTab: '지도자료_202611/jaegun_tab_l99c_1113_v6.json', jgAge: 28 };   // 묶음 L99C: 재건축 탭 자료·나이 기준   // 11-11 배포 수정 3: [학원가] 단추·층은 이번 배포에서 숨김(L99c 새 방식)   // 학원 밀집 영역(분석 탭 1110, 대형 35·학원가 170) — 0.25㎢ 미만 조각은 이름표 없이 칠만, 이름표는 확대 11부터
   const wonAx99 = (v) => Math.abs(v) >= 1 ? v + '억' : v ? Math.round(v * 10000).toLocaleString('ko-KR') + '만' : '0';   // 억 단위 값 눈금
   let pick98b = null;   // 판정 평형이 아닌 평형을 고른 때만 { id, lo, hi }(전용㎡ 반올림 값)
   let elemFrom98b = null;   // 초등 학구 상자를 단지 정보 줄에서 연 경우 그 단지 id(단지 학군 밖 학교 "다른 학군" 표시용)
@@ -443,8 +443,12 @@
   .cm84-jg99 .jg99-r{margin:12px 0 0;display:grid;grid-template-columns:1fr;gap:6px}
   .cm84-jg99 .jg99-r div{display:flex;gap:6px;align-items:baseline;font-size:13px;min-width:0}.cm84-jg99 .jg99-r dt{color:var(--cm-faint);flex:0 0 auto}.cm84-jg99 .jg99-r dd{margin:0;font-weight:700;color:var(--cm-ink);min-width:0;white-space:nowrap}
   .cm84-jg99 .jg99-r dd small{font-weight:500;color:var(--cm-faint)}
+  .cm84-jg99 .jg99-r dd .ge104-r{display:block;white-space:normal;font-size:11px;font-weight:400;line-height:1.45;margin-top:2px}
   .cm84-jg99 .jg99-src{margin-top:10px;font-size:11px;line-height:1.55;color:var(--cm-sub);background:#F8F9FA;border-radius:8px;padding:7px 9px}
   .cm84-jg99 .jg99-w{color:var(--cm-faint);font-weight:500}
+  .cm84-jg99 .jg99-ti{position:relative;display:inline-block;width:16px;height:16px;line-height:15px;text-align:center;border:1px solid var(--cm-faint);border-radius:50%;font-size:10px;font-weight:600;color:var(--cm-faint);cursor:pointer;vertical-align:middle;margin-left:4px;font-style:normal}
+  .cm84-jg99 .jg99-ti::after{content:attr(data-tip);position:absolute;z-index:30;bottom:calc(100% + 8px);left:-8px;width:200px;max-width:calc(100vw - 48px);white-space:normal;text-align:left;background:#fff;color:#111827;font-size:12px;font-weight:500;line-height:1.55;padding:9px 11px;border-radius:9px;border:1px solid #D1D5DB;box-shadow:0 4px 14px rgba(0,0,0,.18);opacity:0;visibility:hidden;pointer-events:none}
+  .cm84-jg99 .jg99-ti:hover::after,.cm84-jg99 .jg99-ti:focus-visible::after,.cm84-jg99 .jg99-ti.open::after{opacity:1;visibility:visible}
   .cm84-jg99 .jg99-gs{margin-top:14px;padding-top:10px;border-top:1px solid var(--cm-line);font-size:12px;line-height:1.65;color:var(--cm-sub)}.cm84-jg99 .jg99-gs a{color:#1C7ED6;font-weight:700;white-space:nowrap}
   @media (max-width:767px){
     .cm84-panel.l93[data-t91="jg"] .cm84-split91 > .cm84-body,.cm84-panel.l93[data-t91="jg"] .cm84-split91 > .cm84-rt,.cm84-panel[data-t91="jg"] .cm84-split91 > .cm84-body,.cm84-panel[data-t91="jg"] .cm84-split91 > .cm84-rt,.cm84-panel[data-t91="jg"] .cm84-split91 > .cm84-tw94{display:none}
@@ -2198,6 +2202,15 @@
   //   평균 대지지분·추정 비례율·계획 세대수·용적률·선도지구는 값 있는 줄만, 출처(고시 번호·정보몽땅)는 ⓘ 안
   const JG_STAGES = ['안전진단', '구역지정', '추진위', '조합설립', '사업시행', '관리처분', '이주철거', '착공', '준공'];
   const JG = { d: null, ld: null, open: false };
+  const GE_URL_L104 = '지도자료_202611/재건축_일반분양_추정_1113d.json';   // 큐4 보충: 1113c   // 묶음 L104: 분석 탭 재건축_일반분양_추정_1113b.json 도착 후 '지도자료_202611/재건축_일반분양_추정_1113b.json'
+  let GE104 = null; if (GE_URL_L104) fetch(GE_URL_L104).then(r => r.ok ? r.json() : null).then(j => { GE104 = j && j.단지 ? j.단지 : j; }, () => {});
+  function geOfL104(id, e){   // 추정값(조합설립 이후 + 검증 통과만), 아니면 null
+    const g = GE104 && Object.prototype.hasOwnProperty.call(GE104, id) ? GE104[id] : (e.세대구성 && e.세대구성.일반분양_추정) || null; if (!g) return null;
+    const v = typeof g === 'object' ? (g.값 != null ? g.값 : g.추정 != null ? g.추정 : g.일반분양_추정) : g; if (v == null || isNaN(Number(v))) return null;
+    if (typeof g === 'object' && g.검증 != null && /^제외/.test(String(g.검증))) return null;   // 큐4 보충: '제외…'만 숨김(1113c 표시분은 검증='추정')
+    const i = JG_STAGES.indexOf(String(e.지금단계 || '')); if (!(i >= 3 || (e.단계날짜 && e.단계날짜.조합설립))) return null;   // 조합설립 전은 확인 중
+    return Number(v);
+  }
   function jgLoad99c(){ if (!JG.ld) JG.ld = fetch(L99A_MAP.jgTab).then(r => r.ok ? r.json() : null).then(j => (JG.d = j), () => { JG.ld = null; return null; }); return JG.ld; }
   function jgHas99c(e){ return !!(e && e.상태 !== '숨김' && (e.지금단계 || Object.values(e.단계날짜 || {}).some(Boolean) || e.평균대지지분 || e.추정비례율 || e.계획세대수 || e.용적률 || e.선도지구 || e.세대구성 || e.시공사)); }
   function jgOk99c(it){
@@ -2233,8 +2246,10 @@
     rows.push(['총 계획 세대수', tot != null ? nm(tot) + k0 : W]);
     rows.push(['용적률', fa != null ? esc(fa) + (/%$/.test(String(fa)) ? '' : '%') : W]);
     rows.push(['조합원 분양', sg.조합원분양 != null ? nm(sg.조합원분양) + k0 + kb : W]);
-    rows.push(['일반 분양', sg.일반분양 != null ? nm(sg.일반분양) + (/^계산/.test(sg.일반분양_표시 || '') ? ' <small>계산</small>' : '') + kb + k0 : W]);
-    rows.push(['임대', sg.임대 != null ? nm(sg.임대) + k0 + kb : W]);
+    const gv = geOfL104(it.id, e), estHtml = gv != null ? '약 ' + Math.round(gv).toLocaleString('ko-KR') + '세대 <small>· 추정</small><small class="ge104-r">총 계획 − 조합원 − 임대 − 공공분양 · 공공분양 확인 안 되면 0 · 사업 진행에 따라 달라질 수 있음</small>' : '';   // 묶음 L104
+    rows.push(['일반 분양', sg.일반분양 != null ? nm(sg.일반분양) + (/^계산/.test(sg.일반분양_표시 || '') ? ' <small>계산</small>' : '') + kb + k0 : estHtml || W]);
+    const rentSum = (() => { const m = /(\d[\d,]*)[^\d+]*\+[^\d]*(\d[\d,]*)/.exec(sg.임대_원문이름 || ''); if (!m || sg.임대 == null) return ''; const a = Number(m[1].replace(/,/g, '')), b = Number(m[2].replace(/,/g, '')); return a + b === Number(sg.임대) ? '원문 두 값(' + a + '+' + b + ')의 합' : ''; })();   // 묶음 L103: 임대 = 원문 두 값의 합일 때만 근거 표기
+    rows.push(['임대', sg.임대 != null ? nm(sg.임대) + k0 + kb + (rentSum ? ' <span class="jg99-ti" tabindex="0" role="button" aria-label="임대 세대수 근거" data-tip="' + esc(rentSum) + '">ⓘ</span>' : '') : W]);
     const sc = e.시공사; if (sc && sc.이름) rows.push(['시공사 선정', (sc.선정일 ? esc(String(sc.선정일).slice(0, 7).replace('-', '.')) + ' · ' : '') + esc(sc.이름) + (/기사/.test(sc.상태 || '') ? ' <small>기사 기준</small>' : '') + (/확인 필요/.test(sc.출처 || '') ? ' <small>재선정 확인 필요</small>' : '')]);
     const g = e.선도지구; if (g) rows.push(['선도지구', esc((g.신도시 || '') + ' 선도지구') + (g.구역 ? ' · ' + esc(g.구역) : '') + (g.구역세대 ? ' (' + Number(g.구역세대).toLocaleString('ko-KR') + '세대)' : '') + (g.연결 && g.연결 !== '확실' ? ' <small>' + esc(g.연결) + '</small>' : '')]);
     const src = (e.출처 || []).concat(e.정비계획고시 ? ['정비계획 고시 ' + e.정비계획고시] : []).concat(e.사업장 ? ['사업장: ' + e.사업장] : []).concat(g ? ['선도지구: 국토교통부 보도자료(2024.11)'] : []).concat(sg.출처 ? ['세대: ' + sg.출처] : []).concat(sc && sc.출처 ? ['시공사: ' + sc.출처] : []);
@@ -2252,6 +2267,7 @@
     if (panel.classList.contains('tws94')) closeTwin94(true);
     host.innerHTML = jgHtml99c(it, JG.d[it.id]); host.hidden = false; panel.classList.add('jgs99'); JG.open = true;
     host.querySelector('.jg99-x').onclick = () => closeJg99c();
+    if (!window.__jgTi103){ window.__jgTi103 = 1; document.addEventListener('click', (e) => { const t = e.target.closest && e.target.closest('.jg99-ti'); document.querySelectorAll('.jg99-ti.open').forEach(x => { if (x !== t) x.classList.remove('open'); }); if (t) t.classList.toggle('open'); }); }   // 묶음 L103: 임대 근거 ⓘ — PC 올리면·폰 누르면 열림, 바깥 누르면 닫힘
     host.querySelector('.i99').onclick = () => { const s = host.querySelector('.jg99-src'), o = s.hidden; s.hidden = !o; host.querySelector('.i99').setAttribute('aria-expanded', String(o)); };
     const b = panel.querySelector('.jg99b'); if (b) b.setAttribute('aria-pressed', 'true');
     if (window.innerWidth < 768 && panel.dataset.t91 !== 'jg'){ panel.dataset.t91 = 'jg'; panel.querySelectorAll('[data-t91]').forEach(x => x.setAttribute('aria-selected', String(x.dataset.t91 === 'jg'))); }
@@ -3042,6 +3058,8 @@
   // ---- 묶음 L100: 중학교 학군 이름표 — ① 이름 아래 작게 "서울 상위 ○%"(소속 중학교 진학률 평균을 시도 안 학군끼리 비교, 자료 없는 학군은 줄 생략) ② 각 학군 이름표를 자기 면 안쪽에 두고
   //   이웃 경계를 넘으면 자기 면 안쪽으로 밀어 넣음(겹치면 숨기지 않고 자리 조정) ③ 고른 학군은 이름표 1.3배·굵게, 고른 학군 경계 안에는 다른 학군 이름표를 내지 않음
   const zonesBySd100 = {}, zonePct100 = {};
+  const ZONE_METRO_URL103 = '지도자료_202611/학군단위_수도권순위_1114b.json';   // 큐4 보충: 1114(학군 275)   // 묶음 L103: 분석 탭 학군 단위 수도권 순위(a7d86918, 학군 칸 '수도권상위%'), 값 없는 학군은 줄 없음
+  let ZMET103;   // undefined=아직 안 받음 · null=받는 중/없음 · 객체=자료
   let ml100 = [], mlT100 = null, assign100 = null;
   function midLblClear100(){ ml100.forEach(m => { try { m.setMap(null); } catch (e) {} }); ml100 = []; midSchClear100(); }
   function zonePctMap100(sd){
@@ -3061,6 +3079,7 @@
     midLblClear100();
     if (!map || !SC.on() || !scOn.mid || !scAttr.mid) return;
     const zm = map.getZoom(); if (zm < SC.minZoomMid) return;
+    if (ZONE_METRO_URL103 && ZMET103 === undefined){ ZMET103 = null; fetch(ZONE_METRO_URL103).then(r => r.ok ? r.json() : null).then(j => { ZMET103 = (j && j.학군) ? j.학군 : j; midLabels100(); }, () => {}); }
     setTimeout(() => { if (scOn.mid && map) midSchDraw100(map.getZoom()); }, 0);   // 학교 점·이름표(c_l100sch)
     if (!assign100){ loadAssign().then(([, M]) => { assign100 = M; midLabels100(); }); }
     const sds = scVisSido();
@@ -3074,12 +3093,14 @@
         const a = (scAttr.mid || {})[z.zid], nm = a ? String(a[0]) : ''; if (!nm) return;
         const p = pm && pm[z.zid] != null ? pm[z.zid] : null;
         const w2 = Math.max(0, Math.min(z.bb.e, E) - Math.max(z.bb.w, Wl)), h2 = Math.max(0, Math.min(z.bb.n, Nn) - Math.max(z.bb.s, S));
-        items.push({ z, sd, nm, pct: p == null ? '' : sd + ' 상위 ' + (p < 1 ? '1% 안' : Math.round(p) + '%'), sel: z.zid === midSel93, area: w2 * h2 }); }); });
+        const mv = ZMET103 ? ZMET103[z.zid] : null, mp = mv == null ? null : (typeof mv === 'object' ? (mv['학군간상위%'] != null ? Number(mv['학군간상위%']) : mv['학군끼리상위%'] != null ? Number(mv['학군끼리상위%']) : null) : Number(mv));   // 묶음 L103: 수도권 순위(자료 있는 학군만)
+        const sp6 = (mv && typeof mv === 'object' && mv['시도내학군상위%'] != null) ? Number(mv['시도내학군상위%']) : p;   // 큐6: 시도 줄도 분석 탭 가중 방식(1114b), 없으면 예전 계산
+        items.push({ z, sd, nm, pct: sp6 == null || isNaN(sp6) ? '' : sd + ' 상위 ' + (sp6 < 1 ? '1% 안' : Math.round(sp6) + '%'), pct2: mp == null || isNaN(mp) ? '' : '수도권 상위 ' + (mp < 1 ? '1% 안' : Math.round(mp) + '%'), sel: z.zid === midSel93, area: w2 * h2 }); }); });
     const cut = items.sort((a, b) => (b.sel - a.sel) || (b.area - a.area)).slice(0, zm >= 12 ? 70 : 40);   // 확대 11은 큰 학군 40곳만, 12부터 70곳
     const stat = [], placed = [], cx0 = (Wl + E) / 2, cy0 = (S + Nn) / 2, G = 9;
     cut.forEach(it => {
       const fs = it.sel ? 13.7 : 10.5, sfs = it.sel ? 12.3 : 9.5, tw = (s, f) => [...s].reduce((a, ch) => a + (ch.charCodeAt(0) > 127 ? f : f * .6), 0);
-      const wpx = Math.max(tw(it.nm, fs), it.pct ? tw(it.pct, sfs) : 0) + 16, hpx = fs * 1.5 + (it.pct ? sfs * 1.3 : 0) + 6;
+      const wpx = Math.max(tw(it.nm, fs), it.pct ? tw(it.pct, sfs) : 0, it.pct2 ? tw(it.pct2, sfs) : 0) + 16, hpx = fs * 1.5 + (it.pct ? sfs * 1.3 : 0) + (it.pct2 ? sfs * 1.3 : 0) + 6;
       const hx = wpx / 2 * kx, hy = hpx / 2 * ky, z = it.z;
       const ll = (y, x, sc) => [[y, x], [y + hy * sc, x + hx * sc], [y + hy * sc, x - hx * sc], [y - hy * sc, x + hx * sc], [y - hy * sc, x - hx * sc]];
       const inOwn = (pts) => pts.reduce((n, p) => n + (inRings95(z.ll, p[0], p[1]) ? 1 : 0), 0);
@@ -3103,7 +3124,7 @@
       placed.push({ x: (best[1] - Wl) / kx, y: (Nn - best[0]) / ky, w: wpx, h: hpx });
       stat.push({ zid: z.zid, y: best[0], x: best[1], own: inRings95(z.ll, best[0], best[1]), full: inOwn(ll(best[0], best[1], 1)) === 5, sel: it.sel, nm: it.nm, pct: it.pct });
       ml100.push(new NV.Marker({ map, position: new NV.LatLng(best[0], best[1]), zIndex: it.sel ? 900 : 35, clickable: false,
-        icon: { content: '<div class="cm84-scl' + (it.sel ? ' sel' : '') + '" style="--s:' + SC.style.mid.c + '">' + esc(it.nm) + (it.pct ? '<small class="pc100">' + esc(it.pct) + '</small>' : '') + '</div>', anchor: new NV.Point(0, 0) } }));
+        icon: { content: '<div class="cm84-scl' + (it.sel ? ' sel' : '') + '" style="--s:' + SC.style.mid.c + '">' + esc(it.nm) + (it.pct ? '<small class="pc100">' + esc(it.pct) + '</small>' : '') + (it.pct2 ? '<small class="pc100">' + esc(it.pct2) + '</small>' : '') + '</div>', anchor: new NV.Point(0, 0) } }));
     });
     window.CALC_MAP_L84.mlLast100 = { n: ml100.length, sel: selZ ? selZ.zid : null, zoom: zm, ownOut: stat.filter(t => !t.own).length, partIn: stat.filter(t => !t.full).length, inSel: selZ ? stat.filter(t => t.zid !== selZ.zid && inRings95(selZ.ll, t.y, t.x)).length : 0, withPct: stat.filter(t => t.pct).length, selNm: (stat.find(t => t.sel) || {}).nm, selPct: (stat.find(t => t.sel) || {}).pct, sample: stat.slice(0, 4).map(t => t.nm + (t.pct ? '|' + t.pct : '')) };
   }

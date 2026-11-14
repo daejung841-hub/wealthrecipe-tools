@@ -33,7 +33,7 @@
 // 묶음 L52·L53(83단계): 아래 정적 스크립트 주소의 ?v=와 이 표는 build_l52_versions.py가 빌드 때 실제 파일 해시로 채운다(손으로 쓰지 않음).
 // 표는 25평 seed 지연 로딩(loadSeed25)이 실행 중에 쓴다. EARLY_FLAGS_L52는 xlsx 태그(L53)를 쓸지 정하려고 주소 플래그를 먼저 읽는다
 // (applyBundlesFromUrl과 같은 규칙, 로컬 주소에서만: 값이 없으면 모두 켬, 있으면 적힌 묶음만 — 묶음 이름 'L' 포함).
-var ASSET_VERSIONS_L52 = /*L52_VERSIONS*/{"shared.js":"8e8ee813","seedComplexes.js":"7d7e417e","seedChips.js":"70c405ed","m2Series.js":"acc3bcaa","seedComplexes25.js":"25bb9b37","feedback-widget.js":"52cf1fae","rtAdjust.js":"9a91b8ce","station_walk.js":"d1744c95","school_elem.js":"e368c3b0","calc_map.js":"6ab6eec7","map_light.js":"4075d058","map_trade_idx.js":"c94b3db1"}/*END_L52_VERSIONS*/;
+var ASSET_VERSIONS_L52 = /*L52_VERSIONS*/{"shared.js":"8e8ee813","seedComplexes.js":"7d7e417e","seedChips.js":"70c405ed","m2Series.js":"acc3bcaa","seedComplexes25.js":"25bb9b37","feedback-widget.js":"52cf1fae","rtAdjust.js":"9a91b8ce","station_walk.js":"d1744c95","school_elem.js":"e368c3b0","calc_map.js":"4ffaedb3","map_light.js":"4075d058","map_trade_idx.js":"c94b3db1"}/*END_L52_VERSIONS*/;
 var EARLY_FLAGS_L52 = (function(){
   var on = { L52: true, L53: true, L86: true, L88: true };   // L86(시세 이력 미루기)은 지도 중심 화면(L85)이 켜져 있을 때만 — L85를 끄면 여기 L86도 false
   try {
@@ -468,6 +468,7 @@ button.pyeong-chip{font:inherit;font-size:11.5px;}
 .p102-t .p102-r{font-size:10.5px;font-weight:400;color:var(--ink-faint);line-height:1.5;}
 .fav-info-l59 .l102-l{flex-basis:100%;min-width:0;font-size:11.5px;font-weight:400;color:var(--ink-faint);line-height:1.5;}
 .diag-info-l59 .fav-info-l59 > div:has(.l102-l){grid-column:1 / -1;width:auto;min-width:0;}
+.r103-m{display:block;font-size:9.5px;font-weight:400;color:var(--ink-muted, #6B7280);white-space:nowrap;line-height:1.35;}
 /* 묶음 L85: 지도 중심 화면 — 탭은 [지도][여러 단지 보기], 지도 화면은 머리줄 한 줄 + 화면 전체 지도 */
 .map-head-l85{display:none;}
 body.l85 #topModeTabs .top-mode-btn[data-top-mode="single"], body.l85 #topModeTabs .top-mode-btn[data-top-mode="favorites"]{display:none;}
@@ -3129,9 +3130,9 @@ function seoulHistoricalAvg(){
 // 라이브는 주소 플래그를 읽지 않으므로 이 기본값이 그대로 동작한다.
 const BUNDLES = { A:false, B:false, C:false, D1:false, D2:false, D3:false, D4:false, E1:true, E2:false, E3:true, F1:true, F2:true, F3:true, F4:true, F5:true, F6:true,
   H1:false, H2:true, H3:true, H4:true, H5:true, H6:true, H7:true,
-  L1:true, L2:true, L3:true, L4:true, L5:true, L6:false, L7:true, L8:true, L9:true, L10:true, L11:true, L12:true, L13:true, L14:true, L15:true, L16:true, L17:true, L18:true, L19:true, L19B:true, L20:true, L22:true, L23:true, L24:true, L25:true, L26:true, L27:!!window.POOL_EXCLUDE_ON, L31:!!window.NEW_NAME_RULE_ON, L32:true, L33:true, L34:true, L37:true, L28:true, L38:true, L40:true, L39:true, L41:true, L42:true, L43:true, L44:true, L45:true, L46:true, L47:true, L49:true, L48:true, L50:true, L51:true, L52:true, L53:true, L54:true, L55:true, L56:true, L57:true, L58:true, L59:true, L59_DND:true, L59_INFOCARD:true, L59_STATION:true, L59_SCHOOL:true, L59_FAVSEARCH:true, L60:true, L60_REL:false, L60_WHY:false, L60_NOTE:true, L61:true, L64:true, L64_LINK:true, L64_NEWBUILD:false, L65:true, L69:true, L70:true, L71:true, L74:true, L75:true, L76:true, L77:true, L78:true, L79:true, L80:true, L81:true, L82:true, L84:true, L85:true, L85_CROSS:true, L85_LEFT:true, L85_INFO:true, L85_LBL:true, L85_FULL:true, L86:(typeof EARLY_FLAGS_L52 === 'undefined' || !!EARLY_FLAGS_L52.L86), L87:true, L88:true, L88_EMBED:true, L88_SHARE:true, L89:true, L84_RT:true, L84_SC:true, L91:true, L92:true, L93:true, L94:true, L95:true, L96:true, L97:true, L97B:true, L98:true, L98H:true, L98B:true, L35:true, L36:true, L30:true, L29:true, L29R:false, L90N:true, L90G:true, L98J:true, L99A:true, L99C:true, L99B:true, L101:true, L102:true, L102C:true, K1:false, K2:true, K4:false };
+  L1:true, L2:true, L3:true, L4:true, L5:true, L6:false, L7:true, L8:true, L9:true, L10:true, L11:true, L12:true, L13:true, L14:true, L15:true, L16:true, L17:true, L18:true, L19:true, L19B:true, L20:true, L22:true, L23:true, L24:true, L25:true, L26:true, L27:!!window.POOL_EXCLUDE_ON, L31:!!window.NEW_NAME_RULE_ON, L32:true, L33:true, L34:true, L37:true, L28:true, L38:true, L40:true, L39:true, L41:true, L42:true, L43:true, L44:true, L45:true, L46:true, L47:true, L49:true, L48:true, L50:true, L51:true, L52:true, L53:true, L54:true, L55:true, L56:true, L57:true, L58:true, L59:true, L59_DND:true, L59_INFOCARD:true, L59_STATION:true, L59_SCHOOL:true, L59_FAVSEARCH:true, L60:true, L60_REL:false, L60_WHY:false, L60_NOTE:true, L61:true, L64:true, L64_LINK:true, L64_NEWBUILD:false, L65:true, L69:true, L70:true, L71:true, L74:true, L75:true, L76:true, L77:true, L78:true, L79:true, L80:true, L81:true, L82:true, L84:true, L85:true, L85_CROSS:true, L85_LEFT:true, L85_INFO:true, L85_LBL:true, L85_FULL:true, L86:(typeof EARLY_FLAGS_L52 === 'undefined' || !!EARLY_FLAGS_L52.L86), L87:true, L88:true, L88_EMBED:true, L88_SHARE:true, L89:true, L84_RT:true, L84_SC:true, L91:true, L92:true, L93:true, L94:true, L95:true, L96:true, L97:true, L97B:true, L98:true, L98H:true, L98B:true, L35:true, L36:true, L30:true, L29:true, L29R:false, L90N:true, L90G:true, L98J:true, L99A:true, L99C:true, L99B:true, L101:true, L102:true, L102C:true, L103:true, K1:false, K2:true, K4:false };
 const BUNDLE_GROUPS = { D:['D1','D2','D3','D4'], E:['E1','E2','E3'], F:['F1','F2','F3','F4','F5','F6'], H:['H1','H2','H3','H4','H5','H6','H7'],
-  L:['L1','L2','L3','L4','L5','L6','L7','L8','L9','L10','L11','L12','L13','L14','L15','L16','L17','L18','L19','L19B','L20','L22','L23','L24','L25','L26','L27','L29','L30','L31','L32','L33','L34','L37','L35','L36','L28','L38','L40','L39','L41','L42','L43','L44','L45','L46','L47','L49','L48','L50','L51','L52','L53','L54','L55','L56','L57','L58','L59','L60','L61','L64','L65','L69','L70','L71','L74','L75','L76','L77','L78','L79','L80','L81','L82','L84','L85','L86','L87','L88','L89','L91','L92','L93','L94','L95','L96','L97','L97B','L98','L98H','L98B','L90N','L90G','L98J','L99A','L99C','L99B','L101','L102','L102C'], K:['K1','K2','K4'] };
+  L:['L1','L2','L3','L4','L5','L6','L7','L8','L9','L10','L11','L12','L13','L14','L15','L16','L17','L18','L19','L19B','L20','L22','L23','L24','L25','L26','L27','L29','L30','L31','L32','L33','L34','L37','L35','L36','L28','L38','L40','L39','L41','L42','L43','L44','L45','L46','L47','L49','L48','L50','L51','L52','L53','L54','L55','L56','L57','L58','L59','L60','L61','L64','L65','L69','L70','L71','L74','L75','L76','L77','L78','L79','L80','L81','L82','L84','L85','L86','L87','L88','L89','L91','L92','L93','L94','L95','L96','L97','L97B','L98','L98H','L98B','L90N','L90G','L98J','L99A','L99C','L99B','L101','L102','L102C','L103'], K:['K1','K2','K4'] };
 // 묶음 L46(69단계): 그래프 점선 모양 통일 — 모든 점선을 "선도단지 대비 적정가" 선(FAIR_LINE_STYLE.borderDash)과 같은 긴 점선으로.
 // 촘촘한 점("좁쌀")·점-선 섞인 패턴을 없앤다. 새 점선은 항상 dashL46(예전 값)을 쓴다 — L46을 끄면 예전 값 그대로.
 const DASH_L46 = [5, 4];
@@ -12167,6 +12168,7 @@ function rateTipL96(sd, v){
   const lab = '<small class="r95-v">진학률 '+n1L94(v[0])+'%</small>'; if (v[6] == null) return lab;
   const o = RATE_L94[sd], d = o && o.d;
   const tip = '<span class="r96-t1">과학고 '+n1L94(v[6])+' · 외고국제고 '+n1L94(v[7])+' · 자사고 '+n1L94(v[8])+'명 / 졸업 '+Math.round(v[5] || 0)+'명(3년 평균)</span>'+
+    (metroOkL103(v) ? '<span class="r96-tavg">'+L103_METRO_NOTE+'</span>' : '')+
     (d && d.avg != null ? '<span class="r96-tavg">'+esc(sd)+' 평균 진학률 '+n1L94(d.avg)+'%'+(d.per ? ' · 과학고 '+n1L94(d.per[0])+' · 외고국제고 '+n1L94(d.per[1])+' · 자사고 '+n1L94(d.per[2]) : '')+'</span>' : '');
   return '<span class="r96-i" tabindex="0" role="button" aria-label="진학 인원 보기">'+lab+'<i aria-hidden="true">ⓘ</i><span class="r96-tip" role="tooltip">'+tip+'</span></span>';
 }
@@ -12265,13 +12267,17 @@ function rateOfL94(sd, name){ const o = RATE_L94[sd], d = o && o.d; if (!d) retu
   if (!q) return { miss: true }; return { code: q[0], sex: q[1], est: q[2], v: d.rate.중학교[q[0]] || null }; }
 const sexTxL94 = (x) => x === '남' ? '남중' : x === '여' ? '여중' : x === '공학' ? '공학' : '-';
 const n1L94 = (x) => x == null ? '-' : (Math.round(x * 10) / 10).toFixed(1);
+// ---- 묶음 L103(11-13): 학교별 진학률 칸 — 시도 상위 % 아랫줄에 "수도권 상위 ○%"(작게, 진학률과 같은 색). 수도권 값(진학률 지도 파일 값[3])이 없으면 줄 없음 ----
+const L103_METRO_NOTE = '서울·경기·인천 순위는 같은 시·도 학교끼리, 수도권 순위는 서울·경기·인천 전체 학교 기준';
+const metroOkL103 = (v) => !!(BUNDLES.L103 && v && v[2] != null && v[3] != null);
+function metroLineL103(v){ return metroOkL103(v) ? '<span class="r103-m">수도권 상위 ' + (v[3] < 1 ? '1% 안' : Math.round(v[3]) + '%') + '</span>' : ''; }
 function rateCellL94(sd, v, code){
   if (!v || v[0] == null) return '<span class="r94-q">자료 없음</span>';
   const bits = RATE_BITS_L94.filter(([b]) => v[4] & b).map(([, t]) => t);
   if (BUNDLES.L95){   // 묶음 L95: 시도 안 상위 %를 앞에 크게, 진학률은 뒤에 작게(상위 %가 없는 소규모·참고 학교는 진학률만)
     const t95 = v[2] != null ? '<b class="r95-top">'+esc(sd)+' 상위 '+(v[2] < 1 ? '1% 안' : Math.round(v[2]) + '%')+'</b> ' : '';
     const ref96 = BUNDLES.L96 && (v[4] & 2), b96 = ref96 ? bits.filter(t => t !== '참고') : bits;   // 묶음 L96: 참고(새 판 = 국제중)는 정해진 문구로
-    return t95+(BUNDLES.L96 ? rateTipL96(sd, v) : '<small class="r95-v">진학률 '+n1L94(v[0])+'%</small>')+(b96.length ? ' <span class="r94-f">'+b96.map(esc).join('·')+'</span>' : '')+(ref96 ? '<small class="r96-ref">'+esc(refTxL96(v))+'</small>' : '');
+    return (t95+(BUNDLES.L96 ? rateTipL96(sd, v) : '<small class="r95-v">진학률 '+n1L94(v[0])+'%</small>')+(b96.length ? ' <span class="r94-f">'+b96.map(esc).join('·')+'</span>' : '')+(ref96 ? '<small class="r96-ref">'+esc(refTxL96(v))+'</small>' : ''))+metroLineL103(v);
   }
   const top = v[2] != null ? '<small>'+esc(sd)+' 상위 '+(v[2] < 1 ? '1% 안' : Math.round(v[2]) + '%')+'</small>' : '';
   return '<b>'+n1L94(v[0])+'%</b>'+(top ? ' '+top : '')+(bits.length ? ' <span class="r94-f">'+bits.map(esc).join('·')+'</span>' : '');
@@ -12290,7 +12296,7 @@ function rateTableL94(list, sd, from){
   return (g96 ? '<div class="r96-from">거리는 '+esc(from.nm || '이 단지')+'에서 학교까지 직선거리 · 남·여 나눔은 공학·남중은 남학생, 공학·여중은 여학생</div>' : '')+
     (rows ? '<table class="r94-t"><thead><tr><th>학교</th><th>설립·구분</th><th>특목·자사고 진학률</th></tr></thead><tbody>'+rows+'</tbody></table>' : '')+
     (d && d.avg != null ? '<div class="r94-avg">'+esc(sd)+' 평균 '+n1L94(d.avg)+'%'+(d.per ? ' · 학교당 과학고 '+n1L94(d.per[0])+' · 외고·국제고 '+n1L94(d.per[1])+' · 자사고 '+n1L94(d.per[2])+'명' : '')+'</div>' : '')+
-    '<div class="r94-n">특목·자사고 진학률 = 2023~2025년 졸업생 가운데 과학고·외고·국제고·자사고 진학자 비율(3년 합산). '+esc(sd)+' 상위 %는 같은 시도 중학교끼리 비교한 값(소규모·참고 학교는 빼고)이며 순위표가 아니라 참고용이에요. 소규모 = 졸업생 연평균 100명 미만, '+(BUNDLES.L96 ? '참고 = 국제중(선발 학교라 비교에서 제외). 같은 재단 자사고가 있는 사립중도 추첨 배정이라 상위 %에 넣어요.' : '참고 = 국제중·자사고 재단 사립 등.')+' 출처: 학교알리미 졸업생 진로 공시 · 남·여·공학은 나이스 학교기본정보(2026-11-05)</div>';
+    '<div class="r94-n">특목·자사고 진학률 = 2023~2025년 졸업생 가운데 과학고·외고·국제고·자사고 진학자 비율(3년 합산). '+esc(sd)+' 상위 %는 같은 시도 중학교끼리 비교한 값(소규모·참고 학교는 빼고)이며 순위표가 아니라 참고용이에요.'+(BUNDLES.L103 ? ' '+L103_METRO_NOTE+'.' : '')+' 소규모 = 졸업생 연평균 100명 미만, '+(BUNDLES.L96 ? '참고 = 국제중(선발 학교라 비교에서 제외). 같은 재단 자사고가 있는 사립중도 추첨 배정이라 상위 %에 넣어요.' : '참고 = 국제중·자사고 재단 사립 등.')+' 출처: 학교알리미 졸업생 진로 공시 · 남·여·공학은 나이스 학교기본정보(2026-11-05)</div>';
 }
 // 초등학교 → 같은 중학 학군 안에서 가까운 중학교(추정) 남학생 3곳·여학생 3곳(분석 탭 파일 그대로, 거리 기준이라 서울 추첨 배정에서는 참고만)
 function elemNearL94(name, lat, lng, sd){
@@ -12517,9 +12523,9 @@ function favLocationTextL59(seed){
 // 재건축: 서울 25년+ 495곳(정보몽땅 단계·인가일, 16곳 대지지분·추정 비례율), 문장은 자료의 '한줄' 그대로. 숨김 43곳은 줄 없음.
 //         경기·인천은 자료가 없어 재건축 대상(25년+)이면 "재건축 · 자료 준비 중".
 // 분양 정보: 청약홈 243곳 + 기사 68곳, 숫자는 원자료 그대로(반올림·환산 없음), 값이 없는 줄은 숨김. 판정·계산과 무관(글자 줄만).
-const L99A_URL = { jaegun: '지도자료_202611/jaegun_l99a_1110.json', daeji: '지도자료_202611/daeji_l99_1110.json', bunyang: '지도자료_202611/bunyang_l99_1111b.json', academy: '지도자료_202611/academy_l99_1110c.json', elem: '지도자료_202611/elem_multi_l99_1111.json' };
+const L99A_URL = { jaegun: '지도자료_202611/jaegun_l99a_1110.json', daeji: '지도자료_202611/daeji_l99_1110.json', bunyang: '지도자료_202611/bunyang_l99_1115m.json', academy: '지도자료_202611/academy_l99_1110c.json', elem: '지도자료_202611/elem_multi_l99_1111.json' };
 if (BUNDLES.L102) L99A_URL.parking = '지도자료_202611/parking_l102b_1113.json';   // 묶음 L102: 주차 줄 자료(분석 탭 1113판, 정보 카드를 열 때만 받음)   // 학원가 = 분석 탭 1110c 판
-if (BUNDLES.L99C) L99A_URL.jgtab = '지도자료_202611/jaegun_tab_l99c_1111_v4.json';   // 묶음 L99C: 재건축 탭 자료(단지 정보 한 줄 '진행 정보 준비 중' 판단에도 씀)
+if (BUNDLES.L99C) L99A_URL.jgtab = '지도자료_202611/jaegun_tab_l99c_1113_v6.json';   // 묶음 L99C: 재건축 탭 자료(단지 정보 한 줄 '진행 정보 준비 중' 판단에도 씀)
 const L99A_AGE = 25;   // (서울 재건축 자료 대상 25년+, 참고용)
 const L99A_AGE_GG = 28;   // 11-11 대표님 결정 4: 경기·인천 "재건축 · 자료 준비 중"은 준공 28년 이상만(계산기 다른 재건축 안내와 같은 28년)
 const L99A_TIP_REBUILD = '진행 단계는 서울시 정비사업 정보몽땅의 사업장 진행단계, 괄호 날짜는 추진경과의 가장 최근 인가 기록(년.월). 대지지분은 정비계획 고시의 정비구역 면적 ÷ 세대수(단지 평균 추정), 추정 비례율은 같은 고시의 추정값(관리처분 확정값 아님).';
@@ -12527,7 +12533,7 @@ let l99aStateL99A = 'idle'; const L99A = {};
 function loadL99A(){
   if (!BUNDLES.L99A || l99aStateL99A !== 'idle' || typeof fetch !== 'function') return;
   l99aStateL99A = 'loading';
-  Promise.all(Object.keys(L99A_URL).map(k => { const p = fetch(L99A_URL[k]).then(r => { if (!r.ok) throw new Error(r.status); return r.json(); }).then(j => { L99A[k] = j; }); return k === 'academy' || k === 'elem' || k === 'jgtab' || k === 'parking' || k === 'parkingNA' ? p.catch(() => { L99A[k] = null; }) : p; }))   // 학원가 파일만 못 받으면 그 줄만 빠짐
+  Promise.all(Object.keys(L99A_URL).map(k => { const p = fetch(L99A_URL[k]).then(r => { if (!r.ok) throw new Error(r.status); return r.json(); }).then(j => { L99A[k] = j; }); return k === 'academy' || k === 'elem' || k === 'jgtab' || k === 'parking' || k === 'saleSus' || k === 'parkingNA' ? p.catch(() => { L99A[k] = null; }) : p; }))   // 학원가 파일만 못 받으면 그 줄만 빠짐
     .then(() => { l99aStateL99A = 'loaded'; try { refreshDiagInfoCardL59(); } catch (e) {} })
     .catch(() => { l99aStateL99A = 'error'; });
 }
@@ -12628,9 +12634,25 @@ function saleOfL99A(id){
   if (!BUNDLES.L99A || l99aStateL99A !== 'loaded' || !id || id[0] === '_') return null;
   const B = L99A.bunyang || {}; return Object.prototype.hasOwnProperty.call(B, id) ? B[id] : null;
 }
+const SALE_SUS_URL_L103 = '지도자료_202611/분양_의심칸_1115.json';   // 큐7: 1115(전체/연월, 1114b 대체)   // 묶음 L103: 분양 의심칸 파일 주소(분석 탭 분양_의심칸_1113.json 도착 후 '지도자료_202611/분양_의심칸_1113.json')
+if (BUNDLES.L103 && SALE_SUS_URL_L103) L99A_URL.saleSus = SALE_SUS_URL_L103;
+const SALE_SUS_EXTRA_YM_L103 = [];   // 큐7: 래미안프레비뉴(2013-10)·백련산해모로(2017-10) 연월 확정(의심칸 1115)으로 비움
+function saleSusModeL103(id){   // 묶음 L103(큐4-4): '전체' | '연월' | null
+  const S = L99A.saleSus; if (!id) return null;
+  if (SALE_SUS_EXTRA_YM_L103.indexOf(id) >= 0 && !(S && S.ids && S.ids[id] === '전체')) return '연월';
+  if (!S) return null;
+  const norm = v => { if (v && typeof v === 'object') v = v.처리 || v.구분 || v.숨김; return v === '연월' ? '연월' : '전체'; };
+  if (Array.isArray(S)) return S.includes(id) ? '전체' : null;
+  if (Array.isArray(S.전체) || Array.isArray(S.연월)) return (S.전체 || []).includes(id) ? '전체' : (S.연월 || []).includes(id) ? '연월' : null;
+  if (Array.isArray(S.ids)) return S.ids.includes(id) ? '전체' : null;
+  const M = (S.ids && typeof S.ids === 'object') ? S.ids : S;
+  return Object.prototype.hasOwnProperty.call(M, id) && id[0] !== '_' && ['뜻', '규칙', '건수', '사유'].indexOf(id) < 0 ? norm(M[id]) : null;
+}
+function saleSusL103(id){ return saleSusModeL103(id) === '전체'; }
 function saleInfoRowL99A(id){
+  if (BUNDLES.L103 && saleSusL103(id)) return null;   // 묶음 L103: 의심칸은 분양 줄 숨김
   const b = saleOfL99A(id); if (!b) return null;
-  const txt = ymKorL99A(b.모집공고일 || b.분양연월) || '분양 정보';   // 11-11 피드백 2: "2020년 7월"처럼 월까지
+  const txt = (BUNDLES.L103 && saleSusModeL103(id) === '연월') ? '분양 정보' : (ymKorL99A(b.모집공고일 || b.분양연월) || '분양 정보');   // 묶음 L103(큐4-4): 연월만 숨김   // 11-11 피드백 2: "2020년 7월"처럼 월까지
   return [txt, '<span class="mz92 si99" tabindex="0" role="button" aria-expanded="false" aria-label="분양 '+esc(txt)+' — 분양 정보 자세히" data-si99="'+esc(id)+'">'+esc(txt)+'<i class="mz92-i" aria-hidden="true">ⓘ</i><span class="mz92-pop" role="tooltip"></span></span>'];
 }
 // 사업 유형(11-11 최종 지시 2, 분석 탭 1110c): "재건축 · 둔촌주공 재건축"(정비유형 · 사업이름), 이름 없으면 정비유형만, 둘 다 없으면 청약홈 사업유형, 그것도 없으면 줄 숨김.
@@ -12657,13 +12679,22 @@ function saleConvL100(raw){
   const conv = (py) => parts.map(x => fmtWonL99A(Math.round(x.v * py)) + esc(x.tag)).join(' / ');
   return base + ' · 25평 환산 약 ' + conv(25) + ' · 34평 환산 약 ' + conv(34) + ' ' + tipL99A('환산 = 평당 분양가에 평형을 곱한 값으로, 실제 주택형 분양가와 다를 수 있어요.');
 }
+// ---- 묶음 L103(11-13): 분양 말풍선 추가 줄 — 일반분양 세대수(청약홈 = 일반공급 세대, 기사 = 기사 표현 그대로)·시행·시공(기사분만). 값이 없으면 줄을 그리지 않음 ----
+function saleExtraL103(b, ch, row){
+  const nf = (x) => Number(x).toLocaleString('ko-KR');
+  let sz = '';
+  if (ch){ if (b.일반공급 != null) sz = nf(b.일반공급) + '세대<div class="si99-b">일반공급 세대(특별공급 제외), 청약홈</div>'; }
+  else if (b.일반분양세대수_기사표현) sz = esc(b.일반분양세대수_기사표현);
+  else if (b.일반분양세대수 != null) sz = nf(b.일반분양세대수) + '세대<div class="si99-b">기사 기준</div>';
+  return (sz ? row('일반분양 세대수', sz) : '') + (b.시행시공 ? row('시행·시공', esc(b.시행시공)) : '');
+}
 function saleTipL99A(id){
   const b = saleOfL99A(id), meta = (L99A.bunyang || {})._meta || {};
   if (!b) return '<div class="mz92-n">분양 정보를 찾지 못했어요.</div>';
   const row = (k, v) => '<div class="si99-r"><span class="si99-k">'+k+'</span>'+(v || '<span class="si99-b">자료 없음</span>')+'</div>';
   const ext = (u, t) => '<a href="' + esc(u) + '" target="_blank" rel="noopener noreferrer" referrerpolicy="no-referrer">' + esc(t) + '</a>';
   const ch = b.출처 === '청약홈';
-  const when = ch ? (b.모집공고일 ? esc(ymKorL99A(b.모집공고일)) + ' 모집공고' : '') : (b.분양연월 ? esc(ymKorL99A(b.분양연월)) + ' 분양' : '');
+  const when = (BUNDLES.L103 && saleSusModeL103(id) === '연월') ? '' : ch ? (b.모집공고일 ? esc(ymKorL99A(b.모집공고일)) + ' 모집공고' : '') : (b.분양연월 ? esc(ymKorL99A(b.분양연월)) + ' 분양' : '');
   let price = b.최고분양가 ? String(b.최고분양가).split(/\s*\/\s*/).map(esc).join('<br>') : '';
   if (!price && b['평균분양가_3.3㎡_만원']) price = '<span class="si99-b">주택형별 최고가는 기사에 없음</span><br>' + saleConvL100(b['평균분양가_3.3㎡_만원']);   // 묶음 L100: 평당 + 25·34평 환산(주택형별 최고 분양가가 있으면 price가 이미 차 있어 환산 없음)
   let comp = '';
@@ -12676,6 +12707,7 @@ function saleTipL99A(id){
   const src = (ch ? '청약홈(한국부동산원)' : '기사 기준') + (L.length ? ' · ' + L.join(' · ') : '');
   return '<b>' + esc(b.분양당시이름 || '분양 정보') + '</b>'
     + row('분양 연월', when) + row('주택형별 최고 분양가', price) + row('1순위 경쟁률', comp)
+    + (BUNDLES.L103 ? saleExtraL103(b, ch, row) : '')
     + row('분양가 상한제', b.상한제 ? esc(b.상한제) + (b.상한제표시 ? '<div class="si99-b">' + esc(b.상한제표시) + (b.상한제근거 ? ' — ' + esc(b.상한제근거) : '') + '</div>' : '') : '<span class="si99-b">확인 안 됨</span>') + (biz ? row('사업 유형', esc(biz) + (bizNote ? '<div class="si99-b">' + bizNote + '</div>' : '')) : '')
     + '<div class="mz92-n">출처: ' + src + (b.기사마다다름 ? ' · 기사마다 숫자가 달라 둘 다 적음' : '') + '</div>';
 }
