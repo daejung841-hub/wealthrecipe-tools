@@ -435,6 +435,8 @@
   .cm84-jg99 .jg99-bar li{display:flex;flex-direction:column;align-items:center;gap:2px;text-align:center;min-width:0}
   .cm84-jg99 .jg99-bar li b{display:block;width:100%;box-sizing:border-box;border-radius:6px;padding:7px 2px;font-size:12px;white-space:nowrap;font-weight:700;word-break:keep-all;line-height:1.25;background:#F1F3F5;color:#868E96;border:1px solid #E9ECEF}
   .cm84-jg99 .jg99-bar li.dn b{background:#D0EBFF;color:#1864AB;border-color:#A5D8FF}
+  .cm84-bb .rt101,.cm84-sum .rt101{display:inline-block;margin-left:4px;padding:0 4px;border-radius:7px;background:#E5E7EB;color:#4B5563;font:600 9.5px/14px sans-serif;font-style:normal;vertical-align:middle;white-space:nowrap}
+  .cm84-bb .col .rt101{display:block;margin:2px 0 0;width:max-content}
   .cm84-jg99 .jg99-bar li.cur b{background:#1C7ED6;color:#fff;border-color:#1C7ED6;box-shadow:0 0 0 2px rgba(28,126,214,.25)}
   .cm84-jg99 .jg99-bar li span{font-size:10.5px;color:var(--cm-sub);font-weight:600}
   .cm84-jg99 .jg99-n{margin-top:6px;font-size:11px;color:var(--cm-faint)}
@@ -780,9 +782,10 @@
   let LIGHT = null;
   function useLight(L){
     LIGHT = L;
+    const RTS101 = new Set(L.rt || []);   // 묶음 L101: 판정에 최근 실거래를 쓴 칸(가벼운 파일에 미리 적어 둠)
     L.cx.forEach(r => { const s = L.s[r[0]]; if (!s) return; const id = s[0] || s[1];
-      const it = { id, name: s[1], region: s[4] || '', lat: r[1] / 1e5, lng: r[2] / 1e5, units: s[5] || 0, built: s[6] || null, light: { p: r[5], cur: r[3], badge: L.bands[r[4]], fair: r[6] == null ? null : r[6] },
-        l25: r.length > 7 ? { p: 25, cur: r[7], badge: L.bands[r[8]], fair: r[9] == null ? null : r[9] } : null };   // 묶음 L89: 34평 단지의 25평 칸(가벼운 파일 v4)
+      const it = { id, name: s[1], region: s[4] || '', lat: r[1] / 1e5, lng: r[2] / 1e5, units: s[5] || 0, built: s[6] || null, light: { p: r[5], cur: r[3], badge: L.bands[r[4]], rt: RTS101.has(r[5] + '|' + id) ? 1 : 0, fair: r[6] == null ? null : r[6] },
+        l25: r.length > 7 ? { p: 25, cur: r[7], badge: L.bands[r[8]], rt: RTS101.has('25|' + id) ? 1 : 0, fair: r[9] == null ? null : r[9] } : null };   // 묶음 L89: 34평 단지의 25평 칸(가벼운 파일 v4)
       items.push(it); itemsById.set(id, it); });
   }
   function loadCoordsAndSeedItems(){
@@ -822,7 +825,7 @@
         const c = buildComplex(text, nm, nm); c._pyeong = p;
         if (c.rows.length){
           const r = computeSlot(getVirtualBenchmarkComplex(pickBenchGroupForTarget(stripPyeongSuffix(nm)).groupKey), c);
-          if (!r.error){ const v = badgeViewL61(r.diag); out = { p, cur: r.curSalePrice, badge: v.text }; }
+          if (!r.error){ const v = badgeViewL61(r.diag); out = { p, cur: r.curSaleKbL101 != null ? r.curSaleKbL101 : r.curSalePrice, badge: v.text, rt: (r.rtAdjL100 && r.rtAdjL100.applied) ? 1 : 0 }; }
         }
       }
     } catch (e) { out = null; }
@@ -839,7 +842,7 @@
       else if (p === 25 && e && typeof SEED25_BY_ID !== 'undefined' && SEED25_BY_ID.get(it.id)){ text = SEED25_BY_ID.get(it.id).text; nm = e.name + PYEONG25_SUFFIX; }
       if (text){
         const c = buildComplex(text, nm, nm); c._pyeong = p;
-        if (c.rows.length){ const r = computeSlot(getVirtualBenchmarkComplex(pickBenchGroupForTarget(stripPyeongSuffix(nm)).groupKey), c); if (!r.error){ const v = badgeViewL61(r.diag); out = { p, cur: r.curSalePrice, badge: v.text }; } }
+        if (c.rows.length){ const r = computeSlot(getVirtualBenchmarkComplex(pickBenchGroupForTarget(stripPyeongSuffix(nm)).groupKey), c); if (!r.error){ const v = badgeViewL61(r.diag); out = { p, cur: r.curSaleKbL101 != null ? r.curSaleKbL101 : r.curSalePrice, badge: v.text, rt: (r.rtAdjL100 && r.rtAdjL100.applied) ? 1 : 0 }; } }
       }
     } catch (e) { out = null; }
     cache.set(k, out); return out;
@@ -862,7 +865,8 @@
   function bubble(it, f, detail, info){
     const [, , col] = bandOf(f.badge), price = eok(f.cur) + (f.p === 25 ? '<small style="font-size:9.5px;color:#6B7280;margin-left:1px">25평</small>' : '');
     const inf = info ? infoText(it) : '';
-    const body = detail ? `<span class="col"><b>${price}</b><span class="nm">${esc(it.name)}</span>${inf ? `<span class="if">${esc(inf)}</span>` : ''}</span>` : `<b>${price}</b>`;
+    const rtm = f.rt ? '<i class="rt101" title="판정에 최근 실거래 사용">실거래</i>' : '';   // 묶음 L101
+    const body = detail ? `<span class="col"><b>${price}</b><span class="nm">${esc(it.name)}</span>${inf ? `<span class="if">${esc(inf)}</span>` : ''}${rtm}</span>` : `<b>${price}</b>${rtm}`;
     const tg = detail ? rtTagHtml(rtTagOf(it.id)) : '';   // 지도 1-2: 단지 이름이 보이는 단계부터 실거래 꼬리표(±7%·3건을 넘을 때만)
     return `<div class="cm84-bb${it.id === selId ? ' sel' : ''}" style="--b:${col}"${l96() ? ` data-nm="${esc(it.name)}"` : ''}><span class="bd"></span><span class="tx">${body}${tg}</span>${l96() ? nmTipL96(it) : ''}</div>`;
   }
@@ -1546,7 +1550,7 @@
   // 묶음 L86: 한 줄 요약 — 진단 화면과 같은 값(가벼운 파일에 미리 계산), 적정가는 진단 화면에 숫자가 보일 때만
   function summaryLine(g){
     const fe = (v) => typeof fmtEok === 'function' ? fmtEok(v) : eok(v), [, , col] = bandOf(g.badge);
-    return `<div class="cm84-sum"><span>현재가 <b>${fe(g.cur)}</b>${g.p === 25 ? ' <small>(25평)</small>' : ''}</span><span class="bd" style="background:${col}">${esc(g.badge)}</span>${g.fair != null ? `<span class="fr">적정가 약 <b>${fe(g.fair)}</b></span>` : ''}</div>`;
+    return `<div class="cm84-sum"><span>현재가 <b>${fe(g.cur)}</b>${g.p === 25 ? ' <small>(25평)</small>' : ''}</span><span class="bd" style="background:${col}">${esc(g.badge)}</span>${g.rt ? '<i class="rt101" title="판정에 최근 실거래 사용">실거래</i>' : ''}${g.fair != null ? `<span class="fr">적정가 약 <b>${fe(g.fair)}</b></span>` : ''}</div>`;
   }
   function closePanel(){ back97 = []; exitFull(); delete panel.dataset.id; panel.classList.remove('on', 'full', 'twv', 'back'); mainEl.classList.remove('pon'); panel.innerHTML = ''; selId = null; layoutL87(); setTimeout(resize, 30); }
   // PC: 패널 가장자리를 끌어 넓이 조절(이 브라우저에서 기억). 묶음 L85_LEFT면 패널이 왼쪽이라 손잡이는 패널 오른쪽 끝
