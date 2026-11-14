@@ -463,6 +463,11 @@ button.pyeong-chip{font:inherit;font-size:11.5px;}
 .rt-l101-mini{font-size:10.5px;font-weight:500;color:var(--ink-muted);}
 .rt-l101-old{margin:6px 0 0;font-size:12.5px;line-height:1.5;color:var(--ink-muted);}
 .rt-l101-off{color:var(--ink-muted);}
+.p102-t .p102-b{font-size:12px;font-weight:600;color:var(--ink);line-height:1.55;}
+.p102-t .p102-hr{border:0;border-top:1px solid var(--border);margin:7px 0 5px;}
+.p102-t .p102-r{font-size:10.5px;font-weight:400;color:var(--ink-faint);line-height:1.5;}
+.fav-info-l59 .l102-l{flex-basis:100%;min-width:0;font-size:11.5px;font-weight:400;color:var(--ink-faint);line-height:1.5;}
+.diag-info-l59 .fav-info-l59 > div:has(.l102-l){grid-column:1 / -1;width:auto;min-width:0;}
 /* 묶음 L85: 지도 중심 화면 — 탭은 [지도][여러 단지 보기], 지도 화면은 머리줄 한 줄 + 화면 전체 지도 */
 .map-head-l85{display:none;}
 body.l85 #topModeTabs .top-mode-btn[data-top-mode="single"], body.l85 #topModeTabs .top-mode-btn[data-top-mode="favorites"]{display:none;}
@@ -3124,9 +3129,9 @@ function seoulHistoricalAvg(){
 // 라이브는 주소 플래그를 읽지 않으므로 이 기본값이 그대로 동작한다.
 const BUNDLES = { A:false, B:false, C:false, D1:false, D2:false, D3:false, D4:false, E1:true, E2:false, E3:true, F1:true, F2:true, F3:true, F4:true, F5:true, F6:true,
   H1:false, H2:true, H3:true, H4:true, H5:true, H6:true, H7:true,
-  L1:true, L2:true, L3:true, L4:true, L5:true, L6:false, L7:true, L8:true, L9:true, L10:true, L11:true, L12:true, L13:true, L14:true, L15:true, L16:true, L17:true, L18:true, L19:true, L19B:true, L20:true, L22:true, L23:true, L24:true, L25:true, L26:true, L27:!!window.POOL_EXCLUDE_ON, L31:!!window.NEW_NAME_RULE_ON, L32:true, L33:true, L34:true, L37:true, L28:true, L38:true, L40:true, L39:true, L41:true, L42:true, L43:true, L44:true, L45:true, L46:true, L47:true, L49:true, L48:true, L50:true, L51:true, L52:true, L53:true, L54:true, L55:true, L56:true, L57:true, L58:true, L59:true, L59_DND:true, L59_INFOCARD:true, L59_STATION:true, L59_SCHOOL:true, L59_FAVSEARCH:true, L60:true, L60_REL:false, L60_WHY:false, L60_NOTE:true, L61:true, L64:true, L64_LINK:true, L64_NEWBUILD:false, L65:true, L69:true, L70:true, L71:true, L74:true, L75:true, L76:true, L77:true, L78:true, L79:true, L80:true, L81:true, L82:true, L84:true, L85:true, L85_CROSS:true, L85_LEFT:true, L85_INFO:true, L85_LBL:true, L85_FULL:true, L86:(typeof EARLY_FLAGS_L52 === 'undefined' || !!EARLY_FLAGS_L52.L86), L87:true, L88:true, L88_EMBED:true, L88_SHARE:true, L89:true, L84_RT:true, L84_SC:true, L91:true, L92:true, L93:true, L94:true, L95:true, L96:true, L97:true, L97B:true, L98:true, L98H:true, L98B:true, L35:true, L36:true, L30:true, L29:true, L29R:false, L90N:true, L90G:true, L98J:true, L99A:true, L99C:true, L99B:true, L101:true, K1:false, K2:true, K4:false };
+  L1:true, L2:true, L3:true, L4:true, L5:true, L6:false, L7:true, L8:true, L9:true, L10:true, L11:true, L12:true, L13:true, L14:true, L15:true, L16:true, L17:true, L18:true, L19:true, L19B:true, L20:true, L22:true, L23:true, L24:true, L25:true, L26:true, L27:!!window.POOL_EXCLUDE_ON, L31:!!window.NEW_NAME_RULE_ON, L32:true, L33:true, L34:true, L37:true, L28:true, L38:true, L40:true, L39:true, L41:true, L42:true, L43:true, L44:true, L45:true, L46:true, L47:true, L49:true, L48:true, L50:true, L51:true, L52:true, L53:true, L54:true, L55:true, L56:true, L57:true, L58:true, L59:true, L59_DND:true, L59_INFOCARD:true, L59_STATION:true, L59_SCHOOL:true, L59_FAVSEARCH:true, L60:true, L60_REL:false, L60_WHY:false, L60_NOTE:true, L61:true, L64:true, L64_LINK:true, L64_NEWBUILD:false, L65:true, L69:true, L70:true, L71:true, L74:true, L75:true, L76:true, L77:true, L78:true, L79:true, L80:true, L81:true, L82:true, L84:true, L85:true, L85_CROSS:true, L85_LEFT:true, L85_INFO:true, L85_LBL:true, L85_FULL:true, L86:(typeof EARLY_FLAGS_L52 === 'undefined' || !!EARLY_FLAGS_L52.L86), L87:true, L88:true, L88_EMBED:true, L88_SHARE:true, L89:true, L84_RT:true, L84_SC:true, L91:true, L92:true, L93:true, L94:true, L95:true, L96:true, L97:true, L97B:true, L98:true, L98H:true, L98B:true, L35:true, L36:true, L30:true, L29:true, L29R:false, L90N:true, L90G:true, L98J:true, L99A:true, L99C:true, L99B:true, L101:true, L102:true, L102C:true, K1:false, K2:true, K4:false };
 const BUNDLE_GROUPS = { D:['D1','D2','D3','D4'], E:['E1','E2','E3'], F:['F1','F2','F3','F4','F5','F6'], H:['H1','H2','H3','H4','H5','H6','H7'],
-  L:['L1','L2','L3','L4','L5','L6','L7','L8','L9','L10','L11','L12','L13','L14','L15','L16','L17','L18','L19','L19B','L20','L22','L23','L24','L25','L26','L27','L29','L30','L31','L32','L33','L34','L37','L35','L36','L28','L38','L40','L39','L41','L42','L43','L44','L45','L46','L47','L49','L48','L50','L51','L52','L53','L54','L55','L56','L57','L58','L59','L60','L61','L64','L65','L69','L70','L71','L74','L75','L76','L77','L78','L79','L80','L81','L82','L84','L85','L86','L87','L88','L89','L91','L92','L93','L94','L95','L96','L97','L97B','L98','L98H','L98B','L90N','L90G','L98J','L99A','L99C','L99B','L101'], K:['K1','K2','K4'] };
+  L:['L1','L2','L3','L4','L5','L6','L7','L8','L9','L10','L11','L12','L13','L14','L15','L16','L17','L18','L19','L19B','L20','L22','L23','L24','L25','L26','L27','L29','L30','L31','L32','L33','L34','L37','L35','L36','L28','L38','L40','L39','L41','L42','L43','L44','L45','L46','L47','L49','L48','L50','L51','L52','L53','L54','L55','L56','L57','L58','L59','L60','L61','L64','L65','L69','L70','L71','L74','L75','L76','L77','L78','L79','L80','L81','L82','L84','L85','L86','L87','L88','L89','L91','L92','L93','L94','L95','L96','L97','L97B','L98','L98H','L98B','L90N','L90G','L98J','L99A','L99C','L99B','L101','L102','L102C'], K:['K1','K2','K4'] };
 // 묶음 L46(69단계): 그래프 점선 모양 통일 — 모든 점선을 "선도단지 대비 적정가" 선(FAIR_LINE_STYLE.borderDash)과 같은 긴 점선으로.
 // 촘촘한 점("좁쌀")·점-선 섞인 패턴을 없앤다. 새 점선은 항상 dashL46(예전 값)을 쓴다 — L46을 끄면 예전 값 그대로.
 const DASH_L46 = [5, 4];
@@ -12512,7 +12517,8 @@ function favLocationTextL59(seed){
 // 재건축: 서울 25년+ 495곳(정보몽땅 단계·인가일, 16곳 대지지분·추정 비례율), 문장은 자료의 '한줄' 그대로. 숨김 43곳은 줄 없음.
 //         경기·인천은 자료가 없어 재건축 대상(25년+)이면 "재건축 · 자료 준비 중".
 // 분양 정보: 청약홈 243곳 + 기사 68곳, 숫자는 원자료 그대로(반올림·환산 없음), 값이 없는 줄은 숨김. 판정·계산과 무관(글자 줄만).
-const L99A_URL = { jaegun: '지도자료_202611/jaegun_l99a_1110.json', daeji: '지도자료_202611/daeji_l99_1110.json', bunyang: '지도자료_202611/bunyang_l99_1111b.json', academy: '지도자료_202611/academy_l99_1110c.json', elem: '지도자료_202611/elem_multi_l99_1111.json' };   // 학원가 = 분석 탭 1110c 판
+const L99A_URL = { jaegun: '지도자료_202611/jaegun_l99a_1110.json', daeji: '지도자료_202611/daeji_l99_1110.json', bunyang: '지도자료_202611/bunyang_l99_1111b.json', academy: '지도자료_202611/academy_l99_1110c.json', elem: '지도자료_202611/elem_multi_l99_1111.json' };
+if (BUNDLES.L102) L99A_URL.parking = '지도자료_202611/parking_l102b_1113.json';   // 묶음 L102: 주차 줄 자료(분석 탭 1113판, 정보 카드를 열 때만 받음)   // 학원가 = 분석 탭 1110c 판
 if (BUNDLES.L99C) L99A_URL.jgtab = '지도자료_202611/jaegun_tab_l99c_1111_v4.json';   // 묶음 L99C: 재건축 탭 자료(단지 정보 한 줄 '진행 정보 준비 중' 판단에도 씀)
 const L99A_AGE = 25;   // (서울 재건축 자료 대상 25년+, 참고용)
 const L99A_AGE_GG = 28;   // 11-11 대표님 결정 4: 경기·인천 "재건축 · 자료 준비 중"은 준공 28년 이상만(계산기 다른 재건축 안내와 같은 28년)
@@ -12521,7 +12527,7 @@ let l99aStateL99A = 'idle'; const L99A = {};
 function loadL99A(){
   if (!BUNDLES.L99A || l99aStateL99A !== 'idle' || typeof fetch !== 'function') return;
   l99aStateL99A = 'loading';
-  Promise.all(Object.keys(L99A_URL).map(k => { const p = fetch(L99A_URL[k]).then(r => { if (!r.ok) throw new Error(r.status); return r.json(); }).then(j => { L99A[k] = j; }); return k === 'academy' || k === 'elem' || k === 'jgtab' ? p.catch(() => { L99A[k] = null; }) : p; }))   // 학원가 파일만 못 받으면 그 줄만 빠짐
+  Promise.all(Object.keys(L99A_URL).map(k => { const p = fetch(L99A_URL[k]).then(r => { if (!r.ok) throw new Error(r.status); return r.json(); }).then(j => { L99A[k] = j; }); return k === 'academy' || k === 'elem' || k === 'jgtab' || k === 'parking' || k === 'parkingNA' ? p.catch(() => { L99A[k] = null; }) : p; }))   // 학원가 파일만 못 받으면 그 줄만 빠짐
     .then(() => { l99aStateL99A = 'loaded'; try { refreshDiagInfoCardL59(); } catch (e) {} })
     .catch(() => { l99aStateL99A = 'error'; });
 }
@@ -12554,6 +12560,67 @@ function rebuildRowL99ABase(id, seed){
   if (d && d.대지지분){ const a = d.대지지분; tip += ' — 이 단지: 정비구역 면적 ' + Number(a['정비구역면적㎡']).toLocaleString('ko-KR') + '㎡ ÷ ' + Number(a.KB세대).toLocaleString('ko-KR') + '세대 = 세대당 ' + a['㎡'] + '㎡(' + a.평 + '평), ' + a.고시 + (a.표시 && a.표시 !== '고시 원문' ? ', ' + a.표시 : '');
     if (d.추정비례율 && d.추정비례율.값 != null) tip += ' · 추정 비례율 ' + d.추정비례율.값 + '%' + (d.추정비례율.상태 && d.추정비례율.상태 !== '원문' ? '(' + d.추정비례율.상태 + ')' : ''); }
   return [e.한줄, '<span class="l99a-l">' + esc(e.한줄) + ' ' + tipL99A(tip) + '</span>' + (src.length ? '<span class="l99a-s">' + esc(src.join(' · ')) + '</span>' : '')];
+}
+// ---- 묶음 L102(11-13): 단지 정보 카드 "주차" 줄 — 세대당 대수 한 줄, 나머지는 ⓘ 안에만(키워드 본문 + 구분선 + 작은 참고 줄). 값이 없으면 줄 없음. 판정·계산과 무관 ----
+//   기준 연도·평균·곳 수는 화면에 박지 않고 자료 파일 _meta['세대당 기준']에서 읽음(기준을 바꾸면 자료만 교체). 소수 둘째 자리는 r2L102 한 곳에서 반올림.
+const L102_LABEL = { A: '지하 주차장 동 연결(추정)', B: '일부 동만 연결 가능(추정)', C: '지하 주차장 있음 · 지상 주차 병행', D: '지상 주차 위주' };
+const L102_GRADE = { '여유': '여유', '보통': '보통', '빠듯': '적은 편' };   // 자료 코드('빠듯')는 그대로 두고 화면 글자만 바꿈
+const r2L102 = (v) => (Math.round(Number(v) * 100 + 1e-7) / 100).toFixed(2);
+function parkingBaseL102(){   // 자료 meta에서 기준 연도·평균·곳 수
+  const P = L99A.parking, m = (P && P._meta && P._meta['세대당 기준']) || {}, d = (m.분포 && m.분포.수도권) || {};
+  const y = /(\d{4})\s*년\s*이후/.exec(m.뜻 || '');
+  return { year: y ? Number(y[1]) : null, avg: d.평균 != null ? d.평균 : null, cnt: d.단지수 != null ? d.단지수 : null };
+}
+function parkingLabelL102(e){   // 기준 연도 이후는 D(지상 주차 위주)만, 이전(연도 없음 포함)은 코드 그대로
+  const c = e && e.코드; if (!L102_LABEL[c]) return '';
+  const by = parkingBaseL102().year;
+  return (e.승인연도 != null && by != null && e.승인연도 >= by && c !== 'D') ? '' : L102_LABEL[c];
+}
+function parkingRowL102Old(id, name){
+  if (!BUNDLES.L102 || l99aStateL99A !== 'loaded' || !id || id[0] === '_') return null;
+  const P = L99A.parking; if (!P || !Object.prototype.hasOwnProperty.call(P, id)) return null;
+  const e = P[id]; if (!e || e.코드 === 'N' || e.세대당 == null || e.지상 == null || e.지하 == null) return null;
+  const n = (v) => Number(v).toLocaleString('ko-KR'), lab = parkingLabelL102(e), B = parkingBaseL102();
+  const txt = '세대당 ' + r2L102(e.세대당) + '대 (지하 ' + n(e.지하) + ' · 지상 ' + n(e.지상) + ')' + (lab ? ' · ' + lab : '');
+  const body = [], ref = [], yr = B.year != null ? B.year + '년 이후 ' : '';
+  const g = L102_GRADE[e.등급];
+  if (B.avg != null) body.push(yr + '평균 ' + r2L102(B.avg) + '대');
+  body.push((name ? esc(name) + ' ' : '') + r2L102(e.세대당) + '대' + (e['상위%'] != null ? ' · 상위 ' + e['상위%'] + '%' : '') + (g ? ' · ' + g : ''));
+  if (lab){ const tot = Number(e.지상) + Number(e.지하); body.push('연결 · ' + esc(lab)); if (tot > 0) ref.push('연결 근거 · 지하 주차 ' + Math.round(Number(e.지하) / tot * 100) + '%로 본 추정'); }
+  ref.push('계산 · (지상+지하) ÷ 세대수');
+  if (B.year != null && B.cnt != null) ref.push('비교 · ' + B.year + '년 이후 준공, 수도권 ' + n(B.cnt) + '곳');
+  if (B.year != null && e.승인연도 != null && e.승인연도 < B.year) ref.push('구축은 설계 기준이 달라 낮게 나옴');
+  ref.push('출처 · K-apt');
+  const html = '<span class="info-tip-html p102-t">' + body.map(x => '<div class="p102-b">' + x + '</div>').join('') + '<hr class="p102-hr">' + ref.map(x => '<div class="p102-r">' + x + '</div>').join('') + '</span>';
+  return [txt, '<span class="l102-l">' + esc(txt) + ' <span class="info-icon' + (BUNDLES.L17 ? ' tip-unified' : '') + '" tabindex="0">' + html + 'ⓘ</span></span>'];
+}
+// ---- 묶음 L102C(11-13): 주차 ⓘ 구간별 말풍선(같은 준공 구간끼리 비교) — 자료 meta에서 구간·평균·곳수를 읽음 ----
+if (BUNDLES.L102C){ L99A_URL.parking = '지도자료_202611/parking_l102d_1113.json'; L99A_URL.parkingNA = '지도자료_202611/주차_확인불가_1113d.json'; }
+const L102C_DEC_MIN = 30;   // 같은 연대 평균 줄: 그 연대 곳수가 이 값 미만이면 줄 생략
+const segLabelL102C = (t) => String(t).replace(/^(\d{4})~\d{2}(\d{2})$/, '$1~$2');   // 2000~2009 → 2000~09
+function parkingRowL102(id, name){
+  if (!BUNDLES.L102C || !BUNDLES.L102 || l99aStateL99A !== 'loaded' || !id || id[0] === '_') return parkingRowL102Old(id, name);
+  const NA = L99A.parkingNA, naIds = NA && Array.isArray(NA.ids) ? NA.ids : (Array.isArray(NA) ? NA : null);
+  if (naIds && naIds.includes(id)) return null;   // 주차 확인 불가 → 줄 숨김
+  const P = L99A.parking, M = P && P._meta, segs = M && M.구간별 && Array.isArray(M.구간별.구간) ? M.구간별.구간 : null;
+  const e = P && Object.prototype.hasOwnProperty.call(P, id) ? P[id] : null;
+  if (!segs || !e || e.코드 === 'N' || e.세대당 == null || e.지상 == null || e.지하 == null || !e.구간) return parkingRowL102Old(id, name);
+  const seg = segs.find(s => s.구간 === e.구간); if (!seg || seg.평균 == null) return parkingRowL102Old(id, name);
+  const n = (v) => Number(v).toLocaleString('ko-KR'), lab = parkingLabelL102(e), g = L102_GRADE[e.등급];
+  const txt = '세대당 ' + r2L102(e.세대당) + '대 (지하 ' + n(e.지하) + ' · 지상 ' + n(e.지상) + ')' + (lab ? ' · ' + lab : '');
+  const body = ['같은 시기(' + esc(segLabelL102C(seg.구간)) + ' 준공) 평균 ' + r2L102(seg.평균) + '대',
+    (name ? esc(name) + ' ' : '') + r2L102(e.세대당) + '대' + (e['구간상위%'] != null ? ' · 구간 내 상위 ' + e['구간상위%'] + '%' : '') + (g ? ' · ' + g : '')];
+  const ref = [];
+  if (lab){ const tot = Number(e.지상) + Number(e.지하); body.push('연결 · ' + esc(lab)); if (tot > 0) ref.push('연결 근거 · 지하 주차 ' + Math.round(Number(e.지하) / tot * 100) + '%로 본 추정'); }
+  ref.push('구간별 평균 · ' + segs.map(s => esc(segLabelL102C(s.구간)) + ' ' + r2L102(s.평균)).join(' / '));
+  const decs = M.연대별 && Array.isArray(M.연대별.표) ? M.연대별.표 : [], y = e.승인연도;
+  const dec = y != null ? decs.find(d => d.연대 === (Math.floor(y / 10) * 10) + '년대') : null;
+  if (dec && dec.평균 != null && dec.곳수 != null && dec.곳수 >= L102C_DEC_MIN) ref.push('같은 연대(' + esc(dec.연대) + ' 준공) 평균 ' + r2L102(dec.평균) + ' · ' + n(dec.곳수) + '곳');
+  ref.push('계산 · (지상+지하) ÷ 세대수');
+  if (seg.곳수 != null) ref.push('비교 · 같은 준공 구간, 수도권 ' + n(seg.곳수) + '곳');
+  ref.push('출처 · K-apt');
+  const html = '<span class="info-tip-html p102-t">' + body.map(x => '<div class="p102-b">' + x + '</div>').join('') + '<hr class="p102-hr">' + ref.map(x => '<div class="p102-r">' + x + '</div>').join('') + '</span>';
+  return [txt, '<span class="l102-l">' + esc(txt) + ' <span class="info-icon' + (BUNDLES.L17 ? ' tip-unified' : '') + '" tabindex="0">' + html + 'ⓘ</span></span>'];
 }
 // 분양 정보 줄(11-10 대표님 피드백 4): 단지 정보에는 "분양 2020년 ⓘ" 한 줄만, 나머지는 마우스 올림(폰은 누름) 말풍선 — [글자, html] 또는 null
 const ymKorL99A = (s) => { const m = String(s || '').match(/^(\d{4})(?:-(\d{1,2}))?/); return m ? m[1] + '년' + (m[2] ? ' ' + (+m[2]) + '월' : '') : ''; };
@@ -12651,6 +12718,7 @@ function diagInfoCardHtmlL59(ref){
   ];
   if (BUNDLES.L99A){ const rb = rebuildRowL99A(ref.id, seed), si = saleInfoRowL99A(ref.id);   // 묶음 L99A
     if (rb) rows.push(['재건축', rb[0], '', true, rb[1]]); if (si) rows.push(['분양', si[0], '', true, si[1]]);
+    if (BUNDLES.L102){ const pk = parkingRowL102(ref.id, seed.name); if (pk) rows.push(['주차', pk[0], '', true, pk[1]]); }   // 묶음 L102
     const ac = academyRowL99A(ref.id), mi = rows.findIndex(x => x[0] === '중학교 학군'), wi = rows.findIndex(x => x[0] === '위치'); if (ac){ if (mi >= 0 && rows[mi][1]){ rows[mi][3] = false; rows.splice(mi + 1, 0, ['학원가', ac[0], '', true, ac[1]]); } else rows.splice(wi < 0 ? rows.length : wi, 0, ['학원가', ac[0], '', true, ac[1]]); } }   // 11-11 피드백 3: 중학교 학군 오른쪽 칸(PC 2칸)
   rows = rows.filter(x => x[1] != null && x[1] !== '');
   if (!rows.length) return '';
