@@ -2222,6 +2222,15 @@
   const JG_STAGES = ['안전진단', '구역지정', '추진위', '조합설립', '사업시행', '관리처분', '이주철거', '착공', '준공'];
   const JG = { d: null, ld: null, open: false };
   const GE_URL_L104 = '지도자료_202611/재건축_일반분양_추정_1113d.json';   // 큐4 보충: 1113c   // 묶음 L104: 분석 탭 재건축_일반분양_추정_1113b.json 도착 후 '지도자료_202611/재건축_일반분양_추정_1113b.json'
+  const CASHOUT_RATE = 0.05;   // 묶음 L107(큐10): 재건축 현금청산 비율(조합 설립 미동의 등). 잠정 5% — 분석 탭이 실제 비율을 내면 이 값만 바꿈
+  const l107 = () => { try { return !!BUNDLES.L107; } catch (e) { return false; } };
+  function joOfL107(it, e){   // 조합원 분양: [값, '원문'|'추정'|'산정 불가', 기존 세대수]
+    const sg = e.세대구성 || {}; if (sg.조합원분양 != null) return [Number(sg.조합원분양), '원문'];
+    const g = GE104 && Object.prototype.hasOwnProperty.call(GE104, it.id) ? GE104[it.id] : null;
+    if (g && typeof g === 'object' && g.조합원분양_원문 != null) return [Number(g.조합원분양_원문), '원문'];
+    const base = Number(g && typeof g === 'object' && g['현재세대(KB)'] || it.units || 0);
+    return base > 0 ? [Math.round(base * (1 - CASHOUT_RATE)), '추정', base] : [null, '산정 불가'];
+  }
   let GE104 = null; if (GE_URL_L104) fetch(GE_URL_L104).then(r => r.ok ? r.json() : null).then(j => { GE104 = j && j.단지 ? j.단지 : j; }, () => {});
   function geOfL104(id, e){   // 추정값(조합설립 이후 + 검증 통과만), 아니면 null
     const g = GE104 && Object.prototype.hasOwnProperty.call(GE104, id) ? GE104[id] : (e.세대구성 && e.세대구성.일반분양_추정) || null; if (!g) return null;
@@ -2264,7 +2273,10 @@
     const fa = e.용적률 != null ? (typeof e.용적률 === 'object' ? e.용적률.값 : e.용적률) : null, kb = /기사/.test(sg.상태 || '') ? ' <small>기사 기준</small>' : '';
     rows.push(['총 계획 세대수', tot != null ? nm(tot) + k0 : W]);
     rows.push(['용적률', fa != null ? esc(fa) + (/%$/.test(String(fa)) ? '' : '%') : W]);
-    rows.push(['조합원 분양', sg.조합원분양 != null ? nm(sg.조합원분양) + k0 + kb : W]);
+    if (l107()){   // 묶음 L107: 원문 없으면 기존 세대수 × (1 − 현금청산 비율) 추정, 기존 세대수도 없으면 '산정 불가'
+      const jo = joOfL107(it, e);
+      rows.push(['조합원 분양', jo[1] === '원문' ? nm(jo[0]) + k0 + kb : jo[1] === '추정' ? '약 ' + Math.round(jo[0]).toLocaleString('ko-KR') + '세대 <small>· 추정</small><small class="ge104-r">기존 ' + Number(jo[2]).toLocaleString('ko-KR') + '세대 × (1 − 현금청산 ' + Math.round(CASHOUT_RATE * 100) + '%) · 사업 진행에 따라 달라질 수 있음</small>' : '<span class="jg99-w">산정 불가</span>']);
+    } else rows.push(['조합원 분양', sg.조합원분양 != null ? nm(sg.조합원분양) + k0 + kb : W]);
     const gv = geOfL104(it.id, e), estHtml = gv != null ? '약 ' + Math.round(gv).toLocaleString('ko-KR') + '세대 <small>· 추정</small><small class="ge104-r">총 계획 − 조합원 − 임대 − 공공분양 · 공공분양 확인 안 되면 0 · 사업 진행에 따라 달라질 수 있음</small>' : '';   // 묶음 L104
     rows.push(['일반 분양', sg.일반분양 != null ? nm(sg.일반분양) + (/^계산/.test(sg.일반분양_표시 || '') ? ' <small>계산</small>' : '') + kb + k0 : estHtml || W]);
     const rentSum = (() => { const m = /(\d[\d,]*)[^\d+]*\+[^\d]*(\d[\d,]*)/.exec(sg.임대_원문이름 || ''); if (!m || sg.임대 == null) return ''; const a = Number(m[1].replace(/,/g, '')), b = Number(m[2].replace(/,/g, '')); return a + b === Number(sg.임대) ? '원문 두 값(' + a + '+' + b + ')의 합' : ''; })();   // 묶음 L103: 임대 = 원문 두 값의 합일 때만 근거 표기
