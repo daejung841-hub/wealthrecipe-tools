@@ -1286,7 +1286,7 @@
   }
   function showPanel(){
     panel.classList.add('on'); panel.classList.remove('full', 'mini95'); mainEl.classList.add('pon');
-    panel.querySelector('.x').onclick = closePanel;
+    panel.querySelector('.x').onclick = () => (typeof closeBtn109 === 'function' ? closeBtn109() : closePanel());   // 묶음 L109: ✕ = 쌓은 칸이면 뒤로가기
     const fs = panel.querySelector('.fs'); if (fs) fs.onclick = enterFull;
     const bk = panel.querySelector('.bk'); if (bk) bk.onclick = exitFull;
     const sz = panel.querySelector('.sz'); if (sz) sz.onclick = () => { panel.classList.remove('mini95'); const f = panel.classList.toggle('full'); sz.textContent = l87() ? (f ? '▼' : '▲') : (f ? '▼ 작게' : '▲ 크게'); };
@@ -1440,7 +1440,59 @@
     if (![...panel.querySelectorAll('iframe')].some(f => f.contentWindow === ev.source)) return;   // 이 패널 안 계산기(진단·쌍둥이 창)가 보낸 것만
     linkOpen97(String(m.id), m.p === 25 ? 25 : 34);
   });
+  // ---- 묶음 L109(큐13): 단지 열기 = 브라우저 기록 한 칸 ----
+  const l109 = () => { try { return !!BUNDLES.L109 && !(typeof inFrameL85 === 'function' && inFrameL85()); } catch (e) { return false; } };
+  let rest109 = false, keepView109 = false, pre109 = null;   // pre109 = 검색·링크가 지도를 옮기기 전 상태(openById가 남김)
+  const LAYER109 = ['cm84Az', 'cm84Bd', 'cm84ScE', 'cm84ScM', 'cm84Zone', 'cm84Slope', 'cm84Hide'];   // 되살릴 층 단추(거리 재기·거리뷰처럼 누르면 다른 일이 생기는 단추는 뺌)
+  function snap109(){
+    const o = { id: null, p: null };
+    try { const c = map && map.getCenter(); if (c) o.view = [c.lat(), c.lng(), map.getZoom()]; } catch (e) {}
+    try { const q = root.querySelector('#cm84Q'); if (q) o.q = q.value; } catch (e) {}
+    try { o.ly = LAYER109.filter(k => { const b = root.querySelector('#' + k); return !!(b && b.getAttribute('aria-pressed') === 'true'); }); } catch (e) {}
+    if (panel.classList.contains('on') && panel.dataset.id){ o.id = panel.dataset.id; o.p = +panel.dataset.p === 25 ? 25 : 34; }
+    return o;
+  }
+  function url109(id, p){
+    const u = new URL(window.location.href), q = u.searchParams;
+    if (id){ q.set('단지', id); if (p === 25) q.set('평형', '25'); else q.delete('평형'); } else { q.delete('단지'); q.delete('평형'); q.delete('보기'); }
+    return u.pathname + (q.toString() ? '?' + q.toString() : '') + u.hash;
+  }
+  function hist109(id, p){
+    const pre = pre109; pre109 = null;   // 한 번만 씀(남은 값이 다음 열기에 섞이지 않게)
+    if (!l109() || rest109) return;
+    try {
+      const st = history.state || {}, cur = st.cm109, sameId = panel.classList.contains('on') && panel.dataset.id === id;
+      const fromUrl = !cur && new URLSearchParams(window.location.search).get('단지') === id;   // 주소(?단지=)로 들어와 처음 여는 단지
+      if (sameId || fromUrl){ history.replaceState(Object.assign({}, st, { cm109: Object.assign({}, cur || {}, { id, p, push: !!(cur && cur.push) }) }), '', url109(id, p)); return; }
+      history.replaceState(Object.assign({}, st, { cm109: pre || snap109() }), '');
+      history.pushState({ cm109: { id, p, push: true } }, '', url109(id, p));
+    } catch (e) {}
+  }
+  function closeBtn109(){
+    if (l109()){
+      const s = history.state && history.state.cm109;
+      if (s && s.push){ keepView109 = true; history.back(); return; }   // 우리가 쌓은 칸 = 뒤로가기와 같게(지도 위치는 지금 그대로)
+      closePanel(); try { history.replaceState(Object.assign({}, history.state || {}, { cm109: snap109() }), '', url109(null)); } catch (e) {}
+      return;
+    }
+    closePanel();
+  }
+  function pop109(ev){
+    const s = ev.state && ev.state.cm109; if (!l109() || !s) return;
+    rest109 = true;
+    try {
+      if (s.id){ if (!(panel.classList.contains('on') && panel.dataset.id === s.id && (+panel.dataset.p === 25 ? 25 : 34) === (s.p === 25 ? 25 : 34))) openById(s.id, s.p === 25 ? 25 : 34, { fly: !s.view && !keepView109 }); }
+      else if (panel.classList.contains('on')) closePanel();
+      if (s.view && !keepView109 && map){ map.setCenter(new NV.LatLng(s.view[0], s.view[1])); map.setZoom(s.view[2]); }
+      if (s.q != null){ const q = root.querySelector('#cm84Q'); if (q){ q.value = s.q; const qx = root.querySelector('#cm84Qx'); if (qx) qx.hidden = !s.q; } }
+      if (Array.isArray(s.ly)) LAYER109.forEach(k => { const b = root.querySelector('#' + k); if (!b) return; const want = s.ly.includes(k); if ((b.getAttribute('aria-pressed') === 'true') !== want) b.click(); });
+    } catch (e) {}
+    rest109 = false; keepView109 = false;
+    window.CALC_MAP_L84.hist109 = { at: performance.now(), id: s.id || null, len: history.length };
+  }
+  try { window.addEventListener('popstate', pop109); } catch (e) {}
   function openPanel(it, pOver){
+    hist109(it.id, (() => { const f = itemsById.has(it.id) ? (info(it) || {}) : {}; return (pOver || f.p || 34) === 25 ? 25 : 34; })());   // 묶음 L109
     if (l97() && !nav97) back97 = [];   // 묶음 L97: 링크가 아니라 지도·검색·최근 본 단지로 열면 되돌아가기 기록을 새로
     selId = it.id; const f = itemsById.has(it.id) ? (info(it) || {}) : {};
     const p = pOver || f.p || 34, url = calcUrl(it.id, p);
@@ -1591,6 +1643,7 @@
   function openById(id, p, opt){
     if (!ready){ pendingOpen = [id, p, opt]; return true; }
     const it = itemsById.get(id);
+    pre109 = (typeof l109 === 'function' && l109() && !rest109) ? snap109() : null;   // 묶음 L109: 지도를 옮기기 전 상태
     if (it){
       if (!opt || opt.fly !== false){ const oz = ZM().cxOpen; map.setCenter(new NV.LatLng(it.lat, it.lng)); if (map.getZoom() < oz) map.setZoom(oz); }
       openPanel(it, p === 25 ? 25 : null);
