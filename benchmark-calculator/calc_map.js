@@ -95,7 +95,26 @@
   const other98b = (id) => !!(l98b() && pick98b && pick98b.id === id);
   function bandRT(id, p){ return other98b(id) ? [pick98b.lo - .5, pick98b.hi + .49] : slotBandRT(id, p); }
   const area98b = (lo, hi) => '전용 ' + (lo === hi ? lo : lo + '~' + hi) + '㎡';
-  const bandName98b = (id, p) => other98b(id) ? area98b(pick98b.lo, pick98b.hi) : p + '평 칸';
+  // 묶음 L106(큐10): 실거래 탭 평형 이름 = 진단 탭 평형 칩 이름(KB 공급평 — seedChips g칸). 전용㎡로 칩을 찾음(경계 0.5㎡, 가장 가까운 칩 1.5㎡ 안)
+  const l106 = () => { try { return !!BUNDLES.L106; } catch (e) { return false; } };
+  function kbPy106(id, lo, hi){
+    const c = window.SEED_CHIPS && window.SEED_CHIPS[id], g = c && c[7]; if (!Array.isArray(g)) return null;
+    const hit = []; for (let i = 0; i + 3 < g.length; i += 4){ if (g[i] && g[i + 3] >= lo - .5 && g[i + 2] <= hi + .5) hit.push(g[i]); }
+    if (!hit.length){ const m = (lo + hi) / 2; let best = null, bd = 1e9; for (let i = 0; i + 3 < g.length; i += 4){ if (!g[i]) continue; const d = Math.min(Math.abs(m - g[i + 2]), Math.abs(m - g[i + 3])); if (d < bd){ bd = d; best = g[i]; } } return bd <= 1.5 ? String(best) : null; }
+    const u = [...new Set(hit)].sort((a, b) => a - b); return u.length === 1 ? String(u[0]) : u[0] + '~' + u[u.length - 1];   // 한 묶음에 칩이 둘 이상이면 "17~19"
+  }
+  // 칸 시세 타입의 전용㎡가 그 칸 평형대(34평대 81~86㎡·25평대 56~62㎡, 앞뒤 3㎡)를 벗어난 단지만 KB 평형 이름을 씀(공작-성일: 34평 칸 = 전용 39.6㎡)
+  //   — 칸 이름 34·25가 실제 크기와 맞는 단지는 예전 글 그대로(전체에 KB 이름을 쓰면 3,860곳이 바뀌어 대표님 결정 대기)
+  const L106_BAND = { 34: [78, 89], 25: [53, 65] };
+  function slotArea106(id, p){ let a = null; try { const s = typeof slotAreaL69 === 'function' ? slotAreaL69(id, p) : null; if (s && s[1]) a = s[1] + .5; } catch (e) {}
+    if (a == null){ const c = window.SEED_CHIPS && window.SEED_CHIPS[id]; a = c ? (p === 25 ? c[5] && c[5][0] : c[4] && c[4][0]) : null; } return a || null; }
+  const kbOn106 = (id) => { if (!l106() || !id) return false; return [34, 25].some(p => { const a = slotArea106(id, p); return a != null && (a < L106_BAND[p][0] || a > L106_BAND[p][1]); }); };
+  // 칸(34·25) 시세 타입의 KB 평형 이름 — 못 찾으면 칸 이름 그대로
+  function slotPy106(id, p){
+    if (!kbOn106(id)) return p;
+    const a = slotArea106(id, p), py = a ? kbPy106(id, a, a) : null; return py || p;
+  }
+  const bandName98b = (id, p) => other98b(id) ? area98b(pick98b.lo, pick98b.hi) : slotPy106(id, p) + '평 칸';
   const panelKey94 = () => l95() ? L95CFG.key : L94CFG.key;
   // 지금 쓰는 확대 단계(묶음 L89를 끄면 L88 값 그대로)
   const ZM = () => l89() ? { dist: L89CFG.distZoom, open: L89CFG.distOpenZoom, cx: L89CFG.cxMinZoom, detail: l97() ? L97CFG.detailZoom : L89CFG.detailZoom, info: l97() ? L97CFG.infoZoom : L89CFG.infoZoom, cxOpen: L89CFG.openZoom }
@@ -1922,7 +1941,7 @@
   }
   function jeonseHtml(id){
     const rows = jeonseRows(id); if (!rows.length) return '';
-    return '<div class="rtj">' + rows.map(x => `<div class="jr"><span class="jp">${x.p}평</span><span>KB 전세 <b>${eokTx(x.jeon)}</b></span><span>전세가율 <b>${x.ratio.toFixed(0)}%</b></span><span>갭 <b>${eokTx(x.gap)}</b></span>`
+    return '<div class="rtj">' + rows.map(x => `<div class="jr"><span class="jp">${slotPy106(id, x.p)}평</span><span>KB 전세 <b>${eokTx(x.jeon)}</b></span><span>전세가율 <b>${x.ratio.toFixed(0)}%</b></span><span>갭 <b>${eokTx(x.gap)}</b></span>`
       + `<i class="jb" title="전세가율 ${x.ratio.toFixed(1)}%"><i style="width:${Math.max(0, Math.min(100, x.ratio)).toFixed(1)}%"></i></i></div>`).join('') + `<div class="rts">KB 시세 기준(${ymd(rows[0].ym)}) · 갭 = KB 매매 − KB 전세</div></div>`;
   }
   // 실거래 칸 그리기(패널 아래). 처음엔 가격 상자·차이·꼬리표·전세가율, [실거래 자세히]를 누르면 그래프(KB 선 + 실거래 점)·최근 거래 목록
@@ -1939,16 +1958,16 @@
       if (selId !== id || !panel.contains(host)) return;
       const st = d ? boxStats(d, id, p) : null, oth = other98b(id), mo = st ? st.mo : RT.boxMonths;
       const L94 = l94(), sYmd = (v) => String(v).slice(2, 4) + '.' + String(v).slice(4, 6) + '.' + String(v).slice(6, 8);   // 묶음 L94: 줄바꿈 없게 짧은 문구(평형 칸 면적은 최고점 칸 설명에)
-      const box = (L94 ? `<div class="rtx"><div class="bx kb"><small>KB 시세 · 판정 기준</small><b>${eokTx(kb)}</b><small>${p}평</small></div>`
-        + `<div class="bx tr"><small>최근 실거래 ${oth ? area98b(pick98b.lo, pick98b.hi) : p + '평대'}</small>`
+      const box = (L94 ? `<div class="rtx"><div class="bx kb"><small>KB 시세 · 판정 기준</small><b>${eokTx(kb)}</b><small>${slotPy106(id, p)}평</small></div>`
+        + `<div class="bx tr"><small>최근 실거래 ${oth ? area98b(pick98b.lo, pick98b.hi) : slotPy106(id, p) + '평대'}</small>`
         + (st && st.n >= RT.boxMin ? `<b>${eokTx(st.med)}</b><small>${mo}개월 중앙값 · ${st.n}건</small><small>마지막 ${sYmd(st.last)}</small>` : `<b class="few">거래 적음</b><small>최근 ${mo}개월 ${st ? st.n : 0}건</small>${st && st.last ? `<small>마지막 ${sYmd(st.last)}</small>` : ''}`)
-        : `<div class="rtx"><div class="bx kb"><small>KB 시세 · 판정 기준</small><b>${eokTx(kb)}</b><small>${p}평</small></div>`
+        : `<div class="rtx"><div class="bx kb"><small>KB 시세 · 판정 기준</small><b>${eokTx(kb)}</b><small>${slotPy106(id, p)}평</small></div>`
         + `<div class="bx tr"><small>최근 실거래 · ${p}평대(전용 ${st ? Math.round(st.lo) + '~' + Math.round(st.hi) : '-'}㎡)</small>`
         + (st && st.n >= RT.boxMin ? `<b>${eokTx(st.med)}</b><small>최근 3개월 중앙값 · ${st.n}건 · 마지막 ${ymd(st.last)}</small>` : `<b class="few">거래 적음</b><small>최근 3개월 ${st ? st.n : 0}건${st && st.last ? ' · 마지막 ' + ymd(st.last) : ''}</small>`))
         + '</div></div>' + (l93() && d ? '<div class="nhb93" hidden></div><div class="rth93"><div class="rld">최고점을 찾는 중이에요…</div></div>' : '');   // 묶음 L93: 최근 신고가 한 줄 · 최고점 두 줄
       const more = d && !L91 ? `<button type="button" class="rtm" aria-expanded="false">실거래 자세히 ▾</button>` : '';   // 묶음 L91: 접지 않고 늘 펼침
       const L98 = l98(), jm = L98 && rtMode98 === 'jeon', offi = L98 && !!d && d.원자료 === '오피스텔', shTx = L98 && !d && RTX && RTX.show ? RTX.show[id] : null;   // 묶음 L98: 오피스텔 자료·못 맞춘 단지 문구
-      const sale = `${offi ? '<div class="of98">오피스텔 실거래</div>' : ''}${l98b() && d ? '<div class="pk98b-w"></div>' : ''}${box}${oth ? note98b(p) : (st ? diffLine(kb, st) : '') + (d ? tagLine(d.꼬리표) : '')}${d ? '' : (shTx ? `<div class="rts sh98">${esc(shTx)}</div>` : '<div class="rts">이 단지는 맞춘 실거래 자료가 없어요.</div>')}<div class="rtj-w"></div>${more}<div class="rtv" hidden></div>`
+      const sale = `${offi ? '<div class="of98">오피스텔 실거래</div>' : ''}${l98b() && d ? '<div class="pk98b-w"></div>' : ''}${box}${oth ? note98b(p, id) : (st ? diffLine(kb, st) : '') + (d ? tagLine(d.꼬리표) : '')}${d ? '' : (shTx ? `<div class="rts sh98">${esc(shTx)}</div>` : '<div class="rts">이 단지는 맞춘 실거래 자료가 없어요.</div>')}<div class="rtj-w"></div>${more}<div class="rtv" hidden></div>`
         + `<div class="rts">${esc(offi ? L98CFG.srcOffi : RT.src)} · ${esc(d ? ymd(String(d.기간).split('~')[1]) : (RTX && RTX.meta ? RTX.meta.month.replace('-', '.') : ''))} 기준 · 참고용(판정은 KB 시세로만)${l95() ? ' · 중앙값은 계약 해제·직거래 뺌' : ''}</div>`;
       host.innerHTML = (l93() ? head93('rt') : '') + '<div class="rtb">' + (L98 ? md98Html(jm) + `<div class="sv98"${jm ? ' hidden' : ''}>${sale}</div><div class="jv98"${jm ? '' : ' hidden'}></div>` : sale) + '<div class="sc-w"></div></div>';
       if (L98) wire98(host, it, p);
@@ -2617,7 +2636,7 @@
       return base ? base(ctx) : ctx.dataset.label + ': ' + fmt(ctx.parsed.y); };
   }
   const graphNote98b = (id, p) => `${esc(bandName98b(id, p))} · 선 = 최근 3개월 중앙값, 점 = 그달 중앙값(클수록 거래 많음 · 흐린 점 3건 미만)`;
-  const note98b = (p) => `<div class="pn98b"><b>판정 기준 평형: ${p}평</b> · 이 평형은 KB 시세 판정이 없어 실거래만 보여 줘요</div>`;
+  const note98b = (p, id) => `<div class="pn98b"><b>판정 기준 평형: ${slotPy106(id, p)}평</b> · 이 평형은 KB 시세 판정이 없어 실거래만 보여 줘요</div>`;
   // 거래를 전용㎡(반올림)로 묶음 — 2㎡ 이내 이웃은 한 묶음. skip(t)가 참인 거래(계약 해제 등)는 셈에서 뺌
   function groups98b(d, aIdx, skip){
     const g = new Map(); (d.거래 || []).forEach(t => { if (skip && skip(t)) return; const k = Math.round(t[aIdx]); g.set(k, (g.get(k) || 0) + 1); });
@@ -2633,7 +2652,7 @@
     const tag = (x) => mid(x) >= a && mid(x) <= b ? p : (hasO && mid(x) >= c && mid(x) <= e ? oP : 0);
     const cur = other98b(id) ? pick98b : null;
     w.innerHTML = '<div class="pk98b" role="group" aria-label="실거래 평형">' + gs.map((x, i) => { const t = tag(x), on = cur ? (x.lo === cur.lo && x.hi === cur.hi) : t === p;
-      return `<button type="button" data-pk98b="${i}" aria-pressed="${on}"${t ? ' class="jd"' : ''}>${t ? t + '평 ' : ''}${area98b(x.lo, x.hi)} <small>${x.n.toLocaleString('ko-KR')}건</small></button>`; }).join('') + '</div>';
+      return `<button type="button" data-pk98b="${i}" aria-pressed="${on}"${t ? ' class="jd"' : ''}>${kbOn106(id) ? ((py => py ? py + '평 ' : '')(kbPy106(id, x.lo, x.hi))) : (t ? t + '평 ' : '')}${area98b(x.lo, x.hi)} <small>${x.n.toLocaleString('ko-KR')}건</small></button>`; }).join('') + '</div>';
     w.querySelectorAll('[data-pk98b]').forEach(bt => bt.onclick = () => {
       const x = gs[+bt.dataset.pk98b], t = tag(x);
       if (t === p){ if (!pick98b) return; pick98b = null; renderRT(it, p, kb); return; }
@@ -2682,10 +2701,10 @@
       const cell = j4 && j4.칸 && j4.칸[id] ? j4.칸[id][String(p)] || null : null, code = cell ? cell[11] || 0 : 0, offi = !!d && d.원자료 === '오피스텔';
       const b = d ? jBox98(d, id, p) : null, sY = (v) => String(v).slice(2, 4) + '.' + String(v).slice(4, 6) + '.' + String(v).slice(6, 8), oth = other98b(id);   // 묶음 L98B: 판정 평형 아닌 평형
       let h = (l98b() && d ? '<div class="pk98b-w"></div>' : '') + `<div class="rtx"><div class="bx kb"><small>KB 전세 시세</small><b>${kbj != null ? eokTx(kbj) : '-'}</b><small>${p}평${kr ? ' · ' + yymm(kr.ym) : ''}</small></div>`
-        + `<div class="bx tr jn98"><small>최근 신규 전세 ${oth ? area98b(pick98b.lo, pick98b.hi) : p + '평대'}</small>`
+        + `<div class="bx tr jn98"><small>최근 신규 전세 ${oth ? area98b(pick98b.lo, pick98b.hi) : slotPy106(id, p) + '평대'}</small>`
         + (b && b.med != null ? `<b>${eokTx(b.med)}</b><small>${b.m}개월 중앙값 · ${b.n}건</small><small>마지막 ${sY(b.last)}</small>`
           : `<b class="few">거래 적음</b><small>최근 6개월 신규 ${b ? b.n : 0}건</small>${b && b.last ? `<small>마지막 ${sY(b.last)}</small>` : ''}`) + '</div></div>';
-      if (oth) h += note98b(p);
+      if (oth) h += note98b(p, id);
       if (!oth && kbj && b && b.med != null){ const pc = (b.med - kbj) / kbj * 100, sm = Math.abs(pc) <= RT.same;
         h += `<div class="rtd ${sm ? 'same' : pc > 0 ? 'up' : 'dn'}">${sm ? `신규 전세가 KB 전세와 비슷 (±${RT.same}% 안, ${b.n}건)` : `신규 전세가 KB 전세보다 ${pc > 0 ? '+' : '−'}${Math.abs(pc).toFixed(1)}% (${b.n}건)`}</div>`; }
       if (!oth && code >= 2 && L98CFG.codeTx[code]) h += `<div class="rtt cd98">${esc(L98CFG.codeTx[code])}</div>`;
@@ -2695,7 +2714,7 @@
           + `<div class="rts">전세 4지표 ${esc(win)}(최근 12개월) · 참고용(판정에 안 씀)</div>`;
       }
       if (!d) h += '<div class="rts">이 단지는 맞춘 전세 거래 자료가 없어요.</div>';
-      else h += `<div class="rtg-h"><b>전세 그래프</b><small>${l98b() ? graphNote98b(id, p) : p + '평 칸 · 신규 전세 월별 중앙값'}</small></div><div class="rtc c91"><div class="chart-canvas-wrap"><canvas aria-label="KB 전세와 신규 전세"></canvas></div></div><div class="jl98-w"></div>`;
+      else h += `<div class="rtg-h"><b>전세 그래프</b><small>${l98b() ? graphNote98b(id, p) : slotPy106(id, p) + '평 칸 · 신규 전세 월별 중앙값'}</small></div><div class="rtc c91"><div class="chart-canvas-wrap"><canvas aria-label="KB 전세와 신규 전세"></canvas></div></div><div class="jl98-w"></div>`;
       h += `<div class="rts">${esc(offi ? L98CFG.srcOffi : L98CFG.src)} · ${esc(d ? ymd(String(d.기간).split('~')[1]) : (RTX && RTX.meta ? RTX.meta.month.replace('-', '.') : ''))} 기준${d ? ' · 최근 5년' : ''} · 전세만(월세 뺌) · 그래프·가격은 신규 거래만(갱신·구분없음·임대 의심 뺌) · 참고용(판정은 KB 시세로만)</div>`;
       w.innerHTML = (offi ? '<div class="of98">오피스텔 실거래</div>' : '') + h;
       if (d){ const C = jcols98(d); drawJChart98(w.querySelector('canvas'), id, p, d, C); drawJList98(w.querySelector('.jl98-w'), id, p, d, C);
@@ -2723,7 +2742,7 @@
     opt.animation = false;
     const ds = [
       { label: 'KB 전세 시세', data: labels.map(ym => kbMap.has(ym) ? kbMap.get(ym) : null), borderColor: '#1E3A8A', backgroundColor: '#1E3A8A', borderWidth: 2.5, pointRadius: 0, tension: .15, spanGaps: false },
-      { label: '신규 전세 월별 중앙값(' + p + '평 칸)', data: labels.map(ym => by.has(ym) ? median(by.get(ym)) : null), borderColor: '#2B8A3E', backgroundColor: '#2B8A3E', borderWidth: 2, pointRadius: 2, pointHoverRadius: 4, tension: 0, spanGaps: false } ];
+      { label: '신규 전세 월별 중앙값(' + slotPy106(id, p) + '평 칸)', data: labels.map(ym => by.has(ym) ? median(by.get(ym)) : null), borderColor: '#2B8A3E', backgroundColor: '#2B8A3E', borderWidth: 2, pointRadius: 2, pointHoverRadius: 4, tension: 0, spanGaps: false } ];
     if (l98b()){ const R = roll98b(labels, by); ds.splice(1, 1, ...ds98b(R, '43,138,62', '신규 전세(3개월 이동 중앙값)')); if (other98b(id)) ds.splice(0, 1); tip98b(opt, labels, R, '신규', fmt); }   // 묶음 L98B
     jChart98 = new Chart(cv, { type: 'line', data: { labels: labels.map(ym => typeof fmtYm === 'function' ? fmtYm(ym) : ymd(ym)), datasets: ds }, options: opt });
     window.CALC_MAP_L84.jChart98 = { kb: kbRows.length, months: by.size, labels: labels.length, from: start, to: end };
@@ -2735,7 +2754,7 @@
     const list = (d.거래 || []).filter(t => t[C.a] >= lo && t[C.a] <= hi).sort((a, b) => (b[C.ym] * 100 + b[C.d]) - (a[C.ym] * 100 + a[C.d]));
     const kind = (t) => t[C.k] === 1 ? `<small class="gs98">갱신${t[C.o] ? `(종전 ${eokTx(t[C.o])} → ${eokTx(t[C.p])})` : ''}</small>` : t[C.k] === 2 ? '<small class="nk98">구분없음</small>' : '<small class="nw98">신규</small>';
     const draw = () => {
-      w.innerHTML = `<div class="rtg-h"><b>최근 전세 거래</b><small>${other98b(id) ? esc(bandName98b(id, p)) : p + '평 칸(전용 ' + Math.round(lo) + '~' + Math.round(hi) + '㎡)'} · 임대 의심은 흐리게(계산에서 뺌)</small></div>`
+      w.innerHTML = `<div class="rtg-h"><b>최근 전세 거래</b><small>${other98b(id) ? esc(bandName98b(id, p)) : slotPy106(id, p) + '평 칸(전용 ' + Math.round(lo) + '~' + Math.round(hi) + '㎡)'} · 임대 의심은 흐리게(계산에서 뺌)</small></div>`
         + `<table class="rtl jt98"><thead><tr><th>계약일</th><th>전용</th><th>층</th><th>보증금</th></tr></thead><tbody>`
         + list.slice(0, shown).map(t => `<tr${t[C.s] ? ' class="su98"' : ''}><td>${ymd(t[C.ym] * 100 + t[C.d])}</td><td>${t[C.a]}㎡</td><td>${t[C.f]}층</td><td>${eokTx(t[C.p])} ${kind(t)}${t[C.s] ? ' <small class="sb98">임대 의심</small>' : ''}</td></tr>`).join('') + '</tbody></table>'
         + (list.length > shown ? `<button type="button" class="rtmore">더보기 (${(list.length - shown).toLocaleString('ko-KR')}건 더)</button>` : '')
@@ -2799,7 +2818,7 @@
       const hasG = C.g >= 0, nh = H93 ? H93.nh : null;
       const list = all.filter(t => !t[C.x] && t[C.a] >= blo && t[C.a] <= bhi).sort((a, b) => (b[C.ym] * 100 + b[C.d]) - (a[C.ym] * 100 + a[C.d]));
       const tag = (t) => (nh && nh.has(t) ? ' <small class="nh93">신고가</small>' : '') + (hasG && t[C.g] ? ' <small class="dg93">직거래</small>' : '');
-      w.innerHTML = `<div class="rtg-h"><b>최근 거래</b><small>${oth98 ? esc(bandName98b(id, p)) : p + '평 칸(전용 ' + Math.round(blo) + '~' + Math.round(bhi) + '㎡)'} · 계약 해제는 뺌${hasG ? (l95() ? ' · 직거래는 신고가·중앙값에서 뺌' : ' · 직거래는 신고가 판정에서 뺌') : ' · 직거래 여부 자료 없음'}</small></div>`
+      w.innerHTML = `<div class="rtg-h"><b>최근 거래</b><small>${oth98 ? esc(bandName98b(id, p)) : slotPy106(id, p) + '평 칸(전용 ' + Math.round(blo) + '~' + Math.round(bhi) + '㎡)'} · 계약 해제는 뺌${hasG ? (l95() ? ' · 직거래는 신고가·중앙값에서 뺌' : ' · 직거래는 신고가 판정에서 뺌') : ' · 직거래 여부 자료 없음'}</small></div>`
         + '<div class="rtj93" hidden></div>'
         + `<table class="rtl"><thead><tr><th>계약일</th><th>전용</th><th>층</th><th>금액</th></tr></thead><tbody>`
         + list.slice(0, shown).map(t => `<tr data-ym="${t[C.ym]}"${hl93 === t[C.ym] ? ' class="hl93"' : ''}><td>${ymd(t[C.ym] * 100 + t[C.d])}</td><td>${t[C.a]}㎡</td><td>${t[C.f]}층</td><td>${eokTx(t[C.p])}${tag(t)}</td></tr>`).join('') + '</tbody></table>'
@@ -2824,15 +2843,15 @@
     }
     const draw = () => {
       const list = all.filter(t => !L91 || (t[C.a] >= blo && t[C.a] <= bhi)).sort((a, b) => (b[C.ym] * 100 + b[C.d]) - (a[C.ym] * 100 + a[C.d]));   // 묶음 L91: 지금 보는 평형 칸(전용㎡ ±3)의 거래만
-      v.innerHTML = (L92 ? `<div class="rtg-h"><b>실거래 그래프</b><small>${l98b() ? graphNote98b(id, p) : p + '평 칸 · 월별 중앙값'}${l95() && C.g >= 0 ? '(직거래 뺌)' : ''}</small></div><div class="rtp92" role="group" aria-label="그래프 기간">${L92CFG.periods.map(([k, t]) => `<button type="button" data-per92="${k}" aria-pressed="${k === per}">${oldBusy && k === 'all' ? '받는 중…' : t}</button>`).join('')}</div>`
-          : L91 ? `<div class="rtg-h"><b>실거래 그래프</b><small>${p}평 칸 · 월별 중앙값</small>${hasOld && !oldOn ? '<button type="button" class="rto">전체 기간</button>' : ''}</div>`
+      v.innerHTML = (L92 ? `<div class="rtg-h"><b>실거래 그래프</b><small>${l98b() ? graphNote98b(id, p) : slotPy106(id, p) + '평 칸 · 월별 중앙값'}${l95() && C.g >= 0 ? '(직거래 뺌)' : ''}</small></div><div class="rtp92" role="group" aria-label="그래프 기간">${L92CFG.periods.map(([k, t]) => `<button type="button" data-per92="${k}" aria-pressed="${k === per}">${oldBusy && k === 'all' ? '받는 중…' : t}</button>`).join('')}</div>`
+          : L91 ? `<div class="rtg-h"><b>실거래 그래프</b><small>${slotPy106(id, p)}평 칸 · 월별 중앙값</small>${hasOld && !oldOn ? '<button type="button" class="rto">전체 기간</button>' : ''}</div>`
           : `<div class="rtg-h"><b>실거래 그래프</b><span class="lg"><i class="ln"></i>KB 시세(선) <i class="pt"></i>실거래(점)</span>${hasOld && !oldOn ? '<button type="button" class="rto">전체 기간</button>' : ''}</div>`)
         + (L92 ? `<div class="rtc c91"><div class="chart-canvas-wrap"><canvas aria-label="KB 시세와 실거래"></canvas><div class="drag-select-box" hidden></div><div class="drag-result" hidden><div class="drag-result-head"><span data-role="dragRange"></span><button type="button" class="clear-link" aria-label="구간 지우기">✕</button></div><div class="drag-result-list" data-role="dragList"></div></div></div></div>`
             + `<div class="period-l40 rts92"><div class="period-l40-head"><span>표시 기간</span><b class="pl"></b></div><div class="period-l40-track"><div class="period-l40-fill"></div><input type="range" class="ps" min="0" max="0" step="1" value="0" aria-label="표시 시작 월"><input type="range" class="pe" min="0" max="0" step="1" value="0" aria-label="표시 끝 월"></div></div>`
             + '<div class="rts">그래프를 끌면(폰은 두 손가락) 그 구간의 시작·끝 값과 상승률이 나와요(KB 선·실거래 중앙값 선 둘 다)</div>'
           : `<div class="rtc${L91 ? ' c91' : ''}"><canvas aria-label="KB 시세와 실거래"></canvas></div>`)
         + (L93 ? '<div class="rtl93-w"></div>'   // 묶음 L93: 거래 목록은 따로 그림(더보기·그래프 누르기가 그래프를 다시 그리지 않게)
-          : (L91 ? `<div class="rtg-h"><b>최근 거래</b><small>${p}평 칸(전용 ${Math.round(blo)}~${Math.round(bhi)}㎡) · 해제는 줄 긋기</small></div>` : `<div class="rtg-h"><b>최근 거래</b><small>전용㎡는 모든 평형 · 해제는 줄 긋기</small></div>`)
+          : (L91 ? `<div class="rtg-h"><b>최근 거래</b><small>${slotPy106(id, p)}평 칸(전용 ${Math.round(blo)}~${Math.round(bhi)}㎡) · 해제는 줄 긋기</small></div>` : `<div class="rtg-h"><b>최근 거래</b><small>전용㎡는 모든 평형 · 해제는 줄 긋기</small></div>`)
         + `<table class="rtl"><thead><tr><th>계약일</th><th>전용</th><th>층</th><th>금액</th></tr></thead><tbody>`
         + list.slice(0, shown).map(t => `<tr${t[C.x] ? ' class="cx"' : ''}><td>${ymd(t[C.ym] * 100 + t[C.d])}</td><td>${t[C.a]}㎡</td><td>${t[C.f]}층</td><td>${eokTx(t[C.p])}${t[C.x] ? ' <small>해제</small>' : ''}</td></tr>`).join('') + '</tbody></table>'
         + (list.length > shown ? `<button type="button" class="rtmore">더보기 (${(list.length - shown).toLocaleString('ko-KR')}건 더)</button>` : '')
@@ -2918,7 +2937,7 @@
     opt.animation = false;
     const ds = [
       { label: 'KB 매매 시세', _kind: 'base', _color: '#1E3A8A', data: labels.map(ym => kbMap.has(ym) ? kbMap.get(ym) : null), borderColor: '#1E3A8A', backgroundColor: '#1E3A8A', borderWidth: 2.5, pointRadius: 0, tension: .15, spanGaps: false },
-      { label: '실거래 월별 중앙값(' + p + '평 칸)', _kind: 'base', _color: '#E8590C', data: labels.map(ym => by.has(ym) ? median(by.get(ym)) : null), borderColor: '#E8590C', backgroundColor: '#E8590C', borderWidth: 2, pointRadius: 2, pointHoverRadius: 4, tension: 0, spanGaps: false } ];   // _kind·_color = 계산기 끌어 고르기(구간 상승률)가 읽는 칸
+      { label: '실거래 월별 중앙값(' + slotPy106(it && it.id, p) + '평 칸)', _kind: 'base', _color: '#E8590C', data: labels.map(ym => by.has(ym) ? median(by.get(ym)) : null), borderColor: '#E8590C', backgroundColor: '#E8590C', borderWidth: 2, pointRadius: 2, pointHoverRadius: 4, tension: 0, spanGaps: false } ];   // _kind·_color = 계산기 끌어 고르기(구간 상승률)가 읽는 칸
     if (o93){   // 묶음 L93: 범례 = 칸 머리와 같은 말, 실거래 선은 끌어 고르기에서 직접 계산(양 끝 3개월 묶음 중앙값)하므로 _kind를 뺌, 신고가 = 그 달 신고가 거래(세모)
       ds[0].label = L93CFG.kbLegend; ds[1].label = L93CFG.rtLegend; delete ds[1]._kind;
       const nhBy = new Map(); if (o93.nh) o93.nh.forEach((prev, t) => { if (!nhBy.has(t[C.ym]) || t[C.p] > nhBy.get(t[C.ym])) nhBy.set(t[C.ym], t[C.p]); });
