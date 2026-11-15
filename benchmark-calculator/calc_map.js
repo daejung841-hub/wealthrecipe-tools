@@ -2231,11 +2231,30 @@
     const base = Number(g && typeof g === 'object' && g['현재세대(KB)'] || it.units || 0);
     return base > 0 ? [Math.round(base * (1 - CASHOUT_RATE)), '추정', base] : [null, '산정 불가'];
   }
+  const RENT_FIX_L108 = { '목동신시가지14단지': 729 };   // 묶음 L108(큐12): 원문 임대 칸이 빈 단지 — 공공 627 + 기부채납 102 합(나중에 확인되면 나눠 넣음)
+  const l108 = () => { try { return !!BUNDLES.L108; } catch (e) { return false; } };
+  const rentOfL108 = (id, v) => v != null ? v : (l108() && Object.prototype.hasOwnProperty.call(RENT_FIX_L108, id) ? RENT_FIX_L108[id] : null);
+  // 묶음 L108: 조합원·일반분양 [조합원, 일반, 추정 여부] — 화면과 같은 규칙(원문 우선, 아니면 L107 추정). 하나라도 없으면 null
+  function supplyOfL108(it, e){
+    const jo = joOfL107(it, e); if (!jo || jo[0] == null) return null;
+    const sg = e.세대구성 || {}; let il = null, est = jo[1] === '추정';
+    if (sg.일반분양 != null) il = Number(sg.일반분양); else { il = geOfL107(it, e, jo); est = true; }
+    return il != null && jo[0] > 0 ? [jo[0], il, est] : null;
+  }
+  let SEOUL_AVG_L108 = null;   // { avg, n, nSrc, nEst } — 서울 재건축 탭 자료 전체에서 한 번만 셈(자료가 다 온 뒤)
+  function seoulAvgL108(){
+    if (SEOUL_AVG_L108 || !JG.d || !GE104) return SEOUL_AVG_L108;
+    const rs = []; let nSrc = 0, nEst = 0;
+    Object.keys(JG.d).forEach(id => { if (id[0] === '_') return; const e = JG.d[id]; if (!e || !/서울/.test(e.지역 || '')) return;
+      const it = itemsById.get(id) || { id, units: 0 }; const v = supplyOfL108(it, e); if (!v) return; rs.push(v[1] / v[0] * 100); if (v[2]) nEst++; else nSrc++; });
+    if (rs.length) SEOUL_AVG_L108 = { avg: rs.reduce((a, b) => a + b, 0) / rs.length, n: rs.length, nSrc, nEst };
+    return SEOUL_AVG_L108;
+  }
   function geOfL107(it, e, jo){   // 묶음 L107(큐11): 일반분양 추정 = 총 계획 − 화면 조합원 값 − 임대 − 공공분양(없으면 0). 조합설립 전·'제외'·자료 없으면 null
     if (geOfL104(it.id, e) == null) return null;
     const g = GE104 && Object.prototype.hasOwnProperty.call(GE104, it.id) ? GE104[it.id] : null;
     if (!g || typeof g !== 'object' || g.총계획세대 == null || !jo || jo[0] == null) return null;
-    const v = Number(g.총계획세대) - Number(jo[0]) - Number(g.임대 || 0) - Number(g.공공분양 || 0);
+    const v = Number(g.총계획세대) - Number(jo[0]) - Number(rentOfL108(it.id, g.임대) || 0) - Number(g.공공분양 || 0);   // 묶음 L108: 빈 임대 칸 보충값
     return v > 0 ? v : null;
   }
   let GE104 = null; if (GE_URL_L104) fetch(GE_URL_L104).then(r => r.ok ? r.json() : null).then(j => { GE104 = j && j.단지 ? j.단지 : j; }, () => {});
@@ -2285,8 +2304,13 @@
     else rows.push(['조합원 분양', sg.조합원분양 != null ? nm(sg.조합원분양) + k0 + kb : W]);
     const gv = jo107 ? geOfL107(it, e, jo107) : geOfL104(it.id, e), estHtml = gv != null ? '약 ' + Math.round(gv).toLocaleString('ko-KR') + '세대 <small>· 추정 · 기존 세대수 기준</small><small class="ge104-r">총 계획 − 조합원 − 임대 − 공공분양 · 공공분양 확인 안 되면 0 · 사업 진행에 따라 달라질 수 있음</small>' : '';   // 묶음 L104·L107(큐11): 일반분양 = 화면 조합원 값으로 계산
     rows.push(['일반 분양', sg.일반분양 != null ? nm(sg.일반분양) + (/^계산/.test(sg.일반분양_표시 || '') ? ' <small>계산</small>' : '') + kb + k0 : estHtml || W]);
+    if (l108() && l107()){   // 묶음 L108: 조합원 대비 일반분양 비율 + 서울 재건축 평균
+      const v = supplyOfL108(it, e), A = seoulAvgL108();
+      const avgTx = A ? '서울 재건축 평균 ' + A.avg.toFixed(1) + '%(' + A.n + '곳) · 일반분양 ÷ 조합원, 단지별 평균(원문 ' + A.nSrc + '곳 + 추정 포함 ' + A.nEst + '곳)' : '';
+      rows.push(['조합원 대비 일반분양', (v ? (v[1] / v[0] * 100).toFixed(1) + '%' + (v[2] ? ' <small>· 추정</small>' : '') : '<span class="jg99-w">산정 불가</span>') + (avgTx ? '<small class="ge104-r">' + avgTx + '</small>' : '')]);
+    }
     const rentSum = (() => { const m = /(\d[\d,]*)[^\d+]*\+[^\d]*(\d[\d,]*)/.exec(sg.임대_원문이름 || ''); if (!m || sg.임대 == null) return ''; const a = Number(m[1].replace(/,/g, '')), b = Number(m[2].replace(/,/g, '')); return a + b === Number(sg.임대) ? '원문 두 값(' + a + '+' + b + ')의 합' : ''; })();   // 묶음 L103: 임대 = 원문 두 값의 합일 때만 근거 표기
-    rows.push(['임대', sg.임대 != null ? nm(sg.임대) + k0 + kb + (rentSum ? ' <span class="jg99-ti" tabindex="0" role="button" aria-label="임대 세대수 근거" data-tip="' + esc(rentSum) + '">ⓘ</span>' : '') : W]);
+    rows.push(['임대', sg.임대 != null ? nm(sg.임대) + k0 + kb + (rentSum ? ' <span class="jg99-ti" tabindex="0" role="button" aria-label="임대 세대수 근거" data-tip="' + esc(rentSum) + '">ⓘ</span>' : '') : rentOfL108(it.id, null) != null ? nm(rentOfL108(it.id, null)) + ' <small>· 임대·공공·기부채납 포함</small>' : W]);   // 묶음 L108: 빈 임대 칸 보충
     const sc = e.시공사; if (sc && sc.이름) rows.push(['시공사 선정', (sc.선정일 ? esc(String(sc.선정일).slice(0, 7).replace('-', '.')) + ' · ' : '') + esc(sc.이름) + (/기사/.test(sc.상태 || '') ? ' <small>기사 기준</small>' : '') + (/확인 필요/.test(sc.출처 || '') ? ' <small>재선정 확인 필요</small>' : '')]);
     const g = e.선도지구; if (g) rows.push(['선도지구', esc((g.신도시 || '') + ' 선도지구') + (g.구역 ? ' · ' + esc(g.구역) : '') + (g.구역세대 ? ' (' + Number(g.구역세대).toLocaleString('ko-KR') + '세대)' : '') + (g.연결 && g.연결 !== '확실' ? ' <small>' + esc(g.연결) + '</small>' : '')]);
     const src = (e.출처 || []).concat(e.정비계획고시 ? ['정비계획 고시 ' + e.정비계획고시] : []).concat(e.사업장 ? ['사업장: ' + e.사업장] : []).concat(g ? ['선도지구: 국토교통부 보도자료(2024.11)'] : []).concat(sg.출처 ? ['세대: ' + sg.출처] : []).concat(sc && sc.출처 ? ['시공사: ' + sc.출처] : []);
