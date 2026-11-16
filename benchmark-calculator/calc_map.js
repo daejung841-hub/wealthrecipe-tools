@@ -411,6 +411,7 @@
   @media (max-width:767px){ .cm84-sv{right:0;bottom:45%} .cm84-map.sv98b .cm84-vbtns{display:none} .cm84-svh{top:56px;white-space:normal;max-width:80%;text-align:center} }
   /* 묶음 L98B: 거리 재기 — 위 가운데 안내 띠([마지막 점 지우기][전체 지우기]), 점·선·구간 길이·총 길이 */
   .cm84.vb98b #cm84Ms[aria-pressed="true"]{background:#2B8A3E;border-color:#2B8A3E;color:#fff}
+  html.l112 .cm84.vb98b #cm84Ms[aria-pressed="true"]{background:#364FC7;border-color:#364FC7;color:#fff}   /* 묶음 L112(구현4): 거리 재기 = 청회(경사도 초록과 겹침 해소) */
   /* 묶음 L99B: [개발 호재]·[경사도] — 단추 켬 색·상자·범례(재개발 지도 h10c·46차와 같은 값) */
   .cm84.vb98b #cm84Hj[aria-pressed="true"]{background:#0B7285;border-color:#0B7285;color:#fff}
   .cm84.vb98b #cm84Slope[aria-pressed="true"]{background:#2B8A3E;border-color:#2B8A3E;color:#fff}
@@ -666,10 +667,12 @@
   .mh-recent-l89 .rc .o{padding:4px 4px 4px 10px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:170px}
   .mh-recent-l89 .rc .o small{font-weight:600;color:#6B7280;margin-left:3px}
   .mh-recent-l89 .rc .d{padding:4px 9px 4px 3px;color:#6B7280;font-size:13px}
+  @media (max-width:400px){ html.l112 .mh-recent-l89 .hr-t{display:none} }   /* 묶음 L112: 좁은 폰은 '🕘 4'만 */
   @media (max-width:767px){
     .cm84-frow{width:calc(100% - 20px)}
     .cm84-frow button{padding:5px 9px}
     .mh-recent-l89{flex:0 0 auto}
+    html.l112 .mh-recent-l89 .hr-btn{padding:5px 8px}
     .mh-recent-l89 .hr-btn{display:inline-flex;align-items:center}
     .mh-recent-l89 .hr-chips{display:none;position:absolute;left:0;top:calc(100% + 6px);z-index:3100;flex-direction:column;align-items:stretch;background:#fff;border:1px solid #E5E7EB;border-radius:12px;box-shadow:0 8px 22px rgba(0,0,0,.18);padding:6px;width:min(280px,calc(100vw - 24px));max-height:60vh;overflow:auto}
     .mh-recent-l89.open .hr-chips{display:flex}
@@ -1595,7 +1598,7 @@
     let w = head.querySelector('#cm84HRc');
     if (!w){
       w = document.createElement('div'); w.id = 'cm84HRc'; w.className = 'mh-recent-l89'; w.setAttribute('aria-label', '최근 본 단지');
-      w.innerHTML = '<button type="button" class="hr-btn" aria-expanded="false">🕘 최근<b></b></button><div class="hr-chips"></div>';
+      w.innerHTML = '<button type="button" class="hr-btn" aria-expanded="false" aria-label="최근 본 단지">🕘<span class="hr-t"> 최근</span><b></b></button><div class="hr-chips"></div>';
       const tabs = head.querySelector('.mh-tabs'); if (tabs) tabs.insertAdjacentElement('afterend', w); else head.appendChild(w);
       const btn = w.querySelector('.hr-btn');
       btn.addEventListener('click', (ev) => { ev.stopPropagation(); const o = w.classList.toggle('open'); btn.setAttribute('aria-expanded', String(o)); });
@@ -2583,9 +2586,19 @@
   }
   // 오른쪽 단추 줄: 한 줄 짧은 이름(켬은 색 채움으로만), 원래 긴 이름은 말풍선(PC 마우스 올림 = title, 폰 = 길게 누름)
   const VB98 = [['#cm84Zone', '재개발', '재개발 구역'], ['#cm84ScE', '초등', '초등 학구도'], ['#cm84ScM', '중학', '중학교 학군'], ['#cm84Hide', '단지 숨김', '단지 가격 말풍선 숨기기'], ['#cm84Sv', '거리뷰', '거리뷰'], ['#cm84Cad', '지적도', '지적도(지적편집도)'], ['#cm84Ms', '거리', '거리 재기']];
+  const l112 = () => { try { return !!BUNDLES.L112; } catch (e) { return false; } };
+  const ORDER112 = ['#cm84Zone', '#cm84ScE', '#cm84ScM', '#cm84Az', '#cm84Bd', '#cm84Hj', '#cm84Hide', '#cm84Slope', '#cm84Cad', '#cm84Sv', '#cm84Ms'];   // 묶음 L112(구현4): 통일안 순서. 개발 호재는 hjShow:false라 없음(켜면 행정 경계 다음)
+  function order112(){
+    const vb = root && root.querySelector('.cm84-vbtns'); if (!vb) return;
+    const bs = ORDER112.map(q => vb.querySelector(q)).filter(Boolean); if (!bs.length) return;
+    const anchor = bs[0].previousSibling;   // 목록에 없는 단추(준비 중 등)는 제자리에 둠
+    let at = anchor ? anchor.nextSibling : vb.firstChild; bs.forEach(b => { if (b !== at) vb.insertBefore(b, at); at = b.nextSibling; });
+  }
   function relabel98b(){
+    if (l112()){ const bd = VB98.find(x => x[0] === '#cm84Bd'); if (bd) bd[1] = '행정 경계'; }   // 묶음 L112: '경계' → '행정 경계'(긴 이름은 그대로 '행정구역 경계(시군구·법정동)')
     VB98.forEach(([q, s, l]) => { const b = root && root.querySelector(q); if (!b) return; const on = b.getAttribute('aria-pressed') === 'true';
       b.textContent = s; b.title = l + (on ? ' — 켜짐(다시 누르면 꺼짐)' : ''); b.setAttribute('aria-label', l); });
+    if (l112()) order112();
   }
   function tipWire98b(vb){
     let t = null, tip = null, long = false;
