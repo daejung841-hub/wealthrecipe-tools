@@ -88,7 +88,8 @@
     acadFilter: false,   // 11-10 피드백 2: [학원가▾] 필터 뺌(코드는 둠, true면 다시 보임)
     acadZone: '지도자료_202611/academy_zone_1110.geojson', azLabMin: .25, azLabZoom: 11, azShow: false,
     acadCluster: '지도자료_202611/academy_cluster_1111.geojson', acadRegion: '지도자료_202611/academy_region_1111.geojson', acSmallZoom: 14, acLabZoom: 12,   // 묶음 L99C: 학원 덩어리(분석 탭 1111) — 동네 학원 밀집은 확대 14부터, 이름표는 12부터
-    jgTab: '지도자료_202611/jaegun_tab_l99c_1113_v6.json', jgAge: 28 };   // 묶음 L99C: 재건축 탭 자료·나이 기준   // 11-11 배포 수정 3: [학원가] 단추·층은 이번 배포에서 숨김(L99c 새 방식)   // 학원 밀집 영역(분석 탭 1110, 대형 35·학원가 170) — 0.25㎢ 미만 조각은 이름표 없이 칠만, 이름표는 확대 11부터
+    jgTab: '지도자료_202611/jaegun_tab_l99c_1113_v6.json', jgAge: 28 };
+  try { if (BUNDLES.L111) L99A_MAP.jgTab = '지도자료_202611/jaegun_tab_l99c_1116_v7.json'; } catch (e) {}   // 묶음 L111(구현3): 재건축 탭 v7   // 묶음 L99C: 재건축 탭 자료·나이 기준   // 11-11 배포 수정 3: [학원가] 단추·층은 이번 배포에서 숨김(L99c 새 방식)   // 학원 밀집 영역(분석 탭 1110, 대형 35·학원가 170) — 0.25㎢ 미만 조각은 이름표 없이 칠만, 이름표는 확대 11부터
   const wonAx99 = (v) => Math.abs(v) >= 1 ? v + '억' : v ? Math.round(v * 10000).toLocaleString('ko-KR') + '만' : '0';   // 억 단위 값 눈금
   let pick98b = null;   // 판정 평형이 아닌 평형을 고른 때만 { id, lo, hi }(전용㎡ 반올림 값)
   let elemFrom98b = null;   // 초등 학구 상자를 단지 정보 줄에서 연 경우 그 단지 id(단지 학군 밖 학교 "다른 학군" 표시용)
@@ -2277,6 +2278,7 @@
   const GE_URL_L104 = '지도자료_202611/재건축_일반분양_추정_1113d.json';   // 큐4 보충: 1113c   // 묶음 L104: 분석 탭 재건축_일반분양_추정_1113b.json 도착 후 '지도자료_202611/재건축_일반분양_추정_1113b.json'
   const CASHOUT_RATE = 0;   // 묶음 L107(큐11): 조합원 분양 추정 = 기존 세대수 × (1 − 이 값). 지금 0(기존 세대수 100%). 분석 탭이 현금청산 비율을 내면 이 값만 바꿈 — 일반분양 추정도 이 조합원 값으로 같이 바뀜
   const l107 = () => { try { return !!BUNDLES.L107; } catch (e) { return false; } };
+  const l111 = () => { try { return !!BUNDLES.L111; } catch (e) { return false; } };   // 묶음 L111(구현3): 대지지분 '(구역면적 기준)'·서울 평균·연결 끊은 단지 표시
   function joOfL107(it, e){   // 조합원 분양: [값, '원문'|'추정'|'산정 불가', 기존 세대수]
     const sg = e.세대구성 || {}; if (sg.조합원분양 != null) return [Number(sg.조합원분양), '원문'];
     const g = GE104 && Object.prototype.hasOwnProperty.call(GE104, it.id) ? GE104[it.id] : null;
@@ -2319,7 +2321,7 @@
     return Number(v);
   }
   function jgLoad99c(){ if (!JG.ld) JG.ld = fetch(L99A_MAP.jgTab).then(r => r.ok ? r.json() : null).then(j => (JG.d = j), () => { JG.ld = null; return null; }); return JG.ld; }
-  function jgHas99c(e){ return !!(e && e.상태 !== '숨김' && (e.지금단계 || Object.values(e.단계날짜 || {}).some(Boolean) || e.평균대지지분 || e.추정비례율 || e.계획세대수 || e.용적률 || e.선도지구 || e.세대구성 || e.시공사)); }
+  function jgHas99c(e){ return !!(e && e.상태 !== '숨김' && ((l111() && e.연결해제) || e.지금단계 || Object.values(e.단계날짜 || {}).some(Boolean) || e.평균대지지분 || e.추정비례율 || e.계획세대수 || e.용적률 || e.선도지구 || e.세대구성 || e.시공사)); }
   function jgOk99c(it){
     if (!JG.d || !it || !Object.prototype.hasOwnProperty.call(JG.d, it.id) || it.id[0] === '_') return false;
     const age = it.built ? new Date().getFullYear() - it.built : null;
@@ -2342,10 +2344,20 @@
     return '<div class="jg99-gs">근거 고시 · ' + (items.length ? items.join(' · ') : '<span class="jg99-w">확인 중</span>') + '</div>';
   }
   function jgHtml99c(it, e){
+    if (l111() && e.연결해제){   // 묶음 L111: 연결을 끊은 단지 — 단계·세대 줄 없이 '정보몽땅 등록 사업장 없음'만
+      const z = e.연결해제;
+      return '<div class="jg99-h"><b>🏗 재건축 진행</b><button type="button" class="i99" aria-expanded="false" aria-label="재건축 자료 출처">ⓘ</button><button type="button" class="jg99-x">✕ 실거래로 돌아가기</button></div>'
+        + '<div class="jg99-b"><div class="jg99-now">지금 <b>정보몽땅 등록 사업장 없음</b></div><ol class="jg99-bar">' + JG_STAGES.map(k => '<li class="td"><b>' + (k === '이주철거' ? '이주·철거' : k) + '</b></li>').join('') + '</ol>'
+        + '<div class="jg99-n">서울시 정비사업 정보몽땅에 이 단지의 재건축 사업장이 없어요.</div>'
+        + '<div class="jg99-gs">근거 · 서울시 정비사업 정보몽땅</div>'
+        + '<div class="jg99-src" hidden>' + esc('정보몽땅 사업장 목록(2026-11-08)에 이 단지 사업장 없음') + (z['전 사업장'] ? '<br>' + esc(z.날짜 + ' 연결 끊음: ' + z['전 사업장'] + ' — ' + (z.이유 || '')) : '') + '</div></div>';
+    }
     const [cur, note] = jgCur99c(e), D = e.단계날짜 || {};
     const cells = JG_STAGES.map((k, j) => '<li class="' + (j < cur ? 'dn' : j === cur ? 'cur' : 'td') + '"><b>' + (k === '이주철거' ? '이주·철거' : k) + '</b>' + (D[k] ? '<span>' + esc(jgYm99c(D[k])) + '</span>' : '') + '</li>').join('');
     const rows = [];
-    const a = e.평균대지지분; if (a && a.평 != null) rows.push(['평균 대지지분', esc(a.평) + '평' + (a['㎡'] != null ? ' (' + esc(a['㎡']) + '㎡)' : '') + (a.표시 && a.표시 !== '고시 원문' ? ' <small>' + esc(a.표시) + '</small>' : '')]);
+    const a = e.평균대지지분, SA = l111() && JG.d && JG.d._meta && JG.d._meta.서울평균대지지분;   // 묶음 L111: 서울 평균 = 구역면적 합 ÷ 기존 세대수 합(자료 _meta에서 읽음)
+    if (a && a.평 != null) rows.push([l111() ? '평균 대지지분 <small>(구역면적 기준)</small>' : '평균 대지지분', esc(a.평) + '평' + (a['㎡'] != null ? ' (' + esc(a['㎡']) + '㎡)' : '') + (a.표시 && a.표시 !== '고시 원문' ? ' <small>' + esc(a.표시) + '</small>' : '')
+      + (SA && SA.평 != null ? '<small class="ge104-r">서울 재건축 평균 ' + esc(SA.평) + '평(' + esc(SA.곳) + '곳) · 구역면적 합 ÷ 기존 세대수 합</small>' : '')]);
     const b = e.추정비례율; if (b && b.값 != null) rows.push(['추정 비례율', esc(b.값) + '%' + (b.상태 && b.상태 !== '원문' ? ' <small>' + esc(b.상태) + '</small>' : '')]);
     const sg = e.세대구성 || {}, nm = (v) => Number(v).toLocaleString('ko-KR') + '세대', k0 = sg.상태 === '대조 전' ? ' <small>대조 전</small>' : '', W = '<span class="jg99-w">확인 중</span>';
     const tot = sg.총계획세대 != null ? sg.총계획세대 : (e.계획세대수 != null ? (typeof e.계획세대수 === 'object' ? e.계획세대수.값 : e.계획세대수) : null);
@@ -3009,7 +3021,7 @@
       { type: 'scatter', label: '실거래', data: pts.map(t => ({ x: toX(t[C.ym], t[C.d]), y: t[C.p] / 10000, t })), backgroundColor: 'rgba(224,49,49,.55)', borderColor: '#C92A2A', pointRadius: 3, order: 1 } ] },
       options: { animation: false, responsive: true, maintainAspectRatio: false, parsing: false,
         scales: { x: { type: 'linear', ticks: { callback: (v) => Number.isInteger(v) ? String(v) : '', stepSize: 1 } }, y: { ticks: { callback: (v) => l99a() ? wonAx99(v) : v + '억' } } },
-        plugins: { legend: { display: false }, tooltip: { enabled: true, external: null, callbacks: { title: (it) => { const x = it[0] ? it[0].raw.x : 0, y = Math.floor(x + 1e-6), m = Math.min(12, Math.floor((x - y) * 12 + 1e-6) + 1); return y + '.' + String(m).padStart(2, '0'); }, label: (c) => c.raw.t ? `실거래 ${ymd(c.raw.t[C.ym] * 100 + c.raw.t[C.d])} · ${c.raw.t[C.a]}㎡ · ${c.raw.t[C.f]}층 · ${eokTx(c.raw.t[C.p])}` : `KB 시세 ${l99a() && Math.abs(c.raw.y) < 1 ? wonAx99(c.raw.y) : c.raw.y.toFixed(2) + '억'}` } } } } });
+        plugins: { legend: { display: false }, tooltip: { enabled: true, external: null, callbacks: { title: (it) => { const x = it[0] ? it[0].raw.x : 0, y = Math.floor(x + 1e-6), m = Math.min(12, Math.floor((x - y) * 12 + 1e-6) + 1); return y + '.' + String(m).padStart(2, '0'); }, label: (c) => c.raw.t ? `실거래 ${ymd(c.raw.t[C.ym] * 100 + c.raw.t[C.d])} · ${c.raw.t[C.a]}㎡ · ${c.raw.t[C.f]}층 · ${eokTx(c.raw.t[C.p])}` : `KB 시세 ${l99a() && Math.abs(c.raw.y) < 1 ? wonAx99(c.raw.y) : (typeof eokL111 === 'function' ? eokL111(c.raw.y, 2) : c.raw.y.toFixed(2)) + '억'}` } } } } });
     window.CALC_MAP_L84.rtChart = { kb: kb.length, pts: pts.length };
   }
   // 묶음 L91: 실거래 그래프 = 계산기 시세 그래프와 같은 형식(축·글꼴·툴팁) — KB 매매 선 + 같은 평형 칸 실거래 월별 중앙값 선(거래 없는 달은 비움, 해제 뺌)
