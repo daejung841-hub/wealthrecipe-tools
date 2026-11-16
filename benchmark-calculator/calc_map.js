@@ -89,7 +89,7 @@
     acadZone: '지도자료_202611/academy_zone_1110.geojson', azLabMin: .25, azLabZoom: 11, azShow: false,
     acadCluster: '지도자료_202611/academy_cluster_1111.geojson', acadRegion: '지도자료_202611/academy_region_1111.geojson', acSmallZoom: 14, acLabZoom: 12,   // 묶음 L99C: 학원 덩어리(분석 탭 1111) — 동네 학원 밀집은 확대 14부터, 이름표는 12부터
     jgTab: '지도자료_202611/jaegun_tab_l99c_1113_v6.json', jgAge: 28 };
-  try { if (BUNDLES.L111) L99A_MAP.jgTab = '지도자료_202611/jaegun_tab_l99c_1116_v7b.json'; } catch (e) {}   // 묶음 L111(구현3): 재건축 탭 v7   // 묶음 L99C: 재건축 탭 자료·나이 기준   // 11-11 배포 수정 3: [학원가] 단추·층은 이번 배포에서 숨김(L99c 새 방식)   // 학원 밀집 영역(분석 탭 1110, 대형 35·학원가 170) — 0.25㎢ 미만 조각은 이름표 없이 칠만, 이름표는 확대 11부터
+  try { if (BUNDLES.L111) L99A_MAP.jgTab = '지도자료_202611/jaegun_tab_l99c_1116_v7c.json'; } catch (e) {}   // 묶음 L111(구현3): 재건축 탭 v7   // 묶음 L99C: 재건축 탭 자료·나이 기준   // 11-11 배포 수정 3: [학원가] 단추·층은 이번 배포에서 숨김(L99c 새 방식)   // 학원 밀집 영역(분석 탭 1110, 대형 35·학원가 170) — 0.25㎢ 미만 조각은 이름표 없이 칠만, 이름표는 확대 11부터
   const wonAx99 = (v) => Math.abs(v) >= 1 ? v + '억' : v ? Math.round(v * 10000).toLocaleString('ko-KR') + '만' : '0';   // 억 단위 값 눈금
   let pick98b = null;   // 판정 평형이 아닌 평형을 고른 때만 { id, lo, hi }(전용㎡ 반올림 값)
   let elemFrom98b = null;   // 초등 학구 상자를 단지 정보 줄에서 연 경우 그 단지 id(단지 학군 밖 학교 "다른 학군" 표시용)
@@ -2380,7 +2380,7 @@
     rows.push(['일반 분양', sg.일반분양 != null ? nm(sg.일반분양) + (/^계산/.test(sg.일반분양_표시 || '') ? ' <small>계산</small>' : '') + kb + k0 : estHtml || W]);
     if (l108() && l107()){   // 묶음 L108: 조합원 대비 일반분양 비율 + 서울 재건축 평균
       const v = supplyOfL108(it, e), A = seoulAvgL108();
-      const avgTx = A ? '서울 재건축 평균 ' + A.avg.toFixed(1) + '%(' + A.n + '곳) · 일반분양 ÷ 조합원, 단지별 평균(원문 ' + A.nSrc + '곳 + 추정 포함 ' + A.nEst + '곳)' : '';
+      const avgTx = (() => { try { return !!BUNDLES.L115; } catch (x) { return false; } })() ? '' : A ? '서울 재건축 평균 ' + A.avg.toFixed(1) + '%(' + A.n + '곳) · 일반분양 ÷ 조합원, 단지별 평균(원문 ' + A.nSrc + '곳 + 추정 포함 ' + A.nEst + '곳)' : '';
       rows.push(['조합원 대비 일반분양', (v ? (v[1] / v[0] * 100).toFixed(1) + '%' + (v[2] ? ' <small>· 추정</small>' : '') : '<span class="jg99-w">산정 불가</span>') + (avgTx ? '<small class="ge104-r">' + avgTx + '</small>' : '')]);
     }
     const rentSum = (() => { const m = /(\d[\d,]*)[^\d+]*\+[^\d]*(\d[\d,]*)/.exec(sg.임대_원문이름 || ''); if (!m || sg.임대 == null) return ''; const a = Number(m[1].replace(/,/g, '')), b = Number(m[2].replace(/,/g, '')); return a + b === Number(sg.임대) ? '원문 두 값(' + a + '+' + b + ')의 합' : ''; })();   // 묶음 L103: 임대 = 원문 두 값의 합일 때만 근거 표기
