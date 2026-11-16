@@ -528,6 +528,7 @@
   .cm84-ms .ls li i{flex:0 0 auto;width:14px;height:4px;border-radius:2px}
   .cm84-ms .ls li em{font-style:normal;font-weight:600;font-size:11px;color:#868e96}
   .cm84-ms .ls li button{margin-left:auto;border:1px solid #ced4da;background:#fff;color:#495057;font:inherit;font-size:11.5px;font-weight:700;border-radius:999px;padding:2px 9px;cursor:pointer;min-height:24px}
+  html.l114 .cm84-ms .bt button{border-color:#364FC7;color:#364FC7}   /* 묶음 L114(구현6): 상자 안 단추 3개 청회 */
   .ms98d{width:12px;height:12px;border-radius:50%;background:#fff;border:3px solid #2B8A3E;box-sizing:border-box;pointer-events:none}
   .ms98l{transform:translate(-50%,-50%);background:rgba(255,255,255,.92);border:1px solid #2B8A3E;color:#2B8A3E;font-size:11px;font-weight:800;border-radius:6px;padding:0 4px;white-space:nowrap;pointer-events:none}
   .ms98t{transform:translate(-50%,calc(-100% - 10px));background:#2B8A3E;color:#fff;font-size:12.5px;font-weight:800;border-radius:8px;padding:3px 8px;white-space:nowrap;box-shadow:0 1px 5px rgba(0,0,0,.25);pointer-events:none}
@@ -2681,6 +2682,7 @@
   //   개수 제한 없음(색 12개를 돌려 씀). [거리]를 끄면 모두 숨기고, 다시 켜면 그대로 보임
   const MS98 = { on: false, pts: [], lines: [], polys: [], marks: [], walkM: 67, last: 0, dz: null };
   const MS_COL = ['#2B8A3E', '#1C7ED6', '#E8590C', '#AE3EC9', '#C2255C', '#0B7285', '#5C940D', '#364FC7', '#B7791F', '#862E9C', '#D6336C', '#495057'];
+  try { if (BUNDLES.L114){ MS_COL[0] = '#364FC7'; MS_COL[7] = '#2B8A3E'; } } catch (e) {}   // 묶음 L114(구현6): 첫 거리 = 청회(단추 켜짐 색과 같게), 12색은 그대로
   function msLen98b(a, b){   // 두 점 사이 직선 거리(m, 하버사인)
     const R = 6371008.8, r = Math.PI / 180, la1 = a.lat() * r, la2 = b.lat() * r, dla = la2 - la1, dln = (b.lng() - a.lng()) * r;
     const h = Math.sin(dla / 2) ** 2 + Math.cos(la1) * Math.cos(la2) * Math.sin(dln / 2) ** 2; return 2 * R * Math.asin(Math.min(1, Math.sqrt(h)));
