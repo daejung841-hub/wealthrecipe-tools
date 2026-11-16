@@ -89,7 +89,7 @@
     acadZone: '지도자료_202611/academy_zone_1110.geojson', azLabMin: .25, azLabZoom: 11, azShow: false,
     acadCluster: '지도자료_202611/academy_cluster_1111.geojson', acadRegion: '지도자료_202611/academy_region_1111.geojson', acSmallZoom: 14, acLabZoom: 12,   // 묶음 L99C: 학원 덩어리(분석 탭 1111) — 동네 학원 밀집은 확대 14부터, 이름표는 12부터
     jgTab: '지도자료_202611/jaegun_tab_l99c_1113_v6.json', jgAge: 28 };
-  try { if (BUNDLES.L111) L99A_MAP.jgTab = '지도자료_202611/jaegun_tab_l99c_1116_v7.json'; } catch (e) {}   // 묶음 L111(구현3): 재건축 탭 v7   // 묶음 L99C: 재건축 탭 자료·나이 기준   // 11-11 배포 수정 3: [학원가] 단추·층은 이번 배포에서 숨김(L99c 새 방식)   // 학원 밀집 영역(분석 탭 1110, 대형 35·학원가 170) — 0.25㎢ 미만 조각은 이름표 없이 칠만, 이름표는 확대 11부터
+  try { if (BUNDLES.L111) L99A_MAP.jgTab = '지도자료_202611/jaegun_tab_l99c_1116_v7b.json'; } catch (e) {}   // 묶음 L111(구현3): 재건축 탭 v7   // 묶음 L99C: 재건축 탭 자료·나이 기준   // 11-11 배포 수정 3: [학원가] 단추·층은 이번 배포에서 숨김(L99c 새 방식)   // 학원 밀집 영역(분석 탭 1110, 대형 35·학원가 170) — 0.25㎢ 미만 조각은 이름표 없이 칠만, 이름표는 확대 11부터
   const wonAx99 = (v) => Math.abs(v) >= 1 ? v + '억' : v ? Math.round(v * 10000).toLocaleString('ko-KR') + '만' : '0';   // 억 단위 값 눈금
   let pick98b = null;   // 판정 평형이 아닌 평형을 고른 때만 { id, lo, hi }(전용㎡ 반올림 값)
   let elemFrom98b = null;   // 초등 학구 상자를 단지 정보 줄에서 연 경우 그 단지 id(단지 학군 밖 학교 "다른 학군" 표시용)
@@ -513,6 +513,7 @@
   .cm84-ms[hidden]{display:none}
   .cm84-ms .tx{font-weight:700;line-height:1.5}
   .cm84-ms .bt{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-top:5px}
+  html.l113 .cm84-ms{border-color:#364FC7}   /* 묶음 L113(구현5): 결과 상자 테두리 = 거리 재기 단추 켜짐 색 */
   .cm84-ms .bt button{border:1px solid #2B8A3E;background:#fff;color:#2B8A3E;font:inherit;font-size:12px;font-weight:700;border-radius:999px;padding:4px 10px;cursor:pointer;min-height:28px}
   .cm84-ms .bt button:disabled{opacity:.4;cursor:default}
   /* 묶음 L98B(L98i): 패널 머리 임대 경고 배지 — PC는 이름 바로 옆, 폰은 이름 아래 줄(긴 이름이 잘리지 않게) */
@@ -670,6 +671,9 @@
   @media (max-width:400px){ html.l112 .mh-recent-l89 .hr-t{display:none} }   /* 묶음 L112: 좁은 폰은 '🕘 4'만 */
   @media (max-width:767px){
     .cm84-frow{width:calc(100% - 20px)}
+    html.l113 .cm84-frow{width:calc(100% - 94px)}   /* 묶음 L113(구현5): 오른쪽 84px = 단추 줄 예약 구역 */
+    html.l113 .cm84-scc.l97b{right:84px}
+    html.l113 .cm84-scc:not(.l97b):not(.cm84-hjc99){width:calc(100% - 94px)}
     .cm84-frow button{padding:5px 9px}
     .mh-recent-l89{flex:0 0 auto}
     html.l112 .mh-recent-l89 .hr-btn{padding:5px 8px}
@@ -2281,7 +2285,8 @@
   const GE_URL_L104 = '지도자료_202611/재건축_일반분양_추정_1113d.json';   // 큐4 보충: 1113c   // 묶음 L104: 분석 탭 재건축_일반분양_추정_1113b.json 도착 후 '지도자료_202611/재건축_일반분양_추정_1113b.json'
   const CASHOUT_RATE = 0;   // 묶음 L107(큐11): 조합원 분양 추정 = 기존 세대수 × (1 − 이 값). 지금 0(기존 세대수 100%). 분석 탭이 현금청산 비율을 내면 이 값만 바꿈 — 일반분양 추정도 이 조합원 값으로 같이 바뀜
   const l107 = () => { try { return !!BUNDLES.L107; } catch (e) { return false; } };
-  const l111 = () => { try { return !!BUNDLES.L111; } catch (e) { return false; } };   // 묶음 L111(구현3): 대지지분 '(구역면적 기준)'·서울 평균·연결 끊은 단지 표시
+  const l111 = () => { try { return !!BUNDLES.L111; } catch (e) { return false; } };
+  const l113 = () => { try { return !!BUNDLES.L113; } catch (e) { return false; } };   // 묶음 L113(구현5): 재건축 탭 = 보여 줄 값이 있을 때만(정보몽땅 사업장 유무와 무관)   // 묶음 L111(구현3): 대지지분 '(구역면적 기준)'·서울 평균·연결 끊은 단지 표시
   function joOfL107(it, e){   // 조합원 분양: [값, '원문'|'추정'|'산정 불가', 기존 세대수]
     const sg = e.세대구성 || {}; if (sg.조합원분양 != null) return [Number(sg.조합원분양), '원문'];
     const g = GE104 && Object.prototype.hasOwnProperty.call(GE104, it.id) ? GE104[it.id] : null;
@@ -2324,7 +2329,7 @@
     return Number(v);
   }
   function jgLoad99c(){ if (!JG.ld) JG.ld = fetch(L99A_MAP.jgTab).then(r => r.ok ? r.json() : null).then(j => (JG.d = j), () => { JG.ld = null; return null; }); return JG.ld; }
-  function jgHas99c(e){ return !!(e && e.상태 !== '숨김' && ((l111() && e.연결해제) || e.지금단계 || Object.values(e.단계날짜 || {}).some(Boolean) || e.평균대지지분 || e.추정비례율 || e.계획세대수 || e.용적률 || e.선도지구 || e.세대구성 || e.시공사)); }
+  function jgHas99c(e){ return !!(e && e.상태 !== '숨김' && ((l111() && !l113() && e.연결해제) || e.지금단계 || Object.values(e.단계날짜 || {}).some(Boolean) || e.평균대지지분 || e.추정비례율 || e.계획세대수 || e.용적률 || e.선도지구 || e.세대구성 || e.시공사)); }
   function jgOk99c(it){
     if (!JG.d || !it || !Object.prototype.hasOwnProperty.call(JG.d, it.id) || it.id[0] === '_') return false;
     const age = it.built ? new Date().getFullYear() - it.built : null;
@@ -2347,7 +2352,7 @@
     return '<div class="jg99-gs">근거 고시 · ' + (items.length ? items.join(' · ') : '<span class="jg99-w">확인 중</span>') + '</div>';
   }
   function jgHtml99c(it, e){
-    if (l111() && e.연결해제){   // 묶음 L111: 연결을 끊은 단지 — 단계·세대 줄 없이 '정보몽땅 등록 사업장 없음'만
+    if (l111() && !l113() && e.연결해제){   // 묶음 L111: 연결을 끊은 단지 — 단계·세대 줄 없이 '정보몽땅 등록 사업장 없음'만
       const z = e.연결해제;
       return '<div class="jg99-h"><b>🏗 재건축 진행</b><button type="button" class="i99" aria-expanded="false" aria-label="재건축 자료 출처">ⓘ</button><button type="button" class="jg99-x">✕ 실거래로 돌아가기</button></div>'
         + '<div class="jg99-b"><div class="jg99-now">지금 <b>정보몽땅 등록 사업장 없음</b></div><ol class="jg99-bar">' + JG_STAGES.map(k => '<li class="td"><b>' + (k === '이주철거' ? '이주·철거' : k) + '</b></li>').join('') + '</ol>'
@@ -2383,7 +2388,7 @@
     const g = e.선도지구; if (g) rows.push(['선도지구', esc((g.신도시 || '') + ' 선도지구') + (g.구역 ? ' · ' + esc(g.구역) : '') + (g.구역세대 ? ' (' + Number(g.구역세대).toLocaleString('ko-KR') + '세대)' : '') + (g.연결 && g.연결 !== '확실' ? ' <small>' + esc(g.연결) + '</small>' : '')]);
     const src = (e.출처 || []).concat(e.정비계획고시 ? ['정비계획 고시 ' + e.정비계획고시] : []).concat(e.사업장 ? ['사업장: ' + e.사업장] : []).concat(g ? ['선도지구: 국토교통부 보도자료(2024.11)'] : []).concat(sg.출처 ? ['세대: ' + sg.출처] : []).concat(sc && sc.출처 ? ['시공사: ' + sc.출처] : []);
     const memo = Object.entries(e.단계날짜_메모 || {}).map(([k, v]) => k + ': ' + v);
-    const now = cur >= 0 ? (JG_STAGES[cur] === '이주철거' ? '이주·철거' : JG_STAGES[cur]) + (note ? ' · ' + note : '') + (D[JG_STAGES[cur]] && !note ? ' (' + jgYm99c(D[JG_STAGES[cur]]) + ')' : '') : '단계 정보 없음';
+    const now = (l113() && cur < 0 && e.상태 === '정보몽땅 등록 사업장 없음') ? '정보몽땅 등록 사업장 없음' : cur >= 0 ? (JG_STAGES[cur] === '이주철거' ? '이주·철거' : JG_STAGES[cur]) + (note ? ' · ' + note : '') + (D[JG_STAGES[cur]] && !note ? ' (' + jgYm99c(D[JG_STAGES[cur]]) + ')' : '') : '단계 정보 없음';
     return '<div class="jg99-h"><b>🏗 재건축 진행</b><button type="button" class="i99" aria-expanded="false" aria-label="재건축 자료 출처">ⓘ</button><button type="button" class="jg99-x">✕ 실거래로 돌아가기</button></div>'
       + '<div class="jg99-b"><div class="jg99-now">지금 <b>' + esc(now) + '</b></div><ol class="jg99-bar">' + cells + '</ol>'
       + '<div class="jg99-n">날짜는 확인된 단계만 적었어요(년.월).</div>'
