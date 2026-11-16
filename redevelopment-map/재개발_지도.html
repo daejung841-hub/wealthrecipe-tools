@@ -225,7 +225,16 @@
   @media (max-width:767px){.schc{right:84px;left:auto;top:118px;width:60%;max-height:30%}}
   .hjlg{position:absolute;left:12px;top:12px;z-index:1045;width:min(300px,calc(100% - 130px));max-height:calc(100% - 90px);overflow:auto;background:rgba(255,255,255,.96);border:1px solid var(--line);border-radius:10px;padding:8px 10px;font-size:11.5px;line-height:1.45;box-shadow:0 4px 14px rgba(0,0,0,.12)}
   .hjlg small{color:#6B7280}
-  @media (max-width:767px){.hjlg{left:10px;top:auto;bottom:96px;width:calc(100% - 110px);max-height:38%}}
+  /* 50차 39번(50ai): 폰에서 호재 범례를 아래 큰 막대 대신 위쪽 작은 칩(노선 툴팁 #hjCard와 같은 자리·같은 너비)으로. 접힘=한 줄 칩, 펼침=최대 40vh 스크롤. 노선 툴팁이 열리면 칩 아래로 내림. 공용 파일(v13) 그대로 */
+  .hjlg .dh4x{display:none}
+  @media (max-width:767px){
+    .hjlg{left:10px;top:58px;bottom:auto;width:calc(100% - 100px);max-width:none;max-height:40vh;padding:5px 10px;border-radius:10px;font-size:12px;line-height:1.35;box-shadow:0 2px 8px rgba(0,0,0,.14)}
+    .hjlg.fold{width:fit-content;max-width:calc(100% - 100px)}
+    .hjlg:not(.fold){padding:8px 10px}
+    .hjlg .t{width:auto;white-space:nowrap}.hjlg:not(.fold) .t{width:calc(100% - 30px);display:inline-block}
+    .hjlg:not(.fold) .dh4x{display:inline-block;float:right;font:inherit;font-size:13px;line-height:1;border:1px solid #E5E7EB;background:#fff;border-radius:7px;padding:2px 8px;cursor:pointer;color:#1F2937}
+    #main:has(#hjLg:not([hidden])) #hjCard.schc{top:96px}
+  }
   /* 44차 H: 개발 호재를 켜면 구 묶음 이름·구역 이름·단지 가격표·배지 숨김(구역 테두리·칠·구역 점은 남김) */
   #map.hj-on .zl,#map.hj-on .zdot,#map.hj-on .bb,#map.hj-on .gcl,#map.hj-on .bbl{display:none!important}
   /* 46차: 개발 호재를 켜면 구역 칠을 옅게(테두리·누르기는 그대로) — 노선이 먼저 보이게 */
@@ -235,6 +244,13 @@
   /* 50차 5번: 구역 면이 그려지는 단계(또는 PT_FAR="hide")에선 동그라미(.pt) 표식 상자를 가림. 선택 강조(.sel)는 남김 */
   #map.ptz div[style*="content-box"]:has(>.pt:not(.sel)){display:none!important}
   @media (max-width:767px){.schc{top:118px;left:auto;right:84px;width:60%;max-height:30%}}
+  /* 50차 35번(50af): 개발 호재 노선 설명 상자 = 위쪽 짧은 툴팁(이름·단계 칩·개통 목표 한 줄, 높이 15vh 이내) + [자세히 ▾](펼침 40vh 이내, 안에서 스크롤). 지도 가운데는 비움 */
+  #hjCard.schc{left:324px;right:auto;top:56px;width:min(440px,calc(100% - 430px));max-height:15vh;overflow:hidden;padding:8px 10px}
+  #hjCard.schc.dh4-open{max-height:40vh;overflow:auto}
+  #hjCard .dh4-h{flex-wrap:wrap;gap:2px 4px;min-width:0;line-height:1.35}#hjCard .dh4-h .dh4-nm{max-width:calc(100% - 40px);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}#hjCard .dh4-h .dh4-chip,#hjCard .dh4-h .dh4-approx{flex:none}
+  #hjCard .dh4-det{display:none}#hjCard.dh4-open .dh4-det{display:block}
+  #hjCard .dh4-more{font:inherit;font-size:12px;border:1px solid #E5E7EB;background:#fff;border-radius:7px;padding:2px 10px;cursor:pointer;color:#1F2937;margin-top:4px}
+  @media (max-width:767px){#hjCard.schc{left:10px;right:auto;top:58px;width:calc(100% - 100px);max-width:none;max-height:15vh}#hjCard.schc.dh4-open{max-height:40vh}}
   .slg{position:absolute;left:12px;bottom:58px;z-index:1040;background:rgba(255,255,255,.95);border:1px solid var(--line);border-radius:10px;padding:8px 10px 6px;font-size:11.5px;line-height:1.35;box-shadow:0 4px 14px rgba(0,0,0,.12);width:min(330px,calc(100% - 24px))}
   .slg .bar{height:10px;border-radius:5px;margin:4px 0 2px;position:relative}
   .slg .tk{position:relative;height:30px}.slg .tk span{position:absolute;transform:translateX(-50%);white-space:nowrap;font-size:10.5px;color:var(--ink-soft,#475569)}
@@ -4184,6 +4200,34 @@
  }
  function hjSweepOn() { hjSweep(); if (HJS.ob) return; HJS.ob = new MutationObserver(() => { if (!HJS.raf) HJS.raf = requestAnimationFrame(hjSweep); }); HJS.ob.observe(document.getElementById("map"), { childList: true, subtree: true }); }
  function hjSweepOff() { if (HJS.ob) { HJS.ob.disconnect(); HJS.ob = null; } if (HJS.raf) { cancelAnimationFrame(HJS.raf); HJS.raf = 0; } document.querySelectorAll("#map [data-hjhide]").forEach(w => w.removeAttribute("data-hjhide")); }
+ /* 50차 35번(50af): 노선 설명 상자(#hjCard) 내용이 바뀔 때마다 짧은 툴팁 + [자세히 ▾] 꼴로 접음. 호재 공용 파일(v13)은 그대로 */
+ (function () {
+  const c = document.getElementById("hjCard"); if (!c) return;
+  function fold() {
+   if (!c.classList.contains("on")) { if (c.classList.contains("dh4-open")) c.classList.remove("dh4-open"); return; }
+   if (c.querySelector(".dh4-more")) return;
+   const h = c.querySelector(".dh4-h"); if (!h) return;
+   const rows = [...c.children].filter(e => e !== h && !e.classList.contains("scx"));
+   const goal = rows.find(e => e.classList.contains("scs") && /개통 목표/.test(e.textContent)); if (!goal) return;
+   [...h.childNodes].filter(n => n.nodeType === 3 && n.textContent.trim()).forEach(n => { const s = document.createElement("span"); s.className = "dh4-nm"; s.textContent = n.textContent; h.replaceChild(s, n); });
+   const btn = document.createElement("button"); btn.type = "button"; btn.className = "dh4-more"; btn.setAttribute("aria-expanded", "false"); btn.textContent = "자세히 ▾";
+   const det = document.createElement("div"); det.className = "dh4-det";
+   rows.filter(e => e !== goal).forEach(e => det.appendChild(e));
+   goal.after(btn); btn.after(det); if (c.classList.contains("dh4-open")) c.classList.remove("dh4-open");
+   btn.addEventListener("click", ev => { ev.stopPropagation(); const o = c.classList.toggle("dh4-open"); btn.setAttribute("aria-expanded", o); btn.textContent = o ? "접기 ▴" : "자세히 ▾"; });
+  }
+  new MutationObserver(fold).observe(c, { childList: true, attributes: true, attributeFilter: ["class"] });
+ })();
+ /* 50차 39번(50ai): 호재 범례(#hjLg) 펼쳤을 때 오른쪽 위 [접기 ▴] 단추(노선 툴팁의 접기와 같은 방식). 범례 내용이 다시 그려질 때마다 다시 붙임 */
+ (function () {
+  const g = document.getElementById("hjLg"); if (!g) return;
+  function add() {
+   if (g.hidden || g.querySelector(".dh4x")) return; const t = g.querySelector(".t"); if (!t) return;
+   const x = document.createElement("button"); x.type = "button"; x.className = "dh4x"; x.textContent = "접기 ▴"; x.setAttribute("aria-label", "호재 범례 접기");
+   x.addEventListener("click", ev => { ev.stopPropagation(); t.click(); }); t.after(x);
+  }
+  new MutationObserver(add).observe(g, { childList: true });
+ })();
  function hjState(on) { document.getElementById("map").classList.toggle("hj-on", on); if (on) { hideTip(); document.getElementById("cxcard").classList.remove("on"); hjSweepOn(); } else hjSweepOff(); }
  async function hjToggle(btn) {
   const on = btn.getAttribute("aria-pressed") !== "true"; btn.setAttribute("aria-pressed", on); btn.title = "개발 호재(공사 중·계획 철도, 참고용)" + (on ? " — 켜짐(다시 누르면 꺼짐)" : "");
