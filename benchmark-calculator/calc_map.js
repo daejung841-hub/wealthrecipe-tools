@@ -81,6 +81,8 @@
   const l99b = () => { try { return !!(BUNDLES.L99B && l99a()); } catch (e) { return false; } };   // 묶음 L99B(계산기 7차): [개발 호재]·[경사도] + 공공 색·학군 출처 줄(재개발 지도와 같게)
   // 공용 개발 호재 = 두 지도 공용 폴더(재개발 지도 46차 v2, 읽기만) · 경사도 = 재개발 지도 h10c 자료(라이브 /redevelopment-map/ 그 자리에서 읽기만). 판(v)은 재개발 지도가 쓰는 값과 같게
   const L99B_MAP = { shared: '../map-shared/', hjJs: 'dev_hojae_v2.js', hjV: '20261110-46', slopeJs: '지도_경사.js', slopeDir: '경사도', slopeV: '20261109-1955', hjShow: false };
+  const l118 = () => { try { return !!BUNDLES.L118; } catch (e) { return false; } };
+  if (l118()){ L99B_MAP.hjJs = 'dev_hojae_v13.js'; L99B_MAP.hjV = '20261113-50t'; L99B_MAP.hjShow = true; }   // 묶음 L118(구현11): 지도 라이브(15a1004)와 같은 공용 파일·판 번호, 호재 단추 켬
   const l99c = () => { try { return !!(BUNDLES.L99C && l99a()); } catch (e) { return false; } };   // 묶음 L99C(11-11): 학원 덩어리 층·패널 [재건축] 탭
   const L99A_MAP = { acad: '지도자료_202611/academy_l99_1110c.json', sgg: '지도자료_202611/sgg_tol10m.geojson', emd: '지도자료_202611/emd_tol10m.geojson', emdZoom: 14,   // 법정동 선은 14부터(첫 지도 확대 13에서 1.3MB를 바로 받지 않게)
     src: '행정구역 경계: 국토교통부 법정구역정보(2026.10.09 기준)',
@@ -428,6 +430,25 @@
   .cm84-shov99{position:fixed;z-index:1500;pointer-events:none;background:#fff;border:1px solid #CBD5E1;border-radius:8px;padding:5px 9px;font-size:12.5px;box-shadow:0 4px 12px rgba(0,0,0,.15);white-space:nowrap;display:none}.cm84-shov99.on{display:block}
   .cm84-sbub99{background:#fff;border:1px solid #CBD5E1;border-radius:9px;padding:6px 9px;font-size:12.5px;box-shadow:0 4px 12px rgba(0,0,0,.15);white-space:nowrap}
   @media (max-width:767px){ .cm84-scc.cm84-hjc99{right:84px;top:118px;width:60%;max-height:30%} .cm84-hjlg99{left:10px;top:auto;bottom:96px;width:calc(100% - 110px);max-height:38%} .cm84-slg99{bottom:46px} }
+  /* 묶음 L118(구현11): 노선 설명 = 짧은 툴팁(이름·단계 칩·개통 목표 한 줄, 15vh) + [자세히 ▾](40vh, 안에서 스크롤) — 재개발 지도 15a1004와 같은 규칙 */
+  html.l118 .cm84-scc.cm84-hjc99{max-height:15vh;overflow:hidden;padding:8px 10px}
+  html.l118 .cm84-scc.cm84-hjc99.dh4-open{max-height:40vh;overflow:auto}
+  html.l118 .cm84-hjc99 .dh4-h{flex-wrap:wrap;gap:2px 4px;min-width:0;line-height:1.35}html.l118 .cm84-hjc99 .dh4-h .dh4-nm{max-width:calc(100% - 40px);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}html.l118 .cm84-hjc99 .dh4-h .dh4-chip,html.l118 .cm84-hjc99 .dh4-h .dh4-approx{flex:none}
+  html.l118 .cm84-hjc99 .dh4-det{display:none}html.l118 .cm84-hjc99.dh4-open .dh4-det{display:block}
+  html.l118 .cm84-hjc99 .dh4-more{font:inherit;font-size:12px;border:1px solid #E5E7EB;background:#fff;border-radius:7px;padding:2px 10px;cursor:pointer;color:#1F2937;margin-top:4px}
+  html.l118 .cm84-hjlg99 .dh4x{display:none}
+  @media (max-width:767px){
+    /* 묶음 L118: 폰 범례 = 아래 큰 막대 대신 위쪽 작은 칩(노선 툴팁과 같은 자리·너비). 접힘 = 한 줄 칩, 펼침 = 40vh 스크롤. 오른쪽 84px(단추 줄) 비움 */
+    html.l118 .cm84-hjlg99{left:10px;top:118px;bottom:auto;width:calc(100% - 94px);max-width:none;max-height:40vh;padding:5px 10px;border-radius:10px;font-size:12px;line-height:1.35;box-shadow:0 2px 8px rgba(0,0,0,.14)}
+    html.l118 .cm84-hjlg99.fold{width:fit-content;max-width:calc(100% - 94px)}
+    html.l118 .cm84-hjlg99:not(.fold){padding:8px 10px}
+    html.l118 .cm84-hjlg99 .t{width:auto;white-space:nowrap}html.l118 .cm84-hjlg99:not(.fold) .t{width:calc(100% - 30px);display:inline-block}
+    html.l118 .cm84-hjlg99:not(.fold) .dh4x{display:inline-block;float:right;font:inherit;font-size:13px;line-height:1;border:1px solid #E5E7EB;background:#fff;border-radius:7px;padding:2px 8px;cursor:pointer;color:#1F2937}
+    html.l118 .cm84-scc.cm84-hjc99{left:10px;right:auto;top:118px;width:calc(100% - 94px);max-width:none;max-height:15vh}
+    html.l118 .cm84-scc.cm84-hjc99.dh4-open{max-height:40vh}
+    html.l118 .cm84-map:has(.cm84-hjlg99:not([hidden])) .cm84-scc.cm84-hjc99{top:156px}
+    html.l118 #cm84Map div[style*="border: 1px solid rgb(68, 68, 68)"]{margin-bottom:30px !important}   /* 묶음 L118: 폰 확대·축소 단추(오른쪽 아래)를 네이버 로고 위로 */
+  }
   /* 묶음 L99C: 학원 덩어리 이름표·말풍선, [재건축] 탭(PC 오른쪽 칸 · 폰 위쪽 탭) */
   .cm84-acl99{position:absolute;left:0;top:0;transform:translate(-50%,-50%);white-space:nowrap;pointer-events:none;border-radius:999px;padding:1px 8px;font-size:11px;font-weight:700;line-height:1.5}
   .cm84-acl99.g3{background:#E03131;color:#fff;border:1px solid #E03131;font-size:11.5px;font-weight:800}
@@ -2431,8 +2452,9 @@
   const HJ99 = { dh: null, p: null };
   function phone99b(){ return window.innerWidth < 768; }
   function hjLoad99b(){
-    if (window.DevHojae2) return Promise.resolve(true);
-    if (!HJ99.p) HJ99.p = new Promise(res => { const t = document.createElement('script'); t.src = L99B_MAP.shared + L99B_MAP.hjJs + '?v=' + L99B_MAP.hjV; t.onload = () => res(!!window.DevHojae2); t.onerror = () => { HJ99.p = null; res(false); }; document.head.appendChild(t); });
+    const HJF = () => l118() ? window.DevHojae8 : window.DevHojae2;   // 묶음 L118: v13 = DevHojae8
+    if (HJF()) return Promise.resolve(true);
+    if (!HJ99.p) HJ99.p = new Promise(res => { const t = document.createElement('script'); t.src = L99B_MAP.shared + L99B_MAP.hjJs + '?v=' + L99B_MAP.hjV; t.onload = () => res(!!HJF()); t.onerror = () => { HJ99.p = null; res(false); }; document.head.appendChild(t); });
     return HJ99.p;
   }
   function hjState99b(on){
@@ -2440,12 +2462,34 @@
     const b = root && root.querySelector('#cm84Hj'); if (b) b.setAttribute('aria-pressed', String(on));
     relabel98b(); window.CALC_MAP_L84.hj99b = { on };
   }
+  // 묶음 L118(구현11): 재개발 지도 15a1004의 두 감시기를 그대로 옮김 — ① 노선 설명 상자 내용이 바뀌면 '개통 목표' 줄까지만 보이고 나머지는 [자세히 ▾] 안으로 ② 범례 펼치면 [접기 ▴]
+  function hjFold118(){
+    const c = mapEl.querySelector('#cm84Hjc99'), g = mapEl.querySelector('#cm84HjLg99');
+    if (c) new MutationObserver(function fold(){
+      if (!c.classList.contains('on')){ if (c.classList.contains('dh4-open')) c.classList.remove('dh4-open'); return; }
+      if (c.querySelector('.dh4-more')) return;
+      const h = c.querySelector('.dh4-h'); if (!h) return;
+      const rows = [...c.children].filter(e => e !== h && !e.classList.contains('scx'));
+      const goal = rows.find(e => e.classList.contains('scs') && /개통 목표/.test(e.textContent)); if (!goal) return;
+      [...h.childNodes].filter(n => n.nodeType === 3 && n.textContent.trim()).forEach(n => { const sp = document.createElement('span'); sp.className = 'dh4-nm'; sp.textContent = n.textContent; h.replaceChild(sp, n); });
+      const btn = document.createElement('button'); btn.type = 'button'; btn.className = 'dh4-more'; btn.setAttribute('aria-expanded', 'false'); btn.textContent = '자세히 ▾';
+      const det = document.createElement('div'); det.className = 'dh4-det';
+      rows.filter(e => e !== goal).forEach(e => det.appendChild(e));
+      goal.after(btn); btn.after(det); if (c.classList.contains('dh4-open')) c.classList.remove('dh4-open');
+      btn.addEventListener('click', ev => { ev.stopPropagation(); const o = c.classList.toggle('dh4-open'); btn.setAttribute('aria-expanded', o); btn.textContent = o ? '접기 ▴' : '자세히 ▾'; });
+    }).observe(c, { childList: true, attributes: true, attributeFilter: ['class'] });
+    if (g) new MutationObserver(function add(){
+      if (g.hidden || g.querySelector('.dh4x')) return; const t = g.querySelector('.t'); if (!t) return;
+      const x = document.createElement('button'); x.type = 'button'; x.className = 'dh4x'; x.textContent = '접기 ▴'; x.setAttribute('aria-label', '호재 범례 접기');
+      x.addEventListener('click', ev => { ev.stopPropagation(); t.click(); }); t.after(x);
+    }).observe(g, { childList: true });
+  }
   async function hjToggle99b(){
     const b = root.querySelector('#cm84Hj'), on = b.getAttribute('aria-pressed') !== 'true';
     if (!on){ if (HJ99.dh) HJ99.dh.toggle(false); else hjState99b(false); return; }
     hjState99b(true);
     if (!(await hjLoad99b())){ hjState99b(false); return; }
-    if (!HJ99.dh) HJ99.dh = window.DevHojae2(map, { base: L99B_MAP.shared, v: L99B_MAP.hjV, card: mapEl.querySelector('#cm84Hjc99'), legend: mapEl.querySelector('#cm84HjLg99'), phone: phone99b, onState: hjState99b, onOverlay: () => {} });
+    if (!HJ99.dh) HJ99.dh = (l118() ? window.DevHojae8 : window.DevHojae2)(map, { base: L99B_MAP.shared, v: L99B_MAP.hjV, fold: l118(), host: l118() ? mapEl : undefined, card: mapEl.querySelector('#cm84Hjc99'), legend: mapEl.querySelector('#cm84HjLg99'), phone: phone99b, onState: hjState99b, onOverlay: () => {} });
     if (b.getAttribute('aria-pressed') !== 'true') return;
     await HJ99.dh.toggle(true);
     const lg = mapEl.querySelector('#cm84HjLg99'), t = lg && lg.querySelector('.t');   // 대표님 결정 3: 노선 목록 상자는 접힌 상태로
@@ -2574,6 +2618,7 @@
     if (cb) cb.insertAdjacentHTML('afterend', sb); else vb.insertAdjacentHTML('beforeend', sb);
     mapEl.insertAdjacentHTML('beforeend', '<div class="cm84-scc cm84-hjc99" id="cm84Hjc99" role="dialog" aria-label="개발 호재"></div><div class="cm84-hjlg99" id="cm84HjLg99" hidden></div><div class="cm84-slg99" id="cm84SlopeLg99" hidden></div><div class="cm84-shov99" id="cm84SlopeHov99" role="tooltip"></div>');
     if (hb) vb.querySelector('#cm84Hj').addEventListener('click', hjToggle99b);
+    if (hb && l118()) hjFold118();   // 묶음 L118
     vb.querySelector('#cm84Slope').addEventListener('click', () => slopeSet99b(!SLOPE99.on));
     if (hb) VB98.splice(1, 0, ['#cm84Hj', '개발 호재', '개발 호재(공사 중·계획 철도, 참고용)']);
     VB98.push(['#cm84Slope', '경사도', '경사도(땅의 경사, 참고용)']);
@@ -3554,7 +3599,7 @@
   function initMap(){
     NV = naver.maps;
     map = new NV.Map(mapEl, { center: new NV.LatLng(37.5665, 126.978), zoom: 13, minZoom: 8, maxZoom: 19, zoomControl: true,
-      zoomControlOptions: { position: l89() ? NV.Position.RIGHT_CENTER : NV.Position.LEFT_CENTER, style: NV.ZoomControlStyle.SMALL }, scaleControl: false, mapDataControl: false });   // 묶음 L89: 확대·축소 버튼은 재개발 지도처럼 오른쪽 가운데
+      zoomControlOptions: { position: (l118() && window.innerWidth < 768) ? NV.Position.RIGHT_BOTTOM : l89() ? NV.Position.RIGHT_CENTER : NV.Position.LEFT_CENTER, style: NV.ZoomControlStyle.SMALL }, scaleControl: false, mapDataControl: false });   // 묶음 L89: 확대·축소 버튼은 재개발 지도처럼 오른쪽 가운데
     NV.Event.addListener(map, 'idle', () => { clearTimeout(lt); lt = setTimeout(drawAll, 60); if (l98b()) hint98b(); });
     if (l98b()) NV.Event.addListener(map, 'click', (e) => { if (msTake98b(e)) return; if (SV98.on && e && e.coord) svAt98b(e.coord); });   // 묶음 L98B: 거리뷰 길 위를 누르면 그 자리 거리뷰
     if (l99b()) mapWire99b();   // 묶음 L99B: 개발 호재 그리기·누르기, 경사도 깔기·툴팁
