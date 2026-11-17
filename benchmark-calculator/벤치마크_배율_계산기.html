@@ -33,7 +33,7 @@
 // 묶음 L52·L53(83단계): 아래 정적 스크립트 주소의 ?v=와 이 표는 build_l52_versions.py가 빌드 때 실제 파일 해시로 채운다(손으로 쓰지 않음).
 // 표는 25평 seed 지연 로딩(loadSeed25)이 실행 중에 쓴다. EARLY_FLAGS_L52는 xlsx 태그(L53)를 쓸지 정하려고 주소 플래그를 먼저 읽는다
 // (applyBundlesFromUrl과 같은 규칙, 로컬 주소에서만: 값이 없으면 모두 켬, 있으면 적힌 묶음만 — 묶음 이름 'L' 포함).
-var ASSET_VERSIONS_L52 = /*L52_VERSIONS*/{"shared.js":"8e8ee813","seedComplexes.js":"7d7e417e","seedChips.js":"70c405ed","m2Series.js":"acc3bcaa","seedComplexes25.js":"25bb9b37","feedback-widget.js":"52cf1fae","rtAdjust.js":"9a91b8ce","station_walk.js":"d1744c95","school_elem.js":"e368c3b0","calc_map.js":"53951f94","map_light.js":"437b24a4","map_trade_idx.js":"c94b3db1"}/*END_L52_VERSIONS*/;
+var ASSET_VERSIONS_L52 = /*L52_VERSIONS*/{"shared.js":"8e8ee813","seedComplexes.js":"7d7e417e","seedChips.js":"70c405ed","m2Series.js":"acc3bcaa","seedComplexes25.js":"25bb9b37","feedback-widget.js":"52cf1fae","rtAdjust.js":"9a91b8ce","station_walk.js":"d1744c95","school_elem.js":"e368c3b0","calc_map.js":"17481046","map_light.js":"437b24a4","map_trade_idx.js":"c94b3db1"}/*END_L52_VERSIONS*/;
 var EARLY_FLAGS_L52 = (function(){
   var on = { L52: true, L53: true, L86: true, L88: true };   // L86(시세 이력 미루기)은 지도 중심 화면(L85)이 켜져 있을 때만 — L85를 끄면 여기 L86도 false
   try {
@@ -55,7 +55,7 @@ var EARLY_FLAGS_L52 = (function(){
 })();
 // 묶음 L86(첫 화면 가볍게 1단계): 지도 중심 첫 화면이면 시세 이력(seedComplexes.js·seedChips.js)을 머리에서 받지 않고 지도가 뜬 뒤 받는다.
 // 지도는 가벼운 지도 파일(map_light.js)로 그린다. 미루지 않는 경우 — 다른 화면 안(지도·재개발 지도 패널), 주소에 단지·평형 말고 다른 인자가 있음
-// (여러 단지 비교 주소 등), 같은 창에서 마지막에 '여러 단지 보기'·'즐겨찾기'를 보고 있었음 — 에는 지금처럼 머리에서 받는다.
+// (여러 단지 비교 주소 등), 같은 창에서 마지막에 '여러 단지 비교하기'·'즐겨찾기'를 보고 있었음 — 에는 지금처럼 머리에서 받는다.
 // 끄면(로컬 주소 ?bundles=에서 L86 빼기, 또는 아래 BUNDLES.L86 기본값) 지금과 같다(머리에서 받음).
 var DEFER_SEED_L86 = (function(){
   try {
@@ -471,7 +471,7 @@ button.pyeong-chip{font:inherit;font-size:11.5px;}
 .r103-m{display:block;font-size:9.5px;font-weight:400;color:var(--ink-muted, #6B7280);white-space:nowrap;line-height:1.35;}
 .concl-sub-l105{font-size:11.5px;line-height:1.5;color:var(--ink-faint);margin:2px 0 0;}
 .concl-box > .concl-sub-l105:last-child{margin-top:6px;}   /* 묶음 L105C: 상자 맨 아래 */
-/* 묶음 L85: 지도 중심 화면 — 탭은 [지도][여러 단지 보기], 지도 화면은 머리줄 한 줄 + 화면 전체 지도 */
+/* 묶음 L85: 지도 중심 화면 — 탭은 [지도][여러 단지 비교하기], 지도 화면은 머리줄 한 줄 + 화면 전체 지도 */
 .map-head-l85{display:none;}
 body.l85 #topModeTabs .top-mode-btn[data-top-mode="single"], body.l85 #topModeTabs .top-mode-btn[data-top-mode="favorites"]{display:none;}
 body.l85 #topModeMapBtnL84{order:-1;}
@@ -479,6 +479,16 @@ body.l85-map{overflow:hidden;}
 body.l85-map .wrap > .topbar, body.l85-map #topModeTabs, body.l85-map .wrap > footer, body.l85-map > footer{display:none!important;}
 body.l85-map .map-head-l85{display:flex;position:fixed;left:0;right:0;top:0;height:48px;z-index:60;align-items:center;gap:10px;padding:0 12px;background:var(--surface);border-bottom:1px solid var(--border);box-sizing:border-box;}
 body.l85-map #mapSectionL84{position:fixed;left:0;right:0;top:48px;bottom:0;margin:0;z-index:55;}
+/* 묶음 L120(구현15): 여러 단지 비교하기 [지도에서 선택][이름으로 선택] 탭 · 선택 비교 중 안내 */
+.pick-tabs-l120{display:flex;gap:6px;margin:0 0 12px;flex-wrap:wrap;}
+.pick-tabs-l120[hidden],.pick-strip-l120[hidden]{display:none!important;}
+.pick-tabs-l120 button{font:inherit;font-size:14px;font-weight:700;padding:7px 14px;border-radius:10px;border:1px solid var(--border);background:var(--surface);color:var(--ink-muted);cursor:pointer;}
+.pick-tabs-l120 button.active{background:#FFF4E6;border-color:#E8590C;color:#D9480F;}
+body.l120-pick .pick-tabs-l120{position:fixed;left:0;right:0;top:48px;height:44px;z-index:60;margin:0;padding:0 12px;align-items:center;flex-wrap:nowrap;background:var(--surface);border-bottom:1px solid var(--border);box-sizing:border-box;}
+body.l120-pick .pick-tabs-l120 button{padding:5px 12px;font-size:13.5px;}
+body.l85-map.l120-pick #mapSectionL84{top:92px;}
+.pick-strip-l120{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:0 0 12px;padding:8px 12px;border-radius:10px;background:#FFF4E6;border:1px solid #FFD8A8;color:#7C2D12;font-size:13.5px;}
+.pick-strip-l120 button{font:inherit;font-size:13px;font-weight:700;border:1px solid #E8590C;background:#fff;color:#D9480F;border-radius:8px;padding:4px 10px;cursor:pointer;}
 .map-head-l85 h1{font-size:15px;margin:0;white-space:nowrap;color:var(--ink);}
 .map-head-l85 .mh-tabs{display:flex;gap:4px;}
 .map-head-l85 .mh-tabs button{border:1px solid var(--border);background:var(--surface);color:var(--ink);font:inherit;font-size:13px;font-weight:700;padding:6px 10px;border-radius:999px;cursor:pointer;white-space:nowrap;min-height:34px;}
@@ -1773,7 +1783,7 @@ body.l36 #baseLibSelect, body.l36 .lib-row:has(> #baseLibSelect){display:none !i
   <!-- 묶음 L85: 지도 중심 화면의 최소 머리줄(지도 화면에서만 보임) -->
   <div class="map-head-l85" id="mapHeadL85">
     <h1>저평가 단지 계산기</h1>
-    <div class="mh-tabs"><button type="button" data-l85-mode="map" class="active">🗺️ 지도</button><button type="button" data-l85-mode="multi">📊 여러 단지<span class="tx2"> 보기</span></button></div>
+    <div class="mh-tabs"><button type="button" data-l85-mode="map" class="active">🗺️ 지도</button><button type="button" data-l85-mode="multi">📊 여러 단지<span class="tx2"> 비교하기</span></button></div>
     <div class="mh-links">
       <button type="button" id="mapHeadGuideL85" hidden>❓<span class="tx"> 사용법</span></button>
       <a href="급지표.html">📋<span class="tx"> 급지표</span></a>
@@ -1788,6 +1798,9 @@ body.l36 #baseLibSelect, body.l36 .lib-row:has(> #baseLibSelect){display:none !i
   <!-- 묶음 L85: 지도를 못 띄웠거나 엑셀로 넣은 단지를 볼 때 진단 화면 위 안내 -->
   <div class="map-note-l85" id="mapNoteL85" hidden></div>
   <!-- 묶음 L84(지도 1-1단계): 지도 탭 자리. 지도 코드(calc_map.js)·좌표·네이버 지도는 탭을 처음 열 때만 받는다 -->
+  <!-- 묶음 L120(구현15): 여러 단지 비교하기 위 탭 [지도에서 선택][이름으로 선택] + 선택한 단지 비교 중 안내 -->
+  <div class="pick-tabs-l120" id="pickTabsL120" role="tablist" aria-label="단지 고르는 방법" hidden><button type="button" role="tab" data-pick-sub="map">🗺️ 지도에서 선택</button><button type="button" role="tab" data-pick-sub="name">🔍 이름으로 선택</button></div>
+  <div class="pick-strip-l120" id="pickStripL120" role="status" hidden><span class="t"></span><button type="button" data-pick-back="1">← 지도에서 더 고르기</button></div>
   <section id="mapSectionL84" class="map-wrap-l84" hidden></section>
 
   <section id="singleDiagSection" class="single-diag-wrap" hidden>
@@ -3153,9 +3166,9 @@ function seoulHistoricalAvg(){
 // 라이브는 주소 플래그를 읽지 않으므로 이 기본값이 그대로 동작한다.
 const BUNDLES = { A:false, B:false, C:false, D1:false, D2:false, D3:false, D4:false, E1:true, E2:false, E3:true, F1:true, F2:true, F3:true, F4:true, F5:true, F6:true,
   H1:false, H2:true, H3:true, H4:true, H5:true, H6:true, H7:true,
-  L1:true, L2:true, L3:true, L4:true, L5:true, L6:false, L7:true, L8:true, L9:true, L10:true, L11:true, L12:true, L13:true, L14:true, L15:true, L16:true, L17:true, L18:true, L19:true, L19B:true, L20:true, L22:true, L23:true, L24:true, L25:true, L26:true, L27:!!window.POOL_EXCLUDE_ON, L31:!!window.NEW_NAME_RULE_ON, L32:true, L33:true, L34:true, L37:true, L28:true, L38:true, L40:true, L39:true, L41:true, L42:true, L43:true, L44:true, L45:true, L46:true, L47:true, L49:true, L48:true, L50:true, L51:true, L52:true, L53:true, L54:true, L55:true, L56:true, L57:true, L58:true, L59:true, L59_DND:true, L59_INFOCARD:true, L59_STATION:true, L59_SCHOOL:true, L59_FAVSEARCH:true, L60:true, L60_REL:false, L60_WHY:false, L60_NOTE:true, L61:true, L64:true, L64_LINK:true, L64_NEWBUILD:false, L65:true, L69:true, L70:true, L71:true, L74:true, L75:true, L76:true, L77:true, L78:true, L79:true, L80:true, L81:true, L82:true, L84:true, L85:true, L85_CROSS:true, L85_LEFT:true, L85_INFO:true, L85_LBL:true, L85_FULL:true, L86:(typeof EARLY_FLAGS_L52 === 'undefined' || !!EARLY_FLAGS_L52.L86), L87:true, L88:true, L88_EMBED:true, L88_SHARE:true, L89:true, L84_RT:true, L84_SC:true, L91:true, L92:true, L93:true, L94:true, L95:true, L96:true, L97:true, L97B:true, L98:true, L98H:true, L98B:true, L35:true, L36:true, L30:true, L29:true, L29R:false, L90N:true, L90G:true, L98J:true, L99A:true, L99C:true, L99B:true, L101:true, L102:true, L102C:true, L103:true, L105:true, L105C:true, L105D:true, L105E:true, L106:true, L107:true, L108:true, L109:true, L111:true, L112:true, L113:true, L114:true, L115:true, L116:true, L117:true, L118:true, K1:false, K2:true, K4:false };
+  L1:true, L2:true, L3:true, L4:true, L5:true, L6:false, L7:true, L8:true, L9:true, L10:true, L11:true, L12:true, L13:true, L14:true, L15:true, L16:true, L17:true, L18:true, L19:true, L19B:true, L20:true, L22:true, L23:true, L24:true, L25:true, L26:true, L27:!!window.POOL_EXCLUDE_ON, L31:!!window.NEW_NAME_RULE_ON, L32:true, L33:true, L34:true, L37:true, L28:true, L38:true, L40:true, L39:true, L41:true, L42:true, L43:true, L44:true, L45:true, L46:true, L47:true, L49:true, L48:true, L50:true, L51:true, L52:true, L53:true, L54:true, L55:true, L56:true, L57:true, L58:true, L59:true, L59_DND:true, L59_INFOCARD:true, L59_STATION:true, L59_SCHOOL:true, L59_FAVSEARCH:true, L60:true, L60_REL:false, L60_WHY:false, L60_NOTE:true, L61:true, L64:true, L64_LINK:true, L64_NEWBUILD:false, L65:true, L69:true, L70:true, L71:true, L74:true, L75:true, L76:true, L77:true, L78:true, L79:true, L80:true, L81:true, L82:true, L84:true, L85:true, L85_CROSS:true, L85_LEFT:true, L85_INFO:true, L85_LBL:true, L85_FULL:true, L86:(typeof EARLY_FLAGS_L52 === 'undefined' || !!EARLY_FLAGS_L52.L86), L87:true, L88:true, L88_EMBED:true, L88_SHARE:true, L89:true, L84_RT:true, L84_SC:true, L91:true, L92:true, L93:true, L94:true, L95:true, L96:true, L97:true, L97B:true, L98:true, L98H:true, L98B:true, L35:true, L36:true, L30:true, L29:true, L29R:false, L90N:true, L90G:true, L98J:true, L99A:true, L99C:true, L99B:true, L101:true, L102:true, L102C:true, L103:true, L105:true, L105C:true, L105D:true, L105E:true, L106:true, L107:true, L108:true, L109:true, L111:true, L112:true, L113:true, L114:true, L115:true, L116:true, L117:true, L118:true, L119:false, L120:true, K1:false, K2:true, K4:false };
 const BUNDLE_GROUPS = { D:['D1','D2','D3','D4'], E:['E1','E2','E3'], F:['F1','F2','F3','F4','F5','F6'], H:['H1','H2','H3','H4','H5','H6','H7'],
-  L:['L1','L2','L3','L4','L5','L6','L7','L8','L9','L10','L11','L12','L13','L14','L15','L16','L17','L18','L19','L19B','L20','L22','L23','L24','L25','L26','L27','L29','L30','L31','L32','L33','L34','L37','L35','L36','L28','L38','L40','L39','L41','L42','L43','L44','L45','L46','L47','L49','L48','L50','L51','L52','L53','L54','L55','L56','L57','L58','L59','L60','L61','L64','L65','L69','L70','L71','L74','L75','L76','L77','L78','L79','L80','L81','L82','L84','L85','L86','L87','L88','L89','L91','L92','L93','L94','L95','L96','L97','L97B','L98','L98H','L98B','L90N','L90G','L98J','L99A','L99C','L99B','L101','L102','L102C','L103','L105','L105C','L105D','L105E','L106','L107','L108','L109','L111','L112','L113','L114','L115','L116','L117','L118'], K:['K1','K2','K4'] };
+  L:['L1','L2','L3','L4','L5','L6','L7','L8','L9','L10','L11','L12','L13','L14','L15','L16','L17','L18','L19','L19B','L20','L22','L23','L24','L25','L26','L27','L29','L30','L31','L32','L33','L34','L37','L35','L36','L28','L38','L40','L39','L41','L42','L43','L44','L45','L46','L47','L49','L48','L50','L51','L52','L53','L54','L55','L56','L57','L58','L59','L60','L61','L64','L65','L69','L70','L71','L74','L75','L76','L77','L78','L79','L80','L81','L82','L84','L85','L86','L87','L88','L89','L91','L92','L93','L94','L95','L96','L97','L97B','L98','L98H','L98B','L90N','L90G','L98J','L99A','L99C','L99B','L101','L102','L102C','L103','L105','L105C','L105D','L105E','L106','L107','L108','L109','L111','L112','L113','L114','L115','L116','L117','L118','L119','L120'], K:['K1','K2','K4'] };
 // 묶음 L46(69단계): 그래프 점선 모양 통일 — 모든 점선을 "선도단지 대비 적정가" 선(FAIR_LINE_STYLE.borderDash)과 같은 긴 점선으로.
 // 촘촘한 점("좁쌀")·점-선 섞인 패턴을 없앤다. 새 점선은 항상 dashL46(예전 값)을 쓴다 — L46을 끄면 예전 값 그대로.
 const DASH_L46 = [5, 4];
@@ -11624,6 +11637,7 @@ function renderSingleActiveChart(bench, target){
   }
 }
 function setTopMode(mode){
+  if (BUNDLES.L120){ if (!_pickEnterL120) pickOnL120 = false; pickCmpL120 = mode === 'multi' && _pickCmpNextL120; _pickCmpNextL120 = false; }   // 묶음 L120: 지도에서 선택(선택 모드)·선택 비교 중 표시
   // 묶음 L85: 지도 중심 화면에서는 '우리 단지 진단하기' 탭이 없다 — 진단을 열려던 곳(카드 링크·즐겨찾기 등)은 지도 패널로 연다
   if (mode === 'single' && mapFirstL85() && !classicL85){
     pendingOpenL85 = state.singleTargetId ? { id: state.singleTargetId, p: isPyeong25Name(state.singleTargetName) ? 25 : 34 } : null;
@@ -11660,7 +11674,123 @@ function setTopMode(mode){
     renderSingleDiag(state.singleTargetName);
   } else if (mode === 'single' && seedMissingL43()) renderSingleDiag('');   // 묶음 L43(P3): 고른 단지가 없어도 데이터 실패 안내
   if (mode === 'favorites') renderFavoritesTab();
+  if (BUNDLES.L120) syncPickL120();   // 묶음 L120
 }
+// ---- 묶음 L120(구현15): 여러 단지 비교하기 = [🗺️ 지도에서 선택] [🔍 이름으로 선택] ----
+// [지도에서 선택] = 같은 지도를 '선택 모드'로 연다(머리 탭은 '여러 단지 비교하기'). 말풍선을 누르면 선택 목록에 넣고 상세 패널도 연다(이미 선택된 단지는 상세만).
+// 선택 목록은 여기 한 곳(같은 기기 저장소 benchmarkCalc_multiPick_v1 — 단지 id·평형). 최대 = 비교 칸 수(MAX_SLOTS). 구현12 담기 목록(benchmarkCalc_mapPicks_v1)은 처음 한 번 옮김(옛 저장은 그대로).
+// '비교 보기 →' = 1번이 기준 단지, 2번부터 비교 단지(급지표 주소·즐겨찾기 비교와 같은 채우기). [이름으로 선택] = 지금 입력 화면 그대로.
+// 마지막으로 쓴 탭은 같은 기기 저장소(benchmarkCalc_multiSub_v1) — 못 쓰면 [지도에서 선택]. 지도 표시(테두리·순번·목록 띠·패널 [선택 해제])는 calc_map.js.
+// var: setTopMode가 이 줄보다 먼저 불려도 안전하게
+var PICK_KEY_L120 = 'benchmarkCalc_multiPick_v1', PICK_OLD_KEY_L120 = 'benchmarkCalc_mapPicks_v1', PICK_SUB_KEY_L120 = 'benchmarkCalc_multiSub_v1', PICK_CMP_SS_L120 = 'benchmarkCalc_pickCmp_l120';
+var _pickL120 = null, pickOnL120 = false, pickCmpL120 = false, _pickEnterL120 = false, _pickCmpNextL120 = false, _pickSubMemL120 = null;
+function l120(){ return !!(BUNDLES.L120 && mapFirstL85()); }
+function pickMaxL120(){ return MAX_SLOTS; }
+function normPickL120(a){ const seen = new Set(); return (Array.isArray(a) ? a : []).filter(x => x && typeof x.id === 'string' && x.id && !seen.has(x.id) && seen.add(x.id)).slice(0, pickMaxL120()).map(x => ({ id: x.id, p: x.p === 25 ? 25 : 34 })); }
+function pickListL120(){
+  if (_pickL120) return _pickL120;
+  let raw = null; try { raw = localStorage.getItem(PICK_KEY_L120); } catch (e) { raw = null; }
+  let a = null; try { a = raw == null ? null : JSON.parse(raw); } catch (e) { a = []; }
+  if (!Array.isArray(a)){   // 처음 한 번: 구현12 [＋ 비교에 담기] 목록을 새 선택 목록으로 옮김
+    let o = []; try { o = JSON.parse(localStorage.getItem(PICK_OLD_KEY_L120) || '[]'); } catch (e) { o = []; }
+    _pickL120 = normPickL120(o); pickSaveL120(); return _pickL120;
+  }
+  _pickL120 = normPickL120(a); return _pickL120;
+}
+function pickSaveL120(){ try { localStorage.setItem(PICK_KEY_L120, JSON.stringify(_pickL120 || [])); } catch (e) {} }   // 저장소를 못 써도 이번 화면에서는 그대로 동작
+function pickAddL120(id, p){ const L = pickListL120(); if (!id || L.some(x => x.id === id)) return 'dup'; if (L.length >= pickMaxL120()) return 'full'; L.push({ id, p: p === 25 ? 25 : 34 }); pickSaveL120(); pickChangedL120(); return 'ok'; }
+function pickRemoveL120(id){ const L = pickListL120(), i = L.findIndex(x => x.id === id); if (i < 0) return false; L.splice(i, 1); pickSaveL120(); pickChangedL120(); return true; }
+function pickSetL120(arr){ _pickL120 = normPickL120(arr); pickSaveL120(); pickChangedL120(); }
+function pickChangedL120(){ try { if (window.CALC_MAP_L84 && window.CALC_MAP_L84.pickChanged) window.CALC_MAP_L84.pickChanged(); } catch (e) {} pickStripL120(); }
+function pickSubL120(){ if (_pickSubMemL120) return _pickSubMemL120; let v = null; try { v = localStorage.getItem(PICK_SUB_KEY_L120); } catch (e) {} return v === 'name' ? 'name' : 'map'; }
+function pickSubSaveL120(v){ _pickSubMemL120 = v; try { localStorage.setItem(PICK_SUB_KEY_L120, v); } catch (e) {} }
+function openPickL120(){
+  if (!l120()){ setTopMode('multi'); return; }
+  pickSubSaveL120('map'); pickOnL120 = true; _pickEnterL120 = true;
+  try { setTopMode('map'); } finally { _pickEnterL120 = false; }
+}
+function pickNameL120(id){ const e = seedEntryById(id) || importedLibraryEntryById(id); return e ? e.name : id; }
+// 비교 보기: 1번 = 기준 단지, 2번부터 비교 칸(openCompareFromFavsL59와 같은 채우기 — 25평은 주소 넘기기와 같은 방식). 시세를 받는 중이면 다 받은 뒤
+function pickCompareL120(){
+  const L = pickListL120().slice(); if (!L.length) return false;
+  const go = () => {
+    const items = L.map(x => ({ x, e: findLibraryEntryById(x.id) }));
+    const ok = items.filter(o => o.e && (o.e.text || o.x.p === 25)), missing = items.filter(o => !(o.e && (o.e.text || o.x.p === 25)));
+    if (!ok.length) return false;
+    const want25 = (id, p, name) => { if (p !== 25) return false; if (has25Data(id)) return true; _pyeongNotices.push(stripPyeongSuffix(name)+': 25평 시세가 없어 34평으로 표시합니다.'); return false; };
+    const b = ok[0];
+    state.baseText = b.e.text; state.baseName = b.e.name; state.basePreset = 'custom';
+    delete state.baseId; delete state.basePyeong; delete state.basePending25;
+    if (want25(b.x.id, b.x.p, b.e.name)){ state.baseText = ''; state.baseName = stripPyeongSuffix(b.e.name) + PYEONG25_SUFFIX; state.baseId = b.x.id; state.basePyeong = 25; state.basePending25 = true; }
+    state.compares = Array.from({length: MAX_SLOTS}, () => ({ text:'', name:'', visible:true }));
+    ok.slice(1, MAX_SLOTS + 1).forEach((o, i) => {
+      state.compares[i] = want25(o.x.id, o.x.p, o.e.name)
+        ? { text:'', name: stripPyeongSuffix(o.e.name) + PYEONG25_SUFFIX, visible: true, id: o.x.id, pyeong: 25, pending25: true }
+        : { text: o.e.text, name: o.e.name, visible: true };
+    });
+    usingSeed = false; state.activeSlot = 0;
+    if (missing.length) _pyeongNotices.push('찾을 수 없는 단지 '+missing.length+'개('+missing.map(o => pickNameL120(o.x.id)).join(', ')+')는 빼고 열었어요.');
+    saveState();
+    _pickCmpNextL120 = true; setTopMode('multi'); render();
+    if (hasPending25()) resumePendingPyeong();
+    try { window.scrollTo(0, 0); } catch (e) {}
+    return true;
+  };
+  if (seedPendingL86()){ whenSeedsL86(r => { if (r) go(); }); return true; }
+  return go();
+}
+// 급지표에서 2곳 이상 넘어온 주소(?기준단지=&비교단지=)를 적용했으면 그 단지들을 선택 목록으로(기준 = 1번)
+function pickFromUrlL120(){
+  if (!l120()) return;
+  try {
+    const q = new URLSearchParams(window.location.search), b = q.get('기준단지'); if (!b) return;
+    const arr = [{ id: b, p: q.get('기준평형') === '25' ? 25 : 34 }].concat(parseCompareSpec(q.get('비교단지')).map(sp => ({ id: sp.id, p: sp.pyeong === 25 ? 25 : 34 })));
+    pickSetL120(arr.filter(x => findLibraryEntryById(x.id)));
+    _pickCmpNextL120 = true;
+  } catch (e) {}
+}
+function pickStripL120(){
+  const el = document.getElementById('pickStripL120'); if (!el) return;
+  const show = l120() && state.topMode === 'multi' && pickCmpL120;
+  el.hidden = !show; if (!show) return;
+  if (!el._wL120){ el._wL120 = true; el.querySelector('[data-pick-back]').addEventListener('click', () => { saveState(); openPickL120(); }); }
+  const n = pickListL120().length;
+  el.querySelector('.t').textContent = n ? '선택한 ' + n + '곳을 비교하고 있어요 — 1번 단지가 기준 단지예요.' : '선택한 단지가 없어요. 지도에서 단지를 눌러 고르세요.';
+}
+function syncPickL120(){
+  const on = l120(), pick = on && pickOnL120 && state.topMode === 'map';
+  if (!pick) pickOnL120 = false;
+  document.documentElement.classList.toggle('l120', on);
+  document.body.classList.toggle('l120-pick', pick);
+  const tabs = document.getElementById('pickTabsL120');
+  if (tabs){
+    if (!tabs._wL120){ tabs._wL120 = true; tabs.addEventListener('click', ev => { const b = ev.target.closest && ev.target.closest('[data-pick-sub]'); if (!b) return;
+      if (b.dataset.pickSub === 'map'){ if (!(pickOnL120 && state.topMode === 'map')){ saveState(); openPickL120(); } }
+      else { pickSubSaveL120('name'); saveState(); setTopMode('multi'); } }); }
+    tabs.hidden = !(on && (pick || state.topMode === 'multi'));
+    const sub = (pick || pickCmpL120) ? 'map' : 'name';
+    tabs.querySelectorAll('[data-pick-sub]').forEach(b => { const a = b.dataset.pickSub === sub; b.classList.toggle('active', a); b.setAttribute('aria-selected', String(a)); });
+  }
+  if (pick){   // 머리 탭은 '여러 단지 비교하기'에 불, 같은 창 새로고침 때도 이 화면으로
+    document.querySelectorAll('#mapHeadL85 [data-l85-mode]').forEach(x => x.classList.toggle('active', x.dataset.l85Mode === 'multi'));
+    document.querySelectorAll('#topModeTabs .top-mode-btn').forEach(b => b.classList.toggle('active', b.dataset.topMode === 'multi'));
+    try { sessionStorage.setItem(LAST_TAB_KEY_L85, 'multi'); } catch (e) {}
+  }
+  try { sessionStorage.setItem(PICK_CMP_SS_L120, on && state.topMode === 'multi' && pickCmpL120 ? '1' : '0'); } catch (e) {}
+  pickStripL120();
+  try { if (window.CALC_MAP_L84 && window.CALC_MAP_L84.pickSync) window.CALC_MAP_L84.pickSync(); } catch (e) {}
+}
+window.PICK_L120 = { on: () => !!(pickOnL120 && state.topMode === 'map' && l120()), list: () => pickListL120(), add: (id, p) => pickAddL120(id, p), remove: (id) => pickRemoveL120(id), compare: () => pickCompareL120(), get max(){ return pickMaxL120(); } };
+// 머리의 '여러 단지 비교하기'를 누르면 마지막으로 쓴 탭으로(지도에서 선택이면 선택 모드 지도). 이름으로 선택이면 원래 동작 그대로
+document.addEventListener('click', ev => {
+  if (!BUNDLES.L120 || !l120()) return;
+  const b = ev.target && ev.target.closest && ev.target.closest('#mapHeadL85 [data-l85-mode="multi"], #topModeTabs .top-mode-btn[data-top-mode="multi"]');
+  if (!b || pickSubL120() !== 'map') return;
+  ev.stopPropagation(); ev.preventDefault();
+  if (state.topMode === 'multi' || (pickOnL120 && state.topMode === 'map')) return;
+  try { saveState(); } catch (e) {}
+  openPickL120();
+}, true);
 
 // ---- 묶음 L84(지도 1-1단계): '지도로 보기' 탭 — 처음 열 때 calc_map.js를 받아 window.CALC_MAP_L84.open()을 부른다 ----
 // 지도 코드·좌표·네이버 지도 스크립트는 여기서만 받으므로 계산기 첫 화면 로딩은 그대로다. 끄면 탭 버튼이 없다.
@@ -11681,7 +11811,7 @@ function openMapTabL84(){
       () => { _mapLoadL84 = null; if (mapFirstL85()){ onMapFailL85('code'); return; } sec.innerHTML = '<div class="map-load-l84">지도를 불러오지 못했어요. 인터넷 연결을 확인하고 탭을 다시 눌러 주세요.</div>'; });
   }
 }
-// ---- 묶음 L85: 지도 중심 화면 — 첫 화면 = 지도, 탭 [지도][여러 단지 보기], 진단 화면은 지도 패널 안(계산기를 ?단지=로 띄움) ----
+// ---- 묶음 L85: 지도 중심 화면 — 첫 화면 = 지도, 탭 [지도][여러 단지 비교하기], 진단 화면은 지도 패널 안(계산기를 ?단지=로 띄움) ----
 // 계산기가 다른 화면 안(지도 패널·재개발 지도 패널)에 들어 있으면 지도 중심 화면을 쓰지 않는다 — 그 안에서는 진단 화면만.
 // 지도를 못 띄우면(네이버 지도 한도·네트워크) 검색창 + 진단 화면(예전 탭)으로 바꾼다. 끄면(setBundles({L85:false})) 지금 탭 구조 그대로.
 let mapFailedL85 = false, classicL85 = false, pendingOpenL85 = null;
@@ -11691,7 +11821,7 @@ function mapFirstL85(){ return !!(BUNDLES.L85 && BUNDLES.L84 && !mapFailedL85 &&
 function initScreenL85(){
   const on = mapFirstL85(); document.body.classList.toggle('l85', on);
   const b = document.getElementById('topModeMapBtnL84'); if (b) b.textContent = on ? '🗺️ 지도' : '🗺️ 지도로 보기';
-  const mb = document.querySelector('#topModeTabs .top-mode-btn[data-top-mode="multi"]'); if (mb) mb.textContent = on ? '📊 여러 단지 보기' : '📊 여러 단지 비교';
+  const mb = document.querySelector('#topModeTabs .top-mode-btn[data-top-mode="multi"]'); if (mb) mb.textContent = on ? '📊 여러 단지 비교하기' : '📊 여러 단지 비교';
   const head = document.getElementById('mapHeadL85');
   if (head && head.querySelectorAll) head.querySelectorAll('[data-l58-l85]').forEach(a => { a.hidden = !BUNDLES.L58; });   // 묶음 L58 이동 메뉴와 같게
   if (head && !head._wiredL85){
@@ -11838,7 +11968,7 @@ function openClassicL85(){ classicL85 = true; setTopMode('single'); }
 // ---- 묶음 L86(첫 화면 가볍게 1단계): 시세 이력(seed)을 지도가 뜬 뒤 받는다 ----
 // 머리(DEFER_SEED_L86)가 미루기로 정했으면: 지도는 map_light.js(미리 계산한 현재가·판정)로 그리고, 지도가 뜬 뒤 seed를 받는다.
 // seed를 받기 전에는 저장된 상태를 읽지도 쓰지도 않는다(loadState·saveState 보류 — 저장값이 seed 없이 정리되지 않게).
-// 그동안 '여러 단지 보기'·'즐겨찾기'·진단 화면을 누르면 "받는 중" 안내 뒤 다 받으면 연다. 단지 패널도 다 받은 뒤 띄운다.
+// 그동안 '여러 단지 비교하기'·'즐겨찾기'·진단 화면을 누르면 "받는 중" 안내 뒤 다 받으면 연다. 단지 패널도 다 받은 뒤 띄운다.
 var stateDeferredL86 = false, seedLoadL86 = null, seedReadyL86 = false, queuedModeL86 = null;   // var: 스크립트 앞쪽(loadState·saveState)에서도 읽히게
 var seedWaitersL86 = [];
 function seedPendingL86(){ return !!(window.DEFER_SEED_L86 && !seedReadyL86 && !Array.isArray(window.SEED_COMPLEXES)); }
@@ -16624,6 +16754,7 @@ function initGuide(){
 }
 loadState();
 const urlApplied = applyUrlParams();
+if (urlApplied && BUNDLES.L120) pickFromUrlL120();   // 묶음 L120: 급지표에서 넘어온 단지들 = 새 선택 목록
 resumePendingPyeong(); // 저장·URL로 들어온 25평 슬롯이 있으면 25평 시세를 불러와 채운다
 wireStaticEvents();
 initRecentViews(); // 묶음 L16
@@ -16634,7 +16765,10 @@ if (mapFirstL85() && !urlApplied){   // 묶음 L85: 첫 화면 = 지도. 주소 
   if (!pendingOpenL85 && seedPendingL86()) pendingOpenL85 = urlOpenL86();   // 묶음 L86: seed 전이라 주소의 단지 번호를 그대로 넘김
   // 11-02 결정: 처음 들어온 사람은 지도, 같은 창에서 새로고침하면 마지막에 보던 탭(창을 닫으면 잊음 — sessionStorage)
   let lastL85 = null; if (!pendingOpenL85){ try { lastL85 = sessionStorage.getItem(LAST_TAB_KEY_L85); } catch (e) {} }
-  setTopMode(lastL85 === 'multi' || lastL85 === 'favorites' ? lastL85 : 'map');
+  if (BUNDLES.L120 && lastL85 === 'multi' && l120() && pickSubL120() === 'map'){   // 묶음 L120: 여러 단지 비교하기를 [지도에서 선택]으로 보던 중이면 그대로(비교 보기 화면이었으면 비교 화면)
+    let cmp = null; try { cmp = sessionStorage.getItem(PICK_CMP_SS_L120); } catch (e) {}
+    if (cmp === '1'){ _pickCmpNextL120 = true; setTopMode('multi'); } else openPickL120();
+  } else setTopMode(lastL85 === 'multi' || lastL85 === 'favorites' ? lastL85 : 'map');
 } else setTopMode(urlApplied ? 'multi' : ((state.topMode === 'map' ? 'single' : state.topMode) || 'single'));   // 묶음 L84: 지도 탭은 새로 열 때 기억하지 않음(첫 화면 로딩 그대로)
 // 항목 1(2026-09-21 세션, 다크모드 토글 작업 중 발견) — 여기서 항상
 // render()(다중비교 전용, renderActiveChart 안에서 그 시점에 등록된 모든

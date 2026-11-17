@@ -710,6 +710,42 @@
   .cm84.l87 .cm84-ph.cx h2{font-size:18.5px}
   .cm84-ph .ad{background:var(--cm-navy-soft);border-color:#C7D2FE;color:var(--cm-navy)}
   .cm84-ph .ad:disabled{opacity:.5;cursor:default}
+  /* 묶음 L119(구현12): [＋ 비교에 담기] 단추 · 지도 아래 담은 목록 띠 */
+  .cm84-ph .pk119{background:var(--cm-navy-soft);border-color:#C7D2FE;color:var(--cm-navy);white-space:nowrap}
+  .cm84-ph .pk119[aria-pressed="true"]{background:#1E3A8A;border-color:#1E3A8A;color:#fff}
+  .pk119-bar{position:absolute;left:50%;transform:translateX(-50%);bottom:18px;z-index:270;width:max-content;max-width:min(560px,calc(100% - 200px));background:#fff;border:1px solid #C7D2FE;border-radius:12px;box-shadow:0 4px 14px rgba(0,0,0,.18);padding:6px 8px;font-size:13px;box-sizing:border-box}
+  .pk119-bar[hidden]{display:none}
+  .pk119-bar .r{display:flex;gap:6px;align-items:center}
+  .pk119-bar .go{flex:1;min-width:0;border:0;background:#1E3A8A;color:#fff;border-radius:9px;padding:7px 12px;font:inherit;font-weight:700;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .pk119-bar .tg{flex:none;border:1px solid #C7D2FE;background:#fff;color:#1E3A8A;border-radius:8px;padding:5px 9px;cursor:pointer;font:inherit}
+  .pk119-bar .msg{display:block;margin-top:4px;font-size:12px;font-weight:700;color:#C2255C}.pk119-bar .msg[hidden]{display:none}
+  .pk119-bar .chips{display:flex;flex-wrap:wrap;gap:5px;margin-top:6px;max-height:30vh;overflow:auto}.pk119-bar .chips[hidden]{display:none}
+  .pk119-bar .c{display:inline-flex;align-items:center;gap:2px;border:1px solid #CBD5E1;border-radius:999px;padding:2px 3px 2px 9px;background:#F8FAFC;font-size:12.5px;white-space:nowrap}
+  .pk119-bar .c button{border:0;background:none;cursor:pointer;font-size:12px;color:#64748B;padding:1px 5px;border-radius:999px}.pk119-bar .c button:hover{background:#E2E8F0}
+  @media (max-width:767px){ .pk119-bar{left:10px;right:94px;transform:none;width:auto;max-width:none;bottom:64px;font-size:12.5px} .pk119-bar .go{padding:7px 9px} }
+  /* 묶음 L120(구현15): [지도에서 선택] — 선택한 단지 말풍선 주황 테두리 + 순번, 패널 머리 [선택 해제], 지도 아래 선택 목록(칩 + 비교 보기 →) */
+  .cm84-bb.pk120{border-color:#E8590C;box-shadow:0 0 0 2.5px #E8590C}
+  .cm84-bb.pk120.sel{box-shadow:0 0 0 2.5px #E8590C,0 0 0 4.5px var(--cm-navy)}
+  .cm84-bb .pkn120{position:absolute;left:-10px;top:-10px;min-width:19px;height:19px;padding:0 4px;box-sizing:border-box;border-radius:999px;background:#E8590C;color:#fff;font:700 11px/19px "Pretendard",-apple-system,"Malgun Gothic",sans-serif;font-style:normal;text-align:center;box-shadow:0 1px 3px rgba(0,0,0,.3);z-index:1}
+  .cm84-ph .pk120{display:none}
+  body.l120-pick .cm84-ph .pk120{display:inline-flex;align-items:center;gap:4px;background:#E8590C;border-color:#E8590C;color:#fff;white-space:nowrap;font-weight:700}
+  body.l120-pick .cm84-ph .pk120[aria-pressed="true"]{background:#fff;border-color:#E8590C;color:#D9480F}
+  .cm84-ph .pk120 i{font-style:normal;background:#E8590C;color:#fff;border-radius:999px;min-width:17px;height:17px;line-height:17px;font-size:10.5px;text-align:center;padding:0 3px;box-sizing:border-box}
+  body.l120-pick .cm84-ph .ad{display:none}
+  .pk120-bar{position:absolute;left:50%;transform:translateX(-50%);bottom:18px;z-index:270;width:max-content;min-width:280px;max-width:min(640px,calc(100% - 200px));background:#fff;border:1px solid #FFC078;border-radius:12px;box-shadow:0 4px 14px rgba(0,0,0,.18);padding:7px 8px;font-size:13px;box-sizing:border-box}
+  .pk120-bar[hidden],body:not(.l120-pick) .pk120-bar{display:none}
+  .pk120-bar .r{display:flex;gap:8px;align-items:center}
+  .pk120-bar .n{flex:1;min-width:0;color:#1F2937;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-left:2px}
+  .pk120-bar .n small{color:#6B7280;font-size:11.5px;margin-left:6px}
+  .pk120-bar .go{flex:none;border:0;background:#1E3A8A;color:#fff;border-radius:9px;padding:7px 14px;font:inherit;font-weight:700;cursor:pointer;white-space:nowrap}
+  .pk120-bar .msg{display:block;margin-top:4px;font-size:12px;font-weight:700;color:#C2255C}.pk120-bar .msg[hidden]{display:none}
+  .pk120-bar .chips{display:flex;flex-wrap:wrap;gap:5px;margin-top:6px;max-height:30vh;overflow:auto}
+  .pk120-bar .c{display:inline-flex;align-items:center;border:1px solid #FFD8A8;border-radius:999px;background:#FFF9F2;font-size:12.5px;white-space:nowrap}
+  .pk120-bar .c .nm{border:0;background:none;cursor:pointer;font:inherit;color:#1F2937;padding:2px 2px 2px 3px;display:inline-flex;align-items:center;gap:4px}
+  .pk120-bar .c .nm i{font-style:normal;background:#E8590C;color:#fff;border-radius:999px;min-width:17px;height:17px;line-height:17px;font-size:10.5px;text-align:center;font-weight:700;padding:0 3px;box-sizing:border-box}
+  .pk120-bar .c .nm small{color:#D9480F;font-size:11px;font-weight:700}
+  .pk120-bar .c .x{border:0;background:none;cursor:pointer;font-size:12px;color:#64748B;padding:1px 7px;border-radius:999px}.pk120-bar .c .x:hover{background:#FFE8CC}
+  @media (max-width:767px){ .pk120-bar{left:10px;right:94px;transform:none;width:auto;min-width:0;max-width:none;bottom:64px;font-size:12.5px} .pk120-bar .chips{max-height:18vh} .pk120-bar .n small{display:none} .pk120-bar .go{padding:7px 10px} }
   .cm84-ph .zt{display:none}
   /* 묶음 L87-5: 쌍둥이 창을 열면 패널을 넓게(PC는 패널 옆으로, 폰은 전체 화면) */
   .cm84-panel.twv{width:min(1180px,calc(100% - 80px))!important;max-width:none!important;z-index:600}
@@ -921,7 +957,8 @@
     const rtm = f.rt ? '<i class="rt101" title="판정에 최근 실거래 사용">실거래</i>' : '';   // 묶음 L101
     const body = detail ? `<span class="col"><b>${price}</b><span class="nm">${esc(it.name)}</span>${inf ? `<span class="if">${esc(inf)}</span>` : ''}${rtm}</span>` : `<b>${price}</b>${rtm}`;
     const tg = detail ? rtTagHtml(rtTagOf(it.id)) : '';   // 지도 1-2: 단지 이름이 보이는 단계부터 실거래 꼬리표(±7%·3건을 넘을 때만)
-    return `<div class="cm84-bb${it.id === selId ? ' sel' : ''}" style="--b:${col}"${l96() ? ` data-nm="${esc(it.name)}"` : ''}><span class="bd"></span><span class="tx">${body}${tg}</span>${l96() ? nmTipL96(it) : ''}</div>`;
+    const k120 = pkIdx120(it.id);   // 묶음 L120: 선택 모드에서 선택한 단지 = 주황 테두리 + 순번
+    return `<div class="cm84-bb${it.id === selId ? ' sel' : ''}${k120 >= 0 ? ' pk120' : ''}" style="--b:${col}"${l96() ? ` data-nm="${esc(it.name)}"` : ''}>${k120 >= 0 ? '<i class="pkn120">' + (k120 + 1) + '</i>' : ''}<span class="bd"></span><span class="tx">${body}${tg}</span>${l96() ? nmTipL96(it) : ''}</div>`;
   }
   function boxOf(it, f, detail, info){   // 겹침 판단용 크기(글자 수로 어림 — 말풍선은 글자에 맞춰 늘어나므로 넘치지 않음)
     const t = eok(f.cur).length * 7.4 + (f.p === 25 ? 18 : 0); const nm = detail ? Math.min(96, it.name.length * 9) : 0;
@@ -955,23 +992,25 @@
     const sel = selId ? itemsById.get(selId) : null;
     const L97 = l97() && detail;   // 묶음 L97: 이름이 보이는 단계에서는 세대수 큰 단지부터 자리를 잡고, 이름 말풍선이 겹치는 작은 단지는 이름 없이 가격만(그래도 겹치면 숨김)
     const base = L97 ? items.slice().sort((a, b) => (Number(b.units) || 0) - (Number(a.units) || 0)) : items;
-    const list = sel ? [sel].concat(base.filter(x => x !== sel)) : base;
+    let list = sel ? [sel].concat(base.filter(x => x !== sel)) : base;
+    const pkS = new Set(pk120() ? pkL120().map(x => x.id) : []);   // 묶음 L120: 선택한 단지는 누른 단지 다음으로 먼저 자리 잡고 늘 보임
+    if (pkS.size) list = list.filter(x => x === sel || pkS.has(x.id)).concat(list.filter(x => x !== sel && !pkS.has(x.id)));
     const hit = (bx) => boxes.some(q => !(bx.r < q.l || bx.l > q.r || bx.b < q.t || bx.t > q.b));
     for (const it of list){
       if (!inView(v, it.lat, it.lng)) continue;
       const f = shownInfo(it, it === sel); if (!f || f.cur == null) continue;   // 묶음 L89: 고른 평형 값(없으면 숨김)
-      if (it !== sel && !passFilter(it, f)) continue;   // 묶음 L88: 필터(누른 단지는 늘 보임)
+      if (it !== sel && !pkS.has(it.id) && !passFilter(it, f)) continue;   // 묶음 L88: 필터(누른 단지는 늘 보임)
       const pt = v.proj.fromCoordToOffset(new NV.LatLng(it.lat, it.lng));
       const x = pt.x - v.oSW.x, y = pt.y - v.oNE.y; let dt = detail, ii = info, [w, h] = boxOf(it, f, dt, ii);
       let bx = { l: x - w / 2, r: x + w / 2, t: y - h - 7, b: y };
-      if (it !== sel && hit(bx)){
+      if (it !== sel && !pkS.has(it.id) && hit(bx)){
         if (!L97) continue;
         dt = false; ii = false; [w, h] = boxOf(it, f, false, false); bx = { l: x - w / 2, r: x + w / 2, t: y - h - 7, b: y };
         if (hit(bx)) continue;
       }
       boxes.push(bx);
-      const m = new NV.Marker({ map, position: new NV.LatLng(it.lat, it.lng), zIndex: it === sel ? 300 : 60, title: l96() ? '' : it.name, icon: { content: bubble(it, f, dt, ii), anchor: new NV.Point(0, 0) } });
-      NV.Event.addListener(m, 'click', (ev) => msTake98b(ev, m.getPosition()) || openPanel(it, l89() ? f.p : undefined));   // 묶음 L89: 고른 평형으로 연다
+      const m = new NV.Marker({ map, position: new NV.LatLng(it.lat, it.lng), zIndex: it === sel ? 300 : pkS.has(it.id) ? 200 : 60, title: l96() ? '' : it.name, icon: { content: bubble(it, f, dt, ii), anchor: new NV.Point(0, 0) } });
+      NV.Event.addListener(m, 'click', (ev) => msTake98b(ev, m.getPosition()) || (pkTap120(it, f.p), openPanel(it, l89() ? f.p : undefined)));   // 묶음 L89: 고른 평형으로 연다 · 묶음 L120: 선택 모드면 누르는 즉시 선택 + 상세
       marks.push(m);
     }
     window.CALC_MAP_L84.last = { zoom: zm, shown: marks.length, info, flt: fltCount(), ms: Math.round(performance.now() - t0), W: mapEl.clientWidth, H: mapEl.clientHeight };
@@ -1540,6 +1579,8 @@
     } else
     panel.innerHTML = (l87() ? headCx(it, p, url) : panelHead('단지', '', it.name + (p === 25 ? '(25평)' : ''), (fullOn() ? '<button type="button" class="bk">← 지도로</button>' : '') + (itemsById.has(it.id) ? '' : '<span class="nomap">지도 위치 없음</span>') + `<a href="${url}" target="_blank" rel="opener">계산기 새 탭으로 열기</a>` + (fullOn() ? '<button type="button" class="fs">⛶ 전체 화면으로 보기</button>' : '')))
       + '<div class="cm84-body"><div class="ld">우리 단지 진단하기를 불러오는 중이에요…</div></div>' + (RT.on() ? rtHtmlShell() : '<div class="cm84-rt"><b>실거래</b>이 자리에 최근 실거래가 들어갈 예정이에요(지도 1-2단계).</div>');
+    if (l119()) pkHead119(it, p);   // 묶음 L119
+    if (l120()) pkHead120(it, p);   // 묶음 L120
     const fr = document.createElement('iframe'); fr.title = '우리 단지 진단하기';
     if (L91){ fr.style.visibility = 'hidden'; fr._it91 = it; }   // 묶음 L91: 기본 화면이 잠깐 보였다 바뀌지 않게, 그 단지를 다 그릴 때까지 가림
     fr.addEventListener('load', () => {
@@ -1576,6 +1617,114 @@
       whenSeedsL86(ok => { if (ok) mount(); else { const l2 = panel.querySelector('.ld'); if (l2) l2.textContent = '시세 자료를 받지 못했어요. 새로고침해 주세요.'; } });
     } else mount();
   }
+  // ---- 묶음 L119(구현12): 지도에서 단지 담기 → 여러 단지 비교하기로 넘기기 ----
+  const l119 = () => { try { return !!BUNDLES.L119; } catch (e) { return false; } };
+  const PK119_KEY = 'benchmarkCalc_mapPicks_v1', PK119_MAX = (typeof MAX_SLOTS === 'number' && MAX_SLOTS > 0) ? MAX_SLOTS : 10;   // 여러 단지 비교하기 비교 슬롯 수와 같게
+  let PK119 = null, pkMsgT119 = 0;
+  function pkList119(){
+    if (PK119) return PK119; let a = [];
+    try { a = JSON.parse(localStorage.getItem(PK119_KEY) || '[]'); } catch (e) { a = []; }   // 저장소를 못 써도 빈 목록으로 동작
+    const seen = new Set(); PK119 = (Array.isArray(a) ? a : []).filter(x => x && typeof x.id === 'string' && !seen.has(x.id) && seen.add(x.id)).slice(0, PK119_MAX).map(x => ({ id: x.id, p: x.p === 25 ? 25 : 34 }));
+    return PK119;
+  }
+  function pkSave119(){ try { localStorage.setItem(PK119_KEY, JSON.stringify(PK119 || [])); } catch (e) {} }
+  function pkName119(id){ const it = itemsById.get(id); let sd = null; try { sd = typeof seedEntryById === 'function' ? seedEntryById(id) : null; } catch (e) {} return (it && it.name) || (sd && sd.name) || id; }
+  function pkHas119(id){ return pkList119().some(x => x.id === id); }
+  function pkMsg119(t){ pkRender119(); const m = mapEl && mapEl.querySelector('.pk119-bar .msg'); if (!m) return; m.textContent = t; m.hidden = false; clearTimeout(pkMsgT119); pkMsgT119 = setTimeout(() => { m.hidden = true; }, 3000); }
+  function pkToggle119(id, p){
+    const L = pkList119(), i = L.findIndex(x => x.id === id);
+    if (i >= 0) L.splice(i, 1);
+    else { if (L.length >= PK119_MAX){ pkMsg119('최대 ' + PK119_MAX + '곳까지 담을 수 있어요'); return; } L.push({ id, p: p === 25 ? 25 : 34 }); }
+    pkSave119(); pkRender119();
+  }
+  function pkHead119(it, p){
+    const b = panel.querySelector('.cm84-ph .pk119'); if (!b) return;
+    const upd = () => { const on = pkHas119(it.id); b.setAttribute('aria-pressed', String(on)); b.innerHTML = on ? '✓<span class="tx"> 담김</span>' : '＋<span class="tx"> 비교에 담기</span>'; b.title = on ? '비교에서 빼기' : '여러 단지 비교하기 비교에 담기'; b.setAttribute('aria-label', on ? '비교에 담김 — 누르면 빼기' : '비교에 담기'); };
+    b.onclick = () => { pkToggle119(it.id, p); upd(); }; b._upd119 = upd; upd();
+  }
+  function pkRender119(){
+    if (!mapEl) return; let bar = mapEl.querySelector('.pk119-bar');
+    if (!bar){
+      mapEl.insertAdjacentHTML('beforeend', '<div class="pk119-bar" hidden role="region" aria-label="비교에 담은 단지"><div class="r"><button type="button" class="go"></button><button type="button" class="tg" aria-expanded="false" aria-label="담은 단지 펼치기">▴</button></div><span class="msg" hidden role="status"></span><div class="chips" hidden></div></div>');
+      bar = mapEl.querySelector('.pk119-bar');
+      bar.querySelector('.go').onclick = pkGo119;
+      bar.querySelector('.tg').onclick = () => { const o = bar.classList.toggle('open'), t = bar.querySelector('.tg'); t.setAttribute('aria-expanded', String(o)); t.textContent = o ? '▾' : '▴'; t.setAttribute('aria-label', o ? '담은 단지 접기' : '담은 단지 펼치기'); bar.querySelector('.chips').hidden = !o; };
+      bar.querySelector('.chips').addEventListener('click', e => { const x = e.target.closest('[data-pk119]'); if (!x) return; e.stopPropagation(); const L = pkList119(), i = L.findIndex(q => q.id === x.dataset.pk119); if (i >= 0){ L.splice(i, 1); pkSave119(); } pkRender119(); });
+      ['click', 'mousedown', 'touchstart', 'dblclick', 'wheel'].forEach(ev => bar.addEventListener(ev, e => e.stopPropagation(), { passive: true }));   // 띠를 눌러도 지도가 움직이거나 닫히지 않게
+    }
+    const L = pkList119(); bar.hidden = !L.length;
+    bar.querySelector('.go').innerHTML = '<b>비교 ' + L.length + '곳</b> · 여러 단지 비교하기로 →';
+    bar.querySelector('.chips').innerHTML = L.map(x => { const nm = pkName119(x.id) + (x.p === 25 ? '(25평)' : ''); return '<span class="c">' + esc(nm) + '<button type="button" data-pk119="' + esc(x.id) + '" aria-label="' + esc(nm) + ' 빼기">✕</button></span>'; }).join('');
+    const b = panel && panel.querySelector('.cm84-ph .pk119'); if (b && b._upd119) b._upd119();
+    window.CALC_MAP_L84.pk119 = L.map(x => x.id);
+  }
+  // 띠를 누르면: 여러 단지 비교하기 비교 슬롯을 담은 단지로 채우고(기준단지는 그대로) 탭을 바꿈. 25평으로 담은 단지는 주소 넘기기(applyUrlParams)와 같은 방식으로 25평
+  function pkGo119(){
+    const L = pkList119().slice(); if (!L.length) return;
+    const go = () => {
+      if (typeof state === 'undefined' || typeof findLibraryEntryById !== 'function' || typeof setTopMode !== 'function') return;
+      const N = typeof MAX_SLOTS === 'number' ? MAX_SLOTS : PK119_MAX, cs = Array.from({ length: N }, () => ({ text: '', name: '', visible: true })); let k = 0;
+      L.forEach(x => {
+        if (k >= N) return; const e = findLibraryEntryById(x.id); if (!e || !e.text) return;
+        if (x.p === 25 && typeof has25Data === 'function' && has25Data(x.id)) cs[k++] = { text: '', name: stripPyeongSuffix(e.name) + PYEONG25_SUFFIX, visible: true, id: x.id, pyeong: 25, pending25: true };
+        else cs[k++] = { text: e.text, name: e.name, visible: true };
+      });
+      state.compares = cs; state.activeSlot = 0; try { usingSeed = false; } catch (e) {}
+      saveState(); setTopMode('multi'); render();
+      window.CALC_MAP_L84.pk119Go = { n: k, at: Date.now() };
+    };
+    if (seedsPending() && typeof whenSeedsL86 === 'function'){ pkMsg119('시세 자료를 받는 중이에요. 다 받으면 넘어가요'); whenSeedsL86(ok => { if (ok) go(); }); }
+    else go();
+  }
+  // ---- 묶음 L120(구현15): 여러 단지 비교하기 [지도에서 선택] — 지도 표시만(선택 목록은 계산기 본문 window.PICK_L120) ----
+  const l120 = () => { try { return !!BUNDLES.L120; } catch (e) { return false; } };
+  const pk120 = () => { try { return l120() && !!window.PICK_L120 && window.PICK_L120.on(); } catch (e) { return false; } };
+  const pkL120 = () => { try { return window.PICK_L120 ? window.PICK_L120.list() : []; } catch (e) { return []; } };
+  let pkMsgT120 = 0;
+  function pkIdx120(id){ return pk120() ? pkL120().findIndex(x => x.id === id) : -1; }
+  function pkTap120(it, p){   // 말풍선을 누름: 선택 모드이고 아직 없으면 넣음(이미 있으면 상세만 — 선택 그대로)
+    if (!pk120() || pkIdx120(it.id) >= 0) return;
+    if (window.PICK_L120.add(it.id, p) === 'full') pkMsg120('최대 ' + window.PICK_L120.max + '곳까지 선택할 수 있어요');
+  }
+  function pkMsg120(t){ pkRender120(); const m = mapEl && mapEl.querySelector('.pk120-bar .msg'); if (!m) return; m.textContent = t; m.hidden = false; clearTimeout(pkMsgT120); pkMsgT120 = setTimeout(() => { m.hidden = true; }, 3000); }
+  function pkName120(id){ const it = itemsById.get(id); let sd = null; try { sd = typeof seedEntryById === 'function' ? seedEntryById(id) : null; } catch (e) {} return (it && it.name) || (sd && sd.name) || id; }
+  function pkRender120(){
+    if (!mapEl || !l120()) return; let bar = mapEl.querySelector('.pk120-bar');
+    if (!bar){
+      mapEl.insertAdjacentHTML('beforeend', '<div class="pk120-bar" hidden role="region" aria-label="선택한 단지"><div class="r"><span class="n"></span><button type="button" class="go">비교 보기 →</button></div><span class="msg" hidden role="status"></span><div class="chips"></div></div>');
+      bar = mapEl.querySelector('.pk120-bar');
+      bar.querySelector('.go').onclick = () => { try { window.PICK_L120.compare(); } catch (e) {} };
+      bar.querySelector('.chips').addEventListener('click', e => {
+        const x = e.target.closest('[data-pk120x]'); if (x){ e.stopPropagation(); window.PICK_L120.remove(x.dataset.pk120x); return; }
+        const c = e.target.closest('[data-pk120]'); if (c){ e.stopPropagation(); openById(c.dataset.pk120, Number(c.dataset.p) === 25 ? 25 : undefined); }   // 칩 이름 = 그 단지 상세
+      });
+      ['click', 'mousedown', 'touchstart', 'dblclick', 'wheel'].forEach(ev => bar.addEventListener(ev, e => e.stopPropagation(), { passive: true }));   // 목록을 눌러도 지도가 움직이거나 닫히지 않게
+    }
+    const L = pk120() ? pkL120() : [];
+    bar.hidden = !L.length;   // 1곳 이상이면 펼친 채로, 0곳이면 숨김
+    bar.querySelector('.n').innerHTML = '<b>선택 ' + L.length + '곳</b><small>1번이 기준 단지 · 최대 ' + window.PICK_L120.max + '곳</small>';
+    bar.querySelector('.chips').innerHTML = L.map((x, i) => { const nm = pkName120(x.id) + (x.p === 25 ? '(25평)' : ''); return '<span class="c"><button type="button" class="nm" data-pk120="' + esc(x.id) + '" data-p="' + x.p + '" title="' + esc(nm) + ' 상세 보기"><i>' + (i + 1) + '</i>' + esc(nm) + (i ? '' : '<small>기준</small>') + '</button><button type="button" class="x" data-pk120x="' + esc(x.id) + '" aria-label="' + esc(nm) + ' 선택 해제">✕</button></span>'; }).join('');
+    pkHeadUpd120();
+    window.CALC_MAP_L84.pk120 = L.map(x => x.id);
+  }
+  function pkHeadUpd120(){
+    const b = panel && panel.querySelector('.cm84-ph .pk120'); if (!b) return;
+    const k = pkIdx120(panel.dataset.id), on = k >= 0;
+    b.setAttribute('aria-pressed', String(on)); b.innerHTML = on ? '<i>' + (k + 1) + '</i>선택 해제' : '＋ 선택';
+    b.title = on ? '선택 목록에서 빼기' : '선택 목록에 넣기'; b.setAttribute('aria-label', on ? (k + 1) + '번 선택됨 — 누르면 선택 해제' : '선택 목록에 넣기');
+  }
+  function pkHead120(it, p){
+    const b = panel.querySelector('.cm84-ph .pk120'); if (!b) return;
+    b.onclick = () => { if (!pk120()) return; if (pkIdx120(it.id) >= 0) window.PICK_L120.remove(it.id); else pkTap120(it, p); };
+    pkHeadUpd120();
+  }
+  // 선택 모드 켜고 끌 때: 말풍선·목록 다시 + 지도 크기(위 탭 줄 44px). 지도 칸이 숨어 있을 때(비교 화면)는 크기를 재지 않음 — 네이버 지도가 높이 0으로 굳음
+  function pkSync120(){
+    pkRender120(); if (!map || !root) return;
+    if (root.hidden || !root.offsetHeight){ return; }
+    drawCx();
+    setTimeout(() => { if (!map || root.hidden || !root.offsetHeight) return; try { mapEl.style.width = ''; mapEl.style.height = ''; } catch (e) {} resize(); }, 40);   // 붙어 있던 옛 크기를 지우고 지금 칸 크기로
+  }
   // 묶음 L87-3: 단지 패널 머리 — 단지명 하나(조금 크게) + 바로 옆 [비교 단지 추가], 폰은 글자 없는 작은 버튼으로 한 줄
   // 묶음 L98B(L98i 임대 경고 배지, 11-09): 지도 1차 뒤 계산기 안 이름 칸(배지 포함)이 숨어 배지가 안 보이던 것 → 패널 머리 이름 옆에 같은 함수(rentalHeavyChip, 같은 기준·색·문구)로 붙임
   //   폰(좁은 머리)은 이름 아래 줄에 같은 배지(긴 이름이 잘리지 않게), PC는 이름 바로 옆·마우스 말풍선 = 기존 title. 판정 계산과 무관
@@ -1588,7 +1737,8 @@
   function headCx(it, p, url){
     const rc = rentChip98b(it), h2 = `<h2 title="${esc(it.name)}">${esc(it.name + (p === 25 ? '(25평)' : ''))}</h2>`;   // 배지가 있으면 이름과 한 묶음(폰은 이름 아래 줄)
     return `<div class="cm84-ph cx"><span class="ty">단지</span>${l97() && back97.length ? '<button type="button" class="bk97" title="바로 전에 보던 단지로">← 이전 단지</button>' : ''}${rc ? '<span class="nm98">' + h2 + rc + '</span>' : h2}`
-      + `<button type="button" class="ad" disabled title="비교 단지 추가">➕<span class="tx"> 비교 단지</span></button>`
+      + (l119() ? '<button type="button" class="pk119" aria-pressed="false" title="여러 단지 비교하기 비교에 담기">＋<span class="tx"> 비교에 담기</span></button>' : `<button type="button" class="ad" disabled title="비교 단지 추가">➕<span class="tx"> 비교 단지</span></button>`)   // 묶음 L119
+      + (l120() ? '<button type="button" class="pk120" aria-pressed="false">＋ 선택</button>' : '')   // 묶음 L120: [지도에서 선택]일 때만 보임(CSS)
       + (l99c() ? '<button type="button" class="jg99b" hidden aria-pressed="false" title="재건축 진행 단계·대지지분">🏗 재건축</button>' : '')   // 묶음 L99C(PC)
       + (fullOn() ? '<button type="button" class="bk">← 지도로</button>' : '') + (itemsById.has(it.id) ? '' : '<span class="nomap">' + (l97() ? '지도 위치 없음' : '위치 없음') + '</span>')
       + `<a href="${url}" target="_blank" rel="opener">새 탭</a>`
@@ -2619,6 +2769,8 @@
     mapEl.insertAdjacentHTML('beforeend', '<div class="cm84-scc cm84-hjc99" id="cm84Hjc99" role="dialog" aria-label="개발 호재"></div><div class="cm84-hjlg99" id="cm84HjLg99" hidden></div><div class="cm84-slg99" id="cm84SlopeLg99" hidden></div><div class="cm84-shov99" id="cm84SlopeHov99" role="tooltip"></div>');
     if (hb) vb.querySelector('#cm84Hj').addEventListener('click', hjToggle99b);
     if (hb && l118()) hjFold118();   // 묶음 L118
+    if (l119()) pkRender119();   // 묶음 L119: 새로고침 뒤에도 담은 목록 띠
+    if (l120()) pkRender120();   // 묶음 L120: 선택 목록
     vb.querySelector('#cm84Slope').addEventListener('click', () => slopeSet99b(!SLOPE99.on));
     if (hb) VB98.splice(1, 0, ['#cm84Hj', '개발 호재', '개발 호재(공사 중·계획 철도, 참고용)']);
     VB98.push(['#cm84Slope', '경사도', '경사도(땅의 경사, 참고용)']);
@@ -3631,6 +3783,7 @@
       failTimer = setTimeout(() => { if (!ready) fail('timeout'); }, MAP_TIMEOUT_MS);
       loadData().then(initMap, (e) => { started = false; fail(e && e.message === 'config' ? 'config' : 'load'); });
     },
+    pickSync: () => pkSync120(), pickChanged: () => { if (map) drawCx(); pkRender120(); },   // 묶음 L120(계산기 본문이 부름)
     drawCx: () => drawAll(), openById: (id, p, opt) => openById(id, p, opt), openZone: (k) => openZone(k), toggleZones: () => toggleZones(), loadZones: () => loadZones(),
     search: (q) => search(q), get map(){ return map; }, get ready(){ return ready; }, enterFull: () => enterFull(), exitFull: () => exitFull(),
     setFilter: (o) => setFilter(o || {}), passFilter: (it) => passFilter(it), cfg88: L88CFG,
