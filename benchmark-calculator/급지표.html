@@ -737,7 +737,7 @@ function renderBottomBar(){
   });
   // (2026-09-30) 계산기가 25평을 지원하므로 25평 카드도 시세비교로 넘긴다. 25평·34평이 섞여도 막지 않는다.
   bar.innerHTML = (chips.length ? chips.join('') : '<span class="empty">단지를 클릭해 선택하세요</span>') +
-    '<button id="compareBtn"'+(baseId ? '' : ' disabled')+'>시세비교</button>';
+    '<button id="compareBtn"'+(baseId ? '' : ' disabled')+'>'+(baseId && !compareIds.length ? '내 단지 보기' : '시세비교')+'</button>';   // (11-17 구현15) 1곳 = 내 단지 보기
   document.getElementById('compareBtn').addEventListener('click', goToCalculator);
   fitBottomPad();
 }
@@ -755,6 +755,12 @@ window.addEventListener('resize', fitBottomPad);
 function goToCalculator(){
   if (!baseId) return;
   const params = new URLSearchParams();
+  if (!compareIds.length){   // (11-17 구현15) 1곳만: 계산기 지도로 가서 그 단지 상세를 연다(?단지=id, 25평 카드면 &평형=25)
+    params.set('단지', realIdOfKey(baseId));
+    if (isKey25(baseId)) params.set('평형', '25');
+    window.location.href = '벤치마크_배율_계산기.html?' + params.toString();
+    return;
+  }
   params.set('기준단지', realIdOfKey(baseId));
   if (isKey25(baseId)) params.set('기준평형', '25');
   if (compareIds.length) params.set('비교단지', compareIds.map(k => isKey25(k) ? realIdOfKey(k) + ':25' : k).join(','));
