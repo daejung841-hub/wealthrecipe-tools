@@ -89,7 +89,7 @@
     acadZone: '지도자료_202611/academy_zone_1110.geojson', azLabMin: .25, azLabZoom: 11, azShow: false,
     acadCluster: '지도자료_202611/academy_cluster_1111.geojson', acadRegion: '지도자료_202611/academy_region_1111.geojson', acSmallZoom: 14, acLabZoom: 12,   // 묶음 L99C: 학원 덩어리(분석 탭 1111) — 동네 학원 밀집은 확대 14부터, 이름표는 12부터
     jgTab: '지도자료_202611/jaegun_tab_l99c_1113_v6.json', jgAge: 28 };
-  try { if (BUNDLES.L111) L99A_MAP.jgTab = '지도자료_202611/jaegun_tab_l99c_1116_v7c.json'; } catch (e) {}   // 묶음 L111(구현3): 재건축 탭 v7   // 묶음 L99C: 재건축 탭 자료·나이 기준   // 11-11 배포 수정 3: [학원가] 단추·층은 이번 배포에서 숨김(L99c 새 방식)   // 학원 밀집 영역(분석 탭 1110, 대형 35·학원가 170) — 0.25㎢ 미만 조각은 이름표 없이 칠만, 이름표는 확대 11부터
+  try { if (BUNDLES.L111) L99A_MAP.jgTab = '지도자료_202611/jaegun_tab_l99c_1116_v8.json'; } catch (e) {}   // 묶음 L111(구현3): 재건축 탭 v7   // 묶음 L99C: 재건축 탭 자료·나이 기준   // 11-11 배포 수정 3: [학원가] 단추·층은 이번 배포에서 숨김(L99c 새 방식)   // 학원 밀집 영역(분석 탭 1110, 대형 35·학원가 170) — 0.25㎢ 미만 조각은 이름표 없이 칠만, 이름표는 확대 11부터
   const wonAx99 = (v) => Math.abs(v) >= 1 ? v + '억' : v ? Math.round(v * 10000).toLocaleString('ko-KR') + '만' : '0';   // 억 단위 값 눈금
   let pick98b = null;   // 판정 평형이 아닌 평형을 고른 때만 { id, lo, hi }(전용㎡ 반올림 값)
   let elemFrom98b = null;   // 초등 학구 상자를 단지 정보 줄에서 연 경우 그 단지 id(단지 학군 밖 학교 "다른 학군" 표시용)
