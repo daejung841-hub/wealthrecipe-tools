@@ -482,6 +482,7 @@
   .cm84-jg99 .jg99-bar li.cur b{background:#1C7ED6;color:#fff;border-color:#1C7ED6;box-shadow:0 0 0 2px rgba(28,126,214,.25)}
   .cm84-jg99 .jg99-bar li span{font-size:10.5px;color:var(--cm-sub);font-weight:600}
   .cm84-jg99 .jg99-n{margin-top:6px;font-size:11px;color:var(--cm-faint)}
+  .cm84-jg99 .jg99-old{margin-top:4px;font-size:11px;color:#868E96}   /* 묶음 L121: 옛 절차 안내 */
   .cm84-jg99 .jg99-r{margin:12px 0 0;display:grid;grid-template-columns:1fr;gap:6px}
   .cm84-jg99 .jg99-r div{display:flex;gap:6px;align-items:baseline;font-size:13px;min-width:0}.cm84-jg99 .jg99-r dt{color:var(--cm-faint);flex:0 0 auto}.cm84-jg99 .jg99-r dd{margin:0;font-weight:700;color:var(--cm-ink);min-width:0;white-space:nowrap}
   .cm84-jg99 .jg99-r dd small{font-weight:500;color:var(--cm-faint)}
@@ -2543,6 +2544,7 @@
   // ---- 묶음 L99C: 패널 [재건축] 탭 — 준공 28년 이상이고 재건축 탭 자료(분석 탭 jaegun_tab_l99c_1111)가 있는 단지에만 ----
   //   PC = 패널 머리 [🏗 재건축] 단추 → 오른쪽 칸(실거래 자리)에, 폰 = 위쪽 탭 [재건축]. 단계 막대 9칸(지금 단계 강조, 날짜는 있는 칸 아래만),
   //   평균 대지지분·추정 비례율·계획 세대수·용적률·선도지구는 값 있는 줄만, 출처(고시 번호·정보몽땅)는 ⓘ 안
+  const l121 = () => { try { return !!BUNDLES.L121; } catch (e) { return false; } };   // 묶음 L121(구현17)
   const JG_STAGES = ['안전진단', '구역지정', '추진위', '조합설립', '사업시행', '관리처분', '이주철거', '착공', '준공'];
   const JG = { d: null, ld: null, open: false };
   const GE_URL_L104 = '지도자료_202611/재건축_일반분양_추정_1113d.json';   // 큐4 보충: 1113c   // 묶음 L104: 분석 탭 재건축_일반분양_추정_1113b.json 도착 후 '지도자료_202611/재건축_일반분양_추정_1113b.json'
@@ -2654,6 +2656,7 @@
     const now = (l113() && cur < 0 && e.상태 === '정보몽땅 등록 사업장 없음') ? '정보몽땅 등록 사업장 없음' : cur >= 0 ? (JG_STAGES[cur] === '이주철거' ? '이주·철거' : JG_STAGES[cur]) + (note ? ' · ' + note : '') + (D[JG_STAGES[cur]] && !note ? ' (' + jgYm99c(D[JG_STAGES[cur]]) + ')' : '') : '단계 정보 없음';
     return '<div class="jg99-h"><b>🏗 재건축 진행</b><button type="button" class="i99" aria-expanded="false" aria-label="재건축 자료 출처">ⓘ</button><button type="button" class="jg99-x">✕ 실거래로 돌아가기</button></div>'
       + '<div class="jg99-b"><div class="jg99-now">지금 <b>' + esc(now) + '</b></div><ol class="jg99-bar">' + cells + '</ol>'
+      + (l121() && D.추진위 && D.구역지정 && String(D.추진위) < String(D.구역지정) ? '<div class="jg99-old">옛 절차: 추진위가 구역 지정보다 먼저(2009년 법 개정 전)</div>' : '')   // 묶음 L121(구현17): 날짜는 그대로
       + '<div class="jg99-n">날짜는 확인된 단계만 적었어요(년.월).</div>'
       + (rows.length ? '<dl class="jg99-r">' + rows.map(([k, v]) => '<div><dt>' + k + '</dt><dd>' + v + '</dd></div>').join('') + '</dl>' : '')
       + jgGosi99c(e, sg, sc)

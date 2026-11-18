@@ -33,7 +33,7 @@
 // 묶음 L52·L53(83단계): 아래 정적 스크립트 주소의 ?v=와 이 표는 build_l52_versions.py가 빌드 때 실제 파일 해시로 채운다(손으로 쓰지 않음).
 // 표는 25평 seed 지연 로딩(loadSeed25)이 실행 중에 쓴다. EARLY_FLAGS_L52는 xlsx 태그(L53)를 쓸지 정하려고 주소 플래그를 먼저 읽는다
 // (applyBundlesFromUrl과 같은 규칙, 로컬 주소에서만: 값이 없으면 모두 켬, 있으면 적힌 묶음만 — 묶음 이름 'L' 포함).
-var ASSET_VERSIONS_L52 = /*L52_VERSIONS*/{"shared.js":"8e8ee813","seedComplexes.js":"7d7e417e","seedChips.js":"70c405ed","m2Series.js":"acc3bcaa","seedComplexes25.js":"25bb9b37","feedback-widget.js":"52cf1fae","rtAdjust.js":"9a91b8ce","station_walk.js":"d1744c95","school_elem.js":"e368c3b0","calc_map.js":"c8776974","map_light.js":"437b24a4","map_trade_idx.js":"c94b3db1"}/*END_L52_VERSIONS*/;
+var ASSET_VERSIONS_L52 = /*L52_VERSIONS*/{"shared.js":"8e8ee813","seedComplexes.js":"7d7e417e","seedChips.js":"70c405ed","m2Series.js":"acc3bcaa","seedComplexes25.js":"25bb9b37","feedback-widget.js":"52cf1fae","rtAdjust.js":"9a91b8ce","station_walk.js":"d1744c95","school_elem.js":"e368c3b0","calc_map.js":"6bffe9dd","map_light.js":"437b24a4","map_trade_idx.js":"c94b3db1"}/*END_L52_VERSIONS*/;
 var EARLY_FLAGS_L52 = (function(){
   var on = { L52: true, L53: true, L86: true, L88: true };   // L86(시세 이력 미루기)은 지도 중심 화면(L85)이 켜져 있을 때만 — L85를 끄면 여기 L86도 false
   try {
@@ -497,12 +497,16 @@ body.l85-map.l120-pick #mapSectionL84{top:92px;}
 .base-swap-l124{margin-left:6px;border:1px solid #CBD5E1;background:#fff;color:#1864AB;border-radius:999px;font:inherit;font-size:11.5px;font-weight:700;padding:2px 8px;cursor:pointer;white-space:nowrap;vertical-align:middle;}
 .base-swap-l124:hover{background:#E7F5FF;border-color:#74C0FC;}
 @media (max-width:767px){.base-swap-l124{min-height:32px;padding:4px 10px;}}
+/* 묶음 L121(구현17): 정보 카드 매매 칸 '실거래' 꼬리표 · 분양가 줄 '공공분양' 꼬리표 */
+.rtfb-l121,.pub-l121{display:inline-block;margin-left:4px;padding:0 6px;border-radius:999px;font-size:11px;font-weight:700;line-height:17px;vertical-align:1px;white-space:nowrap;}
+.rtfb-l121{background:#E7F5FF;color:#1864AB;border:1px solid #A5D8FF;}
+.pub-l121{background:#F3F0FF;color:#5F3DC4;border:1px solid #D0BFFF;}
 .map-head-l85 h1{font-size:15px;margin:0;white-space:nowrap;color:var(--ink);}
 .map-head-l85 .mh-tabs{display:flex;gap:4px;}
 .map-head-l85 .mh-tabs button{border:1px solid var(--border);background:var(--surface);color:var(--ink);font:inherit;font-size:13px;font-weight:700;padding:6px 10px;border-radius:999px;cursor:pointer;white-space:nowrap;min-height:34px;}
 .map-head-l85 .mh-tabs button.active{background:var(--accent);border-color:var(--accent);color:#fff;}
 .map-head-l85 .mh-links{margin-left:auto;display:flex;gap:4px;align-items:center;}
-@media (max-width:400px){ html.l112 .map-head-l85 .mh-tabs .tx2{display:none;} }   /* 묶음 L112: 폰 390·폴드 344에서는 '여러 단지'까지만 */
+@media (max-width:400px){ html.l112 .map-head-l85 .mh-tabs .tx2{display:none;} }   /* 묶음 L112: 폰 390·폴드 344에서는 짧게 — 묶음 L121(구현17): '📊 비교하기' */
 /* 묶음 L98B: 머리줄 이동 버튼은 🏠 초기화면 하나만(급지표·비례율·목록표·임장은 첫 화면에 있음) */
 html.l98b .map-head-l85 .mh-links a[href="급지표.html"], html.l98b .map-head-l85 .mh-links a[href="../rate-simulator/비례율_시뮬레이터.html"], html.l98b .map-head-l85 .mh-links a[href="../redevelopment-list/재개발_목록표.html"], html.l98b .map-head-l85 .mh-links a[href="../imjang/"],
 html.l98b .topbar-actions a[href="급지표.html"], html.l98b .topbar-actions a[href="../rate-simulator/비례율_시뮬레이터.html"], html.l98b .topbar-actions a[href^="../redevelopment-list/"], html.l98b .topbar-actions a[href^="../imjang/"]{display:none!important;}
@@ -1791,7 +1795,7 @@ body.l36 #baseLibSelect, body.l36 .lib-row:has(> #baseLibSelect){display:none !i
   <!-- 묶음 L85: 지도 중심 화면의 최소 머리줄(지도 화면에서만 보임) -->
   <div class="map-head-l85" id="mapHeadL85">
     <h1>저평가 단지 계산기</h1>
-    <div class="mh-tabs"><button type="button" data-l85-mode="map" class="active">🗺️ 지도</button><button type="button" data-l85-mode="multi">📊 여러 단지<span class="tx2"> 비교하기</span></button></div>
+    <div class="mh-tabs"><button type="button" data-l85-mode="map" class="active">🗺️ 지도</button><button type="button" data-l85-mode="multi">📊 <span class="tx2">여러 단지 </span>비교하기</button></div>
     <div class="mh-links">
       <button type="button" id="mapHeadGuideL85" hidden>❓<span class="tx"> 사용법</span></button>
       <a href="급지표.html">📋<span class="tx"> 급지표</span></a>
@@ -3174,9 +3178,9 @@ function seoulHistoricalAvg(){
 // 라이브는 주소 플래그를 읽지 않으므로 이 기본값이 그대로 동작한다.
 const BUNDLES = { A:false, B:false, C:false, D1:false, D2:false, D3:false, D4:false, E1:true, E2:false, E3:true, F1:true, F2:true, F3:true, F4:true, F5:true, F6:true,
   H1:false, H2:true, H3:true, H4:true, H5:true, H6:true, H7:true,
-  L1:true, L2:true, L3:true, L4:true, L5:true, L6:false, L7:true, L8:true, L9:true, L10:true, L11:true, L12:true, L13:true, L14:true, L15:true, L16:true, L17:true, L18:true, L19:true, L19B:true, L20:true, L22:true, L23:true, L24:true, L25:true, L26:true, L27:!!window.POOL_EXCLUDE_ON, L31:!!window.NEW_NAME_RULE_ON, L32:true, L33:true, L34:true, L37:true, L28:true, L38:true, L40:true, L39:true, L41:true, L42:true, L43:true, L44:true, L45:true, L46:true, L47:true, L49:true, L48:true, L50:true, L51:true, L52:true, L53:true, L54:true, L55:true, L56:true, L57:true, L58:true, L59:true, L59_DND:true, L59_INFOCARD:true, L59_STATION:true, L59_SCHOOL:true, L59_FAVSEARCH:true, L60:true, L60_REL:false, L60_WHY:false, L60_NOTE:true, L61:true, L64:true, L64_LINK:true, L64_NEWBUILD:false, L65:true, L69:true, L70:true, L71:true, L74:true, L75:true, L76:true, L77:true, L78:true, L79:true, L80:true, L81:true, L82:true, L84:true, L85:true, L85_CROSS:true, L85_LEFT:true, L85_INFO:true, L85_LBL:true, L85_FULL:true, L86:(typeof EARLY_FLAGS_L52 === 'undefined' || !!EARLY_FLAGS_L52.L86), L87:true, L88:true, L88_EMBED:true, L88_SHARE:true, L89:true, L84_RT:true, L84_SC:true, L91:true, L92:true, L93:true, L94:true, L95:true, L96:true, L97:true, L97B:true, L98:true, L98H:true, L98B:true, L35:true, L36:true, L30:true, L29:true, L29R:false, L90N:true, L90G:true, L98J:true, L99A:true, L99C:true, L99B:true, L101:true, L102:true, L102C:true, L103:true, L105:true, L105C:true, L105D:true, L105E:true, L106:true, L107:true, L108:true, L109:true, L111:true, L112:true, L113:true, L114:true, L115:true, L116:true, L117:true, L118:true, L119:false, L120:true, L122:true, L123:true, L124:true, K1:false, K2:true, K4:false };
+  L1:true, L2:true, L3:true, L4:true, L5:true, L6:false, L7:true, L8:true, L9:true, L10:true, L11:true, L12:true, L13:true, L14:true, L15:true, L16:true, L17:true, L18:true, L19:true, L19B:true, L20:true, L22:true, L23:true, L24:true, L25:true, L26:true, L27:!!window.POOL_EXCLUDE_ON, L31:!!window.NEW_NAME_RULE_ON, L32:true, L33:true, L34:true, L37:true, L28:true, L38:true, L40:true, L39:true, L41:true, L42:true, L43:true, L44:true, L45:true, L46:true, L47:true, L49:true, L48:true, L50:true, L51:true, L52:true, L53:true, L54:true, L55:true, L56:true, L57:true, L58:true, L59:true, L59_DND:true, L59_INFOCARD:true, L59_STATION:true, L59_SCHOOL:true, L59_FAVSEARCH:true, L60:true, L60_REL:false, L60_WHY:false, L60_NOTE:true, L61:true, L64:true, L64_LINK:true, L64_NEWBUILD:false, L65:true, L69:true, L70:true, L71:true, L74:true, L75:true, L76:true, L77:true, L78:true, L79:true, L80:true, L81:true, L82:true, L84:true, L85:true, L85_CROSS:true, L85_LEFT:true, L85_INFO:true, L85_LBL:true, L85_FULL:true, L86:(typeof EARLY_FLAGS_L52 === 'undefined' || !!EARLY_FLAGS_L52.L86), L87:true, L88:true, L88_EMBED:true, L88_SHARE:true, L89:true, L84_RT:true, L84_SC:true, L91:true, L92:true, L93:true, L94:true, L95:true, L96:true, L97:true, L97B:true, L98:true, L98H:true, L98B:true, L35:true, L36:true, L30:true, L29:true, L29R:false, L90N:true, L90G:true, L98J:true, L99A:true, L99C:true, L99B:true, L101:true, L102:true, L102C:true, L103:true, L105:true, L105C:true, L105D:true, L105E:true, L106:true, L107:true, L108:true, L109:true, L111:true, L112:true, L113:true, L114:true, L115:true, L116:true, L117:true, L118:true, L119:false, L120:true, L121:true, L122:true, L123:true, L124:true, K1:false, K2:true, K4:false };
 const BUNDLE_GROUPS = { D:['D1','D2','D3','D4'], E:['E1','E2','E3'], F:['F1','F2','F3','F4','F5','F6'], H:['H1','H2','H3','H4','H5','H6','H7'],
-  L:['L1','L2','L3','L4','L5','L6','L7','L8','L9','L10','L11','L12','L13','L14','L15','L16','L17','L18','L19','L19B','L20','L22','L23','L24','L25','L26','L27','L29','L30','L31','L32','L33','L34','L37','L35','L36','L28','L38','L40','L39','L41','L42','L43','L44','L45','L46','L47','L49','L48','L50','L51','L52','L53','L54','L55','L56','L57','L58','L59','L60','L61','L64','L65','L69','L70','L71','L74','L75','L76','L77','L78','L79','L80','L81','L82','L84','L85','L86','L87','L88','L89','L91','L92','L93','L94','L95','L96','L97','L97B','L98','L98H','L98B','L90N','L90G','L98J','L99A','L99C','L99B','L101','L102','L102C','L103','L105','L105C','L105D','L105E','L106','L107','L108','L109','L111','L112','L113','L114','L115','L116','L117','L118','L119','L120','L122','L123','L124'], K:['K1','K2','K4'] };
+  L:['L1','L2','L3','L4','L5','L6','L7','L8','L9','L10','L11','L12','L13','L14','L15','L16','L17','L18','L19','L19B','L20','L22','L23','L24','L25','L26','L27','L29','L30','L31','L32','L33','L34','L37','L35','L36','L28','L38','L40','L39','L41','L42','L43','L44','L45','L46','L47','L49','L48','L50','L51','L52','L53','L54','L55','L56','L57','L58','L59','L60','L61','L64','L65','L69','L70','L71','L74','L75','L76','L77','L78','L79','L80','L81','L82','L84','L85','L86','L87','L88','L89','L91','L92','L93','L94','L95','L96','L97','L97B','L98','L98H','L98B','L90N','L90G','L98J','L99A','L99C','L99B','L101','L102','L102C','L103','L105','L105C','L105D','L105E','L106','L107','L108','L109','L111','L112','L113','L114','L115','L116','L117','L118','L119','L120','L121','L122','L123','L124'], K:['K1','K2','K4'] };
 // 묶음 L46(69단계): 그래프 점선 모양 통일 — 모든 점선을 "선도단지 대비 적정가" 선(FAIR_LINE_STYLE.borderDash)과 같은 긴 점선으로.
 // 촘촘한 점("좁쌀")·점-선 섞인 패턴을 없앤다. 새 점선은 항상 dashL46(예전 값)을 쓴다 — L46을 끄면 예전 값 그대로.
 const DASH_L46 = [5, 4];
@@ -12857,6 +12861,7 @@ function parkingRowL102Old(id, name){
   if (!BUNDLES.L102 || l99aStateL99A !== 'loaded' || !id || id[0] === '_') return null;
   const P = L99A.parking; if (!P || !Object.prototype.hasOwnProperty.call(P, id)) return null;
   const e = P[id]; if (!e || e.코드 === 'N' || e.세대당 == null || e.지상 == null || e.지하 == null) return null;
+  if (BUNDLES.L121 && Number(e.지상) === 0 && Number(e.지하) === 0) return null;   // 묶음 L121: K-apt 주차 칸이 비어 0으로 들어간 단지 = 0대가 아니라 빈칸
   const n = (v) => Number(v).toLocaleString('ko-KR'), lab = parkingLabelL102(e), B = parkingBaseL102();
   const txt = '세대당 ' + r2L102(e.세대당) + '대 (지하 ' + n(e.지하) + ' · 지상 ' + n(e.지상) + ')' + (lab ? ' · ' + lab : '');
   const body = [], ref = [], yr = B.year != null ? B.year + '년 이후 ' : '';
@@ -12867,7 +12872,7 @@ function parkingRowL102Old(id, name){
   ref.push('계산 · (지상+지하) ÷ 세대수');
   if (B.year != null && B.cnt != null) ref.push('비교 · ' + B.year + '년 이후 준공, 수도권 ' + n(B.cnt) + '곳');
   if (B.year != null && e.승인연도 != null && e.승인연도 < B.year) ref.push('구축은 설계 기준이 달라 낮게 나옴');
-  ref.push('출처 · K-apt');
+  ref.push('출처 · ' + (BUNDLES.L121 && e.출처 ? esc(e.출처) : 'K-apt'));   // 묶음 L121: 건축물대장으로 채운 단지는 그 출처
   const html = '<span class="info-tip-html p102-t">' + body.map(x => '<div class="p102-b">' + x + '</div>').join('') + '<hr class="p102-hr">' + ref.map(x => '<div class="p102-r">' + x + '</div>').join('') + '</span>';
   return [txt, '<span class="l102-l">' + esc(txt) + ' <span class="info-icon' + (BUNDLES.L17 ? ' tip-unified' : '') + '" tabindex="0">' + html + 'ⓘ</span></span>'];
 }
@@ -12882,6 +12887,7 @@ function parkingRowL102(id, name){
   const P = L99A.parking, M = P && P._meta, segs = M && M.구간별 && Array.isArray(M.구간별.구간) ? M.구간별.구간 : null;
   const e = P && Object.prototype.hasOwnProperty.call(P, id) ? P[id] : null;
   if (!segs || !e || e.코드 === 'N' || e.세대당 == null || e.지상 == null || e.지하 == null || !e.구간) return parkingRowL102Old(id, name);
+  if (BUNDLES.L121 && Number(e.지상) === 0 && Number(e.지하) === 0) return null;   // 묶음 L121: 0·0 = 빈칸
   const seg = segs.find(s => s.구간 === e.구간); if (!seg || seg.평균 == null) return parkingRowL102Old(id, name);
   const n = (v) => Number(v).toLocaleString('ko-KR'), lab = parkingLabelL102(e), g = L102_GRADE[e.등급];
   const txt = '세대당 ' + r2L102(e.세대당) + '대 (지하 ' + n(e.지하) + ' · 지상 ' + n(e.지상) + ')' + (lab ? ' · ' + lab : '');
@@ -12895,7 +12901,7 @@ function parkingRowL102(id, name){
   if (dec && dec.평균 != null && dec.곳수 != null && dec.곳수 >= L102C_DEC_MIN) ref.push('같은 연대(' + esc(dec.연대) + ' 준공) 평균 ' + r2L102(dec.평균) + ' · ' + n(dec.곳수) + '곳');
   ref.push('계산 · (지상+지하) ÷ 세대수');
   if (seg.곳수 != null) ref.push('비교 · 같은 준공 구간, 수도권 ' + n(seg.곳수) + '곳');
-  ref.push('출처 · K-apt');
+  ref.push('출처 · ' + (BUNDLES.L121 && e.출처 ? esc(e.출처) : 'K-apt'));   // 묶음 L121: 건축물대장으로 채운 단지는 그 출처
   const html = '<span class="info-tip-html p102-t">' + body.map(x => '<div class="p102-b">' + x + '</div>').join('') + '<hr class="p102-hr">' + ref.map(x => '<div class="p102-r">' + x + '</div>').join('') + '</span>';
   return [txt, '<span class="l102-l">' + esc(txt) + ' <span class="info-icon' + (BUNDLES.L17 ? ' tip-unified' : '') + '" tabindex="0">' + html + 'ⓘ</span></span>'];
 }
@@ -12907,11 +12913,12 @@ function saleOfL99A(id){
 }
 const SALE_SUS_URL_L103 = '지도자료_202611/분양_의심칸_1115.json';   // 큐7: 1115(전체/연월, 1114b 대체)   // 묶음 L103: 분양 의심칸 파일 주소(분석 탭 분양_의심칸_1113.json 도착 후 '지도자료_202611/분양_의심칸_1113.json')
 if (BUNDLES.L103 && SALE_SUS_URL_L103) L99A_URL.saleSus = SALE_SUS_URL_L103;
-if (BUNDLES.L116) L99A_URL.salePrice = '지도자료_202611/분양가_대표평형_1116g8.json';   // 묶음 L116(구현9): 대표 평형 세대당 분양가(못 받으면 그 줄만 빠짐)
+if (BUNDLES.L116) L99A_URL.salePrice = '지도자료_202611/분양가_대표평형_1116g8.json';
+if (BUNDLES.L121){ if (BUNDLES.L116) L99A_URL.salePrice = '지도자료_202611/분양가_대표평형_1118g14.json'; L99A_URL.bunyang = '지도자료_202611/bunyang_l99_1118g14.json'; if (BUNDLES.L102C) L99A_URL.parking = '지도자료_202611/parking_l102d_1118g14.json'; }   // 묶음 L121(구현17): 청량리 키 = seed id · 서초포레스타2 공공분양 · 반포센트레빌 주차(건축물대장)   // 묶음 L116(구현9): 대표 평형 세대당 분양가(못 받으면 그 줄만 빠짐)
 // 묶음 L116: 분양 말풍선 '분양가' 줄 — "84형 4.9억 (청약홈)" / "84형 약 5.6억 (추정)" / "84형 6.8억 (기사)" + 3.3㎡당 값 작은 글씨. 자료 없으면 줄 없음
 function salePriceRowL116(id, row){
   const P = L99A.salePrice, v = P && id && id[0] !== '_' && Object.prototype.hasOwnProperty.call(P, id) ? P[id] : null; if (!v || v.값 == null) return '';
-  const est = v.종류 === '추정', main = esc(v.형) + '형 ' + (est ? '약 ' : '') + fmtWonL99A(v.값) + ' (' + esc(v.종류) + ')';
+  const est = v.종류 === '추정', main = esc(v.형) + '형 ' + (est ? '약 ' : '') + fmtWonL99A(v.값) + ' (' + esc(v.종류) + ')' + (BUNDLES.L121 && v.공공분양 ? '<span class="pub-l121" title="공공분양 단지라 주변 민간 분양가와 직접 비교하지 않아요">공공분양</span>' : '');   // 묶음 L121
   const pp = v.평당 != null ? '3.3㎡당 ' + Number(v.평당).toLocaleString('ko-KR') + '만' + (v.평당종류 && v.평당종류 !== v.종류 ? ' (' + esc(v.평당종류) + ')' : '') : '';
   const note = est ? '추정 = 기사의 3.3㎡당 평균 분양가 × ' + esc(v.형) + '형 공급면적(가정)' : v.종류 === '청약홈' ? '모집공고 주택형 최고 분양가(세대당)' : '기사에 나온 세대당 분양가';
   return row('분양가', main + (pp ? ' <small>' + pp + '</small>' : '') + '<div class="si99-b">' + note + '</div>');
@@ -13008,6 +13015,13 @@ function academyRowL99A(id){
 let _diagInfoOnLastL59 = null;
 function diagInfoCardOnL59(){ return !!(BUNDLES.L59 && BUNDLES.L59_INFOCARD); }
 // 진단 화면 정보 카드 — 즐겨찾기 카드와 같은 값(favInfoL59·seed id), 값이 없는 줄은 그리지 않는다.
+// 묶음 L121(구현17, 분석 10번 1117): KB 매매 시세가 비어 있는 3곳 — 정보 카드 매매 칸에만 보여 줌(진단·적정가·판정 계산에는 쓰지 않음)
+//  동부삼환_60 = 실거래 '동부'(오산 원동 807, 전용 59.931㎡) — 실거래 대조표(v5) KB 키 '원동|807'·전용 59.93㎡·1996년으로 같은 단지 확인
+const SALE_FB_L121 = {
+  '동부삼환_60': { t: '실거래 중앙값 1억9,700만원(2026-08~10, 11건)', rt: true, tip: 'KB 시세가 없어 국토교통부 실거래가(같은 단지 원동 807 · 전용 59.93㎡, 중개거래, 직거래·해제 제외) 최근 3개월 중앙값을 보여 줘요. 판정·계산에는 쓰지 않아요.' },
+  '미성-미륭-삼호3차-과거시세': { t: '실거래(삼호3차 59㎡) 중앙값 11억8,500만원(7건)', rt: true, tip: 'KB 시세가 없어 국토교통부 실거래가 2026-08~10 중개거래 중앙값을 보여 줘요. 세 단지 중 전용 59.22㎡ 거래는 삼호3차에만 있어요. 판정·계산에는 쓰지 않아요.' },
+  '주공-군자15단지-안산시-단원구-선부동': { t: 'KB 시세 없음', rt: false, tip: 'KB 매매 시세가 비어 있어요. 최근 3개월 실거래가 1건뿐이라 값을 적지 않았어요.' }
+};
 function diagInfoCardHtmlL59(ref){
   const seed = ref && ref.id ? seedEntryById(ref.id) : null;
   if (!seed) return '';
@@ -13015,7 +13029,8 @@ function diagInfoCardHtmlL59(ref){
   const money = v => v == null ? null : fmtEok(v);
   const age = seed.builtYear != null ? ageText(complexAge(seed.builtYear), seed.builtYear) : null;
   let rows = [
-    ['매매', info.saleText || money(info.sale), info.ym ? 'KB 시세 '+fmtYm(info.ym)+' 기준(진단 결론 현재가와 같은 기준)' : ''],
+    ((BUNDLES.L121 && !(info.saleText || info.sale != null) && SALE_FB_L121[ref.id]) ? (fb => ['매매', fb.t, fb.tip, false, esc(fb.t) + (fb.rt ? '<span class="rtfb-l121">실거래</span>' : '')])(SALE_FB_L121[ref.id])   // 묶음 L121: KB 빈칸 3곳 표시값
+      : ['매매', info.saleText || money(info.sale), info.ym ? 'KB 시세 '+fmtYm(info.ym)+' 기준(진단 결론 현재가와 같은 기준)' : '']),
     ['전세', money(info.jeonse)],
     ['전세가율', info.jr != null ? fmtPct(info.jr, 1) : null],
     ['연식', age],
