@@ -746,6 +746,21 @@
   .pk120-bar .c .nm small{color:#D9480F;font-size:11px;font-weight:700}
   .pk120-bar .c .x{border:0;background:none;cursor:pointer;font-size:12px;color:#64748B;padding:1px 7px;border-radius:999px}.pk120-bar .c .x:hover{background:#FFE8CC}
   @media (max-width:767px){ .pk120-bar{left:10px;right:94px;transform:none;width:auto;min-width:0;max-width:none;bottom:64px;font-size:12.5px} .pk120-bar .chips{max-height:18vh} .pk120-bar .n small{display:none} .pk120-bar .go{padding:7px 10px} }
+  /* 묶음 L122(구현18): 선택 목록 줄 검색창 — PC는 줄 왼쪽 끝, 폰은 칩 위 한 줄. 후보는 위로 펼침(줄이 지도 맨 아래) */
+  .pk120-bar.l122 .r{flex-wrap:nowrap}
+  .pk120-bar.l122 .sw{position:relative;flex:0 0 190px;min-width:0}
+  .pk120-bar.l122.z .sw{flex:1 1 220px}
+  .pk120-bar.l122 .q{width:100%;box-sizing:border-box;border:1px solid #FFC078;border-radius:9px;padding:6px 9px;font:inherit;font-size:13px;background:#FFF9F2;color:#1F2937;outline:none}
+  .pk120-bar.l122 .q:focus{border-color:#E8590C;background:#fff}
+  .pk120-bar.l122 .ac{position:absolute;left:0;bottom:calc(100% + 6px);width:max(100%,260px);max-width:calc(100vw - 40px);max-height:min(40vh,280px);overflow:auto;background:#fff;border:1px solid #E5E7EB;border-radius:10px;box-shadow:0 6px 18px rgba(0,0,0,.2);padding:4px;box-sizing:border-box;z-index:2}
+  .pk120-bar.l122 .ac[hidden]{display:none}
+  .pk120-bar.l122 .ac .it{display:block;width:100%;text-align:left;border:0;background:none;padding:7px 9px;border-radius:7px;font:inherit;font-size:13px;color:#1F2937;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .pk120-bar.l122 .ac .it.on,.pk120-bar.l122 .ac .it:hover{background:#FFF4E6}
+  .pk120-bar.l122 .ac small{color:#6B7280;font-size:11.5px}.pk120-bar.l122 .ac small.dn{color:#D9480F;font-weight:700}
+  .pk120-bar.l122 .ac .em{padding:8px 9px;font-size:12.5px;color:#6B7280}
+  .pk120-bar.l122 .go[hidden],.pk120-bar.l122 .chips[hidden]{display:none}
+  .pk120-bar.l122.z{min-width:240px}
+  @media (max-width:767px){ .pk120-bar.l122 .r{flex-wrap:wrap} .pk120-bar.l122 .sw,.pk120-bar.l122.z .sw{flex:1 1 100%} .pk120-bar.l122 .ac{width:100%;max-width:none;max-height:min(34vh,240px)} }
   .cm84-ph .zt{display:none}
   /* 묶음 L87-5: 쌍둥이 창을 열면 패널을 넓게(PC는 패널 옆으로, 폰은 전체 화면) */
   .cm84-panel.twv{width:min(1180px,calc(100% - 80px))!important;max-width:none!important;z-index:600}
@@ -1010,7 +1025,7 @@
       }
       boxes.push(bx);
       const m = new NV.Marker({ map, position: new NV.LatLng(it.lat, it.lng), zIndex: it === sel ? 300 : pkS.has(it.id) ? 200 : 60, title: l96() ? '' : it.name, icon: { content: bubble(it, f, dt, ii), anchor: new NV.Point(0, 0) } });
-      NV.Event.addListener(m, 'click', (ev) => msTake98b(ev, m.getPosition()) || (pkTap120(it, f.p), openPanel(it, l89() ? f.p : undefined)));   // 묶음 L89: 고른 평형으로 연다 · 묶음 L120: 선택 모드면 누르는 즉시 선택 + 상세
+      NV.Event.addListener(m, 'click', (ev) => msTake98b(ev, m.getPosition()) || ((l122() && pk120()) ? pkClick122(it, f.p) : (pkTap120(it, f.p), openPanel(it, l89() ? f.p : undefined))));   /* 묶음 L122: 선택 모드는 선택·해제만 */   // 묶음 L89: 고른 평형으로 연다 · 묶음 L120: 선택 모드면 누르는 즉시 선택 + 상세
       marks.push(m);
     }
     window.CALC_MAP_L84.last = { zoom: zm, shown: marks.length, info, flt: fltCount(), ms: Math.round(performance.now() - t0), W: mapEl.clientWidth, H: mapEl.clientHeight };
@@ -1686,9 +1701,10 @@
     if (!pk120() || pkIdx120(it.id) >= 0) return;
     if (window.PICK_L120.add(it.id, p) === 'full') pkMsg120('최대 ' + window.PICK_L120.max + '곳까지 선택할 수 있어요');
   }
-  function pkMsg120(t){ pkRender120(); const m = mapEl && mapEl.querySelector('.pk120-bar .msg'); if (!m) return; m.textContent = t; m.hidden = false; clearTimeout(pkMsgT120); pkMsgT120 = setTimeout(() => { m.hidden = true; }, 3000); }
+  function pkMsg120(t, ms){ pkRender120(); const m = mapEl && mapEl.querySelector('.pk120-bar .msg'); if (!m) return; m.textContent = t; m.hidden = false; clearTimeout(pkMsgT120); pkMsgT120 = setTimeout(() => { m.hidden = true; }, ms || 3000); }
   function pkName120(id){ const it = itemsById.get(id); let sd = null; try { sd = typeof seedEntryById === 'function' ? seedEntryById(id) : null; } catch (e) {} return (it && it.name) || (sd && sd.name) || id; }
   function pkRender120(){
+    if (l122()) return pkRender122();   // 묶음 L122
     if (!mapEl || !l120()) return; let bar = mapEl.querySelector('.pk120-bar');
     if (!bar){
       mapEl.insertAdjacentHTML('beforeend', '<div class="pk120-bar" hidden role="region" aria-label="선택한 단지"><div class="r"><span class="n"></span><button type="button" class="go">비교 보기 →</button></div><span class="msg" hidden role="status"></span><div class="chips"></div></div>');
@@ -1724,6 +1740,65 @@
     if (root.hidden || !root.offsetHeight){ return; }
     drawCx();
     setTimeout(() => { if (!map || root.hidden || !root.offsetHeight) return; try { mapEl.style.width = ''; mapEl.style.height = ''; } catch (e) {} resize(); }, 40);   // 붙어 있던 옛 크기를 지우고 지금 칸 크기로
+  }
+  // ---- 묶음 L122(구현18): [지도에서 선택] 말풍선 = 선택·해제만, 선택 목록 줄 검색창(단지 이름으로 추가) ----
+  const l122 = () => { try { return !!BUNDLES.L122; } catch (e) { return false; } };
+  const pickP122 = (it, p) => { if (p === 25 || p === 34) return p; const f = it ? shownInfo(it) : null; return f && f.p === 25 ? 25 : 34; };   // 지도에서 누를 때와 같은 기본 평형
+  function pkClick122(it, p){
+    if (pkIdx120(it.id) >= 0){ window.PICK_L120.remove(it.id); return; }   // 다시 누르면 해제(번호 다시 매김)
+    if (window.PICK_L120.add(it.id, pickP122(it, p)) === 'full') pkMsg120('최대 ' + window.PICK_L120.max + '곳까지 선택할 수 있어요', 3000);
+  }
+  function pkAddById122(id){   // 검색창에서 고름: 바로 추가 + 지도만 그 단지로(확대 단계·상세 그대로)
+    if (pkIdx120(id) >= 0){ pkMsg120('이미 선택한 단지예요', 2000); return false; }
+    const it = itemsById.get(id), r = window.PICK_L120.add(id, pickP122(it));
+    if (r === 'full'){ pkMsg120('최대 ' + window.PICK_L120.max + '곳까지 선택할 수 있어요', 3000); return false; }
+    if (it && map){ try { map.panTo(new NV.LatLng(it.lat, it.lng)); } catch (e) {} }
+    return r === 'ok';
+  }
+  let pkAcSel122 = -1, pkAcList122 = [];
+  function pkAc122(bar, show){
+    const q = bar.querySelector('.q'), ac = bar.querySelector('.ac'); if (!q || !ac) return;
+    const v = q.value.trim(); let res = { list: [] }; try { res = window.PICK_L120.search ? window.PICK_L120.search(v, 8) : res; } catch (e) {}
+    pkAcList122 = res.list || []; pkAcSel122 = pkAcList122.length ? 0 : -1;
+    if (!show || !v){ ac.hidden = true; ac.innerHTML = ''; return; }
+    ac.innerHTML = res.loading ? '<div class="em">단지 목록을 받는 중이에요…</div>' : !pkAcList122.length ? '<div class="em">"' + esc(v) + '"에 맞는 단지가 없어요</div>'
+      : pkAcList122.map((x, i) => '<button type="button" class="it' + (i === pkAcSel122 ? ' on' : '') + '" data-pk122="' + esc(x.id) + '">' + esc(x.name) + (x.sub ? ' <small>' + esc(x.sub) + '</small>' : '') + (pkIdx120(x.id) >= 0 ? ' <small class="dn">선택됨</small>' : '') + '</button>').join('');
+    ac.hidden = false;
+  }
+  function pkPick122(bar, id){ const q = bar.querySelector('.q'); pkAddById122(id); q.value = ''; pkAc122(bar, false); }
+  function pkRender122(){
+    if (!mapEl || !l120()) return; let bar = mapEl.querySelector('.pk120-bar');
+    if (!bar){
+      mapEl.insertAdjacentHTML('beforeend', '<div class="pk120-bar l122" hidden role="region" aria-label="선택한 단지"><div class="r"><div class="sw"><input class="q" type="search" placeholder="단지 이름으로 추가" autocomplete="off" aria-label="단지 이름으로 추가"><div class="ac" hidden role="listbox"></div></div><span class="n"></span><button type="button" class="go">비교 보기 →</button></div><span class="msg" hidden role="status"></span><div class="chips"></div></div>');
+      bar = mapEl.querySelector('.pk120-bar');
+      bar.querySelector('.go').onclick = () => { try { window.PICK_L120.compare(); } catch (e) {} };
+      bar.querySelector('.chips').addEventListener('click', e => {
+        const x = e.target.closest('[data-pk120x]'); if (x){ e.stopPropagation(); window.PICK_L120.remove(x.dataset.pk120x); return; }
+        const c = e.target.closest('[data-pk120]'); if (c){ e.stopPropagation(); openById(c.dataset.pk120, Number(c.dataset.p) === 25 ? 25 : undefined); }   // 칩 이름 = 그 단지 상세(여기서만 상세)
+      });
+      const q = bar.querySelector('.q'), ac = bar.querySelector('.ac');
+      q.addEventListener('input', () => pkAc122(bar, true));
+      q.addEventListener('focus', () => { if (q.value.trim()) pkAc122(bar, true); });
+      q.addEventListener('keydown', e => {
+        if (e.key === 'Enter'){ e.preventDefault(); if (!pkAcList122.length) pkAc122(bar, true); const x = pkAcList122[Math.max(0, pkAcSel122)]; if (x) pkPick122(bar, x.id); return; }
+        if (e.key === 'Escape'){ q.value = ''; pkAc122(bar, false); return; }
+        if ((e.key === 'ArrowDown' || e.key === 'ArrowUp') && pkAcList122.length){ e.preventDefault(); pkAcSel122 = (pkAcSel122 + (e.key === 'ArrowDown' ? 1 : -1) + pkAcList122.length) % pkAcList122.length; ac.querySelectorAll('.it').forEach((b, i) => b.classList.toggle('on', i === pkAcSel122)); }
+      });
+      ac.addEventListener('mousedown', e => e.preventDefault());   // 고르기 전에 검색창이 포커스를 잃어 목록이 닫히지 않게
+      ac.addEventListener('click', e => { const b = e.target.closest('[data-pk122]'); if (b){ e.stopPropagation(); pkPick122(bar, b.dataset.pk122); } });
+      q.addEventListener('blur', () => setTimeout(() => { if (document.activeElement !== q) pkAc122(bar, false); }, 150));
+      mapEl.addEventListener('scroll', () => { if (mapEl.scrollTop || mapEl.scrollLeft){ mapEl.scrollTop = 0; mapEl.scrollLeft = 0; } }, { passive: true });   // 검색창 포커스·후보 목록 때 브라우저가 지도 칸을 스크롤해 지도가 밀리던 것 막기(지도 칸은 스크롤하지 않음)
+      ['click', 'mousedown', 'touchstart', 'dblclick', 'wheel', 'keydown'].forEach(ev => bar.addEventListener(ev, e => e.stopPropagation(), { passive: true }));   // 목록 줄을 눌러도 지도가 움직이거나 닫히지 않게
+    }
+    const on = pk120(), L = on ? pkL120() : [];
+    bar.hidden = !on;   // 선택 모드면 0곳이어도 검색창 줄은 보임
+    bar.classList.toggle('z', !L.length);
+    bar.querySelector('.n').innerHTML = L.length ? '<b>선택 ' + L.length + '곳</b><small>1번이 기준 단지 · 최대 ' + window.PICK_L120.max + '곳</small>' : '';
+    bar.querySelector('.go').hidden = !L.length;
+    const ch = bar.querySelector('.chips'); ch.hidden = !L.length;
+    ch.innerHTML = L.map((x, i) => { const nm = pkName120(x.id) + (x.p === 25 ? '(25평)' : ''); return '<span class="c"><button type="button" class="nm" data-pk120="' + esc(x.id) + '" data-p="' + x.p + '" title="' + esc(nm) + ' 상세 보기"><i>' + (i + 1) + '</i>' + esc(nm) + (i ? '' : '<small>기준</small>') + '</button><button type="button" class="x" data-pk120x="' + esc(x.id) + '" aria-label="' + esc(nm) + ' 선택 해제">✕</button></span>'; }).join('');
+    pkHeadUpd120();
+    window.CALC_MAP_L84.pk120 = L.map(x => x.id);
   }
   // 묶음 L87-3: 단지 패널 머리 — 단지명 하나(조금 크게) + 바로 옆 [비교 단지 추가], 폰은 글자 없는 작은 버튼으로 한 줄
   // 묶음 L98B(L98i 임대 경고 배지, 11-09): 지도 1차 뒤 계산기 안 이름 칸(배지 포함)이 숨어 배지가 안 보이던 것 → 패널 머리 이름 옆에 같은 함수(rentalHeavyChip, 같은 기준·색·문구)로 붙임
