@@ -852,11 +852,13 @@ window.SBJListLink = (function () {
   function etaOf66(r){ const E = window.RT_ETA66; return E && r ? E[r.id] : null; }
   function etaGroup66(g){ const E = window.RT_ETA66; if (!E || !g || !Array.isArray(g.subs)) return null; const xs = g.subs.map((s) => E[s.id]).filter((x) => x && x.k === 'eta'); if (!xs.length) return null;
     const ys = xs.map((x) => x.y), lo = Math.min.apply(null, ys), hi = Math.max.apply(null, ys); return { k: 'eta', y: lo, y2: hi, c: xs.every((x) => x.c === '보통') ? '보통' : '낮음', tip: '하위 구역 ' + xs.length + '곳의 예상 준공 연도 범위예요. 각 하위 구역은 자세히 보기에서 확인하세요.' }; }
-  function etaHtml66(r){ const e = r && r.isGroup ? etaGroup66(r) : etaOf66(r); if (!e) return '';
+  function etaHtml66(r){ const e = r && r.isGroup ? etaGroup66(r) : etaOf66(r); if (!e) return (r && r.isGroup) ? '<span class="rt-eta lo">예상 준공 자료 부족</span>' : '';
+    if (e.k === 'none') return '<span class="rt-eta lo" tabindex="0" data-rt-tip="' + esc(e.tip).replace(/"/g, '&quot;') + '">예상 준공 자료 부족</span>';
     if (e.k === 'done') return '<span class="rt-eta dn" tabindex="0" data-rt-tip="' + esc(e.tip) + '">준공</span>';
     const yr = e.y2 && e.y2 !== e.y ? e.y + '~' + e.y2 + '년' : e.y + '년';
-    return '<span class="rt-eta' + (e.c === '낮음' ? ' lo' : '') + '" tabindex="0" data-rt-tip="' + esc(e.tip).replace(/"/g, '&quot;') + '">예상 준공 ' + yr + (e.c === '낮음' ? '<small>낮은 신뢰</small>' : '') + '</span>'; }
+    return '<span class="rt-eta' + (e.c === '낮음' ? ' lo' : '') + '" tabindex="0" data-rt-tip="' + esc(e.tip).replace(/"/g, '&quot;') + '">예상 준공 ' + yr + '<small>추정</small>' + '</span>'; }
   function etaDetail66(r){ const e = etaOf66(r); if (!e) return '';
+    if (e.k === 'none') return '<div class="rt-eta-d" data-rt-eta><span style="color:#8593A3">예상 준공 자료 부족</span> · ' + esc(String(e.tip).replace('예상 준공 자료 부족: ', '')) + '</div>';
     if (e.k === 'done') return '<div class="rt-eta-d"><b>준공</b> · 이미 준공(입주)한 구역이에요.</div>';
     const L = String(e.tip).split('\n'); const steps = L.filter((x) => x.indexOf('· ') === 0).map((x) => '<li>' + esc(x) + '</li>').join(''); const memo = L.filter((x) => x.indexOf('※') === 0).join(' '); const basis = L.filter((x) => x.charAt(0) === '(').join(' ');
     return '<div class="rt-eta-d" data-rt-eta><b>예상 준공 ' + e.y + '년 ' + e.m + '월</b> · 신뢰 ' + esc(e.c) + ' <span style="color:#8593A3">(추정 단계 ' + e.n + '개)</span><ul class="rt-eta-s">' + steps + '</ul>' + (memo ? '<div class="rt-eta-n">' + esc(memo) + '</div>' : '') + '<div class="rt-eta-n">' + esc(basis) + ' 대략의 시기이며 실제와 크게 다를 수 있어요.</div></div>'; }
