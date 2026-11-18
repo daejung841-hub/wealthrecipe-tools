@@ -489,6 +489,10 @@ body.l120-pick .pick-tabs-l120 button{padding:5px 12px;font-size:13.5px;}
 body.l85-map.l120-pick #mapSectionL84{top:92px;}
 .pick-strip-l120{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:0 0 12px;padding:8px 12px;border-radius:10px;background:#FFF4E6;border:1px solid #FFD8A8;color:#7C2D12;font-size:13.5px;}
 .pick-strip-l120 button{font:inherit;font-size:13px;font-weight:700;border:1px solid #E8590C;background:#fff;color:#D9480F;border-radius:8px;padding:4px 10px;cursor:pointer;}
+/* 묶음 L123(구현18): 채운 뒤 '이전 입력으로 되돌리기' 작은 글씨(5초) */
+.undo-l123{display:flex;align-items:center;gap:8px;margin:0 0 10px;font-size:12.5px;color:var(--ink-muted);}
+.undo-l123[hidden]{display:none!important;}
+.undo-l123 button{font:inherit;font-size:12.5px;font-weight:700;border:0;background:none;color:#1864AB;text-decoration:underline;cursor:pointer;padding:2px 0;}
 .map-head-l85 h1{font-size:15px;margin:0;white-space:nowrap;color:var(--ink);}
 .map-head-l85 .mh-tabs{display:flex;gap:4px;}
 .map-head-l85 .mh-tabs button{border:1px solid var(--border);background:var(--surface);color:var(--ink);font:inherit;font-size:13px;font-weight:700;padding:6px 10px;border-radius:999px;cursor:pointer;white-space:nowrap;min-height:34px;}
@@ -3166,9 +3170,9 @@ function seoulHistoricalAvg(){
 // 라이브는 주소 플래그를 읽지 않으므로 이 기본값이 그대로 동작한다.
 const BUNDLES = { A:false, B:false, C:false, D1:false, D2:false, D3:false, D4:false, E1:true, E2:false, E3:true, F1:true, F2:true, F3:true, F4:true, F5:true, F6:true,
   H1:false, H2:true, H3:true, H4:true, H5:true, H6:true, H7:true,
-  L1:true, L2:true, L3:true, L4:true, L5:true, L6:false, L7:true, L8:true, L9:true, L10:true, L11:true, L12:true, L13:true, L14:true, L15:true, L16:true, L17:true, L18:true, L19:true, L19B:true, L20:true, L22:true, L23:true, L24:true, L25:true, L26:true, L27:!!window.POOL_EXCLUDE_ON, L31:!!window.NEW_NAME_RULE_ON, L32:true, L33:true, L34:true, L37:true, L28:true, L38:true, L40:true, L39:true, L41:true, L42:true, L43:true, L44:true, L45:true, L46:true, L47:true, L49:true, L48:true, L50:true, L51:true, L52:true, L53:true, L54:true, L55:true, L56:true, L57:true, L58:true, L59:true, L59_DND:true, L59_INFOCARD:true, L59_STATION:true, L59_SCHOOL:true, L59_FAVSEARCH:true, L60:true, L60_REL:false, L60_WHY:false, L60_NOTE:true, L61:true, L64:true, L64_LINK:true, L64_NEWBUILD:false, L65:true, L69:true, L70:true, L71:true, L74:true, L75:true, L76:true, L77:true, L78:true, L79:true, L80:true, L81:true, L82:true, L84:true, L85:true, L85_CROSS:true, L85_LEFT:true, L85_INFO:true, L85_LBL:true, L85_FULL:true, L86:(typeof EARLY_FLAGS_L52 === 'undefined' || !!EARLY_FLAGS_L52.L86), L87:true, L88:true, L88_EMBED:true, L88_SHARE:true, L89:true, L84_RT:true, L84_SC:true, L91:true, L92:true, L93:true, L94:true, L95:true, L96:true, L97:true, L97B:true, L98:true, L98H:true, L98B:true, L35:true, L36:true, L30:true, L29:true, L29R:false, L90N:true, L90G:true, L98J:true, L99A:true, L99C:true, L99B:true, L101:true, L102:true, L102C:true, L103:true, L105:true, L105C:true, L105D:true, L105E:true, L106:true, L107:true, L108:true, L109:true, L111:true, L112:true, L113:true, L114:true, L115:true, L116:true, L117:true, L118:true, L119:false, L120:true, L122:true, K1:false, K2:true, K4:false };
+  L1:true, L2:true, L3:true, L4:true, L5:true, L6:false, L7:true, L8:true, L9:true, L10:true, L11:true, L12:true, L13:true, L14:true, L15:true, L16:true, L17:true, L18:true, L19:true, L19B:true, L20:true, L22:true, L23:true, L24:true, L25:true, L26:true, L27:!!window.POOL_EXCLUDE_ON, L31:!!window.NEW_NAME_RULE_ON, L32:true, L33:true, L34:true, L37:true, L28:true, L38:true, L40:true, L39:true, L41:true, L42:true, L43:true, L44:true, L45:true, L46:true, L47:true, L49:true, L48:true, L50:true, L51:true, L52:true, L53:true, L54:true, L55:true, L56:true, L57:true, L58:true, L59:true, L59_DND:true, L59_INFOCARD:true, L59_STATION:true, L59_SCHOOL:true, L59_FAVSEARCH:true, L60:true, L60_REL:false, L60_WHY:false, L60_NOTE:true, L61:true, L64:true, L64_LINK:true, L64_NEWBUILD:false, L65:true, L69:true, L70:true, L71:true, L74:true, L75:true, L76:true, L77:true, L78:true, L79:true, L80:true, L81:true, L82:true, L84:true, L85:true, L85_CROSS:true, L85_LEFT:true, L85_INFO:true, L85_LBL:true, L85_FULL:true, L86:(typeof EARLY_FLAGS_L52 === 'undefined' || !!EARLY_FLAGS_L52.L86), L87:true, L88:true, L88_EMBED:true, L88_SHARE:true, L89:true, L84_RT:true, L84_SC:true, L91:true, L92:true, L93:true, L94:true, L95:true, L96:true, L97:true, L97B:true, L98:true, L98H:true, L98B:true, L35:true, L36:true, L30:true, L29:true, L29R:false, L90N:true, L90G:true, L98J:true, L99A:true, L99C:true, L99B:true, L101:true, L102:true, L102C:true, L103:true, L105:true, L105C:true, L105D:true, L105E:true, L106:true, L107:true, L108:true, L109:true, L111:true, L112:true, L113:true, L114:true, L115:true, L116:true, L117:true, L118:true, L119:false, L120:true, L122:true, L123:true, K1:false, K2:true, K4:false };
 const BUNDLE_GROUPS = { D:['D1','D2','D3','D4'], E:['E1','E2','E3'], F:['F1','F2','F3','F4','F5','F6'], H:['H1','H2','H3','H4','H5','H6','H7'],
-  L:['L1','L2','L3','L4','L5','L6','L7','L8','L9','L10','L11','L12','L13','L14','L15','L16','L17','L18','L19','L19B','L20','L22','L23','L24','L25','L26','L27','L29','L30','L31','L32','L33','L34','L37','L35','L36','L28','L38','L40','L39','L41','L42','L43','L44','L45','L46','L47','L49','L48','L50','L51','L52','L53','L54','L55','L56','L57','L58','L59','L60','L61','L64','L65','L69','L70','L71','L74','L75','L76','L77','L78','L79','L80','L81','L82','L84','L85','L86','L87','L88','L89','L91','L92','L93','L94','L95','L96','L97','L97B','L98','L98H','L98B','L90N','L90G','L98J','L99A','L99C','L99B','L101','L102','L102C','L103','L105','L105C','L105D','L105E','L106','L107','L108','L109','L111','L112','L113','L114','L115','L116','L117','L118','L119','L120','L122'], K:['K1','K2','K4'] };
+  L:['L1','L2','L3','L4','L5','L6','L7','L8','L9','L10','L11','L12','L13','L14','L15','L16','L17','L18','L19','L19B','L20','L22','L23','L24','L25','L26','L27','L29','L30','L31','L32','L33','L34','L37','L35','L36','L28','L38','L40','L39','L41','L42','L43','L44','L45','L46','L47','L49','L48','L50','L51','L52','L53','L54','L55','L56','L57','L58','L59','L60','L61','L64','L65','L69','L70','L71','L74','L75','L76','L77','L78','L79','L80','L81','L82','L84','L85','L86','L87','L88','L89','L91','L92','L93','L94','L95','L96','L97','L97B','L98','L98H','L98B','L90N','L90G','L98J','L99A','L99C','L99B','L101','L102','L102C','L103','L105','L105C','L105D','L105E','L106','L107','L108','L109','L111','L112','L113','L114','L115','L116','L117','L118','L119','L120','L122','L123'], K:['K1','K2','K4'] };
 // 묶음 L46(69단계): 그래프 점선 모양 통일 — 모든 점선을 "선도단지 대비 적정가" 선(FAIR_LINE_STYLE.borderDash)과 같은 긴 점선으로.
 // 촘촘한 점("좁쌀")·점-선 섞인 패턴을 없앤다. 새 점선은 항상 dashL46(예전 값)을 쓴다 — L46을 끄면 예전 값 그대로.
 const DASH_L46 = [5, 4];
@@ -11675,6 +11679,7 @@ function setTopMode(mode){
   } else if (mode === 'single' && seedMissingL43()) renderSingleDiag('');   // 묶음 L43(P3): 고른 단지가 없어도 데이터 실패 안내
   if (mode === 'favorites') renderFavoritesTab();
   if (BUNDLES.L120) syncPickL120();   // 묶음 L120
+  if (BUNDLES.L123 && mode !== 'multi') hideUndoL123();   // 묶음 L123
 }
 // ---- 묶음 L120(구현15): 여러 단지 비교하기 = [🗺️ 지도에서 선택] [🔍 이름으로 선택] ----
 // [지도에서 선택] = 같은 지도를 '선택 모드'로 연다(머리 탭은 '여러 단지 비교하기'). 말풍선을 누르면 선택 목록에 넣고 상세 패널도 연다(이미 선택된 단지는 상세만).
@@ -11718,6 +11723,7 @@ function pickCompareL120(){
     const ok = items.filter(o => o.e && (o.e.text || o.x.p === 25)), missing = items.filter(o => !(o.e && (o.e.text || o.x.p === 25)));
     if (!ok.length) return false;
     const want25 = (id, p, name) => { if (p !== 25) return false; if (has25Data(id)) return true; _pyeongNotices.push(stripPyeongSuffix(name)+': 25평 시세가 없어 34평으로 표시합니다.'); return false; };
+    if (BUNDLES.L123) snapFillL123('지도에서 선택');   // 묶음 L123
     const b = ok[0];
     state.baseText = b.e.text; state.baseName = b.e.name; state.basePreset = 'custom';
     delete state.baseId; delete state.basePyeong; delete state.basePending25;
@@ -11732,6 +11738,7 @@ function pickCompareL120(){
     if (missing.length) _pyeongNotices.push('찾을 수 없는 단지 '+missing.length+'개('+missing.map(o => pickNameL120(o.x.id)).join(', ')+')는 빼고 열었어요.');
     saveState();
     _pickCmpNextL120 = true; setTopMode('multi'); render();
+    if (BUNDLES.L123) showUndoL123();   // 묶음 L123
     if (hasPending25()) resumePendingPyeong();
     try { window.scrollTo(0, 0); } catch (e) {}
     return true;
@@ -11793,6 +11800,41 @@ function pickSearchL122(q, n){
   return { list: out };
 }
 if (BUNDLES.L122) window.PICK_L120.search = (q, n) => pickSearchL122(q, n);
+// ---- 묶음 L123(구현18): 고른 단지로 채우는 동작 = 확인 창 없이 바로, 직전 입력 1회분 저장 + '이전 입력으로 되돌리기' 5초 ----
+var UNDO_KEY_L123 = 'benchmarkCalc_undoFill_v1', UNDO_MS_L123 = 5000, _undoMemL123 = null, _undoTimerL123 = null;
+var UNDO_FIELDS_L123 = ['baseText', 'baseName', 'basePreset', 'baseId', 'basePyeong', 'basePending25', 'compares', 'activeSlot'];
+function snapFillL123(why){   // 바꾸기 직전에 부름. 기준·비교 칸이 모두 비어 있으면 남기지 않음(되돌릴 것이 없음)
+  _undoMemL123 = null; try { localStorage.removeItem(UNDO_KEY_L123); } catch (e) {}
+  const has = !!(state.baseText || state.basePending25 || (state.compares || []).some(s => s && (s.text || s.pending25)));
+  if (!has) return false;
+  const snap = { at: Date.now(), why: why || '' }; UNDO_FIELDS_L123.forEach(k => { if (state[k] !== undefined) snap[k] = JSON.parse(JSON.stringify(state[k])); });
+  _undoMemL123 = snap; try { localStorage.setItem(UNDO_KEY_L123, JSON.stringify(snap)); } catch (e) {}   // 저장소를 못 써도 이번 화면에서는 되돌리기 가능
+  return true;
+}
+function undoSnapL123(){ if (_undoMemL123) return _undoMemL123; try { const s = JSON.parse(localStorage.getItem(UNDO_KEY_L123) || 'null'); return s && typeof s === 'object' ? s : null; } catch (e) { return null; } }
+function hideUndoL123(){ try { clearTimeout(_undoTimerL123); } catch (e) {} _undoTimerL123 = null; const el = document.getElementById('undoFillL123'); if (el) el.hidden = true; }
+function showUndoL123(){
+  hideUndoL123(); if (!BUNDLES.L123 || !undoSnapL123()) return;
+  let el = document.getElementById('undoFillL123');
+  if (!el){ const shell = document.getElementById('multiCompareShell'); if (!shell || !shell.parentNode) return;
+    el = document.createElement('div'); el.id = 'undoFillL123'; el.className = 'undo-l123'; el.setAttribute('role', 'status');
+    el.innerHTML = '<span>기준·비교 칸을 고른 단지로 바꿨어요.</span><button type="button" data-undo-l123="1">이전 입력으로 되돌리기</button>';
+    el.querySelector('button').addEventListener('click', undoFillL123); shell.parentNode.insertBefore(el, shell); }
+  el.hidden = false;
+  const guideOpen = () => { const ov = document.getElementById('guideOverlay'); return !!(ov && !ov.hidden && getComputedStyle(ov).display !== 'none'); };
+  let shown = 0; const STEP = 250;
+  const tick = () => { if (!guideOpen()) shown += STEP; if (shown >= UNDO_MS_L123){ hideUndoL123(); return; } _undoTimerL123 = setTimeout(tick, STEP); };   // 사용법 창이 덮고 있는 동안은 세지 않음(창이 닫힌 시간으로 5초)
+  _undoTimerL123 = setTimeout(tick, STEP);
+}
+function undoFillL123(){
+  const s = undoSnapL123(); hideUndoL123(); if (!s) return false;
+  UNDO_FIELDS_L123.forEach(k => { if (Object.prototype.hasOwnProperty.call(s, k)) state[k] = s[k]; else delete state[k]; });
+  if (!Array.isArray(state.compares) || state.compares.length !== MAX_SLOTS) state.compares = Array.from({length: MAX_SLOTS}, (_, i) => (s.compares && s.compares[i]) || { text:'', name:'', visible:true });
+  _undoMemL123 = null; try { localStorage.removeItem(UNDO_KEY_L123); } catch (e) {}
+  try { usingSeed = false; } catch (e) {}
+  saveState(); render(); if (hasPending25()) resumePendingPyeong();
+  return true;
+}
 // 머리의 '여러 단지 비교하기'를 누르면 마지막으로 쓴 탭으로(지도에서 선택이면 선택 모드 지도). 이름으로 선택이면 원래 동작 그대로
 document.addEventListener('click', ev => {
   if (!BUNDLES.L120 || !l120()) return;
@@ -13511,6 +13553,7 @@ function openCompareFromFavsL59(picks){
     _pyeongNotices.push(stripPyeongSuffix(name)+': 25평 시세가 없어 34평으로 표시합니다.');
     return false;
   };
+  if (BUNDLES.L123) snapFillL123('즐겨찾기');   // 묶음 L123
   const b = ok[0];
   state.baseText = b.e.text; state.baseName = b.e.name; state.basePreset = 'custom';
   delete state.baseId; delete state.basePyeong; delete state.basePending25;
@@ -13535,6 +13578,7 @@ function openCompareFromFavsL59(picks){
   render();
   if (hasPending25()) resumePendingPyeong();
   showFavLoadNoteL59(lost ? Math.min(ok.length, MAX_SLOTS + 1) : 0);
+  if (BUNDLES.L123) showUndoL123();   // 묶음 L123
   try { window.scrollTo(0, 0); } catch (e) {}
   return true;
 }
@@ -16472,7 +16516,8 @@ function applyUrlParams(){
   const compareSpecs = parseCompareSpec(compareIdsRaw).slice(0, MAX_SLOTS);
   const specLabel = (entry, id, p) => entry.name + (p === 25 ? (has25Data(id) ? '(25평)' : '(25평 없음 → 34평)') : '(34평)');
   const compareLabels = compareSpecs.map(sp => { const e = findLibraryEntryById(sp.id); return e ? specLabel(e, sp.id, sp.pyeong) : null; }).filter(Boolean);
-  if (!confirm(urlApplyConfirmMessageL38(specLabel(baseEntry, baseId, basePyeongReq), compareLabels))) return false;
+  if (BUNDLES.L123) snapFillL123('주소');   // 묶음 L123: 확인 창 없이 바로 바꾸고 직전 입력 1회분 저장(되돌리기)
+  else if (!confirm(urlApplyConfirmMessageL38(specLabel(baseEntry, baseId, basePyeongReq), compareLabels))) return false;
 
   const want25 = (id, p, name) => {
     if (p !== 25) return false;
@@ -16792,6 +16837,7 @@ if (mapFirstL85() && !urlApplied){   // 묶음 L85: 첫 화면 = 지도. 주소 
 // 확인 — rerenderCurrentScreen 주석 참고, 같은 원인). 지금 저장된
 // topMode에 맞는 렌더 함수로 분기한다.
 rerenderCurrentScreen();
+if (urlApplied && BUNDLES.L123) showUndoL123();   // 묶음 L123
 if (state.gasUrl) gasFetchList();
 (function(){
   const badge = document.getElementById('dataAsOfBadge');
