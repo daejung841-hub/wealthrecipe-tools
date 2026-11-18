@@ -761,6 +761,13 @@
   .pk120-bar.l122 .go[hidden],.pk120-bar.l122 .chips[hidden]{display:none}
   .pk120-bar.l122.z{min-width:240px}
   @media (max-width:767px){ .pk120-bar.l122 .r{flex-wrap:wrap} .pk120-bar.l122 .sw,.pk120-bar.l122.z .sw{flex:1 1 100%} .pk120-bar.l122 .ac{width:100%;max-width:none;max-height:min(34vh,240px)} }
+  /* 묶음 L124(구현19): 전체 비우기·칩 ☆/★·비운 뒤 되돌리기 */
+  .pk120-bar .clr{flex:none;border:1px solid #E5E7EB;background:#fff;color:#64748B;border-radius:9px;padding:6px 10px;font:inherit;font-size:12px;cursor:pointer;white-space:nowrap}.pk120-bar .clr:hover{background:#F8FAFC;color:#C2255C}.pk120-bar .clr[hidden]{display:none}
+  .pk120-bar .c .st{border:0;background:none;cursor:pointer;font-size:14px;line-height:1;color:#ADB5BD;padding:2px 3px 2px 6px;border-radius:999px}.pk120-bar .c .st:hover{color:#E8590C;background:#FFE8CC}
+  .pk120-bar .c .st.on{color:#E8590C;cursor:default}.pk120-bar .c .st.on:hover{background:none}
+  .pk120-bar .ud{display:flex;align-items:center;gap:6px;margin-top:4px;font-size:12px;color:#495057}.pk120-bar .ud[hidden]{display:none}
+  .pk120-bar .ud button{border:0;background:none;color:#1864AB;font:inherit;font-weight:700;text-decoration:underline;cursor:pointer;padding:2px 0}
+  @media (max-width:767px){ .pk120-bar .clr{min-height:32px;min-width:32px} .pk120-bar .c .st{min-width:32px;min-height:32px;padding:0;display:inline-flex;align-items:center;justify-content:center} .pk120-bar .c .x{min-height:32px} .pk120-bar .ud button{min-height:32px} }
   .cm84-ph .zt{display:none}
   /* 묶음 L87-5: 쌍둥이 창을 열면 패널을 넓게(PC는 패널 옆으로, 폰은 전체 화면) */
   .cm84-panel.twv{width:min(1180px,calc(100% - 80px))!important;max-width:none!important;z-index:600}
@@ -1743,6 +1750,9 @@
   }
   // ---- 묶음 L122(구현18): [지도에서 선택] 말풍선 = 선택·해제만, 선택 목록 줄 검색창(단지 이름으로 추가) ----
   const l122 = () => { try { return !!BUNDLES.L122; } catch (e) { return false; } };
+  const l124 = () => { try { return !!BUNDLES.L124; } catch (e) { return false; } };   // 묶음 L124(구현19)
+  let pkUdT124 = 0;
+  function pkUd124(bar, show){ const u = bar && bar.querySelector('.ud'); if (!u) return; clearTimeout(pkUdT124); u.hidden = !show; if (show) pkUdT124 = setTimeout(() => { u.hidden = true; }, 5000); }
   const pickP122 = (it, p) => { if (p === 25 || p === 34) return p; const f = it ? shownInfo(it) : null; return f && f.p === 25 ? 25 : 34; };   // 지도에서 누를 때와 같은 기본 평형
   function pkClick122(it, p){
     if (pkIdx120(it.id) >= 0){ window.PICK_L120.remove(it.id); return; }   // 다시 누르면 해제(번호 다시 매김)
@@ -1769,11 +1779,16 @@
   function pkRender122(){
     if (!mapEl || !l120()) return; let bar = mapEl.querySelector('.pk120-bar');
     if (!bar){
-      mapEl.insertAdjacentHTML('beforeend', '<div class="pk120-bar l122" hidden role="region" aria-label="선택한 단지"><div class="r"><div class="sw"><input class="q" type="search" placeholder="단지 이름으로 추가" autocomplete="off" aria-label="단지 이름으로 추가"><div class="ac" hidden role="listbox"></div></div><span class="n"></span><button type="button" class="go">비교 보기 →</button></div><span class="msg" hidden role="status"></span><div class="chips"></div></div>');
+      mapEl.insertAdjacentHTML('beforeend', '<div class="pk120-bar l122" hidden role="region" aria-label="선택한 단지"><div class="r"><div class="sw"><input class="q" type="search" placeholder="단지 이름으로 추가" autocomplete="off" aria-label="단지 이름으로 추가"><div class="ac" hidden role="listbox"></div></div><span class="n"></span><button type="button" class="go">비교 보기 →</button>' + (l124() ? '<button type="button" class="clr" title="선택한 단지를 모두 빼기">전체 비우기</button>' : '') + '</div><span class="msg" hidden role="status"></span>' + (l124() ? '<div class="ud" hidden role="status"><span>선택을 비웠어요.</span><button type="button">되돌리기</button></div>' : '') + '<div class="chips"></div></div>');
       bar = mapEl.querySelector('.pk120-bar');
       bar.querySelector('.go').onclick = () => { try { window.PICK_L120.compare(); } catch (e) {} };
+      if (l124()){   // 묶음 L124: 전체 비우기(확인 창 없음) → 5초 되돌리기
+        bar.querySelector('.clr').onclick = () => { try { if (window.PICK_L120.clear()) pkUd124(bar, true); } catch (e) {} };
+        bar.querySelector('.ud button').onclick = () => { pkUd124(bar, false); try { window.PICK_L120.undoClear(); } catch (e) {} };
+      }
       bar.querySelector('.chips').addEventListener('click', e => {
         const x = e.target.closest('[data-pk120x]'); if (x){ e.stopPropagation(); window.PICK_L120.remove(x.dataset.pk120x); return; }
+        const s = e.target.closest('[data-pk124]'); if (s){ e.stopPropagation(); try { window.PICK_L120.setBase(s.dataset.pk124); } catch (er) {} return; }   // 묶음 L124: ☆ = 기준으로
         const c = e.target.closest('[data-pk120]'); if (c){ e.stopPropagation(); openById(c.dataset.pk120, Number(c.dataset.p) === 25 ? 25 : undefined); }   // 칩 이름 = 그 단지 상세(여기서만 상세)
       });
       const q = bar.querySelector('.q'), ac = bar.querySelector('.ac');
@@ -1795,8 +1810,9 @@
     bar.classList.toggle('z', !L.length);
     bar.querySelector('.n').innerHTML = L.length ? '<b>선택 ' + L.length + '곳</b><small>1번이 기준 단지 · 최대 ' + window.PICK_L120.max + '곳</small>' : '';
     bar.querySelector('.go').hidden = !L.length;
+    { const cl = bar.querySelector('.clr'); if (cl) cl.hidden = !L.length; if (L.length) pkUd124(bar, false); }   // 묶음 L124: 0곳이면 비우기 단추 숨김
     const ch = bar.querySelector('.chips'); ch.hidden = !L.length;
-    ch.innerHTML = L.map((x, i) => { const nm = pkName120(x.id) + (x.p === 25 ? '(25평)' : ''); return '<span class="c"><button type="button" class="nm" data-pk120="' + esc(x.id) + '" data-p="' + x.p + '" title="' + esc(nm) + ' 상세 보기"><i>' + (i + 1) + '</i>' + esc(nm) + (i ? '' : '<small>기준</small>') + '</button><button type="button" class="x" data-pk120x="' + esc(x.id) + '" aria-label="' + esc(nm) + ' 선택 해제">✕</button></span>'; }).join('');
+    ch.innerHTML = L.map((x, i) => { const nm = pkName120(x.id) + (x.p === 25 ? '(25평)' : ''); return '<span class="c">' + (l124() ? (i ? '<button type="button" class="st" data-pk124="' + esc(x.id) + '" title="' + esc(nm) + '을(를) 기준 단지로" aria-label="' + esc(nm) + ' 기준 단지로">☆</button>' : '<span class="st on" title="기준 단지" aria-label="기준 단지">★</span>') : '') + '<button type="button" class="nm" data-pk120="' + esc(x.id) + '" data-p="' + x.p + '" title="' + esc(nm) + ' 상세 보기"><i>' + (i + 1) + '</i>' + esc(nm) + (i ? '' : '<small>기준</small>') + '</button><button type="button" class="x" data-pk120x="' + esc(x.id) + '" aria-label="' + esc(nm) + ' 선택 해제">✕</button></span>'; }).join('');
     pkHeadUpd120();
     window.CALC_MAP_L84.pk120 = L.map(x => x.id);
   }
