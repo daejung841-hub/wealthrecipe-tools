@@ -472,7 +472,8 @@ body.df-lock{overflow:hidden;}
 <style>.rt-ntc-sec{margin-top:12px;padding-top:10px;border-top:1px dashed var(--line,#ddd)}.rt-ntc-h{font-size:14px;margin:0 0 2px}.rt-ntc-row{padding:8px 0;border-top:1px solid var(--line,#e5e5e5);font-size:13px;line-height:1.5}.rt-ntc-row:first-of-type{border-top:0}.rt-ntc-b{display:inline-block;margin-left:6px;padding:0 7px;border-radius:999px;font-size:12px;font-weight:700}.rt-ntc-on{background:#fff1e0;color:#b54708;border:1px solid #f5b86b}.rt-ntc-off{background:transparent;color:var(--ink-faint,#888);border:1px solid var(--line,#ddd);font-weight:500}.rt-ntc-pre{background:transparent;color:#1f4fd1;border:1px solid #9db4f5}.rt-ntc-w{color:var(--ink-faint,#777);font-size:12.5px}.rt-ntc-l{margin-top:4px;display:flex;gap:6px;flex-wrap:wrap}</style>
 <script src="마지막거래_전체_A59.js"></script>
 <script src="고시공고.js"></script>   <!-- 1109c: 구역 상세 '고시·공고' 칸 자료 -->
-<script src="공고요약.js"></script>   <!-- 1109c6: '공고 요약 보기' 자료 -->
+<script src="공고요약.js"></script>
+<script src="예상준공_A66.js"></script>   <!-- A66: 구역별 예상 준공 연도(자료 파일, 계산 도구는 기록/작업66) -->   <!-- 1109c6: '공고 요약 보기' 자료 -->
 <style>.rt-ntc-sum{margin-top:6px}.rt-ntc-sum>summary{display:inline-block;cursor:pointer;list-style:none;padding:3px 10px;border:1px solid var(--line,#ddd);border-radius:8px;font-size:12.5px}.rt-ntc-sum>summary::-webkit-details-marker{display:none}.rt-ntc-sum[open]>summary{font-weight:700}.rt-ntc-dl{display:grid;grid-template-columns:max-content 1fr;gap:3px 12px;margin:8px 0 4px;font-size:13px}.rt-ntc-dl dt{color:var(--ink-faint,#777)}.rt-ntc-dl dd{margin:0;word-break:keep-all;overflow-wrap:anywhere}.rt-ntc-src,.rt-ntc-foot{font-size:12px;color:var(--ink-faint,#777)}</style>
 <style>/* 1110a 꼬리표 */.rt-nt .rt-sh{background:#E0F2FE;color:#075985;font-weight:800;white-space:nowrap}.rt-nt .rt-draft{background:#FEF3C7;color:#92400E;font-weight:800;white-space:nowrap}.rt-art{display:inline-block;font-size:10.5px;font-weight:800;border-radius:6px;padding:0 6px;line-height:1.6;background:#FCE7F3;color:#9D174D;white-space:nowrap;cursor:help;vertical-align:1px}.rt-art-a{font-size:11.5px;white-space:nowrap}:root[data-theme="dark"] .rt-nt .rt-sh{background:#0C2A3A;color:#BAE6FD}:root[data-theme="dark"] .rt-nt .rt-draft{background:#3A2A0C;color:#FDE68A}:root[data-theme="dark"] .rt-art{background:#3A1426;color:#FBCFE8}@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .rt-nt .rt-sh{background:#0C2A3A;color:#BAE6FD}:root:not([data-theme="light"]) .rt-nt .rt-draft{background:#3A2A0C;color:#FDE68A}:root:not([data-theme="light"]) .rt-art{background:#3A1426;color:#FBCFE8}}</style>
 </head>
@@ -846,7 +847,21 @@ window.SBJListLink = (function () {
     return ' <span class="rt-gram" tabindex="0" data-rt-gram data-rt-tip="' + tip.replace(/"/g, '&quot;') + '">공람 끝, 고시 전</span>';
   }
   (function(){ const s = document.createElement('style'); s.textContent = '.rt-gram{display:inline-block;font-size:10.5px;font-weight:800;border-radius:6px;padding:0 6px;line-height:1.7;background:#FEF3C7;color:#92400E;white-space:nowrap;cursor:help}'; document.head.appendChild(s); })();
-  function stageCellHtml(r){
+  // A66 예상 준공: 자료는 예상준공_A66.js(window.RT_ETA66). 그룹(모아타운 묶음)은 하위 구역 연도 범위.
+  (function(){ const s = document.createElement('style'); s.textContent = '.rt-eta{display:block;margin-top:2px;font-size:11px;font-weight:600;line-height:1.4;color:#475569;white-space:nowrap}.rt-eta.lo{color:#8593A3}.rt-eta.dn{color:#0F766E;font-weight:800}.rt-eta small{font-weight:500;font-size:10.5px;color:#8593A3;margin-left:3px}.rt-eta-d{margin-top:10px;padding:8px 10px;border:1px solid var(--border,#E2E7EC);border-radius:10px;background:#F8FAFC;font-size:12.5px;line-height:1.6;color:#334155}.rt-eta-d b{font-size:14px;color:#0F172A}.rt-eta-d .rt-eta-s{margin:4px 0 0;padding:0;list-style:none;font-size:12px;color:#475569}.rt-eta-d .rt-eta-n{margin-top:4px;font-size:11.5px;color:#8593A3}'; document.head.appendChild(s); })();
+  function etaOf66(r){ const E = window.RT_ETA66; return E && r ? E[r.id] : null; }
+  function etaGroup66(g){ const E = window.RT_ETA66; if (!E || !g || !Array.isArray(g.subs)) return null; const xs = g.subs.map((s) => E[s.id]).filter((x) => x && x.k === 'eta'); if (!xs.length) return null;
+    const ys = xs.map((x) => x.y), lo = Math.min.apply(null, ys), hi = Math.max.apply(null, ys); return { k: 'eta', y: lo, y2: hi, c: xs.every((x) => x.c === '보통') ? '보통' : '낮음', tip: '하위 구역 ' + xs.length + '곳의 예상 준공 연도 범위예요. 각 하위 구역은 자세히 보기에서 확인하세요.' }; }
+  function etaHtml66(r){ const e = r && r.isGroup ? etaGroup66(r) : etaOf66(r); if (!e) return '';
+    if (e.k === 'done') return '<span class="rt-eta dn" tabindex="0" data-rt-tip="' + esc(e.tip) + '">준공</span>';
+    const yr = e.y2 && e.y2 !== e.y ? e.y + '~' + e.y2 + '년' : e.y + '년';
+    return '<span class="rt-eta' + (e.c === '낮음' ? ' lo' : '') + '" tabindex="0" data-rt-tip="' + esc(e.tip).replace(/"/g, '&quot;') + '">예상 준공 ' + yr + (e.c === '낮음' ? '<small>낮은 신뢰</small>' : '') + '</span>'; }
+  function etaDetail66(r){ const e = etaOf66(r); if (!e) return '';
+    if (e.k === 'done') return '<div class="rt-eta-d"><b>준공</b> · 이미 준공(입주)한 구역이에요.</div>';
+    const L = String(e.tip).split('\n'); const steps = L.filter((x) => x.indexOf('· ') === 0).map((x) => '<li>' + esc(x) + '</li>').join(''); const memo = L.filter((x) => x.indexOf('※') === 0).join(' '); const basis = L.filter((x) => x.charAt(0) === '(').join(' ');
+    return '<div class="rt-eta-d" data-rt-eta><b>예상 준공 ' + e.y + '년 ' + e.m + '월</b> · 신뢰 ' + esc(e.c) + ' <span style="color:#8593A3">(추정 단계 ' + e.n + '개)</span><ul class="rt-eta-s">' + steps + '</ul>' + (memo ? '<div class="rt-eta-n">' + esc(memo) + '</div>' : '') + '<div class="rt-eta-n">' + esc(basis) + ' 대략의 시기이며 실제와 크게 다를 수 있어요.</div></div>'; }
+  function stageCellHtml(r){ return stageCellHtml0(r) + etaHtml66(r); }
+  function stageCellHtml0(r){
     const stage = cleanStage(r);
     const d = shortDate(r.lastDate);
     return (d ? parenSplitHtml(`${stage} (${d})`) : esc(stage)) + (r.offChk ? ' <span class="muted-txt" data-rt-tip="고시 자료로 단계를 확인하는 중이에요">고시 확인 중</span>' : '') + artTag(r) + liveNtc(r) + gramTag(r) + progHtml(r);   // 20차: 아래 줄에 진행 기간(표·카드 같이 씀)
@@ -1772,7 +1787,7 @@ window.SBJListLink = (function () {
     const timelineHtml = (parseStageHistory(r) || STAGE_TRACKS[r.sheet]) ? `
       <div class="modal-section">
         <h4>진행 단계</h4>
-        ${buildTimelineHtml(r)}
+        ${buildTimelineHtml(r)}${etaDetail66(r)}
       </div>` : '';
     const gradeBadge = gradeBadgeHtml(r);
     const moaEstGen = r.sheet === '모아타운' && isEstGrade(r) && moaGeneral(r).k === 'u' && typeof r.estGeneral === 'number';
