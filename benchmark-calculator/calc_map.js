@@ -491,6 +491,7 @@
   .cm84-jg99 .jg99-w{color:var(--cm-faint);font-weight:500}
   .cm84-jg99 .jg99-ti{position:relative;display:inline-block;width:16px;height:16px;line-height:15px;text-align:center;border:1px solid var(--cm-faint);border-radius:50%;font-size:10px;font-weight:600;color:var(--cm-faint);cursor:pointer;vertical-align:middle;margin-left:4px;font-style:normal}
   .cm84-jg99 .jg99-ti::after{content:attr(data-tip);position:absolute;z-index:30;bottom:calc(100% + 8px);left:-8px;width:200px;max-width:calc(100vw - 48px);white-space:normal;text-align:left;background:#fff;color:#111827;font-size:12px;font-weight:500;line-height:1.55;padding:9px 11px;border-radius:9px;border:1px solid #D1D5DB;box-shadow:0 4px 14px rgba(0,0,0,.18);opacity:0;visibility:hidden;pointer-events:none}
+  .cm84-jg99 .jg99-ti.w124::after{width:270px;left:auto;right:-8px;white-space:pre-line}   /* 묶음 L124: 근거 여러 줄, 오른쪽 끝 기준(폰 넘침 없음) */
   .cm84-jg99 .jg99-ti:hover::after,.cm84-jg99 .jg99-ti:focus-visible::after,.cm84-jg99 .jg99-ti.open::after{opacity:1;visibility:visible}
   .cm84-jg99 .jg99-gs{margin-top:14px;padding-top:10px;border-top:1px solid var(--cm-line);font-size:12px;line-height:1.65;color:var(--cm-sub)}.cm84-jg99 .jg99-gs a{color:#1C7ED6;font-weight:700;white-space:nowrap}
   @media (max-width:767px){
@@ -1752,6 +1753,7 @@
   // ---- 묶음 L122(구현18): [지도에서 선택] 말풍선 = 선택·해제만, 선택 목록 줄 검색창(단지 이름으로 추가) ----
   const l122 = () => { try { return !!BUNDLES.L122; } catch (e) { return false; } };
   const l124 = () => { try { return !!BUNDLES.L124; } catch (e) { return false; } };   // 묶음 L124(구현19)
+  const l124b = () => { try { return !!BUNDLES.L124B; } catch (e) { return false; } };   // 묶음 L124 B(구현21): 재건축 사업성 줄 — 기본 꺼짐(자료 안 받음)
   let pkUdT124 = 0;
   function pkUd124(bar, show){ const u = bar && bar.querySelector('.ud'); if (!u) return; clearTimeout(pkUdT124); u.hidden = !show; if (show) pkUdT124 = setTimeout(() => { u.hidden = true; }, 5000); }
   const pickP122 = (it, p) => { if (p === 25 || p === 34) return p; const f = it ? shownInfo(it) : null; return f && f.p === 25 ? 25 : 34; };   // 지도에서 누를 때와 같은 기본 평형
@@ -2593,7 +2595,19 @@
     const i = JG_STAGES.indexOf(String(e.지금단계 || '')); if (!(i >= 3 || (e.단계날짜 && e.단계날짜.조합설립))) return null;   // 조합설립 전은 확인 중
     return Number(v);
   }
-  function jgLoad99c(){ if (!JG.ld) JG.ld = fetch(L99A_MAP.jgTab).then(r => r.ok ? r.json() : null).then(j => (JG.d = j), () => { JG.ld = null; return null; }); return JG.ld; }
+  // 묶음 L124(구현19·20·21): 1세대당 지을 수 있는 면적(분석 14번 최종 표 원문 51행, seed id 키, 순위는 한양 뺀 48곳) — 구현21부터 BUNDLES.L124B(기본 꺼짐)일 때만 — 재건축 탭 자료와 함께 받음, 못 받으면 줄만 빠짐
+  const SY_URL_L124 = '지도자료_202611/saeopseong_l124_1118g17.json'; let SY124 = null, SY124ld = null;
+  function syLoad124(){ if (!l124b()) return Promise.resolve(null); if (!SY124ld) SY124ld = fetch(SY_URL_L124).then(r => r.ok ? r.json() : null).then(j => (SY124 = j), () => { SY124ld = null; return null; }); return SY124ld; }
+  function syRow124(id){
+    if (!l124b() || !SY124 || !id || id[0] === '_' || !Object.prototype.hasOwnProperty.call(SY124, id)) return null;
+    const s = SY124[id]; if (!s || s.칸A평 == null) return null;
+    const n1 = (v) => Number(v).toFixed(1);
+    const head = n1(s.칸A평) + '평 · ' + (s.순위 != null ? '서울 재건축 ' + s.전체 + '곳 중 ' + s.순위 + '위' : esc(s.메모 || '순위 밖') + '이라 순위 밖');
+    const tip = [s.획지기준평 != null ? '획지 기준 대지지분 ' + n1(s.획지기준평) + '평' : '', s.최종용적률 ? '최종 용적률 ' + s.최종용적률 : '', s.기부채납 ? '기부채납 비율 ' + s.기부채납 : '', s.고시 ? '고시 ' + s.고시 : '', s.통합 || ''].filter(Boolean).join('\n')
+      + '\n\n= 기부채납 뒤 실제 짓는 땅 × 최종 용적률 ÷ 기존 세대';
+    return ['1세대당 지을 수 있는 면적', head + ' <span class="jg99-ti w124" tabindex="0" role="button" aria-label="1세대당 지을 수 있는 면적 근거" data-tip="' + esc(tip) + '">ⓘ</span>'];
+  }
+  function jgLoad99c(){ if (!JG.ld) JG.ld = Promise.all([fetch(L99A_MAP.jgTab).then(r => r.ok ? r.json() : null).then(j => (JG.d = j), () => { JG.ld = null; return null; }), syLoad124().catch(() => null)]).then(a => a[0]); return JG.ld; }
   function jgHas99c(e){ return !!(e && e.상태 !== '숨김' && ((l111() && !l113() && e.연결해제) || e.지금단계 || Object.values(e.단계날짜 || {}).some(Boolean) || e.평균대지지분 || e.추정비례율 || e.계획세대수 || e.용적률 || e.선도지구 || e.세대구성 || e.시공사)); }
   function jgOk99c(it){
     if (!JG.d || !it || !Object.prototype.hasOwnProperty.call(JG.d, it.id) || it.id[0] === '_') return false;
@@ -2631,6 +2645,7 @@
     const a = e.평균대지지분, SA = l111() && JG.d && JG.d._meta && JG.d._meta.서울평균대지지분;   // 묶음 L111: 서울 평균 = 구역면적 합 ÷ 기존 세대수 합(자료 _meta에서 읽음)
     if (a && a.평 != null) rows.push([l111() ? '평균 대지지분 <small>(구역면적 기준)</small>' : '평균 대지지분', esc(a.평) + '평' + (a['㎡'] != null ? ' (' + esc(a['㎡']) + '㎡)' : '') + (a.표시 && a.표시 !== '고시 원문' ? ' <small>' + esc(a.표시) + '</small>' : '')
       + (SA && SA.평 != null ? '<small class="ge104-r">서울 재건축 평균 ' + esc(SA.평) + '평(' + esc(SA.곳) + '곳) · 구역면적 합 ÷ 기존 세대수 합</small>' : '')]);
+    { const sy = syRow124(it.id); if (sy) rows.push(sy); }   // 묶음 L124: 대지지분 줄 바로 아래(값 없는 단지는 줄 없음)
     const b = e.추정비례율; if (b && b.값 != null) rows.push(['추정 비례율', esc(b.값) + '%' + (b.상태 && b.상태 !== '원문' ? ' <small>' + esc(b.상태) + '</small>' : '')]);
     const sg = e.세대구성 || {}, nm = (v) => Number(v).toLocaleString('ko-KR') + '세대', k0 = sg.상태 === '대조 전' ? ' <small>대조 전</small>' : '', W = '<span class="jg99-w">확인 중</span>';
     const tot = sg.총계획세대 != null ? sg.총계획세대 : (e.계획세대수 != null ? (typeof e.계획세대수 === 'object' ? e.계획세대수.값 : e.계획세대수) : null);
