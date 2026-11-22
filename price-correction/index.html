@@ -375,6 +375,8 @@ body.l46 .py17 button{flex:1 0 auto;white-space:nowrap;}
 .regionseg{flex:0 0 auto;}
 .regionseg button{min-width:56px;}
 .regionseg[hidden]{display:none;}
+.region-s1{margin-top:4px;}
+.region-s1[hidden]{display:none;}
 .ac-list{position:absolute;left:0;right:0;top:100%;z-index:40;background:var(--surface);border:1px solid var(--border);border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.14);max-height:min(56vh,420px);overflow-y:auto;margin-top:2px;}
 .ac-item{padding:8px 10px;cursor:pointer;border-bottom:1px solid var(--border);min-height:40px;}
 .ac-item:last-child{border-bottom:0;}
@@ -2315,7 +2317,7 @@ window.SBJ_RENT16 = {"source":"seedComplexes.js@67d3760 (md5 65724010) rentalHou
             <div class="f cw-p"><label for="tPyeong">전용면적 (㎡)</label><input id="tPyeong" data-path="target.pyeong" data-kind="num" inputmode="decimal" placeholder="84"><div class="seg py17" id="pySeg" hidden role="group" aria-label="전용면적 고르기"><button type="button" data-pysel="84">84㎡(34평)</button><button type="button" data-pysel="59">59㎡(25평)</button></div><span class="hint" id="pyeongHint">현재가 자동은 84㎡만 됩니다</span></div>
             <div class="f cw-u"><label for="tUnits">세대수</label><input id="tUnits" data-path="target.units" data-kind="num" inputmode="numeric" placeholder="2297"><span class="err" data-err="target.units"></span></div>
             <div class="f cw-y"><label for="tYear">준공(예정)연도</label><input id="tYear" data-path="target.builtYear" data-kind="num" inputmode="numeric" placeholder="2031"><span class="err" data-err="target.builtYear"></span></div>
-            <div class="f stagef" data-redev-only><label for="tStage">진행단계 (필수)</label><div class="stage-row"><div class="selwrap"><span class="selshow" id="tStageShow" aria-hidden="true"></span><select id="tStage" data-path="target.stage" data-kind="select"></select></div><div class="seg regionseg" id="regionCell" data-seg="target.region" role="group" aria-label="지역(판정 기준)"><button type="button" data-v="seoul">서울</button><button type="button" data-v="gi">인천·경기</button></div></div><span class="err" data-err="target.stage"></span></div>
+            <div class="f stagef" data-redev-only><label for="tStage">진행단계 (필수)</label><div class="stage-row"><div class="selwrap"><span class="selshow" id="tStageShow" aria-hidden="true"></span><select id="tStage" data-path="target.stage" data-kind="select"></select></div><div class="seg regionseg" id="regionCell" data-seg="target.region" role="group" aria-label="지역(판정 기준)"><button type="button" data-v="seoul">서울</button><button type="button" data-v="gi">인천·경기</button></div></div><div class="hint region-s1" id="regionHintS1" hidden data-region-s1>경기·인천 구역이면 지역을 바꿔 주세요(단지 검색 범위가 바뀝니다)</div><span class="err" data-err="target.stage"></span></div>
           </div>
           <div class="grade-line" id="gradeLine" hidden></div>
           <div class="hint stage-hint" data-redev-only>진행단계 · 사업시행인가 단계라면: 감정평가를 마쳤으면 후기, 아직이면 중기</div>
@@ -2506,6 +2508,10 @@ window.SBJ_RENT16 = {"source":"seedComplexes.js@67d3760 (md5 65724010) rentalHou
   const SBJ1718 = { LS67: true };
   const FEW1718C = (n) => (SBJ1718.LS67 && n >= 1 && n <= 2 ? '비교 단지 ' + n + '곳 기준이에요. 입지가 비슷한 단지를 여러 곳 고를수록 결과가 더 정확해져요.' : '');
   const G1718 = { open: false };   // 급지별 적정 마진 표(ⓘ) 펼침
+  // S-1 플래그: LS68 [목록표에서 보기] 주소는 구역 키(#zone=)만(&id= 뺌) + 임장 직접 입력 구역(목록표 키 없음)일 때만 지역 버튼(regionCell)과 안내 한 줄. 판정 공식·엔진 그대로, 끄면 17-18 동작
+  const SBJ_S1 = { LS68: true };
+  // 임장에서 온 구역인데 목록표 키(source.listKey)가 없고, 목록표에서 찾는 중도 아닐 때 = 임장 직접 입력 구역
+  function imjangDirectS1(st) { const s = st && st.target && st.target.source; return SBJ_S1.LS68 && st.mode === 'redev' && !!s && s.tool === 'imjang' && !s.listKey && !(LOC1712 && LOC1712.key === s.key && LOC1712.status === 'loading'); }
   let LOC1712 = null;   // { key: 임장 구역 id, status: 'loading'|'found'|'none' } — 지금 화면의 임장 구역 위치 찾기 상태(저장하지 않음)
   const GI_COORDS_URL = 'data/gi_coords_v1.json';   // LS55: 비교단지 이름 검색(단지 찾기·이름 자동완성)에 좌표 파일에 없는 단지(경기·인천 등, 현재가 인덱스에만 있음)도 보여 줌 — 고르면 현재가 자동, 준공연도·세대수는 직접 입력
   if (SBJ177.LS50 && document.body) document.body.classList.add('l50');
@@ -3008,7 +3014,7 @@ window.SBJ_RENT16 = {"source":"seedComplexes.js@67d3760 (md5 65724010) rentalHou
     document.querySelectorAll('[data-redev-only]').forEach((el) => { if (!el.classList.contains('nextrow')) el.hidden = state.mode !== 'redev'; });
     if (NARROW()) document.querySelectorAll('.nextrow[data-redev-only]').forEach((el) => { el.hidden = state.mode !== 'redev'; });
     // 9단계: 지역은 가져온 구역이면 자동(선택칸 숨김), 수기 구역일 때만 진행단계 옆에
-    { const rc = $('regionCell'); if (rc) rc.hidden = state.mode !== 'redev' || !!(state.target && state.target.source) || SBJ11.LS15; }
+    { const rc = $('regionCell'), s1 = imjangDirectS1(state); if (rc) rc.hidden = s1 ? false : (state.mode !== 'redev' || !!(state.target && state.target.source) || SBJ11.LS15); const rh = $('regionHintS1'); if (rh) rh.hidden = !s1; }   // S-1(LS68): 임장 직접 입력 구역만 지역 버튼 노출
     $('optCommonNew').checked = !!(state.options && state.options.commonNew);
     $('recName').value = state.name || '';
     $('thisYearNote').textContent = '연율 제안의 기준 연도: ' + THIS_YEAR + '년';
@@ -4063,7 +4069,7 @@ window.SBJ_RENT16 = {"source":"seedComplexes.js@67d3760 (md5 65724010) rentalHou
       (SBJ174.LS39 ? (tl || SBJ_ZC_ETA ? sec('일정·속도', (SBJ_ZC_ETA ? '<div class="zc-grid" data-zc-sched>' + item('예상 준공', '—') + '</div>' : '') + tl) : '') : sec('일정·속도', '<div class="zc-grid" data-zc-sched>' + item('진행단계', stageTxt) + item('단계 진입', zym(r.lastDate) || '—') + item('진행 속도', speed) + item('예상 준공', '—') + '</div>' + tl)) +
       sec('핵심 수치', '<div class="zc-grid" data-zc-core>' + item('예정 세대수', zv(hh)) + item('조합원수', zv(r.union != null ? r.union : r.owners)) + item('일반분양', zv(gen) + zpct(gen, r.union != null ? r.union : r.owners, '조합원 대비')) + item('임대', zv(r.tenant) + zpct(r.tenant, r.households, '전체 세대 대비')) + '</div>') +
       sec('사업성 지표', '<div class="zc-grid" data-zc-biz>' + item('사업성등급', zv(gname)) + item('일반분양비율', ratio ? ratio + '%' : '—') + item('용적률', zv(r.farRatio)) + item('층수', zv(r.floors)) + '</div>') +
-      '<a class="zc-link" data-zc-link href="' + esc(RD.LIST_URL + (SBJ176.LS47 ? '#zone=' + encodeURIComponent(RD.uid(r)) + (r.id !== undefined && r.id !== null ? '&id=' + encodeURIComponent(String(r.id)) : '') : '')) + '"' + (SBJ1710.LS58 ? '>목록표에서 보기</a>' : ' target="_blank" rel="noopener">목록표에서 보기 ↗</a>');   // 17-6(LS47): 목록표가 아직 이 값을 읽지 않으면 지금처럼 첫 화면
+      '<a class="zc-link" data-zc-link href="' + esc(RD.LIST_URL + (SBJ176.LS47 ? '#zone=' + encodeURIComponent(RD.uid(r)) + (!SBJ_S1.LS68 && r.id !== undefined && r.id !== null ? '&id=' + encodeURIComponent(String(r.id)) : '') : '')) + '"' + (SBJ1710.LS58 ? '>목록표에서 보기</a>' : ' target="_blank" rel="noopener">목록표에서 보기 ↗</a>');   // 17-6(LS47): 목록표가 아직 이 값을 읽지 않으면 지금처럼 첫 화면
   }
   // 17-11(LS60): 결론 문장 숫자 3개 색 — 글자는 V.headline2 그대로, 모양이 다르면(빈칸 등) 맞는 부분만 칠함
   function headColor1711(t) {
