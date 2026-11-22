@@ -141,6 +141,15 @@
   .region-children label.unchecked{ color:var(--muted); }
   .region-children label.region-city-head{ font-weight:600; } /* 경기도 안 구가 있는 시 줄(시 → 구 3단) */
   .region-city-children{ margin-left:16px; }
+  /* 묶음 L125G(구현22): 큰 지역 이름 조금 크게 + 큰 지역 사이 구분선 · 경기 시 아래 구 접힘 · 처음 안내 줄 */
+  .region-group-head label{ font-size:14px; }
+  .region-group + .region-group{ border-top:1px solid var(--border); margin-top:6px; padding-top:6px; }
+  .region-city-head-row{ display:flex; align-items:center; }
+  .region-city-head-row .city-caret{ border:none; background:none; cursor:pointer; padding:0 2px; font-size:11px; color:var(--muted); width:16px; flex:none; margin-left:-18px; }
+  .region-city-head-row label{ flex:1; }
+  .region-city.closed .region-city-children{ display:none; }
+  .pick-hint-l125{ margin:8px 0; padding:10px 12px; border:1px dashed var(--border); border-radius:10px; background:var(--card-bg); color:var(--muted); font-size:14px; font-weight:600; text-align:center; }
+  .pick-hint-l125[hidden]{ display:none; }
   .region-count{ color:var(--muted); font-size:10px; margin-left:auto; }
   .region-panel input[type=checkbox]{ margin:0; cursor:pointer; }
   /* 지역 패널 접기/펴기 버튼(2026-10): 패널 오른쪽 가장자리(스크롤바 바로 옆)에 붙는 22×56px ◀/▶ 하나(기준 파란색 배경·흰 글자). 폭 0짜리 sticky 래퍼라 자리를 차지하지 않고,
@@ -298,6 +307,8 @@
   .m-sheet .region-children{ margin-left:44px; }
   .m-sheet .region-children label{ min-height:44px; padding:0 4px; font-size:15px; gap:10px; }
   .m-sheet .region-city-children{ margin-left:28px; }
+  .m-sheet .region-group-head label{ font-size:17px; }   /* 묶음 L125G */
+  .m-sheet .region-city-head-row .city-caret{ width:28px; height:44px; font-size:15px; margin-left:-30px; }
   .m-sheet .region-panel input[type=checkbox]{ width:22px; height:22px; flex:none; }
   .m-sheet .region-count{ font-size:13px; }
 </style>
@@ -323,6 +334,7 @@
     <div class="mode-bar" id="modeBar"></div>
     <div class="tabs" id="priceTabs"></div>
     <div class="filters" id="filterBar"></div>
+    <div class="pick-hint-l125" id="pickHintL125" role="status" hidden>보고 싶은 지역을 골라 주세요</div>   <!-- 묶음 L125G -->
     <div id="bandContent"></div>
   </div>
 </div>
@@ -354,6 +366,7 @@
     </div>
   </div>
   <div id="mSentinel"></div>
+  <div class="pick-hint-l125" id="mPickHintL125" role="status" hidden>보고 싶은 지역을 골라 주세요</div>   <!-- 묶음 L125G -->
   <main id="mList"></main>
   <div class="m-sheet" id="mFilterSheet" role="dialog" aria-modal="true" aria-label="필터" hidden>
     <div class="m-sheet-back" data-close></div>
@@ -855,8 +868,15 @@ function regionColItems(g){
 function regionColLabelHtml(c, label){
   return '<label class="'+(hiddenCols.has(c.key) ? 'unchecked' : '')+'"><input type="checkbox" data-col="'+esc(c.key)+'"'+(hiddenCols.has(c.key) ? '' : ' checked')+'> '+esc(label)+'<span class="region-count">'+c.count+'</span></label>';
 }
+const L125G = true;   // 묶음 L125G(구현22): false면 예전과 같음
+const openCitiesL125 = new Set();   // 펼쳐 둔 경기 시(구 줄 보임). 기본 = 모두 접힘
 function regionItemHtml(it){
   if (!it.city) return regionColLabelHtml(it.col, it.col.label);
+  if (L125G){
+    const on = it.cols.filter(c => !hiddenCols.has(c.key)).length, sum = it.cols.reduce((s, c) => s + c.count, 0), open = openCitiesL125.has(it.city);
+    return '<div class="region-city'+(open ? '' : ' closed')+'"><div class="region-city-head-row"><button type="button" class="city-caret" data-city-caret="'+esc(it.city)+'" title="구 접기/펼치기" aria-expanded="'+open+'">'+(open ? '▾' : '▸')+'</button><label class="region-city-head'+(on ? '' : ' unchecked')+'"><input type="checkbox" data-city="'+esc(it.city)+'"'+(on === it.cols.length ? ' checked' : '')+'> '+esc(it.city)+'<span class="region-count">'+sum+'</span></label></div>' +
+      '<div class="region-city-children">' + it.cols.map(c => regionColLabelHtml(c, c.key === it.city + '::' + it.city ? '구 없음' : c.key.slice(it.city.length + 2))).join('') + '</div></div>';
+  }
   const on = it.cols.filter(c => !hiddenCols.has(c.key)).length;
   const sum = it.cols.reduce((s, c) => s + c.count, 0);
   return '<div class="region-city"><label class="region-city-head'+(on ? '' : ' unchecked')+'"><input type="checkbox" data-city="'+esc(it.city)+'"'+(on === it.cols.length ? ' checked' : '')+'> '+esc(it.city)+'<span class="region-count">'+sum+'</span></label>' +
@@ -894,6 +914,7 @@ function renderRegionPanel(){
     });
   });
   el.scrollTop = savedTop;
+  if (L125G) pickHintSyncL125(tree);   // 묶음 L125G
 
   el.querySelectorAll('input[data-col]').forEach(box => {
     box.addEventListener('change', () => {
@@ -917,6 +938,9 @@ function renderRegionPanel(){
       renderRegionPanel(); renderBandContent();
     });
   });
+  el.querySelectorAll('button[data-city-caret]').forEach(btn => {   // 묶음 L125G: 경기 시 ▸/▾
+    btn.addEventListener('click', () => { const c = btn.dataset.cityCaret; if (openCitiesL125.has(c)) openCitiesL125.delete(c); else openCitiesL125.add(c); renderRegionPanel(); });
+  });
   el.querySelectorAll('button[data-caret]').forEach(btn => {
     btn.addEventListener('click', () => {
       const r = btn.dataset.caret;
@@ -933,6 +957,28 @@ function renderRegionPanel(){
   });
 }
 
+// ---- 묶음 L125G(구현22): 처음엔 지역 전체 해제 + 안내 줄. 주소 ?지역=…이면 그 지역만 켬 ----
+const L126G = true;   // 묶음 L126G(구현24): false면 g19와 같음
+function allOffL126(){ try { return !!(L125G && L126G && ALL.length && buildColumns(ALL).every(c => hiddenCols.has(c.key))); } catch (e) { return false; } }
+function allOffSetL126(){ hiddenCols.clear(); buildColumns(ALL).forEach(c => hiddenCols.add(c.key)); }
+function pickHintSyncL125(tree){
+  const t = tree || regionTreeData(), any = t.some(g => g.cols.some(c => !hiddenCols.has(c.key)));
+  ['pickHintL125', 'mPickHintL125'].forEach(id => { const h = document.getElementById(id); if (h) h.hidden = any; });
+}
+const REGION_ALIAS_L125 = { '서울': 'seoul', '서울시': 'seoul', '서울특별시': 'seoul', '경기': 'gyeonggi', '경기도': 'gyeonggi', '인천': 'incheon', '인천시': 'incheon', '인천광역시': 'incheon' };
+let _startedL125 = false;
+function startRegionsL125(){   // PC(init)·폰(enterMobile) 어느 쪽이 먼저 열려도 한 번만
+  if (_startedL125 || !ALL.length) return; _startedL125 = true;
+  const cols = buildColumns(ALL);
+  cols.forEach(c => hiddenCols.add(c.key));   // 처음 = 전체 해제
+  let want = []; try { const q = new URLSearchParams(window.location.search); want = String(q.get('지역') || q.get('region') || '').split(',').map(s => s.trim()).filter(Boolean); } catch (e) { want = []; }
+  if (!want.length) return;
+  want.forEach(w => {
+    const r = REGION_ALIAS_L125[w];
+    cols.forEach(c => { if ((r && c.region === r) || c.key === w || c.label === w || cityOfColKey(c.key) === w || c.key.slice(c.key.indexOf('::') + 2) === w) hiddenCols.delete(c.key); });   // 구 이름만(분당구) = 시::구의 뒤쪽
+  });
+  cols.forEach(c => { const city = cityOfColKey(c.key); if (city && !hiddenCols.has(c.key) && want.indexOf(city) < 0) openCitiesL125.add(city); });   // 구만 골라 왔으면 그 시는 펼침
+}
 // 폭 700 이하(CSS @media와 같은 기준)에서는 패널이 위에 쌓여 위아래로 접히므로 ▲/▼, 그 위 폭은 ◀/▶
 const NARROW_MQ = window.matchMedia('(max-width:700px)');
 function panelGlyph(collapsed){ return NARROW_MQ.matches ? (collapsed ? '▼' : '▲') : (collapsed ? '▶' : '◀'); }
@@ -1043,7 +1089,7 @@ function initFilterBar(){
     unitsMinEl.value = '';
     rentalOnly = false;
     rentalOnlyEl.checked = false;
-    hiddenCols.clear();
+    if (typeof L126G !== 'undefined' && L126G) allOffSetL126(); else hiddenCols.clear();   // 묶음 L126G: 지역 = 전체 해제(첫 화면과 같게)
     clearTimeout(pcSearchTimer); // 필터 초기화는 검색어도 지운다
     pcSearchEl.value = '';
     pcSearchClearEl.hidden = true;
@@ -1325,6 +1371,7 @@ function renderPriceRowGrid(content, regionFilterFn, showRegionLabel){
   const priced = buildModeItems(inRegion)
     .filter(p => !hiddenCols.has(colKeyOfComplex(p.complex)));
 
+  if (!priced.length && !searchNorm && allOffL126()){ content.innerHTML = ''; return; }   // 묶음 L126G: 첫 화면(지역 전체 해제)은 안내 줄만
   if (!priced.length){
     const msg = searchNorm ? '검색 결과가 없어요. 검색어나 필터를 바꿔 보세요.' : hiddenCols.size ? '선택된 구/시(또는 연식·세대수 조건)에 해당하는 단지가 없습니다.' : '해당 지역에 단지가 없습니다.';
     content.innerHTML = '<div class="district-section"><div style="color:var(--muted);font-size:13px;padding:16px 20px;">'+msg+'</div></div>';
@@ -1489,6 +1536,7 @@ function init(){
     renderModeBar('', false);
     renderTabs();
     initFilterBar();
+    if (L125G) startRegionsL125();   // 묶음 L125G
     renderRegionPanel();
     renderBandContent();
     renderBottomBar();
@@ -1568,7 +1616,7 @@ window.__geupInit = init;
     else if (st.ageMode === 'over') out.push({ key: 'age', label: '연식 ' + st.ageYears + '년 이상' });
     if (st.unitsMin != null) out.push({ key: 'units', label: '세대수 ' + Number(st.unitsMin).toLocaleString('ko-KR') + ' 이상' });
     if (st.rentalOnly) out.push({ key: 'rental', label: st.rentalLabel });
-    if (st.hiddenCount > 0) out.push({ key: 'region', label: '구·시 ' + st.hiddenCount + '곳 제외' });
+    if (st.hiddenCount > 0 && !allOffL126()) out.push({ key: 'region', label: '구·시 ' + st.hiddenCount + '곳 제외' });   // 묶음 L126G: 전체 해제(첫 화면)일 땐 칩 없음
     return out;
   }
 
@@ -1648,6 +1696,7 @@ window.__geupInit = init;
   function renderList(res){
     const my = ++renderToken, list = $('mList'), secs = res.sections, t0 = performance.now();
     perf.renders++;
+    if (!secs.length && !searchNorm && allOffL126()){ list.innerHTML = ''; perf.lastRender = { rows: 0, firstMs: 0, allMs: 0, sections: 0 }; mRenderedSel = currentSelectionIds(); return; }   // 묶음 L126G: 첫 화면은 안내 줄만
     if (!secs.length){
       list.innerHTML = '<div class="m-empty">조건에 맞는 단지가 없습니다.<br><button type="button" data-reset-all>필터·검색 초기화</button></div>';
       perf.lastRender = { rows: 0, firstMs: performance.now() - t0, allMs: performance.now() - t0, sections: 0 };
@@ -1734,7 +1783,7 @@ window.__geupInit = init;
   function renderSoon(){ clearTimeout(filterTimer); filterTimer = setTimeout(mRender, 250); }
   function resetAllFilters(){
     ageFilterMode = 'none'; ageFilterYears = 20; unitsFilterMin = null; rentalOnly = false;
-    hiddenCols.clear();
+    if (typeof L126G !== 'undefined' && L126G) allOffSetL126(); else hiddenCols.clear();   // 묶음 L126G: 지역 = 전체 해제
     renderRegionPanel(); syncSheet(); mRender();
   }
   function clearOne(key){
@@ -1861,6 +1910,7 @@ window.__geupInit = init;
   function enterMobile(){
     const t0 = performance.now();
     inMobile = true;
+    if (typeof L125G !== 'undefined' && L125G){ startRegionsL125(); try { pickHintSyncL125(); } catch (e) {} }   // 묶음 L125G: 폰으로 먼저 열어도 처음 = 지역 전체 해제
     document.body.classList.add('m-on');
     window.renderBandContent = mRender;
     window.renderModeBar = mRenderModeBar;

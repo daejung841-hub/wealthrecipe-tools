@@ -33,7 +33,7 @@
 // 묶음 L52·L53(83단계): 아래 정적 스크립트 주소의 ?v=와 이 표는 build_l52_versions.py가 빌드 때 실제 파일 해시로 채운다(손으로 쓰지 않음).
 // 표는 25평 seed 지연 로딩(loadSeed25)이 실행 중에 쓴다. EARLY_FLAGS_L52는 xlsx 태그(L53)를 쓸지 정하려고 주소 플래그를 먼저 읽는다
 // (applyBundlesFromUrl과 같은 규칙, 로컬 주소에서만: 값이 없으면 모두 켬, 있으면 적힌 묶음만 — 묶음 이름 'L' 포함).
-var ASSET_VERSIONS_L52 = /*L52_VERSIONS*/{"shared.js":"8e8ee813","seedComplexes.js":"7d7e417e","seedChips.js":"70c405ed","m2Series.js":"acc3bcaa","seedComplexes25.js":"25bb9b37","feedback-widget.js":"52cf1fae","rtAdjust.js":"9a91b8ce","station_walk.js":"d1744c95","school_elem.js":"e368c3b0","calc_map.js":"24fd7675","map_light.js":"437b24a4","map_trade_idx.js":"c94b3db1"}/*END_L52_VERSIONS*/;
+var ASSET_VERSIONS_L52 = /*L52_VERSIONS*/{"shared.js":"8e8ee813","seedComplexes.js":"7d7e417e","seedChips.js":"70c405ed","m2Series.js":"acc3bcaa","seedComplexes25.js":"25bb9b37","feedback-widget.js":"52cf1fae","rtAdjust.js":"9a91b8ce","station_walk.js":"d1744c95","school_elem.js":"e368c3b0","calc_map.js":"bff224ff","map_light.js":"437b24a4","map_trade_idx.js":"c94b3db1"}/*END_L52_VERSIONS*/;
 var EARLY_FLAGS_L52 = (function(){
   var on = { L52: true, L53: true, L86: true, L88: true };   // L86(시세 이력 미루기)은 지도 중심 화면(L85)이 켜져 있을 때만 — L85를 끄면 여기 L86도 false
   try {
@@ -417,6 +417,7 @@ textarea{
 .pyeong-chip b{font-weight:700;color:var(--ink);}
 .pyeong-chip.current{background:var(--accent);border-color:var(--accent);color:#fff;}
 .pyeong-chip.current b{color:#fff;}
+.pyeong-chip .sh126{font-size:10.5px;font-weight:600;opacity:.85;margin-left:2px;white-space:nowrap;}   /* 묶음 L126: 단지 내 ○% */
 .pyeong-chip.other{border-style:dashed;}
 /* 2단계 A(2026-09-30): 다른 평형 칩은 눌러서 전환한다. 25평 로딩·실패, 평형 혼합, 25평 진단 임시 표시 */
 button.pyeong-chip{font:inherit;font-size:11.5px;}
@@ -484,6 +485,27 @@ body.l85-map #mapSectionL84{position:fixed;left:0;right:0;top:48px;bottom:0;marg
 .pick-tabs-l120[hidden],.pick-strip-l120[hidden]{display:none!important;}
 .pick-tabs-l120 button{font:inherit;font-size:14px;font-weight:700;padding:7px 14px;border-radius:10px;border:1px solid var(--border);background:var(--surface);color:var(--ink-muted);cursor:pointer;}
 .pick-tabs-l120 button.active{background:#FFF4E6;border-color:#E8590C;color:#D9480F;}
+/* 묶음 L125(구현22): 탭 줄 오른쪽 [즐겨찾기에서 추가]·작은 창 · 진단 설정 숨김 */
+.pick-tabs-l120 button.fav-add-l125{margin-left:auto;font-size:12.5px;font-weight:700;padding:5px 10px;border-color:#FAB005;background:#FFF9DB;color:#8F5D00;white-space:nowrap;}
+.pick-tabs-l120 button.fav-add-l125:hover{background:#FFF3BF;}
+.fav-add-l125 .s{display:none;}
+@media (max-width:480px){ .fav-add-l125 .l{display:none;} .fav-add-l125 .s{display:inline;} body.l120-pick .pick-tabs-l120 button{padding:5px 9px;font-size:13px;} }
+.fav-pop-l125{position:fixed;z-index:3300;width:min(340px,calc(100vw - 24px));max-height:min(62vh,480px);display:flex;flex-direction:column;background:var(--surface);color:var(--ink);border:1px solid var(--border);border-radius:12px;box-shadow:0 10px 28px rgba(0,0,0,.22);font-size:13.5px;}
+.fav-pop-l125[hidden]{display:none!important;}
+.fav-pop-l125 .hd{display:flex;align-items:center;gap:8px;padding:10px 12px;border-bottom:1px solid var(--border);font-weight:800;}
+.fav-pop-l125 .hd button{margin-left:auto;border:0;background:none;font:inherit;font-size:16px;cursor:pointer;color:var(--ink-muted);min-width:32px;min-height:32px;}
+.fav-pop-l125 .bd{overflow:auto;padding:6px 12px;flex:1;min-height:0;}
+.fav-pop-l125 .gr{margin:8px 0 2px;font-size:12px;font-weight:800;color:var(--ink-muted);}
+.fav-pop-l125 label{display:flex;align-items:center;gap:8px;padding:6px 2px;cursor:pointer;min-height:32px;}
+.fav-pop-l125 label.on{color:var(--ink-muted);cursor:default;}
+.fav-pop-l125 label small{margin-left:auto;font-size:11.5px;color:var(--ink-faint);}
+.fav-pop-l125 input{width:18px;height:18px;flex:none;margin:0;}
+.fav-pop-l125 .em{padding:16px 4px;text-align:center;color:var(--ink-muted);}
+.fav-pop-l125 .ft{display:flex;align-items:center;gap:8px;padding:10px 12px;border-top:1px solid var(--border);}
+.fav-pop-l125 .ft .msg{flex:1;font-size:12px;color:#C2255C;}
+.fav-pop-l125 .ft .go{border:0;border-radius:9px;background:#E8590C;color:#fff;font:inherit;font-weight:800;padding:8px 16px;cursor:pointer;min-height:36px;}
+.fav-pop-l125 .ft .go:disabled{opacity:.45;cursor:default;}
+html.l125 #diagSettingsL125{display:none!important;}
 body.l120-pick .pick-tabs-l120{position:fixed;left:0;right:0;top:48px;height:44px;z-index:60;margin:0;padding:0 12px;align-items:center;flex-wrap:nowrap;background:var(--surface);border-bottom:1px solid var(--border);box-sizing:border-box;}
 body.l120-pick .pick-tabs-l120 button{padding:5px 12px;font-size:13.5px;}
 body.l85-map.l120-pick #mapSectionL84{top:92px;}
@@ -506,10 +528,16 @@ body.l85-map.l120-pick #mapSectionL84{top:92px;}
 .map-head-l85 .mh-tabs button{border:1px solid var(--border);background:var(--surface);color:var(--ink);font:inherit;font-size:13px;font-weight:700;padding:6px 10px;border-radius:999px;cursor:pointer;white-space:nowrap;min-height:34px;}
 .map-head-l85 .mh-tabs button.active{background:var(--accent);border-color:var(--accent);color:#fff;}
 .map-head-l85 .mh-links{margin-left:auto;display:flex;gap:4px;align-items:center;}
+.pk-undo-l128{position:fixed;left:50%;transform:translateX(-50%);top:64px;z-index:3400;background:var(--surface);border:1px solid var(--border);border-radius:999px;box-shadow:0 4px 14px rgba(0,0,0,.12);padding:4px 6px 4px 12px;font-size:12px;color:var(--ink-muted);display:flex;align-items:center;gap:6px;}
+.pk-undo-l128[hidden]{display:none!important;}
+.pk-undo-l128{white-space:nowrap;max-width:calc(100vw - 24px);}
+@media (max-width:767px){ .pk-undo-l128{top:auto;bottom:150px;font-size:12.5px;} }
+.pk-undo-l128 button{border:0;background:none;color:#E8590C;font:inherit;font-weight:700;text-decoration:underline;cursor:pointer;padding:4px 6px;min-height:28px;}   /* 묶음 L128 */
+html.l98b.l127 .map-head-l85 .mh-links a[href^="급지표.html"]{display:inline-flex!important;}   /* 묶음 L127(구현25): 지도 머리줄 급지표 버튼은 보임(?지역= 붙음) */
 @media (max-width:400px){ html.l112 .map-head-l85 .mh-tabs .tx2{display:none;} }   /* 묶음 L112: 폰 390·폴드 344에서는 짧게 — 묶음 L121(구현17): '📊 비교하기' */
 /* 묶음 L98B: 머리줄 이동 버튼은 🏠 초기화면 하나만(급지표·비례율·목록표·임장은 첫 화면에 있음) */
-html.l98b .map-head-l85 .mh-links a[href="급지표.html"], html.l98b .map-head-l85 .mh-links a[href="../rate-simulator/비례율_시뮬레이터.html"], html.l98b .map-head-l85 .mh-links a[href="../redevelopment-list/재개발_목록표.html"], html.l98b .map-head-l85 .mh-links a[href="../imjang/"],
-html.l98b .topbar-actions a[href="급지표.html"], html.l98b .topbar-actions a[href="../rate-simulator/비례율_시뮬레이터.html"], html.l98b .topbar-actions a[href^="../redevelopment-list/"], html.l98b .topbar-actions a[href^="../imjang/"]{display:none!important;}
+html.l98b .map-head-l85 .mh-links a[href^="급지표.html"], html.l98b .map-head-l85 .mh-links a[href="../rate-simulator/비례율_시뮬레이터.html"], html.l98b .map-head-l85 .mh-links a[href="../redevelopment-list/재개발_목록표.html"], html.l98b .map-head-l85 .mh-links a[href="../imjang/"],
+html.l98b .topbar-actions a[href^="급지표.html"], html.l98b .topbar-actions a[href="../rate-simulator/비례율_시뮬레이터.html"], html.l98b .topbar-actions a[href^="../redevelopment-list/"], html.l98b .topbar-actions a[href^="../imjang/"]{display:none!important;}
 .map-head-l85 .mh-links a, .map-head-l85 .mh-links button{border:1px solid var(--border);background:var(--surface);color:var(--ink);font:inherit;font-size:12.5px;padding:5px 8px;border-radius:8px;text-decoration:none;cursor:pointer;white-space:nowrap;min-height:32px;display:inline-flex;align-items:center;}
 .map-head-l85 [hidden]{display:none!important;}
 .seed-wait-l86{position:fixed;left:50%;top:58px;transform:translateX(-50%);z-index:9500;background:#1E3A8A;color:#fff;font-size:13px;font-weight:600;padding:8px 14px;border-radius:999px;box-shadow:0 4px 14px rgba(0,0,0,.2);max-width:calc(100% - 32px);text-align:center;}
@@ -1811,7 +1839,7 @@ body.l36 #baseLibSelect, body.l36 .lib-row:has(> #baseLibSelect){display:none !i
   <div class="map-note-l85" id="mapNoteL85" hidden></div>
   <!-- 묶음 L84(지도 1-1단계): 지도 탭 자리. 지도 코드(calc_map.js)·좌표·네이버 지도는 탭을 처음 열 때만 받는다 -->
   <!-- 묶음 L120(구현15): 여러 단지 비교하기 위 탭 [지도에서 선택][이름으로 선택] + 선택한 단지 비교 중 안내 -->
-  <div class="pick-tabs-l120" id="pickTabsL120" role="tablist" aria-label="단지 고르는 방법" hidden><button type="button" role="tab" data-pick-sub="map">🗺️ 지도에서 선택</button><button type="button" role="tab" data-pick-sub="name">🔍 이름으로 선택</button></div>
+  <div class="pick-tabs-l120" id="pickTabsL120" role="tablist" aria-label="단지 고르는 방법" hidden><button type="button" role="tab" data-pick-sub="map">🗺️ 지도에서 선택</button><button type="button" role="tab" data-pick-sub="name">🔍 이름으로 선택</button><button type="button" class="fav-add-l125" id="favAddL125" hidden aria-haspopup="dialog" title="즐겨찾기한 단지를 선택 목록에 넣기">⭐<span class="l"> 즐겨찾기에서 추가</span><span class="s"> 즐겨찾기</span></button></div>
   <div class="pick-strip-l120" id="pickStripL120" role="status" hidden><span class="t"></span><button type="button" data-pick-back="1">← 지도에서 더 고르기</button></div>
   <section id="mapSectionL84" class="map-wrap-l84" hidden></section>
 
@@ -1927,7 +1955,7 @@ body.l36 #baseLibSelect, body.l36 .lib-row:has(> #baseLibSelect){display:none !i
         </div>
       </details>
 
-      <details class="side-block" open>
+      <details class="side-block" id="diagSettingsL125" open>   <!-- 묶음 L125: html.l125이면 화면에서만 숨김(값·판정 그대로) -->
         <summary>진단 설정<span class="chevron">▸</span></summary>
         <div class="side-block-body">
           <div class="toolbar">
@@ -3178,9 +3206,9 @@ function seoulHistoricalAvg(){
 // 라이브는 주소 플래그를 읽지 않으므로 이 기본값이 그대로 동작한다.
 const BUNDLES = { A:false, B:false, C:false, D1:false, D2:false, D3:false, D4:false, E1:true, E2:false, E3:true, F1:true, F2:true, F3:true, F4:true, F5:true, F6:true,
   H1:false, H2:true, H3:true, H4:true, H5:true, H6:true, H7:true,
-  L1:true, L2:true, L3:true, L4:true, L5:true, L6:false, L7:true, L8:true, L9:true, L10:true, L11:true, L12:true, L13:true, L14:true, L15:true, L16:true, L17:true, L18:true, L19:true, L19B:true, L20:true, L22:true, L23:true, L24:true, L25:true, L26:true, L27:!!window.POOL_EXCLUDE_ON, L31:!!window.NEW_NAME_RULE_ON, L32:true, L33:true, L34:true, L37:true, L28:true, L38:true, L40:true, L39:true, L41:true, L42:true, L43:true, L44:true, L45:true, L46:true, L47:true, L49:true, L48:true, L50:true, L51:true, L52:true, L53:true, L54:true, L55:true, L56:true, L57:true, L58:true, L59:true, L59_DND:true, L59_INFOCARD:true, L59_STATION:true, L59_SCHOOL:true, L59_FAVSEARCH:true, L60:true, L60_REL:false, L60_WHY:false, L60_NOTE:true, L61:true, L64:true, L64_LINK:true, L64_NEWBUILD:false, L65:true, L69:true, L70:true, L71:true, L74:true, L75:true, L76:true, L77:true, L78:true, L79:true, L80:true, L81:true, L82:true, L84:true, L85:true, L85_CROSS:true, L85_LEFT:true, L85_INFO:true, L85_LBL:true, L85_FULL:true, L86:(typeof EARLY_FLAGS_L52 === 'undefined' || !!EARLY_FLAGS_L52.L86), L87:true, L88:true, L88_EMBED:true, L88_SHARE:true, L89:true, L84_RT:true, L84_SC:true, L91:true, L92:true, L93:true, L94:true, L95:true, L96:true, L97:true, L97B:true, L98:true, L98H:true, L98B:true, L35:true, L36:true, L30:true, L29:true, L29R:false, L90N:true, L90G:true, L98J:true, L99A:true, L99C:true, L99B:true, L101:true, L102:true, L102C:true, L103:true, L105:true, L105C:true, L105D:true, L105E:true, L106:true, L107:true, L108:true, L109:true, L111:true, L112:true, L113:true, L114:true, L115:true, L116:true, L117:true, L118:true, L119:false, L120:true, L121:true, L122:true, L123:true, L124:true, L124B:false, K1:false, K2:true, K4:false };
+  L1:true, L2:true, L3:true, L4:true, L5:true, L6:false, L7:true, L8:true, L9:true, L10:true, L11:true, L12:true, L13:true, L14:true, L15:true, L16:true, L17:true, L18:true, L19:true, L19B:true, L20:true, L22:true, L23:true, L24:true, L25:true, L26:true, L27:!!window.POOL_EXCLUDE_ON, L31:!!window.NEW_NAME_RULE_ON, L32:true, L33:true, L34:true, L37:true, L28:true, L38:true, L40:true, L39:true, L41:true, L42:true, L43:true, L44:true, L45:true, L46:true, L47:true, L49:true, L48:true, L50:true, L51:true, L52:true, L53:true, L54:true, L55:true, L56:true, L57:true, L58:true, L59:true, L59_DND:true, L59_INFOCARD:true, L59_STATION:true, L59_SCHOOL:true, L59_FAVSEARCH:true, L60:true, L60_REL:false, L60_WHY:false, L60_NOTE:true, L61:true, L64:true, L64_LINK:true, L64_NEWBUILD:false, L65:true, L69:true, L70:true, L71:true, L74:true, L75:true, L76:true, L77:true, L78:true, L79:true, L80:true, L81:true, L82:true, L84:true, L85:true, L85_CROSS:true, L85_LEFT:true, L85_INFO:true, L85_LBL:true, L85_FULL:true, L86:(typeof EARLY_FLAGS_L52 === 'undefined' || !!EARLY_FLAGS_L52.L86), L87:true, L88:true, L88_EMBED:true, L88_SHARE:true, L89:true, L84_RT:true, L84_SC:true, L91:true, L92:true, L93:true, L94:true, L95:true, L96:true, L97:true, L97B:true, L98:true, L98H:true, L98B:true, L35:true, L36:true, L30:true, L29:true, L29R:false, L90N:true, L90G:true, L98J:true, L99A:true, L99C:true, L99B:true, L101:true, L102:true, L102C:true, L103:true, L105:true, L105C:true, L105D:true, L105E:true, L106:true, L107:true, L108:true, L109:true, L111:true, L112:true, L113:true, L114:true, L115:true, L116:true, L117:true, L118:true, L119:false, L120:true, L121:true, L122:true, L123:true, L124:true, L124B:false, L125:true, L126:true, L127:true, L128:true, K1:false, K2:true, K4:false };
 const BUNDLE_GROUPS = { D:['D1','D2','D3','D4'], E:['E1','E2','E3'], F:['F1','F2','F3','F4','F5','F6'], H:['H1','H2','H3','H4','H5','H6','H7'],
-  L:['L1','L2','L3','L4','L5','L6','L7','L8','L9','L10','L11','L12','L13','L14','L15','L16','L17','L18','L19','L19B','L20','L22','L23','L24','L25','L26','L27','L29','L30','L31','L32','L33','L34','L37','L35','L36','L28','L38','L40','L39','L41','L42','L43','L44','L45','L46','L47','L49','L48','L50','L51','L52','L53','L54','L55','L56','L57','L58','L59','L60','L61','L64','L65','L69','L70','L71','L74','L75','L76','L77','L78','L79','L80','L81','L82','L84','L85','L86','L87','L88','L89','L91','L92','L93','L94','L95','L96','L97','L97B','L98','L98H','L98B','L90N','L90G','L98J','L99A','L99C','L99B','L101','L102','L102C','L103','L105','L105C','L105D','L105E','L106','L107','L108','L109','L111','L112','L113','L114','L115','L116','L117','L118','L119','L120','L121','L122','L123','L124','L124B'], K:['K1','K2','K4'] };
+  L:['L1','L2','L3','L4','L5','L6','L7','L8','L9','L10','L11','L12','L13','L14','L15','L16','L17','L18','L19','L19B','L20','L22','L23','L24','L25','L26','L27','L29','L30','L31','L32','L33','L34','L37','L35','L36','L28','L38','L40','L39','L41','L42','L43','L44','L45','L46','L47','L49','L48','L50','L51','L52','L53','L54','L55','L56','L57','L58','L59','L60','L61','L64','L65','L69','L70','L71','L74','L75','L76','L77','L78','L79','L80','L81','L82','L84','L85','L86','L87','L88','L89','L91','L92','L93','L94','L95','L96','L97','L97B','L98','L98H','L98B','L90N','L90G','L98J','L99A','L99C','L99B','L101','L102','L102C','L103','L105','L105C','L105D','L105E','L106','L107','L108','L109','L111','L112','L113','L114','L115','L116','L117','L118','L119','L120','L121','L122','L123','L124','L124B','L125','L126','L127','L128'], K:['K1','K2','K4'] };
 // 묶음 L46(69단계): 그래프 점선 모양 통일 — 모든 점선을 "선도단지 대비 적정가" 선(FAIR_LINE_STYLE.borderDash)과 같은 긴 점선으로.
 // 촘촘한 점("좁쌀")·점-선 섞인 패턴을 없앤다. 새 점선은 항상 dashL46(예전 값)을 쓴다 — L46을 끄면 예전 값 그대로.
 const DASH_L46 = [5, 4];
@@ -8665,11 +8693,17 @@ function gGroupsL90GRaw(g){ const o = []; for (let i = 0; i + 3 < g.length; i +=
 function gGroupsL90G(g){ const o = gGroupsL90GRaw(g); if (!BUNDLES.L114) return o; const r = [], at = new Map();
   o.forEach(t => { if (t.py) { r.push(t); return; } const k = Math.round(t.lo); if (at.has(k)){ const u = at.get(k); u.n += t.n; u.lo = Math.min(u.lo, t.lo); u.hi = Math.max(u.hi, t.hi); return; }
     const u = Object.assign({}, t, { ex: k }); at.set(k, u); r.push(u); }); return r; }
-function gFindL90G(gs, area){ if (area == null || !isFinite(area)) return -1; let k = gs.findIndex(t => area >= t.lo - 0.005 && area <= t.hi + 0.005); if (k >= 0) return k;
+function gFindL90G(gs, area, units){ if (area == null || !isFinite(area)) return -1;
+  if (BUNDLES.L126){   // 묶음 L126(구현24): 같은 전용면적 칩이 여럿이면 seed 시세 타입 무리 세대수와 같은 칩 → 없으면 세대수 최대 칩
+    const m = []; gs.forEach((t, i) => { if (area >= t.lo - 0.005 && area <= t.hi + 0.005) m.push(i); });
+    if (m.length > 1){ const e = units != null ? m.find(i => gs[i].n === units) : undefined; if (e != null) return e; return m.reduce((a, i) => (gs[i].n > gs[a].n ? i : a), m[0]); }
+  }
+  let k = gs.findIndex(t => area >= t.lo - 0.005 && area <= t.hi + 0.005); if (k >= 0) return k;
   let best = -1, bd = 1e9; gs.forEach((t, i) => { const d = Math.min(Math.abs(area - t.lo), Math.abs(area - t.hi)); if (d < bd){ bd = d; best = i; } }); return bd <= 1.5 ? best : -1; }
 function gChipsL90G(ref, c, cur, target, btnAttrs, seedBasisText, basis25Text){
   const [s, a, b, o, x, q] = c, gs = gGroupsL90G(c[7]); if (!gs.length) return null;
-  const i34 = x && x[0] != null ? gFindL90G(gs, x[0]) : -1, i25 = q ? gFindL90G(gs, q[0]) : -1;
+  const i34 = x && x[0] != null ? gFindL90G(gs, x[0], x[1]) : -1, i25 = q ? gFindL90G(gs, q[0], q[1] === 0 ? q[2] : null) : -1;   // 묶음 L126: 세대수로 같은 전용 칩 가림
+  const tot126 = gs.reduce((a, t) => a + (t.n || 0), 0);   // 묶음 L126: KB 평형 세대 합
   const curI = cur === 25 ? i25 : i34;   // cur null(기타·기본)도 34평 칸(seed 시세 타입) 쪽
   if (curI < 0) return null;   // 지금 칸 평형을 못 찾으면 예전 칩
   const area = (t) => t.lo === t.hi ? '전용 ' + t.lo + '㎡' : '전용 ' + t.lo + '~' + t.hi + '㎡';
@@ -8677,7 +8711,10 @@ function gChipsL90G(ref, c, cur, target, btnAttrs, seedBasisText, basis25Text){
     const lab = t.ex != null ? '<b>전용 ' + t.ex + '㎡</b>' + t.n + '세대' : '<b>' + t.py + '평</b>' + t.n + '세대';   // 묶음 L114: 평형 0은 전용㎡
     const basis = i === i25 && cur === 25 ? basis25Text : i === i34 ? seedBasisText : (i === i25 ? basis25Text : '');
     const tip = (t.ex != null ? area(t) + ' ' + t.n + '세대 · KB 공급평형 정보 없음' : t.py + '평형(' + area(t) + ') ' + t.n + '세대 · KB 평형') + (basis ? '\n' + basis : '');
-    if (i === curI) return '<span class="pyeong-chip current" title="' + esc(tip) + '">' + lab + '</span>';
+    if (i === curI){   // 묶음 L126: 지금 칸 칩이 단지 세대의 10% 미만이면 '단지 내 ○%'
+      const sh = BUNDLES.L126 && tot126 > 0 && t.n / tot126 < 0.10 ? Math.max(1, Math.round(t.n / tot126 * 100)) : 0;
+      return '<span class="pyeong-chip current" title="' + esc(tip + (sh ? '\n이 평형은 단지 세대의 ' + sh + '%(KB 평형 세대 합 ' + tot126 + '세대 중 ' + t.n + '세대)' : '')) + '">' + lab + (sh ? '<span class="sh126">단지 내 ' + sh + '%</span>' : '') + '</span>';
+    }
     if (i === i25 && cur !== 25){
       if (seed25FailedL43()) return '<button type="button" class="pyeong-chip switchable" title="25평 시세를 불러오지 못했어요. 누르면 다시 불러와요"' + btnAttrs(25) + '><b>' + (t.ex != null ? '전용 ' + t.ex + '㎡' : t.py + '평') + '</b>다시 시도</button>';
       if (seed25State === 'loading') return '<button type="button" class="pyeong-chip" disabled title="시세를 불러오는 중입니다"><b>' + (t.ex != null ? '전용 ' + t.ex + '㎡' : t.py + '평') + '</b>불러오는 중…</button>';
@@ -11545,6 +11582,11 @@ function syncLateNoteL79(target){
 function renderSingleActiveChart(bench, target){
   const area = document.getElementById('singleChartArea');
   if (!area) return;
+  if (BUNDLES.L128){   // 묶음 L128(구현26): 탭 눌린 표시와 그래프 지표를 같은 한 값(state.singleActiveChart)에서 — 저장소에서 되살린 값과 HTML 기본 탭이 어긋나던 문제
+    const tabs = Array.from(document.querySelectorAll('#singleChartTabs .tab-btn'));
+    if (tabs.length && !tabs.some(b => b.dataset.schart === state.singleActiveChart)) state.singleActiveChart = 'sale';
+    tabs.forEach(b => b.classList.toggle('active', b.dataset.schart === state.singleActiveChart));
+  }
   const base = bench;
   const comps = singleActiveComps(target);
   if (BUNDLES.L12){   // 묶음 L12: 이 대상의 선도단지 대비 적정가 선을 그릴 수 있는지(A2와 같은 판정)
@@ -11715,7 +11757,10 @@ function pickAddL120(id, p){ const L = pickListL120(); if (!id || L.some(x => x.
 function pickRemoveL120(id){ const L = pickListL120(), i = L.findIndex(x => x.id === id); if (i < 0) return false; L.splice(i, 1); pickSaveL120(); pickChangedL120(); return true; }
 function pickSetL120(arr){ _pickL120 = normPickL120(arr); pickSaveL120(); pickChangedL120(); }
 function pickChangedL120(){ try { if (window.CALC_MAP_L84 && window.CALC_MAP_L84.pickChanged) window.CALC_MAP_L84.pickChanged(); } catch (e) {} pickStripL120(); }
-function pickSubL120(){ if (_pickSubMemL120) return _pickSubMemL120; let v = null; try { v = localStorage.getItem(PICK_SUB_KEY_L120); } catch (e) {} return v === 'name' ? 'name' : 'map'; }
+// 묶음 L125(구현22): 이번 판(g19)에서 처음 열 때는 저장된 탭을 [지도에서 선택]으로 한 번 되돌림 — 그 뒤로는 마지막 탭 기억 그대로
+var PICK_SUB_VER_KEY_L125 = 'benchmarkCalc_multiSubVer_v1', PICK_SUB_VER_L125 = 'g19';
+function pickSubVerL125(){ if (!BUNDLES.L125) return; try { if (localStorage.getItem(PICK_SUB_VER_KEY_L125) !== PICK_SUB_VER_L125){ localStorage.setItem(PICK_SUB_KEY_L120, 'map'); localStorage.setItem(PICK_SUB_VER_KEY_L125, PICK_SUB_VER_L125); } } catch (e) {} }
+function pickSubL120(){ if (_pickSubMemL120) return _pickSubMemL120; pickSubVerL125(); let v = null; try { v = localStorage.getItem(PICK_SUB_KEY_L120); } catch (e) {} return v === 'name' ? 'name' : 'map'; }
 function pickSubSaveL120(v){ _pickSubMemL120 = v; try { localStorage.setItem(PICK_SUB_KEY_L120, v); } catch (e) {} }
 function openPickL120(){
   if (!l120()){ setTopMode('multi'); return; }
@@ -11783,6 +11828,7 @@ function syncPickL120(){
       if (b.dataset.pickSub === 'map'){ if (!(pickOnL120 && state.topMode === 'map')){ saveState(); openPickL120(); } }
       else { pickSubSaveL120('name'); saveState(); setTopMode('multi'); } }); }
     tabs.hidden = !(on && (pick || state.topMode === 'multi'));
+    if (BUNDLES.L125){ const fb = document.getElementById('favAddL125'); if (fb){ fb.hidden = false; if (!fb._w125){ fb._w125 = true; fb.addEventListener('click', ev => { ev.stopPropagation(); favPopToggleL125(fb); }); } } if (tabs.hidden) favPopCloseL125(); }   // 묶음 L125
     const sub = (pick || pickCmpL120) ? 'map' : 'name';
     tabs.querySelectorAll('[data-pick-sub]').forEach(b => { const a = b.dataset.pickSub === sub; b.classList.toggle('active', a); b.setAttribute('aria-selected', String(a)); });
   }
@@ -11847,6 +11893,56 @@ function baseSwapL124(i){
 }
 function baseSwapBtnL124(i){ return (BUNDLES.L124 && state.topMode === 'multi') ? '<button type="button" class="base-swap-l124" data-base-swap-l124="' + i + '" title="이 단지를 기준 단지로">기준으로</button>' : ''; }
 if (BUNDLES.L124 && window.PICK_L120){ window.PICK_L120.clear = () => pickClearL124(); window.PICK_L120.undoClear = () => pickUndoClearL124(); window.PICK_L120.setBase = (id) => pickSetBaseL124(id); }
+// ---- 묶음 L125(구현22): [⭐ 즐겨찾기에서 추가] 작은 창 — 즐겨찾기(그룹별)에서 골라 선택 목록에 바로 넣기 ----
+function favPopCloseL125(){ const p = document.getElementById('favPopL125'); if (p) p.hidden = true; const b = document.getElementById('favAddL125'); if (b) b.setAttribute('aria-expanded', 'false'); }
+function favPopPlaceL125(pop, btn){
+  const r = btn.getBoundingClientRect(), W = window.innerWidth, H = window.innerHeight, w = Math.min(340, W - 24);
+  pop.style.left = Math.max(12, Math.min(r.right - w, W - w - 12)) + 'px';
+  pop.style.top = Math.max(8, Math.min(r.bottom + 6, H - 160)) + 'px';
+  pop.style.maxHeight = Math.max(150, Math.min(480, H - Math.min(r.bottom + 6, H - 160) - 12)) + 'px';
+}
+function favPopToggleL125(btn){
+  let pop = document.getElementById('favPopL125');
+  if (pop && !pop.hidden){ favPopCloseL125(); return; }
+  if (!pop){
+    pop = document.createElement('div'); pop.id = 'favPopL125'; pop.className = 'fav-pop-l125'; pop.setAttribute('role', 'dialog'); pop.setAttribute('aria-label', '즐겨찾기에서 추가'); document.body.appendChild(pop);
+    pop.addEventListener('click', ev => ev.stopPropagation());
+    document.addEventListener('click', ev => { const p = document.getElementById('favPopL125'); if (p && !p.hidden && !(ev.target.closest && ev.target.closest('#favPopL125, #favAddL125'))) favPopCloseL125(); });
+    document.addEventListener('keydown', ev => { if (ev.key === 'Escape') favPopCloseL125(); });
+    window.addEventListener('resize', () => { const p = document.getElementById('favPopL125'), b = document.getElementById('favAddL125'); if (p && !p.hidden && b) favPopPlaceL125(p, b); });
+  }
+  const favs = loadComplexFavsL59(), groups = loadFavGroupsL59(), L = pickListL120(), max = pickMaxL120();
+  const inPick = (id) => L.some(x => x.id === id);
+  let body = '';
+  if (!favs.length) body = '<div class="em">즐겨찾기한 단지가 없어요</div>';
+  else {
+    const secs = favSectionsL59(favs, groups).filter(s => s.items.length), many = secs.length > 1 || (secs[0] && secs[0].gid);
+    body = secs.map(s => (many ? '<div class="gr">' + esc(s.name) + '</div>' : '') + s.items.map(f => {
+      const e = favEntryL59(f), on = inPick(f.id), nm = favLabelL59(f, e);
+      if (!e) return '<label class="on"><input type="checkbox" disabled> ' + esc(nm) + '<small>찾을 수 없음</small></label>';
+      return '<label' + (on ? ' class="on"' : '') + '><input type="checkbox" data-fav125="' + esc(f.id) + '" data-p="' + f.p + '"' + (on ? ' checked disabled' : '') + '> ' + esc(nm) + (on ? '<small>선택됨</small>' : '') + '</label>';
+    }).join('')).join('');
+  }
+  pop.innerHTML = '<div class="hd">⭐ 즐겨찾기에서 추가<button type="button" data-x125 aria-label="닫기">✕</button></div><div class="bd">' + body + '</div>' +
+    (favs.length ? '<div class="ft"><span class="msg" role="status"></span><button type="button" class="go" disabled>추가</button></div>' : '');
+  pop.querySelector('[data-x125]').onclick = favPopCloseL125;
+  const go = pop.querySelector('.go'), msg = pop.querySelector('.msg');
+  const picked = () => [...pop.querySelectorAll('input[data-fav125]:checked:not(:disabled)')];
+  if (go){
+    pop.querySelector('.bd').addEventListener('change', () => { const n = picked().length; go.disabled = !n; go.textContent = n ? n + '곳 추가' : '추가';
+      msg.textContent = n && L.length + n > max ? '최대 ' + max + '곳까지 선택할 수 있어요(지금 ' + L.length + '곳 선택됨)' : ''; });
+    go.onclick = () => {
+      const sel = picked(); if (!sel.length) return;
+      if (pickListL120().length + sel.length > max){ msg.textContent = '최대 ' + max + '곳까지 선택할 수 있어요(지금 ' + pickListL120().length + '곳 선택됨)'; return; }
+      sel.forEach(x => pickAddL120(x.dataset.fav125, Number(x.dataset.p) === 25 ? 25 : 34));
+      favPopCloseL125();
+      if (!(pickOnL120 && state.topMode === 'map')){ try { saveState(); } catch (e) {} openPickL120(); }
+    };
+  }
+  pop.hidden = false; btn.setAttribute('aria-expanded', 'true'); favPopPlaceL125(pop, btn);
+}
+if (BUNDLES.L125 && typeof document !== 'undefined') document.documentElement.classList.add('l125');
+if (BUNDLES.L127 && typeof document !== 'undefined') document.documentElement.classList.add('l127');   // 묶음 L127: 지도 머리줄 급지표 버튼   // 묶음 L125: 진단 설정 숨김 등
 // ---- 묶음 L123(구현18): 고른 단지로 채우는 동작 = 확인 창 없이 바로, 직전 입력 1회분 저장 + '이전 입력으로 되돌리기' 5초 ----
 var UNDO_KEY_L123 = 'benchmarkCalc_undoFill_v1', UNDO_MS_L123 = 5000, _undoMemL123 = null, _undoTimerL123 = null;
 var UNDO_FIELDS_L123 = ['baseText', 'baseName', 'basePreset', 'baseId', 'basePyeong', 'basePending25', 'compares', 'activeSlot'];
@@ -11886,6 +11982,22 @@ function undoFillL123(){
   saveState(); render(); if (hasPending25()) resumePendingPyeong();
   return true;
 }
+// ---- 묶음 L128(구현26): 비교하기 밖에서 머리 탭 '비교하기'로 들어오면 선택 목록을 비움(직전 목록 = 되돌리기 저장소 1회분 + '이전 선택 불러오기' 5초) ----
+function inCmpL128(){ return state.topMode === 'multi' || (typeof pickOnL120 !== 'undefined' && pickOnL120 && state.topMode === 'map'); }
+let _pkUndoTL128 = 0;
+function showPickUndoL128(){
+  let el = document.getElementById('pkUndoL128');
+  if (!el){ el = document.createElement('div'); el.id = 'pkUndoL128'; el.className = 'pk-undo-l128'; el.setAttribute('role', 'status'); el.hidden = true;
+    el.innerHTML = '<span>선택 목록을 비웠어요</span><button type="button">이전 선택 불러오기</button>'; document.body.appendChild(el);
+    el.querySelector('button').addEventListener('click', () => { try { pickUndoClearL124(); } catch (e) {} el.hidden = true; clearTimeout(_pkUndoTL128); try { if (state.topMode === 'multi') { saveState(); render(); } } catch (e) {} }); }
+  el.hidden = false; clearTimeout(_pkUndoTL128); _pkUndoTL128 = setTimeout(() => { el.hidden = true; }, 5000);
+}
+document.addEventListener('click', ev => {
+  if (!BUNDLES.L128 || !BUNDLES.L124 || !l120()) return;
+  const b = ev.target && ev.target.closest && ev.target.closest('#mapHeadL85 [data-l85-mode="multi"], #topModeTabs .top-mode-btn[data-top-mode="multi"]');
+  if (!b || inCmpL128()) return;   // 비교하기 안에서 다시 누름 = 그대로
+  try { if (pickClearL124()) showPickUndoL128(); } catch (e) {}
+}, true);
 // 머리의 '여러 단지 비교하기'를 누르면 마지막으로 쓴 탭으로(지도에서 선택이면 선택 모드 지도). 이름으로 선택이면 원래 동작 그대로
 document.addEventListener('click', ev => {
   if (!BUNDLES.L120 || !l120()) return;
@@ -12590,6 +12702,18 @@ function midPopL94(id, sido){
 // ---- 묶음 L95: 단지 정보 "초등학교" 줄 툴팁 + 줄 누르기 → 지도 ----
 if (BUNDLES.L95 && typeof document !== 'undefined') document.documentElement.classList.add('l95');
 if (BUNDLES.L98B && typeof document !== 'undefined') document.documentElement.classList.add('l98b');
+// ---- 묶음 L126(구현24): 계산기 '급지표' 링크에 지금 보던 단지(최근 본 단지 첫 칸)의 지역 ?지역= — 서울 ○○구, 경기 ○○시, 인천 IC::○○구(서울 중구와 안 섞이게) ----
+function geupRegionL126(){
+  let id = null; try { const l = JSON.parse(localStorage.getItem('benchmarkCalc_recentSingle_v1') || '[]'); if (Array.isArray(l) && l[0]) id = l[0].id || null; } catch (e) {}
+  if (!id) return '';
+  const s = (window.SEED_COMPLEXES || []).find(e => e && e.id === id); if (!s) return '';
+  const city = String(s.regionCity || ''), d = String(s.district || '');
+  if (city === '서울') return d; if (city === '인천') return d ? 'IC::' + d : '인천'; return city;
+}
+function geupHrefL126(){ const r = geupRegionL126(); return '급지표.html' + (r ? '?지역=' + encodeURIComponent(r) : ''); }
+if (BUNDLES.L126 && typeof document !== 'undefined') ['pointerdown', 'focusin', 'mouseover', 'click'].forEach(ev => document.addEventListener(ev, e => {
+  const a = e.target && e.target.closest ? e.target.closest('a[href^="급지표.html"]') : null; if (a) a.setAttribute('href', geupHrefL126());
+}, true));
 if (BUNDLES.L112 && typeof document !== 'undefined') document.documentElement.classList.add('l112');
 if (BUNDLES.L113 && typeof document !== 'undefined') document.documentElement.classList.add('l113');
 if (BUNDLES.L114 && typeof document !== 'undefined') document.documentElement.classList.add('l114');
@@ -12808,7 +12932,7 @@ let l99aStateL99A = 'idle'; const L99A = {};
 function loadL99A(){
   if (!BUNDLES.L99A || l99aStateL99A !== 'idle' || typeof fetch !== 'function') return;
   l99aStateL99A = 'loading';
-  Promise.all(Object.keys(L99A_URL).map(k => { const p = fetch(L99A_URL[k]).then(r => { if (!r.ok) throw new Error(r.status); return r.json(); }).then(j => { L99A[k] = j; }); return k === 'academy' || k === 'elem' || k === 'jgtab' || k === 'parking' || k === 'saleSus' || k === 'parkingNA' || k === 'salePrice' ? p.catch(() => { L99A[k] = null; }) : p; }))   // 학원가 파일만 못 받으면 그 줄만 빠짐
+  Promise.all(Object.keys(L99A_URL).map(k => { const p = fetch(L99A_URL[k]).then(r => { if (!r.ok) throw new Error(r.status); return r.json(); }).then(j => { L99A[k] = j; }); return k === 'academy' || k === 'elem' || k === 'jgtab' || k === 'parking' || k === 'saleSus' || k === 'parkingNA' || k === 'salePrice' || k === 'bldg' ? p.catch(() => { L99A[k] = null; }) : p; }))   // 학원가 파일만 못 받으면 그 줄만 빠짐
     .then(() => { l99aStateL99A = 'loaded'; try { refreshDiagInfoCardL59(); } catch (e) {} })
     .catch(() => { l99aStateL99A = 'error'; });
 }
@@ -12913,6 +13037,23 @@ function saleOfL99A(id){
 }
 const SALE_SUS_URL_L103 = '지도자료_202611/분양_의심칸_1115.json';   // 큐7: 1115(전체/연월, 1114b 대체)   // 묶음 L103: 분양 의심칸 파일 주소(분석 탭 분양_의심칸_1113.json 도착 후 '지도자료_202611/분양_의심칸_1113.json')
 if (BUNDLES.L103 && SALE_SUS_URL_L103) L99A_URL.saleSus = SALE_SUS_URL_L103;
+if (BUNDLES.L125) L99A_URL.bldg = BUNDLES.L127 ? '지도자료_202611/bldg_ratio_l127_1122g23.json' : '지도자료_202611/bldg_ratio_l125_1119g19.json';   // 묶음 L127: KB + 건축물대장 보충   // 묶음 L125(구현22): 현재 용적률·건폐율·최고층수(못 받으면 그 줄만 빠짐)
+// 묶음 L125: [글자, 줄 HTML] — 지금 건물 기준(KB 단지정보). 0·빈칸은 자료에 없음(0%로 안 씀). 셋 다 없으면 줄 없음. 계산·판정에는 안 씀
+function bldgRowL125(id){
+  const B = L99A.bldg, e = (B && id && id[0] !== '_' && Object.prototype.hasOwnProperty.call(B, id)) ? B[id] : null;
+  if (!e) return ['건물', null];
+  const pc = (v) => { const r = Math.round(Number(v)); return (r > 0 ? r : Math.round(Number(v) * 10) / 10) + '%'; };
+  const parts = [e.용적률 > 0 ? '현재 용적률 ' + pc(e.용적률) : '', e.건폐율 > 0 ? '건폐율 ' + pc(e.건폐율) : '', e.최고층 > 0 ? '최고 ' + Math.round(e.최고층) + '층' : ''].filter(Boolean);
+  if (!parts.length) return ['건물', null];
+  if (!e.용적률) parts[0] = '현재 ' + parts[0];   // 용적률이 없어도 '현재'로 시작
+  const t = parts.join(' · ');
+  if (BUNDLES.L127 && e.출처){   // 묶음 L127: 값마다 출처(KB 단지정보 / 건축물대장)
+    const by = { KB: [], 대장: [] }; ['용적률', '건폐율', '최고층'].forEach(k => { if (e[k] > 0) by[e.출처[k] === '대장' ? '대장' : 'KB'].push(k === '최고층' ? '최고층수' : k); });
+    const src = [by.대장.length ? by.대장.join('·') + ' 건축물대장' : '', by.KB.length ? by.KB.join('·') + ' KB 단지정보' : ''].filter(Boolean).join(', ');
+    return ['건물', t, '', true, esc(t) + ' ' + tipL99A('지금 건물 기준(' + src + '). 재건축 탭 용적률은 새로 지을 계획 값')];
+  }
+  return ['건물', t, '', true, esc(t) + ' ' + tipL99A('지금 건물 기준(KB 단지정보). 재건축 탭 용적률은 새로 지을 계획 값')];
+}
 if (BUNDLES.L116) L99A_URL.salePrice = '지도자료_202611/분양가_대표평형_1116g8.json';
 if (BUNDLES.L121){ if (BUNDLES.L116) L99A_URL.salePrice = '지도자료_202611/분양가_대표평형_1118g14.json'; L99A_URL.bunyang = '지도자료_202611/bunyang_l99_1118g14.json'; if (BUNDLES.L102C) L99A_URL.parking = '지도자료_202611/parking_l102d_1118g14.json'; }   // 묶음 L121(구현17): 청량리 키 = seed id · 서초포레스타2 공공분양 · 반포센트레빌 주차(건축물대장)   // 묶음 L116(구현9): 대표 평형 세대당 분양가(못 받으면 그 줄만 빠짐)
 // 묶음 L116: 분양 말풍선 '분양가' 줄 — "84형 4.9억 (청약홈)" / "84형 약 5.6억 (추정)" / "84형 6.8억 (기사)" + 3.3㎡당 값 작은 글씨. 자료 없으면 줄 없음
@@ -13035,6 +13176,7 @@ function diagInfoCardHtmlL59(ref){
     ['전세가율', info.jr != null ? fmtPct(info.jr, 1) : null],
     ['연식', age],
     ['세대수', seed.units ? seed.units.toLocaleString('ko-KR') + '세대' : null],
+    (BUNDLES.L125 ? bldgRowL125(ref.id) : ['건물', null]),   // 묶음 L125: 현재 용적률·건폐율·최고층수(KB 단지정보)
     ['면적', slotAreaTextL69(ref.id, ref.p === 25 ? 25 : 34) || null, (ref.p === 25 ? '25평 칸 기준(전용 56~62㎡)' : '34평 칸 기준(전용 81~86㎡)') + '과 다른 실제 면적 — 평형은 KB 공급면적 기준'],   // 묶음 L69
     ['임대', favRentalTextL59(seed), '총 세대 중 임대 세대(seed rentalHouseholds)', true],   // 108단계: 길어서 한 줄 전체
     ['지하철역', favStationTextL59(ref.id), FAV_STATION_TIP_L59, true, favStationHtmlL59(ref.id)],   // 110단계: 호선 배지
@@ -16116,6 +16258,7 @@ function renderActiveChart(base){
     if (fairNoteEl) fairNoteEl.innerHTML = BUNDLES.L5 ? (BUNDLES.L30 ? (l5Fair && l5Kind ? fairMenuOutlookNoteL30(base, comps, ratioField, l5Kind) : '') : fairMenuOutlookNote(base, comps, ratioField, l5Fair, l5Kind))
       : buildFairOutlookNote(base, comps, ratioField, showFair, benchmarkUsable);
     document.getElementById('recentTable').innerHTML = buildRecentTable(base, comps, field, ratioField, benchmarkOverlay, (BUNDLES.L5 && BUNDLES.L30) ? ((l5Fair && l5Kind) || 'bench') : undefined);
+    if (BUNDLES.L125 && BUNDLES.L97B) recentFoldL97B(document.getElementById('recentTable'), 'multi|' + field);   // 묶음 L125: 단일 단지 화면과 같은 부품(최근 12개월 + 더 보기 — 전체 10년, 상자 안 스크롤 없음)
     const dragResult = document.getElementById('dragResult');
     dragCleanup = wireDragSelect(charts.mainCanvas, document.getElementById('chartCanvasWrap'), document.getElementById('dragBox'), dragResult);
     if (BUNDLES.L40) wirePeriodSliderL40(charts.mainCanvas, base, comps, field);   // 묶음 L40
