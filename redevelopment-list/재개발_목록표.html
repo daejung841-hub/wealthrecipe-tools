@@ -4319,7 +4319,7 @@ const RT21 = {"meta":{"src":"목록표_연결_v3_4_pub.json · 목록표_시계�
     try { relabelLinks(tb); } catch (e) { /* 116차 */ }
     const ch = [...tb.children], q = (x) => tb.querySelector(x), sec = (re) => ch.find((e) => e.classList.contains('modal-section') && re.test((e.querySelector('h4,h3') || {}).textContent || ''));
     const tl = q('.timeline'), tls = tl && tl.closest('.modal-section');
-    const first = [q('#dmpLinks'), tls].filter((e) => e && e.parentElement === tb);
+    const first = [q('#dmpLinks'), tls, q('#dmpHjSec')].filter((e) => e && e.parentElement === tb);   // A 80차: 주변 교통 호재는 진행 단계 바로 다음(급지·주변 아파트 앞)
     const top = [q('#sbjSection'), q('#dmpNearSec'), sec(/핵심 수치/), q('#rtSec')].filter((e) => e && e.parentElement === tb);
     const bottom = [q('#rtSpd')].filter((e) => e && e.parentElement === tb);
     const rest = ch.filter((e) => !first.includes(e) && !top.includes(e) && !bottom.includes(e));
@@ -4585,8 +4585,7 @@ const RT21 = {"meta":{"src":"목록표_연결_v3_4_pub.json · 목록표_시계�
     const h4 = [...tb.querySelectorAll('.modal-section > h4')].find((h) => h.textContent.trim() === '진행 단계'); if (!h4) return;
     load().then((ok) => { if (!ok || tb.querySelector('#dmpHjSec') || !tb.isConnected) return; let s = ''; try { s = html(r); } catch (e) { s = ''; }
       if (!s) { tb.dataset.hjNone = String(r.id); return; }
-      const near = tb.querySelector('#dmpNearSec'), sec = h4.parentElement;
-      if (near && sec.compareDocumentPosition(near) & Node.DOCUMENT_POSITION_FOLLOWING) near.insertAdjacentHTML('beforebegin', s); else sec.insertAdjacentHTML('afterend', s); });
+      h4.parentElement.insertAdjacentHTML('afterend', s); });
   }
   let lastId = null;   // 다른 상세 칸들과 같은 방식: 목록·카드·지도 점([data-id])을 누를 때 구역 id를 기억
   document.addEventListener('click', (e) => { const el = e.target.closest && e.target.closest('[data-id]'); if (el && el.dataset.id && !el.closest('#modalBox')) lastId = parseInt(el.dataset.id, 10); }, true);
