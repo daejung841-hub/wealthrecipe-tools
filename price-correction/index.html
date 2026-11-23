@@ -2533,6 +2533,22 @@ window.SBJ_RENT16 = {"source":"seedComplexes.js@67d3760 (md5 65724010) rentalHou
     const e = ETA8[String(r.id)]; if (!e || (e.k !== 'eta' && e.k !== 'done')) return '';   // 자료 부족(none)·없음 → 표시 안 함
     if (e.k === 'done') return '<div class="zc-grid" data-zc-eta>' + item('예상 준공', '이미 준공(입주)') + '</div>';   // 목록표 '준공'과 같은 뜻
     return '<div class="zc-grid' + (e.c === '낮음' ? ' eta8-lo' : '') + '" data-zc-eta title="' + esc(String(e.tip || '')) + '">' + item('예상 준공', e.y + '년 ' + e.m + '월 · 신뢰 ' + e.c + ' (추정 단계 ' + e.n + '개)') + '</div><div class="small-note" data-zc-eta-note>목록표 추정이에요. 대략의 시기이며 실제와 크게 다를 수 있어요.</div>';
+  // S-7 플래그(LS70, 기본 꺼짐): 목록표 단계 → 시세보정 4구간 대응을 한 곳에서. 목록표 대응표(REDEV 블록 STAGE4, 목록표 연동과 같은 글자라 그대로 둠)에 없는 이름 중
+  //   대표님 결정(11-23 14:16) 3가지만 더함: 조합설립 준비 → 초기, 사업시행인가 → 후기, 일반분양 → 후기. 끄면 이전 동작(빈칸 + 단계 선택 안내)
+  const SBJ_S7 = { LS70: false };
+  const S7_STAGE_ADD = { '조합설립준비': '초기', '사업시행인가': '후기', '일반분양': '후기' };   // 키 = RD.stageKey 모양(공백 없음, 표에 없으면 괄호 설명을 뗌 — '사업시행인가(A-5만 해당)'도 사업시행인가)
+  function stage4S7(s) { const a = RD.stage4(s); if (a || !SBJ_S7.LS70) return a; const k = RD.stageKey(s); return Object.prototype.hasOwnProperty.call(S7_STAGE_ADD, k) ? S7_STAGE_ADD[k] : null; }
+  // 목록표 📐(상자에 단계가 없을 때): 목록표에서 같은 키의 행을 찾아 원래 단계 이름으로 다시 대응
+  function s7FillFromList() {
+    const src = state.target && state.target.source; if (!SBJ_S7.LS70 || !src || src.tool !== 'redevlist' || state.target.stage) return;
+    const key = src.key;
+    loadList().then((p) => {
+      const s = state.target && state.target.source; if (!s || s.tool !== 'redevlist' || s.key !== key || state.target.stage || !p || !p.ok) return;   // 그사이 바뀜·직접 고름
+      const m = E.matchSource({ key }, p.rows.map((x) => x.row)), r = m && m.ok ? m.row : null; if (!r) return;
+      const st4 = stage4S7(r.stage), sk = st4 && L.STAGE4[st4]; if (!sk) return;
+      const wasClean = !isDirty(); state.target.stage = sk; state.options.imported = Object.assign({}, state.options.imported, { 'target.stage': 'redevlist' });
+      frozen = null; fillStatic(); recompute(); if (wasClean) markClean();
+    });
   }
   // 임장에서 온 구역인데 목록표 키(source.listKey)가 없고, 목록표에서 찾는 중도 아닐 때 = 임장 직접 입력 구역
   function imjangDirectS1(st) { const s = st && st.target && st.target.source; return SBJ_S1.LS68 && st.mode === 'redev' && !!s && s.tool === 'imjang' && !s.listKey && !(LOC1712 && LOC1712.key === s.key && LOC1712.status === 'loading'); }
@@ -3745,6 +3761,7 @@ window.SBJ_RENT16 = {"source":"seedComplexes.js@67d3760 (md5 65724010) rentalHou
     toast(L.TOOLS[inbox.from.tool] + '에서 값을 가져왔어요. 표시된 값을 확인하세요.');
     if (SBJ1712.LS61) locate1712(inbox);
     if (SBJ_S4.LS69) s4Fill();   // S-4: 목록표 📐(키 있음)이면 바로, 임장은 목록표 키를 찾은 뒤(locate1712)
+    if (SBJ_S7.LS70) s7FillFromList();   // S-7: 목록표 📐인데 단계가 빈칸이면 목록표 행의 단계 이름으로 다시 대응
   }
   // 17-12(LS61): 임장 상자에는 좌표·구가 없음(임장 app.js sbjInbox) → 받은 목록표 키(from.redevKey)로 [목록표에서 불러오기]와 같은 목록표 읽기(loadList)·키 매칭(E.matchSource)으로 행을 찾아 좌표·구만 채움
   //   구역명·단계·지역구분·출처(source = 임장)·저장 대상은 그대로. 키로 한 곳만 찾을 때만(이름이 같은 구역이 여럿이거나 id 만 맞으면 채우지 않음)
@@ -3760,7 +3777,7 @@ window.SBJ_RENT16 = {"source":"seedComplexes.js@67d3760 (md5 65724010) rentalHou
       const m = p && p.ok ? E.matchSource({ key: rk }, p.rows.map((x) => x.row)) : null, r = m && m.ok ? m.row : null;
       if (SBJ1713.LS62 && r) {   // 17-13(LS62): 출처는 임장 그대로, 목록표 행 키만 덧붙임 · 진행단계는 비어 있을 때만 목록표 값(확인하세요)
         state.target.source = Object.assign({}, state.target.source, { listKey: RD.uid(r) });
-        const st4 = RD.stage4(r.stage), sk = st4 && L.STAGE4[st4];
+        const st4 = SBJ_S7.LS70 ? stage4S7(r.stage) : RD.stage4(r.stage), sk = st4 && L.STAGE4[st4];   // S-7: 대응표 한 곳(stage4S7)
         if (!state.target.stage && sk) { state.target.stage = sk; state.options.imported = Object.assign({}, state.options.imported, { 'target.stage': 'redevlist' }); }
         Z17.sig = null;
       }
@@ -4576,7 +4593,8 @@ window.SBJ_RENT16 = {"source":"seedComplexes.js@67d3760 (md5 65724010) rentalHou
     if (SBJ17.LS32) ['target.units', 'target.builtYear'].forEach((p) => { if (!(p in pt.set) && state.options.imported && state.options.imported[p]) { setPath(state, p, null); delete state.options.imported[p]; } });   // 17단계: 앞 구역에서 가져온 세대수·준공연도가 새 구역에 남지 않게(직접 넣은 값은 그대로)
     if (SBJ_S4.LS69) s4Clear();   // S-4: 앞 구역 추정값(안 고친 것)은 새 구역에 남기지 않음
     Object.keys(pt.set).forEach((p) => setPath(state, p, pt.set[p]));
-    if (!pt.set['target.stage']) state.target.stage = null;
+    let s7sk = null; if (SBJ_S7.LS70 && !pt.set['target.stage']) { const st4 = stage4S7(x.row.stage); s7sk = st4 && L.STAGE4[st4]; }   // S-7: 목록표 대응표에 없는 단계도 대응표 한 곳에서
+    if (s7sk) { state.target.stage = s7sk; pt.imported['target.stage'] = 'redevlist'; } else if (!pt.set['target.stage']) state.target.stage = null;
     if (!pt.set['target.coord']) state.target.coord = null;
     state.target.source = pt.source;
     state.options.imported = Object.assign({}, state.options.imported || {}, pt.imported);
@@ -4585,7 +4603,7 @@ window.SBJ_RENT16 = {"source":"seedComplexes.js@67d3760 (md5 65724010) rentalHou
     devArm17();
     frozen = null; renderAll(false); setOpen(1, true);
     if (SBJ_S4.LS69) s4Fill();
-    if (!pt.set['target.stage']) { const b = modal('진행단계를 선택해 주세요', [para('목록표의 단계 "' + (x.row.stage || '정보 없음') + '"는 판정 단계로 바로 바꿀 수 없어요. 구역 칸의 진행단계를 직접 골라 주세요(사업시행인가라면 감정평가를 마쳤으면 후기, 아직이면 중기).')], [{ label: '확인' }]); b.dataset.stageNeeded = '1'; }
+    if (!pt.set['target.stage'] && !s7sk) { const b = modal('진행단계를 선택해 주세요', [para('목록표의 단계 "' + (x.row.stage || '정보 없음') + '"는 판정 단계로 바로 바꿀 수 없어요. 구역 칸의 진행단계를 직접 골라 주세요(사업시행인가라면 감정평가를 마쳤으면 후기, 아직이면 중기).')], [{ label: '확인' }]); b.dataset.stageNeeded = '1'; }
     else toast(x.label + ' 구역을 불러왔어요. 표시된 값을 확인하세요.');
   }
 
