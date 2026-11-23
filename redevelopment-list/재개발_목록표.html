@@ -4520,5 +4520,79 @@ const RT21 = {"meta":{"src":"목록표_연결_v3_4_pub.json · 목록표_시계�
 </script>
 <!-- DMP_PREVIEW_END -->
 
+<!-- HJ80_START A 80차: 구역 상세 '주변 교통 호재' 칸(진행 단계와 주변 아파트 사이). 자료 = ../map-shared/개발호재_v5_geo.js(지도와 같은 파일, 칸을 처음 열 때만 받음). 구역 중심에서 직선 1km 안 새 역 최대 3개, 없으면 가까운 노선 1개, '구상'은 회색. 좌표 없거나 1km 안에 없으면 칸 없음 -->
+<style>
+.hj80 h4 .hj80-i{color:var(--muted,#8A94A0);font-weight:500;font-size:12px;margin-left:4px}
+.hj80 ul{list-style:none;margin:0;padding:0}
+.hj80 li{font-size:13.5px;line-height:1.5;margin:5px 0;overflow-wrap:anywhere}
+.hj80 .ch{display:inline-block;font-size:11px;font-weight:700;border:1.5px solid;border-radius:999px;padding:0 7px;margin-right:4px;vertical-align:1px;white-space:nowrap}
+.hj80 .ch.k1{color:#1C7ED6;border-color:#1C7ED6}.hj80 .ch.k2{color:#2B8A3E;border-color:#2B8A3E}.hj80 .ch.k3{color:#868E96;border-color:#ADB5BD}
+.hj80 li.gray{color:#868E96}.hj80 li.gray b{color:#868E96}
+.hj80 .sub{color:var(--muted,#5B6670);font-size:12.5px}
+.hj80 .note{font-size:11.5px;color:var(--muted,#5B6670);margin-top:6px;line-height:1.5}
+.hj80 .note a{color:var(--accent,#1E3A8A)}
+</style>
+<script>
+(function hj80(){
+  const SRC = '../map-shared/' + encodeURIComponent('개발호재_v5_geo.js');
+  const R_M = 1000, WALK = 67;   // 직선 1km · 도보 분당 67m(목록표 '역까지 도보'와 같은 속도)
+  const MAP = '../redevelopment-map/' + encodeURIComponent('재개발_지도.html');
+  let P = null, IDX = null;
+  const load = () => P || (P = new Promise((ok) => { if (window.MAP_HOJAE) return ok(true); const s = document.createElement('script'); s.src = SRC; s.onload = () => ok(!!window.MAP_HOJAE); s.onerror = () => { P = null; ok(false); }; document.head.appendChild(s); }));
+  const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  function index(){
+    if (IDX) return IDX; const G = window.MAP_HOJAE || {}; const lines = {}, sts = [];
+    (G.features || []).forEach((f) => { const p = f.properties || {}; if (f.geometry && f.geometry.type === 'Point') sts.push(f); else if (p.line_id) lines[p.line_id] = f; });
+    return (IDX = {lines, sts, day: (G.meta && G.meta['기준일']) || ''});
+  }
+  function hv(a, b, c, d){ const p = Math.PI / 180, x = Math.sin((c - a) * p / 2) ** 2 + Math.cos(a * p) * Math.cos(c * p) * Math.sin((d - b) * p / 2) ** 2; return 2 * 6371008.8 * Math.asin(Math.sqrt(x)); }
+  function lineDist(lat, lng, f){
+    const kx = Math.cos(lat * Math.PI / 180) * 111320, ky = 110540; let best = Infinity;
+    (f.geometry.coordinates || []).forEach((c) => { for (let k = 0; k < c.length - 1; k++) {
+      const ax = (c[k][0] - lng) * kx, ay = (c[k][1] - lat) * ky, bx = (c[k + 1][0] - lng) * kx, by = (c[k + 1][1] - lat) * ky, dx = bx - ax, dy = by - ay, L = dx * dx + dy * dy;
+      const u = L ? Math.max(0, Math.min(1, -(ax * dx + ay * dy) / L)) : 0; best = Math.min(best, Math.hypot(ax + u * dx, ay + u * dy)); } });
+    return best;
+  }
+  const KIND = (s) => s === '공사 중' ? 'k1' : s === '계획 확정' ? 'k2' : 'k3';
+  function find(r){
+    const {lines, sts} = index(); const near = [];
+    sts.forEach((s) => { const c = s.geometry.coordinates, d = hv(r.lat, r.lng, c[1], c[0]); if (d > R_M) return;
+      const p = s.properties || {}; const ids = Array.isArray(p.line_id) ? p.line_id : [p.line_id];
+      ids.forEach((id) => { const L = lines[id] && lines[id].properties; if (!L) return; near.push({st: p['역명'], ln: L['짧은이름'] || id, lid: id, stage: L['단계'] || '', yr: L['개통예정연도'] || p['개통예정연도'] || '', m: d, tr: !!p['환승']}); }); });
+    near.sort((a, b) => a.m - b.m);
+    const seen = new Set(), st = []; near.forEach((n) => { const k = n.ln + '|' + n.st; if (!seen.has(k) && st.length < 3) { seen.add(k); st.push(n); } });
+    let ln = null;
+    if (!st.length) Object.keys(lines).forEach((id) => { const d = lineDist(r.lat, r.lng, lines[id]); const p = lines[id].properties; if (d <= R_M && (!ln || d < ln.m)) ln = {ln: p['짧은이름'] || id, stage: p['단계'] || '', yr: p['개통예정연도'] || '', m: d}; });
+    return {st, ln};
+  }
+  function html(r){
+    const {st, ln} = find(r); if (!st.length && !ln) return '';
+    const chip = (s) => `<span class="ch ${KIND(s)}">${esc(s === '구상' ? '구상' : s)}</span>`;
+    const yr = (n) => n.stage === '구상' ? '개통 시기 미정' : (n.yr ? `${n.yr}년 개통 목표` : '개통 시기 미정');
+    let li = st.map((n) => `<li class="${n.stage === '구상' ? 'gray' : ''}">${chip(n.stage)}<b>${esc(n.ln)} ${esc(n.st)}역</b>${n.tr ? ' 정차' : '(새 역)'} · 도보 약 ${Math.max(1, Math.ceil(n.m / WALK))}분 <span class="sub">· ${esc(yr(n))}</span></li>`).join('');
+    if (!st.length) li = `<li class="${ln.stage === '구상' ? 'gray' : ''}">${chip(ln.stage)}${esc(ln.ln)} 노선이 약 ${(Math.round(ln.m / 10) * 10).toLocaleString()}m 거리를 지나요 <span class="sub">· 역 위치 미정 · ${esc(yr(ln))}</span></li>`;
+    const day = index().day; const u = [r.sheet || '', r.name || '', r.subCode == null ? '' : String(r.subCode)].join('|');
+    const go = r.noPos || r.mapNo ? '' : ` · <a href="${MAP}#zone=${encodeURIComponent(u)}${r.id != null ? '&id=' + r.id : ''}" title="지도 위 '개발 호재' 버튼을 누르면 노선이 보여요">지도에서 노선 보기</a>`;
+    return `<div class="modal-section hj80" id="dmpHjSec"><h4>주변 교통 호재<span class="hj80-i" title="구역 중심에서 직선 1km 안의 새 역(공사 중·계획 확정·구상). 역이 없으면 1km 안을 지나는 가장 가까운 노선 1개. '구상'은 아직 확정되지 않은 노선이라 회색이에요.">ⓘ</span></h4><ul>${li}</ul>`
+      + `<div class="note">구역 중심에서 직선 1km 안 · 도보는 분당 67m 직선 기준 · 단계·개통 목표는 ${esc(day)} 조사 기준이라 참고용이에요(바뀔 수 있어요)${go}</div></div>`;
+  }
+  const box = document.getElementById('modalBox');
+  function put(){
+    const tb = box && box.querySelector('.modal-tab-body'); if (!tb || tb.querySelector('#dmpHjSec')) return;
+    if (lastId == null || tb.dataset.hjNone === String(lastId)) return;
+    const r = REDEV_DATA.find((d) => d.id === lastId);
+    if (!r || r.lat == null || r.lng == null) return;
+    const h4 = [...tb.querySelectorAll('.modal-section > h4')].find((h) => h.textContent.trim() === '진행 단계'); if (!h4) return;
+    load().then((ok) => { if (!ok || tb.querySelector('#dmpHjSec') || !tb.isConnected) return; let s = ''; try { s = html(r); } catch (e) { s = ''; }
+      if (!s) { tb.dataset.hjNone = String(r.id); return; }
+      const near = tb.querySelector('#dmpNearSec'), sec = h4.parentElement;
+      if (near && sec.compareDocumentPosition(near) & Node.DOCUMENT_POSITION_FOLLOWING) near.insertAdjacentHTML('beforebegin', s); else sec.insertAdjacentHTML('afterend', s); });
+  }
+  let lastId = null;   // 다른 상세 칸들과 같은 방식: 목록·카드·지도 점([data-id])을 누를 때 구역 id를 기억
+  document.addEventListener('click', (e) => { const el = e.target.closest && e.target.closest('[data-id]'); if (el && el.dataset.id && !el.closest('#modalBox')) lastId = parseInt(el.dataset.id, 10); }, true);
+  if (box) new MutationObserver(() => { put(); }).observe(box, {childList: true, subtree: true});
+})();
+</script>
+<!-- HJ80_END -->
 </body>
 </html>
