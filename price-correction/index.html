@@ -285,6 +285,8 @@ body.l50 .jline[data-badge] > .badge:first-child{font-size:28px;font-weight:800;
 .zone-card .zc-item{display:flex;flex-direction:column;min-width:0;font-size:13px;}
 .zone-card .zc-item .k{font-size:11.5px;color:var(--ink-muted);}
 .zone-card .zc-item .v{font-weight:600;overflow-wrap:anywhere;}
+.zone-card .eta8-lo .zc-item .v{color:var(--ink-faint);}
+.zone-card [data-zc-eta]{grid-template-columns:1fr;}
 .zone-card .zc-tl{font-size:12.5px;line-height:1.55;margin-top:4px;}
 .zone-card .zc-tl .cur{font-weight:700;color:var(--accent);}
 .zone-card .zc-none{font-size:13.5px;color:var(--ink-muted);margin-top:4px;}
@@ -2513,6 +2515,25 @@ window.SBJ_RENT16 = {"source":"seedComplexes.js@67d3760 (md5 65724010) rentalHou
   const G1718 = { open: false };   // 급지별 적정 마진 표(ⓘ) 펼침
   // S-1 플래그: LS68 [목록표에서 보기] 주소는 구역 키(#zone=)만(&id= 뺌) + 임장 직접 입력 구역(목록표 키 없음)일 때만 지역 버튼(regionCell)과 안내 한 줄. 판정 공식·엔진 그대로, 끄면 17-18 동작
   const SBJ_S1 = { LS68: true };
+  // S-8 플래그(LS71, 기본 꺼짐): 구역 카드 '일정·속도'에 목록표 예상 준공(예상준공_A66.js, 읽기만)을 목록표 상세와 같은 글로
+  //   "예상 준공 2035년 3월 · 신뢰 낮음 (추정 단계 4개)". 자료 부족 구역은 표시하지 않음. 계산·판정에는 쓰지 않음. 끄면 이전 동작
+  const SBJ_S8 = { LS71: false };
+  const ETA8_URL = '../redevelopment-list/' + encodeURIComponent('예상준공_A66.js');
+  let ETA8 = null, ETA8P = null;   // { [목록표 행 id]: {k:'eta'|'none'|'done', y, m, c, n, tip} } — 목록표가 같은 배포의 REDEV_DATA 행 id 로 만든 자료
+  function loadEta8() {
+    if (ETA8) return Promise.resolve(ETA8); if (ETA8P) return ETA8P;
+    ETA8P = fetch(ETA8_URL, { cache: 'no-cache' }).then((r) => (r.ok ? r.text() : '')).then((t) => {
+      const a = t.indexOf('window.RT_ETA66 = '); if (a < 0) return null; const s = a + 'window.RT_ETA66 = '.length, e = t.indexOf(';\n', s);
+      const j = JSON.parse(t.slice(s, e < 0 ? undefined : e)); return j && typeof j === 'object' ? j : null;
+    }).catch(() => null).then((j) => { ETA8 = j; ETA8P = null; return j; });
+    return ETA8P;
+  }
+  function eta8Html(r, item) {
+    if (!SBJ_S8.LS71 || !ETA8 || !r || r.id === undefined || r.id === null || (state.options && state.options.example)) return '';
+    const e = ETA8[String(r.id)]; if (!e || (e.k !== 'eta' && e.k !== 'done')) return '';   // 자료 부족(none)·없음 → 표시 안 함
+    if (e.k === 'done') return '<div class="zc-grid" data-zc-eta>' + item('예상 준공', '이미 준공(입주)') + '</div>';   // 목록표 '준공'과 같은 뜻
+    return '<div class="zc-grid' + (e.c === '낮음' ? ' eta8-lo' : '') + '" data-zc-eta title="' + esc(String(e.tip || '')) + '">' + item('예상 준공', e.y + '년 ' + e.m + '월 · 신뢰 ' + e.c + ' (추정 단계 ' + e.n + '개)') + '</div><div class="small-note" data-zc-eta-note>목록표 추정이에요. 대략의 시기이며 실제와 크게 다를 수 있어요.</div>';
+  }
   // 임장에서 온 구역인데 목록표 키(source.listKey)가 없고, 목록표에서 찾는 중도 아닐 때 = 임장 직접 입력 구역
   function imjangDirectS1(st) { const s = st && st.target && st.target.source; return SBJ_S1.LS68 && st.mode === 'redev' && !!s && s.tool === 'imjang' && !s.listKey && !(LOC1712 && LOC1712.key === s.key && LOC1712.status === 'loading'); }
   // S-4 플래그(LS69, 기본 꺼짐): 실매수가 자동 채움 시안. 목록표 구역(목록표 📐·[목록표에서 불러오기]·임장 구역의 목록표 키)이고
@@ -4122,9 +4143,10 @@ window.SBJ_RENT16 = {"source":"seedComplexes.js@67d3760 (md5 65724010) rentalHou
     const ratio = (/¦ratio=([\d.]+)/.exec(String(r.grade || '')) || [])[1];
     const gname = r.grade ? String(r.grade).split(/[(¦]/)[0].trim() : null;
     const hh = typeof r.households === 'number' ? r.households : (typeof r.estHouseholds === 'number' ? '약 ' + r.estHouseholds.toLocaleString('ko-KR') + ' (추정)' : null);
+    let eta8 = '';   // S-8(LS71)
     return '<h2 data-zc-name>' + esc(String(r.name) + (r.subCode ? ' ' + r.subCode : '')) + '</h2><div class="zc-sub">' + esc([zsheet(r.sheet), r.sigungu || r.gu, stageTxt].filter(Boolean).join(' · ')) + '</div>' +
       sec('기본 정보', '<div class="zc-grid" data-zc-basic>' + item('지역', region || '—') + item('사업 유형', zsheet(r.sheet)) + item('구역면적', zv(r.area)) + item('평균대지지분', zv(r.landShare)) + item('시공사', zv(r.builder)) + item('토지등소유자수', zv(r.owners)) + item('확인일', zv(r.confirmDate)) + '</div>') +
-      (SBJ174.LS39 ? (tl || SBJ_ZC_ETA ? sec('일정·속도', (SBJ_ZC_ETA ? '<div class="zc-grid" data-zc-sched>' + item('예상 준공', '—') + '</div>' : '') + tl) : '') : sec('일정·속도', '<div class="zc-grid" data-zc-sched>' + item('진행단계', stageTxt) + item('단계 진입', zym(r.lastDate) || '—') + item('진행 속도', speed) + item('예상 준공', '—') + '</div>' + tl)) +
+      (SBJ174.LS39 ? ((eta8 = eta8Html(r, item)), (tl || SBJ_ZC_ETA || eta8) ? sec('일정·속도', eta8 + (SBJ_ZC_ETA && !eta8 ? '<div class="zc-grid" data-zc-sched>' + item('예상 준공', '—') + '</div>' : '') + tl) : '') : sec('일정·속도', '<div class="zc-grid" data-zc-sched>' + item('진행단계', stageTxt) + item('단계 진입', zym(r.lastDate) || '—') + item('진행 속도', speed) + item('예상 준공', '—') + '</div>' + tl)) +
       sec('핵심 수치', '<div class="zc-grid" data-zc-core>' + item('예정 세대수', zv(hh)) + item('조합원수', zv(r.union != null ? r.union : r.owners)) + item('일반분양', zv(gen) + zpct(gen, r.union != null ? r.union : r.owners, '조합원 대비')) + item('임대', zv(r.tenant) + zpct(r.tenant, r.households, '전체 세대 대비')) + '</div>') +
       sec('사업성 지표', '<div class="zc-grid" data-zc-biz>' + item('사업성등급', zv(gname)) + item('일반분양비율', ratio ? ratio + '%' : '—') + item('용적률', zv(r.farRatio)) + item('층수', zv(r.floors)) + '</div>') +
       '<a class="zc-link" data-zc-link href="' + esc(RD.LIST_URL + (SBJ176.LS47 ? '#zone=' + encodeURIComponent(RD.uid(r)) + (!SBJ_S1.LS68 && r.id !== undefined && r.id !== null ? '&id=' + encodeURIComponent(String(r.id)) : '') : '')) + '"' + (SBJ1710.LS58 ? '>목록표에서 보기</a>' : ' target="_blank" rel="noopener">목록표에서 보기 ↗</a>');   // 17-6(LS47): 목록표가 아직 이 값을 읽지 않으면 지금처럼 첫 화면
@@ -4150,7 +4172,7 @@ window.SBJ_RENT16 = {"source":"seedComplexes.js@67d3760 (md5 65724010) rentalHou
     if (!key) { el.innerHTML = plain(name ? '목록표에 없는 구역이에요' : '구역을 불러오면 여기에 요약이 보여요'); return; }
     if (state.options && state.options.example && SBJ16.LS27 && !(state.target.source && state.target.source.key)) { el.innerHTML = zoneCardHtml(SBJ_EXAMPLE_ROW17); return; }   // 예시는 사본으로(첫 화면 요청 0)
     el.innerHTML = '<h2 data-zc-name>' + esc(name || '구역 요약') + '</h2><div class="zc-none">목록표에서 구역 정보를 읽는 중…</div>';
-    loadList().then((d) => { if (Z17.sig !== sig) return; const x = d && d.ok ? d.rows.find((y) => y.uid === key) : null; el.innerHTML = x ? zoneCardHtml(x.row) : plain('목록표에 없는 구역이에요'); }).catch(() => { if (Z17.sig === sig) Z17.sig = null; });
+    (SBJ_S8.LS71 ? loadEta8().then(() => loadList()) : loadList()).then((d) => { if (Z17.sig !== sig) return; const x = d && d.ok ? d.rows.find((y) => y.uid === key) : null; el.innerHTML = x ? zoneCardHtml(x.row) : plain('목록표에 없는 구역이에요'); }).catch(() => { if (Z17.sig === sig) Z17.sig = null; });
   }
   const PRICE25_URL = '../benchmark-calculator/complex_index_25.json';   // ㉮ 정식 25평 인덱스 자리(이름은 ㉮ 확정 뒤 이 한 곳만)
   var priceIdx25P;
