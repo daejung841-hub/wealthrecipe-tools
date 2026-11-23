@@ -377,6 +377,8 @@ body.l46 .py17 button{flex:1 0 auto;white-space:nowrap;}
 .regionseg[hidden]{display:none;}
 .region-s1{margin-top:4px;}
 .region-s1[hidden]{display:none;}
+.s4-note{margin:6px 0 2px;background:var(--warn-bg);color:var(--warn);border-radius:8px;padding:6px 10px;font-size:13px;font-weight:600;}
+.s4-note[hidden]{display:none;}
 .ac-list{position:absolute;left:0;right:0;top:100%;z-index:40;background:var(--surface);border:1px solid var(--border);border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.14);max-height:min(56vh,420px);overflow-y:auto;margin-top:2px;}
 .ac-item{padding:8px 10px;cursor:pointer;border-bottom:1px solid var(--border);min-height:40px;}
 .ac-item:last-child{border-bottom:0;}
@@ -2365,6 +2367,7 @@ window.SBJ_RENT16 = {"source":"seedComplexes.js@67d3760 (md5 65724010) rentalHou
             <div class="f"><label for="bBuy">실매수가 (억)</label><input id="bBuy" data-path="buy.purchasePrice" data-kind="eok" inputmode="decimal" placeholder="2.83"><span class="hint" data-hint="buy.purchasePrice"></span><span class="err" data-err="buy.purchasePrice"></span></div>
             <div class="f"><label for="bDep">전세·대출 (억)</label><input id="bDep" data-path="buy.deposit" data-kind="eok" inputmode="decimal" placeholder="0.95 (없으면 0)"><span class="hint" data-hint="buy.deposit"></span><span class="err" data-err="buy.deposit"></span></div>
           </div>
+          <div class="s4-note" id="s4Note" hidden data-s4-note></div>
           <div class="zrow">
             <div><span class="lbl">감정가</span><div class="seg" id="apSeg"><button type="button" data-ap="fixed">확정값</button><button type="button" data-ap="range">공시가로 추정</button></div></div>
             <div class="f" id="apFixed"><label for="bAppr">감정가 (억)</label><input id="bAppr" data-path="buy.appraisal.value" data-kind="eok" inputmode="decimal" placeholder="1.43"><span class="hint" data-hint="buy.appraisal.value"></span><span class="err" data-err="buy.appraisal.value"></span></div>
@@ -2512,6 +2515,57 @@ window.SBJ_RENT16 = {"source":"seedComplexes.js@67d3760 (md5 65724010) rentalHou
   const SBJ_S1 = { LS68: true };
   // 임장에서 온 구역인데 목록표 키(source.listKey)가 없고, 목록표에서 찾는 중도 아닐 때 = 임장 직접 입력 구역
   function imjangDirectS1(st) { const s = st && st.target && st.target.source; return SBJ_S1.LS68 && st.mode === 'redev' && !!s && s.tool === 'imjang' && !s.listKey && !(LOC1712 && LOC1712.key === s.key && LOC1712.status === 'loading'); }
+  // S-4 플래그(LS69, 기본 꺼짐): 실매수가 자동 채움 시안. 목록표 구역(목록표 📐·[목록표에서 불러오기]·임장 구역의 목록표 키)이고
+  //   실매수가·공시가·감정가 칸이 모두 비어 있을 때만 실거래 기준 추정값 묶음(실매수가·전세·공시가)을 채움. 넣거나 고친 값은 덮어쓰지 않음. 끄면 이전 동작 그대로
+  const SBJ_S4 = { LS69: false };
+  // 대체값 방식은 여기 한 곳에서: method 'rep6' = 6개월 대표 매매가(목록표 카드 투자금 + 전세 하단, S-3 추천, 5건 미만이면 12개월)
+  //   · 'med6' = 같은 기간 매매가 중앙값 · 'recent3' = 최근 3개월 중앙값(minN3건 미만이면 rep6). url = 구역별 값 파일(시안: S-3 후보표에서 만든 잠정 값)
+  const S4_CFG = { method: 'rep6', url: 's4_buy_draft_v1.json', minN3: 3 };
+  let S4P = null;
+  function loadS4() { if (S4P) return S4P; S4P = fetch(S4_CFG.url, { cache: 'no-cache' }).then((r) => (r.ok ? r.json() : null)).then((j) => (j && j.meta && j.z && Array.isArray(j.meta.cols) ? j : null)).catch(() => null).then((j) => { if (!j) S4P = null; return j; }); return S4P; }
+  function s4Pick(doc, key) {
+    const a = doc && doc.z && Object.prototype.hasOwnProperty.call(doc.z, key) ? doc.z[key] : null; if (!Array.isArray(a)) return null;
+    const c = doc.meta.cols, g = (n) => a[c.indexOf(n)], per = g('per') === 12 ? 12 : 6;
+    let buy = g('rep'), how = per + '개월 대표값';
+    if (S4_CFG.method === 'med6' && E.isNum(g('med'))) { buy = g('med'); how = per + '개월 중앙값'; }
+    if (S4_CFG.method === 'recent3' && E.isNum(g('r3')) && g('n3') >= S4_CFG.minN3) { buy = g('r3'); how = '최근 3개월 중앙값'; }
+    const dep = g('dep'), pub = g('pub');
+    if (!E.isNum(buy) || buy <= 0 || !E.isNum(dep) || dep < 0 || dep > buy || !E.isNum(pub) || pub <= 0) return null;
+    return { buy, dep, pub, n: g('n'), few: g('few') === 1, how, asof: doc.meta.asof };
+  }
+  function s4Key(st) { const s = st && st.target && st.target.source; if (!s) return null; if (s.tool === 'redevlist') return s.key || null; if (s.tool === 'imjang' && s.listKey) return s.listKey; return null; }
+  const s4Empty = () => !E.isNum(state.buy.purchasePrice) && !E.isNum(state.buy.appraisal.publicPrice) && !E.isNum(state.buy.appraisal.value);   // 매수가가 있거나 다른 집 공시가·감정가가 있으면 채우지 않음
+  function s4Fill() {
+    if (!SBJ_S4.LS69 || state.mode !== 'redev') return;
+    const key = s4Key(state); if (!key || !s4Empty()) return;
+    loadS4().then((doc) => {
+      if (s4Key(state) !== key || !s4Empty()) return;   // 그사이 구역이 바뀌었거나 직접 넣음
+      const p = s4Pick(doc, key); if (!p) return;   // 값 없는 구역 = 지금처럼 빈칸
+      const wasClean = !isDirty(), imp = state.options.imported = Object.assign({}, state.options.imported || {}), paths = [];
+      const put = (path, v) => { setPath(state, path, v); imp[path] = 's4'; paths.push(path); };
+      const prevType = state.buy.appraisal.type;
+      put('buy.purchasePrice', p.buy);
+      if (!E.isNum(state.buy.deposit)) put('buy.deposit', p.dep);
+      put('buy.appraisal.publicPrice', p.pub); state.buy.appraisal.type = 'range';   // 같은 거래들의 공시가(매수가와 같은 집 기준)
+      state.options.s4 = { key, paths, prevType, asof: p.asof, how: p.how, n: p.n, few: p.few, method: S4_CFG.method };
+      frozen = null; fillStatic(); recompute(); if (wasClean) markClean();
+    });
+  }
+  // 다른 구역을 불러올 때: 앞 구역 추정값(아직 안 고친 것)만 비움
+  function s4Clear() {
+    const s = state.options && state.options.s4, imp = (state.options && state.options.imported) || {}; if (!s) return;
+    s.paths.forEach((p) => { if (imp[p] === 's4') { setPath(state, p, null); delete imp[p]; } });
+    if (!E.isNum(state.buy.appraisal.publicPrice) && s.prevType) state.buy.appraisal.type = s.prevType;
+    delete state.options.s4;
+  }
+  // 묶음 표시: 하나라도 고치면 묶음 전체 표시를 해제(값은 그대로)
+  function s4Sync() {
+    const el = $('s4Note'); if (!SBJ_S4.LS69) { if (el) el.hidden = true; return; }
+    const s = state.options && state.options.s4, imp = (state.options && state.options.imported) || {};
+    if (s && !s.paths.every((p) => imp[p] === 's4')) { s.paths.forEach((p) => { if (imp[p] === 's4') delete imp[p]; }); delete state.options.s4; }
+    const t = state.options && state.options.s4;
+    if (el) { el.hidden = !t; el.textContent = t ? '실거래 기준 추정값(' + t.asof + ' 기준 · ' + t.how + ', 거래 ' + t.n + '건' + (t.few ? ' · 거래 적음, 참고만' : '') + '). 실매수가·전세·공시가를 실제 매수가로 고쳐 주세요' : ''; }
+  }
   let LOC1712 = null;   // { key: 임장 구역 id, status: 'loading'|'found'|'none' } — 지금 화면의 임장 구역 위치 찾기 상태(저장하지 않음)
   const GI_COORDS_URL = 'data/gi_coords_v1.json';   // LS55: 비교단지 이름 검색(단지 찾기·이름 자동완성)에 좌표 파일에 없는 단지(경기·인천 등, 현재가 인덱스에만 있음)도 보여 줌 — 고르면 현재가 자동, 준공연도·세대수는 직접 입력
   if (SBJ177.LS50 && document.body) document.body.classList.add('l50');
@@ -3149,6 +3203,7 @@ window.SBJ_RENT16 = {"source":"seedComplexes.js@67d3760 (md5 65724010) rentalHou
   // ───────── 계산과 결과 ─────────
   // 가져온 값: 값을 고치기 전까지 "가져온 값 · 확인하세요" 표시(state.options.imported = {경로: 도구})
   function renderImported() {
+    s4Sync();   // S-4(LS69): 고친 칸이 있으면 추정값 묶음 표시 해제
     const imp = (state.options && state.options.imported) || {};
     document.querySelectorAll('.imp').forEach((el) => el.remove());
     Object.keys(imp).forEach((path) => {
@@ -3159,6 +3214,7 @@ window.SBJ_RENT16 = {"source":"seedComplexes.js@67d3760 (md5 65724010) rentalHou
       const s = document.createElement('span'); s.className = 'imp'; s.dataset.impFor = path;
       let txt = imp[path] === 'redevlist' ? '목록표 값(매물 최저가 기준) · 확인하세요' : '가져온 값 · 확인하세요';
       if (imp[path] === 'redevlist' && !/^buy\.(purchasePrice|deposit)$/.test(path)) txt = '목록표 값 · 확인하세요';
+      if (imp[path] === 's4') txt = '실거래 기준 추정값 · 실제 매수가로 고쳐 주세요';
       s.title = txt; s.setAttribute('role', 'img'); s.setAttribute('aria-label', txt);   // 9단계: 새 줄을 만들지 않는 작은 점(글은 툴팁·화면 읽기용)
       const sr = document.createElement('span'); sr.className = 'sr'; sr.textContent = txt; s.appendChild(sr);
       lab.appendChild(s);
@@ -3667,6 +3723,7 @@ window.SBJ_RENT16 = {"source":"seedComplexes.js@67d3760 (md5 65724010) rentalHou
     renderAll(true); markClean();
     toast(L.TOOLS[inbox.from.tool] + '에서 값을 가져왔어요. 표시된 값을 확인하세요.');
     if (SBJ1712.LS61) locate1712(inbox);
+    if (SBJ_S4.LS69) s4Fill();   // S-4: 목록표 📐(키 있음)이면 바로, 임장은 목록표 키를 찾은 뒤(locate1712)
   }
   // 17-12(LS61): 임장 상자에는 좌표·구가 없음(임장 app.js sbjInbox) → 받은 목록표 키(from.redevKey)로 [목록표에서 불러오기]와 같은 목록표 읽기(loadList)·키 매칭(E.matchSource)으로 행을 찾아 좌표·구만 채움
   //   구역명·단계·지역구분·출처(source = 임장)·저장 대상은 그대로. 키로 한 곳만 찾을 때만(이름이 같은 구역이 여럿이거나 id 만 맞으면 채우지 않음)
@@ -3691,6 +3748,7 @@ window.SBJ_RENT16 = {"source":"seedComplexes.js@67d3760 (md5 65724010) rentalHou
         if (okC) state.target.coord = { lat: r.lat, lng: r.lng }; if (okG) state.target.gu = r.gu;
         LOC1712.status = 'found'; renderAll(true); markClean();
       } else { LOC1712.status = 'none'; if (SBJ1713.LS62 && r) { renderAll(true); markClean(); } else renderAll(); }
+      if (SBJ_S4.LS69 && r) s4Fill();   // S-4: 임장 구역의 목록표 키를 찾았으면 추정값 채우기(빈 칸일 때만)
     }).catch(() => { if (LOC1712 && LOC1712.key === key) { LOC1712.status = 'none'; renderAll(); } });
   }
   function noLoc1712() { const t = state.target || {}; return SBJ1712.LS61 && !!LOC1712 && LOC1712.status === 'none' && !!t.source && t.source.tool === 'imjang' && t.source.key === LOC1712.key && !(t.coord && E.isNum(t.coord.lat)) && !(typeof t.gu === 'string' && t.gu); }
@@ -4494,6 +4552,7 @@ window.SBJ_RENT16 = {"source":"seedComplexes.js@67d3760 (md5 65724010) rentalHou
     if (SBJ177.LS49) exitExample177();   // 17-7: 예시 위에 구역을 불러오면 예시 상태 해제
     if (state.mode !== 'redev') state.mode = 'redev';
     if (SBJ17.LS32) ['target.units', 'target.builtYear'].forEach((p) => { if (!(p in pt.set) && state.options.imported && state.options.imported[p]) { setPath(state, p, null); delete state.options.imported[p]; } });   // 17단계: 앞 구역에서 가져온 세대수·준공연도가 새 구역에 남지 않게(직접 넣은 값은 그대로)
+    if (SBJ_S4.LS69) s4Clear();   // S-4: 앞 구역 추정값(안 고친 것)은 새 구역에 남기지 않음
     Object.keys(pt.set).forEach((p) => setPath(state, p, pt.set[p]));
     if (!pt.set['target.stage']) state.target.stage = null;
     if (!pt.set['target.coord']) state.target.coord = null;
@@ -4503,6 +4562,7 @@ window.SBJ_RENT16 = {"source":"seedComplexes.js@67d3760 (md5 65724010) rentalHou
     if (SBJ17.LS30) delete state.options.임대필터;   // 17단계: 새 구역은 임대 필터 기본(켬)·되살린 단지 없음으로
     devArm17();
     frozen = null; renderAll(false); setOpen(1, true);
+    if (SBJ_S4.LS69) s4Fill();
     if (!pt.set['target.stage']) { const b = modal('진행단계를 선택해 주세요', [para('목록표의 단계 "' + (x.row.stage || '정보 없음') + '"는 판정 단계로 바로 바꿀 수 없어요. 구역 칸의 진행단계를 직접 골라 주세요(사업시행인가라면 감정평가를 마쳤으면 후기, 아직이면 중기).')], [{ label: '확인' }]); b.dataset.stageNeeded = '1'; }
     else toast(x.label + ' 구역을 불러왔어요. 표시된 값을 확인하세요.');
   }
