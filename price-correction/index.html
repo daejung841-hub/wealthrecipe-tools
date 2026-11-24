@@ -2536,8 +2536,15 @@ window.SBJ_RENT16 = {"source":"seedComplexes.js@67d3760 (md5 65724010) rentalHou
   // S-7 플래그(LS70, 기본 꺼짐): 목록표 단계 → 시세보정 4구간 대응을 한 곳에서. 목록표 대응표(REDEV 블록 STAGE4, 목록표 연동과 같은 글자라 그대로 둠)에 없는 이름 중
   //   대표님 결정(11-23 14:16) 3가지만 더함: 조합설립 준비 → 초기, 사업시행인가 → 후기, 일반분양 → 후기. 끄면 이전 동작(빈칸 + 단계 선택 안내)
   const SBJ_S7 = { LS70: false };
-  const S7_STAGE_ADD = { '조합설립준비': '초기', '사업시행인가': '후기', '일반분양': '후기' };   // 키 = RD.stageKey 모양(공백 없음, 표에 없으면 괄호 설명을 뗌 — '사업시행인가(A-5만 해당)'도 사업시행인가)
+  //   + 11-24 13:32 결정: '시공사선정·사업시행인가 준비중(6/12)' → 중기, '사이트미제공'은 빈칸 그대로(표에 넣지 않음), '준공(입주 중)'은 판정 대신 "이미 준공된 구역입니다" 안내(S7_STAGE_DONE)
+  const S7_STAGE_ADD = { '조합설립준비': '초기', '사업시행인가': '후기', '일반분양': '후기', '시공사선정·사업시행인가준비중': '중기' };   // 키 = RD.stageKey 모양(공백 없음, 표에 없으면 괄호 설명을 뗌 — '사업시행인가(A-5만 해당)'도 사업시행인가)
+  const S7_STAGE_DONE = { '준공': 1 };   // 이미 준공된 구역: 단계는 빈칸 그대로, 판정 자리에 안내(가격 계산은 그대로)
   function stage4S7(s) { const a = RD.stage4(s); if (a || !SBJ_S7.LS70) return a; const k = RD.stageKey(s); return Object.prototype.hasOwnProperty.call(S7_STAGE_ADD, k) ? S7_STAGE_ADD[k] : null; }
+  function s7IsDone(s) { return !!SBJ_S7.LS70 && !RD.stage4(s) && Object.prototype.hasOwnProperty.call(S7_STAGE_DONE, RD.stageKey(s)); }
+  function s7SetDone(s) { if (!SBJ_S7.LS70) return; if (s7IsDone(s)) state.options.s7done = 1; else delete state.options.s7done; }
+  function s7DoneNow() { return !!SBJ_S7.LS70 && state.mode === 'redev' && !state.target.stage && !!(state.options && state.options.s7done); }
+  const S7_DONE_TEXT = '이미 준공된 구역입니다';
+  const S7_DONE_SUB = '목록표 단계가 "준공(입주 중)"이라 판정하지 않아요. 가격 계산은 그대로 볼 수 있어요.';
   // 목록표 📐(상자에 단계가 없을 때): 목록표에서 같은 키의 행을 찾아 원래 단계 이름으로 다시 대응
   function s7FillFromList() {
     const src = state.target && state.target.source; if (!SBJ_S7.LS70 || !src || src.tool !== 'redevlist' || state.target.stage) return;
@@ -2545,6 +2552,7 @@ window.SBJ_RENT16 = {"source":"seedComplexes.js@67d3760 (md5 65724010) rentalHou
     loadList().then((p) => {
       const s = state.target && state.target.source; if (!s || s.tool !== 'redevlist' || s.key !== key || state.target.stage || !p || !p.ok) return;   // 그사이 바뀜·직접 고름
       const m = E.matchSource({ key }, p.rows.map((x) => x.row)), r = m && m.ok ? m.row : null; if (!r) return;
+      if (s7IsDone(r.stage)) { s7SetDone(r.stage); renderAll(); return; }   // 이미 준공된 구역: 안내만
       const st4 = stage4S7(r.stage), sk = st4 && L.STAGE4[st4]; if (!sk) return;
       const wasClean = !isDirty(); state.target.stage = sk; state.options.imported = Object.assign({}, state.options.imported, { 'target.stage': 'redevlist' });
       frozen = null; fillStatic(); recompute(); if (wasClean) markClean();
@@ -3329,6 +3337,7 @@ window.SBJ_RENT16 = {"source":"seedComplexes.js@67d3760 (md5 65724010) rentalHou
   function judgeHtml(res) {
     const jv = V.judgeView(res, state.target.stage), j = res.judgement || {};
     if (jv.kind === 'none' || jv.kind === 'na') return '';
+    if (jv.kind === 'needStage' && s7DoneNow()) return '<div class="jline" data-s7-done><span class="badge neutral">판정 제외</span><span>' + esc(S7_DONE_TEXT) + '</span></div><div class="small-note" data-s7-done-sub>' + esc(S7_DONE_SUB) + '</div>';   // S-7: 준공(입주 중)
     if (jv.kind === 'needStage') return '<div class="jline"><span class="badge neutral">판정 대기</span><span>진행단계를 선택해 주세요</span></div>';
     const ck = j.check17 ? '<span class="badge chk17" data-check17>' + esc(G.g17.checkBadge) + '</span>' : '';   // 17단계(LS31)
     if (jv.kind === 'excluded') return '<div class="jline" data-badge data-excluded><span class="badge neutral">' + esc(jv.text) + '</span>' + ck + '</div>' + gradeDroppedHtml(j);
@@ -3398,7 +3407,7 @@ window.SBJ_RENT16 = {"source":"seedComplexes.js@67d3760 (md5 65724010) rentalHou
     let h = '';
     if (res.mode === 'apt') h = '<span>아파트 모드 · 가치만 계산</span>';
     else if (jv.kind === 'graded') h = '<span class="badge g' + (jv.gradeIndex + 1) + '" style="padding:0 9px;font-size:12.5px">' + esc(jv.grade) + '</span>' + (res.judgement.check17 ? '<span class="badge chk17" style="padding:0 9px;font-size:12.5px">' + esc(G.g17.checkBadge) + '</span>' : '') + '<span>' + esc(V.judgeLabel(res.judgement, state.target.stage)) + ' · 투자금 비율 ' + E.fmtPct(res.judgement.ratio) + '</span>';
-    else if (jv.kind === 'needStage') h = '<span>진행단계를 선택해 주세요</span>';
+    else if (jv.kind === 'needStage') h = '<span>' + (s7DoneNow() ? esc(S7_DONE_TEXT) + ' · 판정 제외' : '진행단계를 선택해 주세요') + '</span>';
     else if (jv.kind === 'pre' || jv.kind === 'noInvest' || jv.kind === 'excluded' || jv.kind === 'gradePending') h = '<span>' + esc(jv.text) + '</span>';
     g.innerHTML = h + (frozen ? '<span>· 저장 당시 결과</span>' : '');
   }
@@ -3778,6 +3787,7 @@ window.SBJ_RENT16 = {"source":"seedComplexes.js@67d3760 (md5 65724010) rentalHou
       if (SBJ1713.LS62 && r) {   // 17-13(LS62): 출처는 임장 그대로, 목록표 행 키만 덧붙임 · 진행단계는 비어 있을 때만 목록표 값(확인하세요)
         state.target.source = Object.assign({}, state.target.source, { listKey: RD.uid(r) });
         const st4 = SBJ_S7.LS70 ? stage4S7(r.stage) : RD.stage4(r.stage), sk = st4 && L.STAGE4[st4];   // S-7: 대응표 한 곳(stage4S7)
+        if (!state.target.stage) s7SetDone(r.stage);   // S-7: 이미 준공된 구역이면 판정 자리에 안내
         if (!state.target.stage && sk) { state.target.stage = sk; state.options.imported = Object.assign({}, state.options.imported, { 'target.stage': 'redevlist' }); }
         Z17.sig = null;
       }
@@ -4594,6 +4604,8 @@ window.SBJ_RENT16 = {"source":"seedComplexes.js@67d3760 (md5 65724010) rentalHou
     if (SBJ_S4.LS69) s4Clear();   // S-4: 앞 구역 추정값(안 고친 것)은 새 구역에 남기지 않음
     Object.keys(pt.set).forEach((p) => setPath(state, p, pt.set[p]));
     let s7sk = null; if (SBJ_S7.LS70 && !pt.set['target.stage']) { const st4 = stage4S7(x.row.stage); s7sk = st4 && L.STAGE4[st4]; }   // S-7: 목록표 대응표에 없는 단계도 대응표 한 곳에서
+    if (SBJ_S7.LS70) { if (!pt.set['target.stage']) s7SetDone(x.row.stage); else delete state.options.s7done; }   // S-7: 이미 준공된 구역 표시(다른 구역이면 지움)
+    const s7done = s7DoneNow() || (SBJ_S7.LS70 && !pt.set['target.stage'] && s7IsDone(x.row.stage));
     if (s7sk) { state.target.stage = s7sk; pt.imported['target.stage'] = 'redevlist'; } else if (!pt.set['target.stage']) state.target.stage = null;
     if (!pt.set['target.coord']) state.target.coord = null;
     state.target.source = pt.source;
@@ -4604,6 +4616,8 @@ window.SBJ_RENT16 = {"source":"seedComplexes.js@67d3760 (md5 65724010) rentalHou
     frozen = null; renderAll(false); setOpen(1, true);
     if (SBJ_S4.LS69) s4Fill();
     if (!pt.set['target.stage'] && !s7sk) { const b = modal('진행단계를 선택해 주세요', [para('목록표의 단계 "' + (x.row.stage || '정보 없음') + '"는 판정 단계로 바로 바꿀 수 없어요. 구역 칸의 진행단계를 직접 골라 주세요(사업시행인가라면 감정평가를 마쳤으면 후기, 아직이면 중기).')], [{ label: '확인' }]); b.dataset.stageNeeded = '1'; }
+    if (s7done) { const b = modal(S7_DONE_TEXT, [para(S7_DONE_SUB)], [{ label: '확인' }]); b.dataset.s7Done = '1'; }   // S-7: 준공(입주 중) — 단계 선택 안내 대신
+    else if (!pt.set['target.stage'] && !s7sk) { const b = modal('진행단계를 선택해 주세요', [para('목록표의 단계 "' + (x.row.stage || '정보 없음') + '"는 판정 단계로 바로 바꿀 수 없어요. 구역 칸의 진행단계를 직접 골라 주세요(사업시행인가라면 감정평가를 마쳤으면 후기, 아직이면 중기).')], [{ label: '확인' }]); b.dataset.stageNeeded = '1'; }
     else toast(x.label + ' 구역을 불러왔어요. 표시된 값을 확인하세요.');
   }
 
