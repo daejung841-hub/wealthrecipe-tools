@@ -1011,7 +1011,7 @@ window.SBJListLink = (function () {
       const rng = t ? `<span class="ref-range" data-rt-tip="${gradeTip(r)}">${t}</span>` : '';
       return `<span class="badge-wrap"><span class="badge neutral" data-rt-tip="${gradeTip(r)}">대지지분 기준</span>${rng}</span>`;
     }
-    return g ? `<span class="badge neutral" data-rt-tip="${gradeTip(r)}">${g.split('(')[0]}</span>` : '-';
+    return g ? `<span class="badge neutral" data-rt-tip="${gradeTip(r)}">${g.split('(')[0].replace(/^\uD310\uC815\uBD88\uAC00$/, '등급 계산 불가')}</span>` : '-';   // A85: 데이터 값 '판정불가'는 화면에서 '등급 계산 불가'
   }
   function gradeBadgeClass(rec){
     const n = gradeName(rec);
