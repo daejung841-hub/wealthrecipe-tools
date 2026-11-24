@@ -2533,6 +2533,7 @@ window.SBJ_RENT16 = {"source":"seedComplexes.js@67d3760 (md5 65724010) rentalHou
     const e = ETA8[String(r.id)]; if (!e || (e.k !== 'eta' && e.k !== 'done')) return '';   // 자료 부족(none)·없음 → 표시 안 함
     if (e.k === 'done') return '<div class="zc-grid" data-zc-eta>' + item('예상 준공', '이미 준공(입주)') + '</div>';   // 목록표 '준공'과 같은 뜻
     return '<div class="zc-grid' + (e.c === '낮음' ? ' eta8-lo' : '') + '" data-zc-eta title="' + esc(String(e.tip || '')) + '">' + item('예상 준공', e.y + '년 ' + e.m + '월 · 신뢰 ' + e.c + ' (추정 단계 ' + e.n + '개)') + '</div><div class="small-note" data-zc-eta-note>목록표 추정이에요. 대략의 시기이며 실제와 크게 다를 수 있어요.</div>';
+  }
   // S-7 플래그(LS70, 기본 꺼짐): 목록표 단계 → 시세보정 4구간 대응을 한 곳에서. 목록표 대응표(REDEV 블록 STAGE4, 목록표 연동과 같은 글자라 그대로 둠)에 없는 이름 중
   //   대표님 결정(11-23 14:16) 3가지만 더함: 조합설립 준비 → 초기, 사업시행인가 → 후기, 일반분양 → 후기. 끄면 이전 동작(빈칸 + 단계 선택 안내)
   const SBJ_S7 = { LS70: true };
@@ -4615,7 +4616,6 @@ window.SBJ_RENT16 = {"source":"seedComplexes.js@67d3760 (md5 65724010) rentalHou
     devArm17();
     frozen = null; renderAll(false); setOpen(1, true);
     if (SBJ_S4.LS69) s4Fill();
-    if (!pt.set['target.stage'] && !s7sk) { const b = modal('진행단계를 선택해 주세요', [para('목록표의 단계 "' + (x.row.stage || '정보 없음') + '"는 판정 단계로 바로 바꿀 수 없어요. 구역 칸의 진행단계를 직접 골라 주세요(사업시행인가라면 감정평가를 마쳤으면 후기, 아직이면 중기).')], [{ label: '확인' }]); b.dataset.stageNeeded = '1'; }
     if (s7done) { const b = modal(S7_DONE_TEXT, [para(S7_DONE_SUB)], [{ label: '확인' }]); b.dataset.s7Done = '1'; }   // S-7: 준공(입주 중) — 단계 선택 안내 대신
     else if (!pt.set['target.stage'] && !s7sk) { const b = modal('진행단계를 선택해 주세요', [para('목록표의 단계 "' + (x.row.stage || '정보 없음') + '"는 판정 단계로 바로 바꿀 수 없어요. 구역 칸의 진행단계를 직접 골라 주세요(사업시행인가라면 감정평가를 마쳤으면 후기, 아직이면 중기).')], [{ label: '확인' }]); b.dataset.stageNeeded = '1'; }
     else toast(x.label + ' 구역을 불러왔어요. 표시된 값을 확인하세요.');
