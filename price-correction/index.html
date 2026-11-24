@@ -2517,7 +2517,7 @@ window.SBJ_RENT16 = {"source":"seedComplexes.js@67d3760 (md5 65724010) rentalHou
   const SBJ_S1 = { LS68: true };
   // S-8 플래그(LS71, 기본 꺼짐): 구역 카드 '일정·속도'에 목록표 예상 준공(예상준공_A66.js, 읽기만)을 목록표 상세와 같은 글로
   //   "예상 준공 2035년 3월 · 신뢰 낮음 (추정 단계 4개)". 자료 부족 구역은 표시하지 않음. 계산·판정에는 쓰지 않음. 끄면 이전 동작
-  const SBJ_S8 = { LS71: false };
+  const SBJ_S8 = { LS71: true };
   const ETA8_URL = '../redevelopment-list/' + encodeURIComponent('예상준공_A66.js');
   let ETA8 = null, ETA8P = null;   // { [목록표 행 id]: {k:'eta'|'none'|'done', y, m, c, n, tip} } — 목록표가 같은 배포의 REDEV_DATA 행 id 로 만든 자료
   function loadEta8() {
@@ -2538,7 +2538,7 @@ window.SBJ_RENT16 = {"source":"seedComplexes.js@67d3760 (md5 65724010) rentalHou
   function imjangDirectS1(st) { const s = st && st.target && st.target.source; return SBJ_S1.LS68 && st.mode === 'redev' && !!s && s.tool === 'imjang' && !s.listKey && !(LOC1712 && LOC1712.key === s.key && LOC1712.status === 'loading'); }
   // S-4 플래그(LS69, 기본 꺼짐): 실매수가 자동 채움 시안. 목록표 구역(목록표 📐·[목록표에서 불러오기]·임장 구역의 목록표 키)이고
   //   실매수가·공시가·감정가 칸이 모두 비어 있을 때만 실거래 기준 추정값 묶음(실매수가·전세·공시가)을 채움. 넣거나 고친 값은 덮어쓰지 않음. 끄면 이전 동작 그대로
-  const SBJ_S4 = { LS69: false };
+  const SBJ_S4 = { LS69: true };
   // 대체값 방식은 여기 한 곳에서: method 'rep6' = 6개월 대표 매매가(목록표 카드 투자금 + 전세 하단, S-3 추천, 5건 미만이면 12개월)
   //   · 'med6' = 같은 기간 매매가 중앙값 · 'recent3' = 최근 3개월 중앙값(minN3건 미만이면 rep6). url = 구역별 값 파일(시안: S-3 후보표에서 만든 잠정 값)
   const S4_CFG = { method: 'rep6', url: 's4_buy_draft_v1.json', minN3: 3 };
