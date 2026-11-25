@@ -6457,7 +6457,9 @@ function setPriceKindL98J(kind){
   if (!PRICE_KINDS_L98J.some(x => x[0] === kind)) return;
   priceKindL98J = kind;
   try { Object.values(Chart.instances || {}).forEach(ch => { const a = argsL98J.get(ch.data); if (!a) return;
+    if (ch.$rebaseReset) ch.$rebaseReset();   // 끼워 넣기(11-24): 기준점을 바꿔 둔 그래프는 먼저 처음으로
     const sets = a.idx ? idxSetsL99A(a, kind) : priceSetsL98J(a.comp, a.other, a.otherName, a.yms, kind); ch.data.datasets.splice(0, a.n, ...sets); a.n = sets.length;   // 묶음 L99A: 상승률 그래프도
+    if (ch.$refreshRebaseBaseline) ch.$refreshRebaseBaseline();   // 끼워 넣기(11-24): 기준점 원본을 지금 선(매매/전세)으로 다시 찍음 — 예전엔 처음 그린 종류가 남아 클릭하면 다른 시세로 그려졌음
     if (typeof crossShowLatestL85 === 'function' && ch.$crossIdxL85 != null){ ch.update('none'); crossShowLatestL85(ch); } else ch.update('none'); }); } catch (e) {}
   document.querySelectorAll('[data-pk98j]').forEach(b => { const on = b.dataset.pk98j === kind; b.classList.toggle('on', on); b.setAttribute('aria-pressed', String(on)); });
 }
@@ -6865,6 +6867,7 @@ function wireChartRebase(chart, canvas, resetBtn){
     chart.update();
     if (resetBtn) resetBtn.hidden = true;
   }
+  chart.$rebaseReset = resetRebase;   // 끼워 넣기(11-24): 종류를 바꾸기 전에 기준점을 처음으로 되돌리려고
   if (chart.$rebaseWired) return; // 리스너는 인스턴스당 한 번만 — 스냅샷 갱신은 위에서 이미 처리됨
   chart.$rebaseWired = true;
   canvas.addEventListener('click', (evt) => {
