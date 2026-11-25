@@ -1,0 +1,1044 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<script src="../config.js"></script>
+<script src="../gate.js"></script>
+<script>if (/\.github\.io$/.test(location.hostname)) requireSiteAuth('../index.html');</script>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>시황 분석</title>
+<script src="앱이름.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@600;700&family=Noto+Sans+KR:wght@400;500;700&display=swap">
+<style>
+/* 시장 29: 색·글꼴·카드·배지·여백 = 지역분석.html(:root·.card·.seg·.chips·.tag) 값에 맞춤. 밝은 바탕.
+   옛 변수 이름(--panel·--line·--ink2·--ink3·--acc)은 스크립트가 써서 남기고 지역분석 값으로 연결함 */
+:root{
+  --bg:#F4F6F8; --surface:#FFFFFF; --surface-alt:#EDF2F4; --border:#DCE3E9; --border-strong:#C6D0D7;
+  --ink:#182430; --ink-muted:#61707D; --ink-faint:#93A1AC; --accent:#0E5C6B; --accent-soft:#E4F0F1; --accent-ink:#FFFFFF;
+  --warn:#A9720E; --warn-bg:#FBF1DF; --good:#1E8E5A; --good-bg:#E5F5EC; --info:#2F6FE0; --info-bg:#EAF1FD; --neutral-bg:#EDF1F4;
+  --grid:rgba(24,36,48,.08);
+  --shadow:0 1px 2px rgba(24,36,48,.06), 0 6px 16px -10px rgba(24,36,48,.18);
+  --font-display:'Noto Serif KR', ui-serif, 'Nanum Myeongjo', serif;
+  --font-body:'Noto Sans KR', ui-sans-serif, -apple-system, 'Malgun Gothic', sans-serif;
+  --panel:var(--surface); --panel2:var(--surface-alt); --line:var(--border); --ink2:var(--ink-muted); --ink3:var(--ink-muted); --acc:var(--accent);
+  --gray:rgba(97,112,125,.22); --green:rgba(30,142,90,.16);
+  --grayt:#61707D; --greent:#1E8E5A;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font-body);font-size:14.5px;line-height:1.55}
+::selection{background:var(--accent-soft)}
+.wrap{max-width:1180px;margin:0 auto;padding:0 20px 40px}
+header{background:var(--surface);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:5}
+header .wrap{display:flex;flex-wrap:wrap;align-items:center;gap:10px 18px;padding-top:12px;padding-bottom:12px}
+h1{font-family:var(--font-display);font-size:22px;margin:0;font-weight:700;letter-spacing:-.01em}
+h1 small{font-family:var(--font-body);font-size:12px;color:var(--ink-muted);font-weight:500;margin-left:8px}
+.regions{display:flex;flex-wrap:wrap;gap:6px;margin-left:auto}
+.regions button{height:34px;padding:0 14px;border-radius:8px;border:1px solid var(--border-strong);background:var(--surface);color:var(--ink-muted);font:inherit;font-size:13.5px;font-weight:500;cursor:pointer}
+.regions button:hover{border-color:var(--accent);color:var(--accent)}
+.regions button[aria-pressed=true]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);font-weight:700}
+/* 지역분석 .seg(붙은 단추) */
+.seg{display:inline-flex;border:1px solid var(--border-strong);border-radius:8px;overflow:hidden;flex-wrap:wrap}
+.seg button{background:var(--surface-alt);border:0;border-right:1px solid var(--border-strong);padding:0 12px;height:32px;color:var(--ink-muted);font:inherit;font-size:12.5px;font-weight:600;cursor:pointer}
+.seg button:last-child{border-right:0}
+.seg button[aria-pressed=true]{background:var(--accent);color:var(--accent-ink)}
+section{margin-top:22px}
+h2{font-family:var(--font-display);font-size:18px;margin:0 0 10px;color:var(--ink);font-weight:700;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+h2 .sub{font-family:var(--font-body);color:var(--ink-muted);font-size:12px;font-weight:400}
+.concl{background:var(--surface);border:1px solid var(--border);border-radius:12px;box-shadow:var(--shadow);padding:17px 18px;font-size:15.5px}
+.concl p{margin:0 0 8px}.concl p:last-child{margin:0}
+.concl b{color:var(--accent)}
+.concl .dir{background:var(--surface-alt);border-radius:10px;padding:8px 12px;margin-top:8px;font-size:14.5px}
+.box{background:var(--surface);border:1px solid var(--border);border-radius:12px;box-shadow:var(--shadow);padding:14px 16px}
+.figh{display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px;margin-bottom:6px}
+.figh .seg button{height:30px;padding:0 10px}
+.say{background:var(--surface-alt);border-radius:10px;padding:10px 12px;margin-top:10px;font-size:14px}
+.say b{color:var(--ink)}
+.say .r{color:var(--grayt);font-weight:700}.say .b{color:var(--greent);font-weight:700}
+.gocard{display:block;margin-top:18px;background:var(--surface);border:1px solid var(--accent);border-radius:12px;box-shadow:var(--shadow);padding:16px 18px;color:var(--ink);text-decoration:none}
+.gocard:hover{background:var(--accent-soft)}
+.gocard b{display:block;font-family:var(--font-display);font-size:20px;color:var(--accent)}
+.gocard span{display:block;font-size:14px;color:var(--ink2);margin-top:4px}
+details.mo{margin-top:6px}
+details.mo>summary{font-size:12.5px;font-weight:400;padding:2px 0;border:0;border-radius:0;background:none;color:var(--acc)}
+details.mo>summary::before{content:"▸ "}
+details.mo[open]>summary::before{content:"▾ "}
+details.mo>.in{padding-top:4px;font-size:13px;color:var(--ink2)}
+.concl details.mo>.in{font-size:14.5px}
+.concl details.mo>.in p{margin:0 0 6px}
+.board{display:grid;grid-template-columns:repeat(5,1fr);gap:10px}
+.board.more{grid-template-columns:repeat(4,1fr);margin-top:10px}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:12px;box-shadow:var(--shadow);padding:12px 14px}
+.card .t{font-size:13px;color:var(--ink-muted);font-weight:700}
+.card .v{font-size:22px;font-weight:700;margin:2px 0 6px;font-variant-numeric:tabular-nums}
+.card .v small{font-size:12px;color:var(--ink-muted);font-weight:400;margin-left:4px}
+.bar{position:relative;height:10px;background:linear-gradient(90deg,var(--accent-soft),#BCD6DA);border-radius:5px;margin:6px 0 4px}
+.bar i{position:absolute;top:-4px;width:4px;height:18px;border-radius:2px;background:var(--ink);transform:translateX(-2px)}
+.bar .q{position:absolute;top:0;bottom:0;width:1px;background:rgba(255,255,255,.9)}
+.card .p{display:flex;justify-content:space-between;font-size:12px;color:var(--ink3)}
+.card.wide{grid-column:1/-1}
+.press{display:grid;grid-template-columns:repeat(3,1fr);gap:8px 18px;margin-top:6px}
+.press .k{font-size:12.5px;color:var(--ink2)}
+.two.eq{grid-template-columns:1fr 1fr}
+@media (max-width:640px){.press{grid-template-columns:1fr}.two.eq{grid-template-columns:1fr}}
+.card .p b{color:var(--ink);font-weight:700}
+.card .mean{font-size:12.5px;color:var(--ink2);margin-top:6px;border-top:1px dashed var(--line);padding-top:6px}
+.card .base{font-size:11.5px;color:var(--ink3);margin-top:4px}
+/* 지역분석 .chips(알약 + 작은 색 줄) */
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px}
+.chips button{display:inline-flex;align-items:center;gap:6px;height:30px;padding:0 11px;border-radius:999px;font:inherit;font-size:12.5px;font-weight:600;border:1px solid var(--border);background:var(--surface-alt);color:var(--ink-muted);white-space:nowrap;cursor:pointer}
+.chips button .c{width:12px;height:3px;border-radius:2px;flex:none;opacity:.55}
+.chips button[aria-pressed=true]{background:var(--surface);border-color:var(--accent);color:var(--ink);font-weight:700;box-shadow:inset 0 0 0 1px var(--accent)}
+.chips button[aria-pressed=true] .c{opacity:1}
+.note{font-size:12px;color:var(--ink3);margin-top:6px}
+.panel-t{font-size:12.5px;color:var(--ink2);margin:8px 0 0}
+svg{display:block}
+svg text{fill:var(--ink-muted);font-size:11px;font-family:inherit}
+.legend{display:flex;flex-wrap:wrap;gap:2px 14px;font-size:12.5px;color:var(--ink2);margin:2px 0}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.legend i{display:inline-block;width:18px;height:3px;border-radius:2px}
+.legend i.dash{background:repeating-linear-gradient(90deg,currentColor 0 4px,transparent 4px 7px)!important}
+.legend i.sw{width:12px;height:12px;border-radius:3px}
+#tip{position:fixed;pointer-events:none;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-size:12.5px;color:var(--ink);display:none;z-index:9;min-width:170px;box-shadow:0 6px 18px rgba(24,36,48,.16)}
+#tip .r{display:flex;justify-content:space-between;gap:12px}
+#tip .k{display:inline-flex;align-items:center;gap:6px;color:var(--ink2)}
+#tip .k i{width:10px;height:3px;border-radius:2px;display:inline-block}
+.two{display:grid;grid-template-columns:1.25fr 1fr;gap:12px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{text-align:left;padding:7px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+th{color:var(--ink3);font-weight:400;font-size:12px}
+td.num{font-variant-numeric:tabular-nums}
+.tag{display:inline-flex;align-items:center;padding:2px 9px;border-radius:999px;font-size:11.5px;font-weight:700;white-space:nowrap;vertical-align:middle}
+.tag.ok{background:var(--good-bg);color:var(--good)}.tag.weak{background:var(--warn-bg);color:var(--warn)}.tag.no{background:var(--neutral-bg);color:var(--ink-muted)}
+.tag.hold{background:var(--neutral-bg);color:var(--ink-muted);border:1px dashed var(--border-strong)}
+.scroll{overflow-x:auto}
+details{margin-top:22px;background:transparent}
+details>summary{cursor:pointer;list-style:none;font-size:15px;font-weight:700;padding:11px 16px;border:1px solid var(--border);border-radius:12px;background:var(--surface);box-shadow:var(--shadow)}
+details>summary::-webkit-details-marker{display:none}
+details>summary::before{content:"▸ ";color:var(--acc)}
+details[open]>summary::before{content:"▾ "}
+details>summary .sub{color:var(--ink3);font-size:12px;font-weight:400;margin-left:6px}
+details>.in{padding-top:10px}
+footer{margin-top:24px;font-size:12.5px;color:var(--ink3)}
+footer li{margin:2px 0}
+.blank{color:var(--ink3)}
+footer details{margin-top:0}
+.vgrp{font-size:14px;font-weight:700;margin:14px 0 8px;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+.vgrp:first-of-type{margin-top:4px}
+.vgrp .sub{color:var(--ink3);font-size:12px;font-weight:400}
+.vgrp.ok-h{color:var(--good)}.vgrp.no-h{color:var(--ink-muted)}.vgrp.now-h{color:var(--warn)}
+.vcards{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.vc{background:var(--surface);border:1px solid var(--border);border-radius:12px;box-shadow:var(--shadow);padding:14px 16px;display:flex;flex-direction:column;gap:6px}
+.vc .h{font-size:14.5px;font-weight:700;line-height:1.45}
+.vc .h .n{color:var(--acc);margin-right:4px}
+.vc .ev{font-size:13px;color:var(--ink2)}
+.vc .ev b{color:var(--ink)}
+.vc .sig{background:var(--surface-alt);border-radius:10px;padding:8px 10px;font-size:13.5px;margin-top:auto}
+.vc .sig .k{color:var(--warn);font-weight:700;margin-right:4px}
+.vc .tags{display:flex;flex-wrap:wrap;gap:4px}
+.nolist{margin:0;padding:0;list-style:none;background:var(--surface);border:1px solid var(--border);border-radius:12px;box-shadow:var(--shadow)}
+.nolist .holdbox,.vc .holdbox{display:block;margin-top:6px;background:var(--neutral-bg);border-radius:8px;padding:6px 10px;color:var(--ink-muted);font-size:13px}
+.nolist .holdbox b,.vc .holdbox b{color:var(--ink)}
+.nolist li{padding:8px 14px;border-bottom:1px solid var(--line);font-size:13.5px;color:var(--ink2)}
+.nolist li:last-child{border-bottom:0}
+.nolist li b{color:var(--ink)}
+.nowline{background:var(--surface);border:1px solid var(--border);border-left:4px solid var(--warn);border-radius:12px;box-shadow:var(--shadow);padding:12px 14px;font-size:14.5px}
+.nowline b{color:var(--ink)}
+.wnote{color:var(--warn)}
+/* 시장 35: 검증 칸 카드 3개 = PC 같은 너비 3칸·같은 높이(칸 안 줄도 맞춤 → 지금 신호 상자 크기 같음), 휴대폰(640 이하) 1칸 */
+@media (max-width:640px){.vcards{grid-template-columns:1fr}}
+@media (min-width:641px){
+  .vcards{align-items:stretch}
+  @supports (grid-template-rows:subgrid){ .vcards>.vc{display:grid;grid-row:span 6;grid-template-rows:subgrid;row-gap:6px;align-content:start} .vcards>.vc>.sig{margin-top:0} }
+}
+.vc .sig{display:flex;flex-direction:column;justify-content:flex-start}
+/* 시장 35: 맨 앞 전세가율 카드(넓게) — PC는 왼쪽 설명 · 오른쪽 지금 신호 */
+.vc.first{margin-bottom:12px;border-left:4px solid var(--good)}
+@media (min-width:641px){ .vc.first{display:grid;grid-template-columns:1.5fr 1fr;column-gap:16px;row-gap:6px;align-content:start} .vc.first>*{grid-column:1} .vc.first>.sig{grid-column:2;grid-row:1 / span 5;margin-top:0} }
+/* ===== 시장 35: 해석 먼저, 숫자는 근거로 — 결론 색은 세 가지(+진하게)만 =====
+   청록 = 여유·완화 쪽(부담이 작거나 줄어드는 쪽) · 주황 = 부담·압력 쪽(비용이 크거나 오르는 쪽) · 회색 = 비슷·보통 */
+:root{--cool:#0B7285;--cool-bg:#E3F1F4;--warm:#C2410C;--warm-bg:#FDEDE2;--mid:#56636F;--mid-bg:#EDF1F4}
+.cc{font-size:15px;font-weight:700;line-height:1.4;padding:6px 10px;border-radius:8px;border-left:4px solid currentColor;margin:6px 0 4px;word-break:keep-all}
+.cc.cool{color:var(--cool);background:var(--cool-bg)}.cc.warm{color:var(--warm);background:var(--warm-bg)}.cc.mid{color:var(--mid);background:var(--mid-bg)}
+.cc.cool.s{background:var(--cool);color:#fff;border-left-color:#064B58}.cc.warm.s{background:#B23C0A;color:#fff;border-left-color:#7A2805}
+.gz{font-size:12px;color:var(--ink-muted);line-height:1.5;font-variant-numeric:tabular-nums;word-break:keep-all}
+.gz b{color:var(--ink);font-weight:700}
+.lb2{display:inline-block;font-size:11px;font-weight:700;color:var(--ink-faint);margin-right:5px;letter-spacing:.02em}
+.rd{font-size:12.5px;color:var(--ink2);margin-top:4px}
+.card .cc{margin-top:6px}
+.card.wide .cc{font-size:16px;display:inline-block;min-width:min(100%,360px)}
+.vc .sig .cc{font-size:16px;margin:2px 0 4px}
+@media (max-width:480px){.cc{font-size:14.5px}.vc .sig .cc{font-size:15px}}
+/* ===== 시장 32: 툴팁(ⓘ) 공통 — 지역분석.html과 같은 부품 ===== */
+.tip{display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;margin:0 2px 0 3px;border-radius:50%;border:1px solid #9AA8B4;color:#61707D;font:700 10.5px/1 system-ui,sans-serif;cursor:help;vertical-align:1px;user-select:none;background:#fff;flex:none}
+.tip:hover,.tip:focus,.tip.on{border-color:#0E5C6B;color:#fff;background:#0E5C6B;outline:none}
+#tipbox{position:fixed;z-index:9999;max-width:min(320px,calc(100vw - 24px));padding:9px 11px;border-radius:8px;background:#182430;color:#fff;font-size:12.5px;line-height:1.55;font-weight:400;box-shadow:0 6px 18px rgba(0,0,0,.22);pointer-events:none;opacity:0;transition:opacity .12s;text-align:left;word-break:keep-all}
+#tipbox.show{opacity:1}
+#tipbox b{color:#ffe08a;font-weight:700}
+/* 시장 32: 맨 위 "지금 시황 한 줄" */
+.headline{background:var(--surface);border:1px solid var(--border);border-left:5px solid var(--accent);border-radius:12px;box-shadow:var(--shadow);padding:16px 18px}
+.headline .hl{font-family:var(--font-display);font-size:25px;font-weight:700;line-height:1.4;color:var(--ink);word-break:keep-all}
+.headline .hl .dot{color:var(--ink-faint);margin:0 6px;font-weight:400}
+.headline .why{list-style:none;margin:10px 0 0;padding:10px 0 0;border-top:1px dashed var(--border);display:grid;gap:5px;font-size:13px;color:var(--ink-muted)}
+.headline .why li{display:flex;gap:8px;align-items:baseline;flex-wrap:wrap}
+.headline .why .kw{font-weight:700;color:var(--accent);white-space:nowrap}
+.headline .foot{font-size:12px;color:var(--ink-faint);margin-top:8px}
+/* 시장 32: 검증 칸 카드 = 상황 → 규칙 → 지금 신호(크게) */
+.vc .lb{display:inline-block;font-size:11.5px;font-weight:700;color:var(--ink-faint);margin-right:6px;letter-spacing:.02em}
+.vc .sit{font-size:13px;color:var(--ink2)}
+.vc .rule{font-size:14px;color:var(--ink);font-weight:500}
+.vc .sig .k{display:block;color:var(--warn);font-weight:700;font-size:12px;margin:0 0 2px}
+.vc .sig .big{font-size:17px;font-weight:700;color:var(--ink);line-height:1.45}
+.vc .sig .sm{font-size:12.5px;color:var(--ink2);margin-top:4px}
+/* 시장 32: 겹친 그래프 */
+.ovl-note{font-size:12.5px;color:var(--ink2);margin-top:4px}
+.ovl-ax{font-size:11.5px}
+@media (max-width:480px){.headline .hl{font-size:20px}.headline{padding:13px 14px}.vc .sig .big{font-size:16px}}
+@media (max-width:980px){.board{grid-template-columns:repeat(3,1fr)}.board.more{grid-template-columns:repeat(2,1fr)}.two{grid-template-columns:1fr}}
+td .m{display:none}
+@media (max-width:640px){
+  .board{grid-template-columns:repeat(2,1fr)}
+  .vt tr:first-child{display:none}
+  .vt tr{display:grid;grid-template-columns:1fr;padding:8px 0;border-bottom:1px solid var(--line)}
+  .vt td{border:0;padding:2px 4px;white-space:normal}
+  .vt td[data-l="가설"],.vt td[data-l="구분"]{color:var(--acc);font-size:12px}
+  .vt td.d{display:none} .vt td .m{display:inline;color:var(--ink3);font-size:12px;margin-left:6px}
+  .vt td[data-l="시차·함께 움직인 정도"]::before,.vt td[data-l="기간·지역"]::before,.vt td[data-l="범위"]::before,.vt td[data-l="근거"]::before{content:attr(data-l) " · ";color:var(--ink3);font-size:12px}
+}
+@media (max-width:480px){
+  body{font-size:14px}.wrap{padding:0 16px 32px}
+  .board{gap:8px}.card{padding:10px 11px}.card .v{font-size:19px}
+  h1{font-size:18px}.regions{margin-left:0}
+  .regions button{height:32px;padding:0 10px;font-size:12.5px}
+  .concl{font-size:14.5px;padding:13px 14px}
+  h2{font-size:16.5px}
+}
+</style>
+<style id="hubtabs-css">
+.hubtabs{display:flex;align-items:center;gap:8px;height:48px;padding:0 12px;background:#fff;border-bottom:1px solid #DCE3E9;box-sizing:border-box;font-family:inherit}
+.hubtabs .ht-tabs{display:flex;gap:4px;min-width:0;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.hubtabs .ht-tabs::-webkit-scrollbar{display:none}
+.hubtabs a{display:inline-flex;align-items:center;gap:3px;border:1px solid #DCE3E9;background:#fff;color:#182430;font-size:13px;font-weight:700;padding:6px 10px;border-radius:999px;white-space:nowrap;min-height:34px;box-sizing:border-box;text-decoration:none;flex:0 0 auto}
+.hubtabs a:hover{border-color:#0E5C6B}
+.hubtabs a.on{background:#0E5C6B;border-color:#0E5C6B;color:#fff}
+.hubtabs .ht-links{margin-left:auto;display:flex;gap:4px;flex:0 0 auto}
+@media (max-width:767px){.hubtabs{gap:4px;padding:0 6px}.hubtabs a{padding:6px 8px;font-size:12.5px}.hubtabs .ht-links .tx{display:none}}
+@media (max-width:400px){.hubtabs .tx2{display:none}}
+</style>
+</head>
+<body>
+<nav class="hubtabs" aria-label="도구 이동"><div class="ht-tabs"><a href="index.html" class="on" aria-current="page">📈 시황<span class="tx2">&nbsp;분석</span></a><a href="지역분석.html">📍 지역<span class="tx2">&nbsp;분석</span></a><a href="../benchmark-calculator/벤치마크_배율_계산기.html" data-calc-tab="map">🗺️ 지도</a><a href="../benchmark-calculator/벤치마크_배율_계산기.html" data-calc-tab="multi">📊&nbsp;<span class="tx2">여러 단지&nbsp;</span>비교하기</a></div><div class="ht-links"><a href="../benchmark-calculator/급지표.html">📋<span class="tx">&nbsp;급지표</span></a><a href="../index.html">🏠<span class="tx">&nbsp;초기화면</span></a></div></nav>
+<script>(function(){var n=document.currentScript.previousElementSibling;n.querySelectorAll("[data-calc-tab]").forEach(function(a){a.addEventListener("click",function(){try{sessionStorage.setItem("benchmarkCalc_lastTab_l85",a.getAttribute("data-calc-tab"));}catch(e){}});});var t=n.querySelector(".ht-tabs"),c=n.querySelector("a.on");if(t&&c&&c.offsetLeft+c.offsetWidth>t.clientWidth)t.scrollLeft=c.offsetLeft-8;})();</script>
+<header><div class="wrap">
+  <h1><span id="appName">시황 분석</span></h1>
+  <div class="regions" id="regions" role="group" aria-label="지역 선택"></div>
+</div></header>
+<main class="wrap">
+  <!-- 시장 32: 맨 위 = 지금 시황 한 줄(결론) → 바로 아래 근거 = 지금 위치 -->
+  <section id="sec_head"><h2>지금 시황 한 줄 <span class="sub" id="headsub"></span></h2><div class="headline" id="headline">자료를 읽는 중…</div></section>
+  <section id="sec_pos"><h2>지금 위치<i data-t="pos"></i> <span class="sub">위 한 줄의 근거 · 지금 값이 과거 값들 가운데 어디쯤인지(0 = 가장 낮음, 100 = 가장 높음)</span></h2>
+    <div class="board" id="board"></div>
+    <div class="vgrp" id="more4">함께 보는 지표 4개 <span class="sub">현장 월세 vs KB 시세 차이 · KB 전환율 · 실거래 신규 전환율 · 월세 상승률</span></div>
+    <div class="board more" id="board2" style="margin-top:0"></div>
+  </section>
+  <section><h2>지금 상황 풀어 읽기 <span class="sub" id="conclsub"></span></h2><div class="concl" id="concl">자료를 읽는 중…</div></section>
+  <section id="sec_rules"><h2><span id="rulesName" data-vt></span> <span class="sub" id="simplesub">지금까지 연구로 확인된 규칙과, 아직 지켜보는 가설 · 숫자는 연구 결과 그대로</span></h2>
+    <div id="vfirst"></div>
+    <div class="vgrp ok-h">검증됨 <span class="sub">2011~2020 자료로 정한 규칙이 2021년 이후 새 자료로 다시 봐도 맞았거나, 우연으로 보기 어려운 관계</span></div>
+    <div class="vcards" id="vcards"></div>
+    <div class="vgrp no-h">검증 진행 중인 가설 <span class="sub">시험했지만 아직 뚜렷하지 않았거나, 2021년 이후를 더 지켜봐야 하는 것</span></div>
+    <ul class="nolist" id="nolist"></ul>
+    <div class="vgrp now-h">지금 상태</div>
+    <div class="nowline" id="nowline"></div>
+  </section>
+  <div id="top"></div>
+  <div id="folded"></div>
+  <details><summary>지표 골라 보기 <span class="sub">2011-01 ~ <span id="ymlast">2026-10</span> · 최대 3개 · 단위가 다르면 칸을 나눠 그림</span></summary><div class="in">
+    <div class="box"><div class="chips" id="chips"></div><div id="ts"></div>
+    <div class="note">색은 지역 분석 화면과 같은 지표 색입니다. 전세대출 금리는 늘 점선(지역 분석과 같음)이고, 그중 2015-01 전 추정 금리 구간은 잔 점선입니다. 다른 지표의 점선 = 2015-01 전 추정 금리로 만든 "전세 vs 월세"(참고), 2012-08~2015-12 KB 공식 대용(KB 단지 기반). 실거래 전환율은 2020-12까지 계약 구분 없는 방식.</div></div></div></details>
+  <section id="sec_rel"><h2>검증된 관계 <span class="sub">두 지표를 한 그림에 겹쳐, 같이 움직이는 모습을 봅니다</span></h2>
+    <div class="box"><div class="panel-t" style="margin-top:0;font-weight:700;color:var(--ink)">① 전세대출 금리 → 1~2개월 뒤 전세 수급 지수<i data-t="sup"></i></div>
+      <div class="figh" style="margin-top:6px"><div class="seg" id="ov1seg" role="group" aria-label="겹쳐 보기"></div></div>
+      <div id="ov1"></div><div class="ovl-note" id="ov1note"></div>
+      <details class="mo" id="rel1more"><summary>시차별로 함께 움직인 정도 보기</summary><div class="in">
+        <div class="two" style="margin-top:6px"><div><div id="rel"></div><div class="note" id="relnote"></div></div>
+        <div class="scroll"><table id="reltab"></table><div class="note">1개월 변화끼리 함께 움직인 정도<i data-t="corr"></i>(2015-01부터, 공식 금리만). 음(−) = 반대로 움직임: 금리가 내린 뒤 전세 수급 지수가 오름.</div></div></div></div></details></div>
+    <div class="box" style="margin-top:12px"><div class="panel-t" style="margin-top:0;font-weight:700;color:var(--ink)">② 매매·전세 전망 지수<i data-t="outlook"></i> → 약 3개월 뒤 서울 선도단지<i data-t="lead"></i> 실거래 <span class="tag weak" style="margin-left:6px">서울만 · 지역 확인 불가</span></div>
+      <div class="figh" style="margin-top:6px"><div class="seg" id="ov2pick" role="group" aria-label="전망 지수 고르기"></div><div class="seg" id="ov2seg" role="group" aria-label="겹쳐 보기"></div></div>
+      <div id="ov2"></div><div class="ovl-note" id="ov2note"></div>
+      <details class="mo" id="rel2more"><summary>시차별로 함께 움직인 정도 보기</summary><div class="in">
+        <div class="two eq"><div><div class="note" style="margin:0 0 2px">전세가격 전망 지수 변화 → 선도단지 실거래 변화</div><div id="rel2a"></div></div><div><div class="note" style="margin:0 0 2px">매매가격 전망 지수 변화 → 선도단지 실거래 변화</div><div id="rel2b"></div></div></div></div></details>
+      <div class="note" id="rel2note"></div></div>
+  </section>
+  <details id="d_verdict"><summary>결과표 <span class="sub">연구 기록 전체 · 숫자와 강도만 · 누르면 펼침</span></summary><div class="in">
+    <div class="box scroll"><table class="vt" id="verdict"></table></div></div></details>
+  <footer><details id="d_src"><summary>출처와 갱신일 <span class="sub">누르면 펼침</span></summary><div class="in">
+    <ul>
+      <li id="src_kb">KB부동산 월간 주택가격동향(2026-10): 아파트 매매·전세가격지수, 전월세 전환율, 전세가율, 전세수급지수, 월세지수, 선도50, 매수우위·매매거래활발·매매/전세 전망지수</li>
+      <li id="src_ecos">한국은행 ECOS(2026-09까지): 예금은행 신규취급 전세자금대출·주택담보대출 금리, 기준금리(2026-10까지), M2 평잔</li>
+      <li id="src_rt">국토교통부 아파트 매매·전월세 실거래(2026-10 신고분까지): 선도단지 실거래 지수(계산기 서울 선도단지 25곳, 같은 단지·평형끼리 ㎡당 가격 3개월 중앙값 비교), 실거래 전환율</li>
+      <li class="blank" id="src_gap">공표 전: 2026-10 전세대출·주담대 금리, M2 → "전세 vs 월세"·"사서 세 놓으면"은 2026-09까지</li>
+      <li>2015-01 전 전세대출 금리는 기사 기준점으로 만든 추정값입니다. 그림에서 점선, 그 구간 배경은 흐리게 표시합니다.</li>
+      <li id="src_p8">국토교통부 아파트 전월세 실거래(2021-06~2026-09, 신규·갱신·청구권 구분 칸): 지금 전세 압력 칸. 2026-07~09는 늦은 신고로 바뀔 수 있음</li>
+      <li class="blank" id="src_upd">결과표·검증된 관계·저울의 회색·초록 구간 평균 비교 숫자는 연구(2026-10 자료) 값입니다. 월간 갱신 때 다시 계산하지 않습니다. 회색 구간은 두 저울 모두 지역 분석과 같은 "2개월 연속" 기준으로 셉니다. 전세대출 쪽은 회색 달이 모두 2개월 이상이라 연구 숫자 그대로이고, 주담대(매수) 쪽은 1개월짜리 회색 달이 있던 강북14만 2개월 기준으로 다시 낸 연구 값(2026-11)을 씁니다.</li>
+      <li class="blank">"검증된 관계"의 겹친 그림: 전망 지수는 KB 월간 엑셀(서울), 선도단지 실거래 3개월 변화는 선도단지 실거래 지수 연구 파일 값을 그대로 옮겨 그렸습니다(새 계산 없음).</li>
+      <li>전세 1년 방향과 "전환율 − 대출금리" 값은 지역 분석 시장 신호등과 같은 자료(지역 신호등 파일, 금리가 나온 마지막 달 기준)를 그대로 씁니다. 강북14·강남11은 지역 분석에 같은 묶음이 없어 서울 값을 씁니다.</li>
+      <li class="blank">은행연합회 전세자금대출 금리: 받지 않음(2026-08 취급분 비교 차이 −0.03%p, 한국은행 값 유지)</li>
+      <li class="blank">받지 못한 자료: 입주물량(부동산지인, 대표님 자료가 오면 따로 반영)</li>
+      <li class="blank">"<span data-vt></span>"의 ③ 가격/M2 숫자는 가격 수준 연구(2026-11-18), ② 지금 신호의 전망 지수 값은 KB 2026-10 엑셀 값을 적어 둔 것입니다. 월간 갱신 때 자동으로 바뀌지 않습니다.</li>
+    </ul>
+  </div></details></footer>
+</main>
+<div id="tip"></div>
+<script>
+// 시장 32: 툴팁 — TIP('설명') 이 ⓘ 표시를 돌려줌. PC는 마우스 올리면, 휴대폰은 누르면 뜸(다시 누르거나 바깥 누르면 닫힘). 화면 밖으로 안 잘리게 자리 잡음
+const TIPESC = s => String(s).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+const TIP = t => `<span class="tip" tabindex="0" role="button" aria-label="설명 보기" data-tip="${TIPESC(t)}">i</span>`;
+(() => { let box = null, cur = null; const HOVER = matchMedia('(hover: hover) and (pointer: fine)').matches;
+  const mk = () => { if (!box){ box = document.createElement('div'); box.id = 'tipbox'; box.setAttribute('role', 'tooltip'); document.body.appendChild(box); } return box; };
+  const show = el => { const b = mk(); b.innerHTML = el.dataset.tip.replace(/\*\*(.+?)\*\*/g, '<b>$1</b>'); b.classList.add('show'); if (cur && cur !== el) cur.classList.remove('on'); cur = el; el.classList.add('on');
+    const r = el.getBoundingClientRect(), bw = b.offsetWidth, bh = b.offsetHeight, vw = innerWidth, vh = innerHeight;
+    let x = r.left + r.width / 2 - bw / 2; x = Math.max(12, Math.min(x, vw - bw - 12));
+    let y = r.bottom + 8; if (y + bh > vh - 8) y = Math.max(8, r.top - bh - 8);
+    b.style.left = x + 'px'; b.style.top = y + 'px'; };
+  const hide = () => { if (box) box.classList.remove('show'); if (cur) cur.classList.remove('on'); cur = null; };
+  document.addEventListener('mouseover', e => { if (!HOVER) return; const t = e.target.closest && e.target.closest('.tip'); if (t) show(t); });
+  document.addEventListener('mouseout', e => { if (!HOVER) return; const t = e.target.closest && e.target.closest('.tip'); if (t && !t.contains(e.relatedTarget)) hide(); });
+  // 손가락(터치·펜): 누름에서 바로 열고 닫음(일부 휴대폰·차트 영역에서는 click 이 안 와서) — 뒤따르는 click 은 무시
+  let lastTouch = 0;
+  document.addEventListener('pointerup', e => { if (e.pointerType === 'mouse') return; const t = e.target.closest && e.target.closest('.tip'); if (!t) return; lastTouch = Date.now(); e.stopPropagation(); if (cur === t) hide(); else show(t); }, true);
+  let downAt = 0;
+  document.addEventListener('pointerdown', e => { downAt = Date.now(); if (e.pointerType === 'mouse') return; const t = e.target.closest && e.target.closest('.tip'); if (t) e.stopPropagation(); else hide(); }, true);
+  document.addEventListener('click', e => { const t = e.target.closest && e.target.closest('.tip'); if (t){ e.preventDefault(); e.stopPropagation(); if (Date.now() - lastTouch < 800) return; if (cur === t && !HOVER) hide(); else show(t); return; } if (Date.now() - lastTouch >= 800) hide(); }, true);
+  // 키보드(Tab)로 왔을 때만 포커스로 열기 — 누를 때 생기는 포커스는 무시
+  document.addEventListener('focusin', e => { const t = e.target.closest && e.target.closest('.tip'); if (t && Date.now() - downAt > 800) show(t); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') hide(); });
+  addEventListener('scroll', hide, {passive:true}); addEventListener('resize', hide); })();
+// 쓰는 법: `체력${TIP('선도단지 대비 평소보다 얼마나 싸게 거래되는지. **0보다 높을수록 저평가**가 큽니다.')}`
+// 설명은 2~3문장: ① 이게 뭔지 ② 높으면/낮으면 무슨 뜻 ③ 왜 중요한지. **굵게**는 노란 글자.
+// 시장 32: 툴 이름은 앱이름.js 한 곳에서(없으면 기본값)
+const APP_NAME = window.APP_NAME || '시황 분석';
+document.title = APP_NAME; document.getElementById('appName').textContent = APP_NAME;
+// 시장 35: 검증 칸 이름은 이 한 곳에서만 바꿈(화면의 data-vt 자리를 모두 채움)
+const VERIFY_TITLE = '검증 완료 규칙';
+document.querySelectorAll('[data-vt]').forEach(e => { e.textContent = VERIFY_TITLE; });
+// 시장 32: 툴팁 설명(2~3문장: 무엇인지 → 높으면/낮으면 → 왜 중요한지). HTML의 <i data-t="키"></i> 자리도 이 표로 채움
+const TIPS = {
+  pos:'지금 값이 과거(지표마다 자료가 있는 기간) 값들 가운데 어디쯤인지 0~100으로 나타냅니다. **100에 가까우면 과거 중 가장 높은 쪽**, 0에 가까우면 가장 낮은 쪽입니다. 지금이 평소와 얼마나 다른지 한눈에 보려는 칸입니다.',
+  s1:'전환율에서 전세대출 금리를 뺀 값입니다. **0보다 낮으면 전세대출 이자가 월세보다 비싸** 월세 쪽이 상대적으로 쌉니다(회색 구간). 전세 수요가 월세로 옮겨 가는지 보는 저울이라 전세 흐름을 볼 때 중요합니다.',
+  s2:'전환율(세 놓고 받는 월세 수익률)에서 주담대 금리를 뺀 값입니다. **0보다 낮으면 돈을 빌려 사서 세 놓을 때 이자가 월세보다 큽니다.** 빌려서 사는 수요가 붙기 어려운지 보는 매수 부담 잣대입니다.',
+  jr:'매매가 대비 전세가 비율(전세가율)입니다. **높으면 적은 돈으로 살 수 있어 매매를 받치고**, 낮으면 매매가와 전세가 차이가 큽니다. 전세가 매매를 얼마나 떠받치는지 보는 지표입니다.',
+  sup:'KB가 중개업소에 전세 수요와 공급 중 어느 쪽이 많은지 물어 만든 0~200 지수(전세 수급 지수)입니다. **100보다 높으면 전세 구하기 어려움(공급 부족)**, 낮으면 전세가 남습니다. 전세가가 오를지 가늠하는 대표 지표입니다.',
+  l50:'KB가 시가총액 상위 50개 아파트 단지로 만든 지수(선도50)의 1년 전 대비 상승률입니다. **높으면 대표 단지 가격이 빠르게 오르는 중**입니다. 대표 단지가 시장 흐름을 먼저 이끄는 경우가 많아 봅니다.',
+  press:'실제 전세 계약 신고로 본 지금 전세 시장의 압박 정도(전세압력)입니다. 갱신 계약 비율, 새 계약이 갱신보다·2년 전보다 얼마나 비싼지로 봅니다. **높으면 세입자는 이사 대신 갱신으로 버티고 새 전세는 비싸게 계약됩니다.** 전세가가 오르면 매매가와의 차이가 줄어 매수로 넘어오는 수요가 생기므로 매매에도 중요합니다.',
+  s3:'실제 새 월세 계약에서 나온 전환율에서 KB 전환율을 뺀 값입니다. **0보다 높으면 현장 월세가 KB 시세보다 비쌉니다.** KB 숫자가 현장을 늦게 따라가는지 보는 보조 지표입니다.',
+  kb:'전세금을 월세로 바꿀 때 쓰는 연 이자율(전환율, KB 조사)입니다. **높으면 월세가 전세보다 비싸고**, 낮으면 월세가 쌉니다. 대출 금리와 비교해 전세·월세·매수 중 어느 쪽이 유리한지 따지는 기준선입니다.',
+  rtn:'실제 신고된 새 월세 계약으로 계산한 전환율(최근 3개월)입니다. **높으면 현장에서 월세가 비싸게 계약되는 중**입니다. KB 조사값보다 현장 흐름을 빨리 보여 줄 수 있습니다.',
+  rent:'KB 월세지수의 1년 전 대비 상승률입니다. **높으면 월세가 빠르게 오르는 중**입니다. 월세가 오르면 전세로 돌아오는 수요가 늘 수 있어 함께 봅니다.',
+  gray:'대출 금리가 전환율보다 높은 달이 **2개월 연속**인 때(회색 구간)입니다. 빌린 돈 이자가 월세보다 비싸 전세(또는 빌려서 사기)가 불리한 구간입니다. 1개월만 높으면 "회색 확인 중"으로 따로 표시합니다.',
+  green:'대출 금리가 전환율보다 낮은 때(초록 구간)입니다. **이자가 월세보다 싸** 전세(또는 빌려서 사기)가 유리한 구간입니다. 회색 구간과 비교해 뒤의 가격 흐름이 어떻게 달랐는지 봅니다.',
+  outlook:'중개업소 대상 설문으로 만든 지표로, 앞으로 가격이 오를지 내릴지에 대한 현장의 전망 분위기를 0~200으로 나타냅니다(전망 지수). **100보다 높으면 오른다는 응답이 많습니다.** 실제 거래보다 먼저 움직이는 경우가 있어 봅니다.',
+  lead:'서울에서 거래가 많고 가격을 이끄는 대표 아파트 25곳(선도단지)입니다. 같은 단지·평형끼리 실거래 ㎡당 가격을 비교해 지수로 만들었습니다. **대표 단지가 먼저 움직이면 주변이 뒤따르는 경우가 많아** 봅니다.',
+  pm2:'집값을 시중에 풀린 돈(M2, 통화량)으로 나눈 값(가격/M2)입니다. **높으면 돈의 양에 비해 집값이 비싼 편**, 낮으면 싼 편입니다. 길게 보면 집값이 돈의 양을 따라가는 경향이 있어 1~3년 흐름을 보는 데 씁니다.',
+  corr:'두 지표의 달마다 변화가 같은 쪽으로 움직였는지 −1~+1로 나타낸 값(함께 움직인 정도)입니다. **+1에 가까우면 같이 오르내리고, −1에 가까우면 반대로** 움직입니다. 0.3 아래는 약한 편입니다.',
+  thr:'아무 관계가 없어도 우연히 나올 수 있는 크기(±2÷√개월 수, 우연 기준선)입니다. **이 선을 넘어야 우연으로 보기 어렵습니다.** 자료 기간이 길수록 기준선이 좁아집니다.',
+  blk:'회색 구간이 끊기지 않고 이어진 한 묶음(덩어리)입니다. **덩어리가 적으면 같은 경험이 몇 번 안 되어** 결과를 조심해 읽어야 합니다.',
+  jdir:'지역 분석의 시장 신호등이 월세 부담·전세 수급·앞으로 입주·전세가율을 함께 넣어 낸 앞으로 1년 전세가 방향입니다. **↑면 오르는 쪽, ↓면 내리는 쪽**입니다. 금리 구조 하나보다 넓게 본 결론입니다.',
+  buyw:'주담대 금리와 전환율 가운데 어느 쪽이 높은지로 본 매수 부담입니다. **주담대 금리가 전환율보다 2개월 연속 높으면(회색) 빌려 사서 세 놓을 때 이자가 월세보다 큽니다.** 최근 3개월 사이 그 차이가 벌어지면 "부담 커짐"으로 적습니다.',
+  buyAsk:'매수우위지수: 중개업소 설문으로 사려는 사람과 팔려는 사람 중 어느 쪽이 많은지 0~200으로 나타낸 값입니다. **100보다 높으면 사려는 사람이 많습니다.** 거래 분위기를 보여 주지만 뒤의 가격을 맞히는 힘은 아직 뚜렷하지 않았습니다.',
+  m2:'M2는 시중에 풀린 돈의 양(통화량)입니다. **전년 대비 증가율이 높으면 돈이 빠르게 늘어나는 중**입니다. 돈이 늘면 집값을 밀어 올린다는 생각을 시험했습니다.',
+  jrr:'전세가율은 매매가 대비 전세가 비율입니다. **평균보다 낮으면 언젠가 다시 올라오고, 높으면 내려온다**는 생각(평균으로 돌아간다)을 시험했습니다. 매매가와 전세가 차이가 어디까지 벌어질지 가늠하는 데 씁니다.',
+  zero:'"전세 vs 월세" 값(전환율 − 전세대출 금리)이 0을 넘나든 때입니다. **0선을 넘으면 전세·월세 중 싼 쪽이 바뀝니다.** 그 뒤 대표 단지 가격 방향이 바뀌는지 봤습니다.',
+  r22:'계약갱신청구권: 세입자가 2년 계약을 한 번 더(2년) 늘릴 수 있는 제도(2+2)입니다. **4년이 끝나 새로 계약할 때 값이 크게 뛰는지** 봤습니다.',
+};
+const T = k => TIP(TIPS[k]);
+function fillTips(root = document){ root.querySelectorAll('i[data-t]').forEach(e => { e.outerHTML = T(e.dataset.t); }); }
+fillTips();
+const D = n => 'data/' + encodeURIComponent(n);
+// 시장 30: 받침에 맞는 조사 — jsP(말, '은'|'이'|'을'|'로'|'과') = 조사만, jsW = 말+조사. 숫자로 끝나면 읽는 소리(0·3·6 = 받침, 1·7·8 = ㄹ받침), 끝의 (…)·태그는 빼고 봄
+const JOSA_P = {은:['은', '는'], 는:['은', '는'], 이:['이', '가'], 가:['이', '가'], 을:['을', '를'], 를:['을', '를'], 으로:['으로', '로'], 로:['으로', '로'], 과:['과', '와'], 와:['과', '와']};
+function jsP(w, p){ const s = String(w).replace(/<[^>]*>/g, '').replace(/\([^()]*\)\s*$/, '').replace(/[\s'"’”\]]+$/, ''), c = s.slice(-1), q = JOSA_P[p] || [p, p];
+  let b = false, r = false;
+  if (/[가-힣]/.test(c)){ const k = (c.charCodeAt(0) - 0xAC00) % 28; b = k > 0; r = k === 8; }
+  else if (/[0-9]/.test(c)){ b = '013678'.includes(c); r = '178'.includes(c); }
+  else if (/[a-zA-Z]/.test(c)){ b = /[lmnrLMNR]/.test(c); r = /[lrLR]/.test(c); }
+  return q[0] === '으로' ? (b && !r ? '으로' : '로') : b ? q[0] : q[1]; }
+const jsW = (w, p) => w + jsP(w, p);
+const REG = [['서울특별시','서울'],['강북14개구','강북14'],['강남11개구','강남11'],['경기도','경기'],['인천광역시','인천']];
+const IND = [
+  {k:'kb', col:'전환율_KB(%)', name:'KB 전환율', u:'pct', c:'#e8590c', dash:r=>(r['전환율_KB_출처']||'').includes('대용')},
+  {k:'rtn', col:'실거래_신규전환율_3개월(%)', name:'실거래 신규 전환율', u:'pct', c:'#fd7e14'},
+  {k:'rtg', col:'실거래_갱신전환율_3개월(%)', name:'실거래 갱신 전환율', u:'pct', c:'#b08900'},
+  {k:'jl', col:'전세대출금리(%)', name:'전세대출 금리', u:'pct', c:'#495057', ls:'6 4', dash:r=>(r['전세대출금리_출처']||'').startsWith('추정')},
+  {k:'mo', col:'주담대금리(%)', name:'주담대 금리', u:'pct', c:'#343a40'},
+  {k:'base', col:'기준금리(%)', name:'기준금리', u:'pct', c:'#8d99a6'},
+  {k:'s1', col:'스프레드1_KB전환율−전세대출(%p)', name:'전세 vs 월세, 어느 쪽이 싼가', u:'pp', c:'#0ca678', dash:r=>(r['스프레드1_표시']||'').startsWith('참고')},
+  {k:'s2', col:'스프레드2_KB전환율−주담대(%p)', name:'사서 세 놓으면 남는가', u:'pp', c:'#66a80f'},
+  {k:'s3', col:'스프레드3_실거래신규−KB전환율(%p)', name:'현장 월세 vs KB 시세 차이', u:'pp', c:'#f06595'},
+  {k:'m2', col:'M2_전년동월비(%)', name:'M2 전년비', u:'yoy', c:'#862e9c'},
+  {k:'l50', col:'선도50_전년동월비(%)', name:'KB 선도50 전년비', u:'yoy', c:'#1b2f6b', ls:'7 3'},
+  {k:'rent', col:'KB월세지수_전년동월비(%)', name:'KB 월세지수 전년비', u:'yoy', c:'#f59f00'},
+  {k:'jy', col:'KB전세지수_전년비(%)', name:'KB 전세지수 전년비', u:'yoy', c:'#7048c8'},
+  {k:'by', col:'KB매매지수_전년비(%)', name:'KB 매매지수 전년비', u:'yoy', c:'#1f5fd6'},
+  {k:'ly', col:'선도단지실거래_전년비(%)', name:'선도단지 실거래 전년비(서울)', u:'yoy', c:'#e67700'},
+  {k:'jr', col:'아파트_매매전세비(%)', name:'전세가율', u:'ratio', c:'#a61e4d'},
+  {k:'sup', col:'전세수급지수', name:'전세수급지수', u:'idx', c:'#0b7285'},
+  {k:'act', col:'전세거래활발지수', name:'전세거래활발지수', u:'idx', c:'#087f5b'},
+];
+// 지표 색 = 지역 분석(지역분석.html COL) 색 그대로(시장 29: 밝은 바탕이라 어두운 바탕용으로 밝혔던 색을 원래 색으로 되돌림):
+// KB 매매 #1f5fd6 · 대장(선도50) #1b2f6b · KB 전세 #7048c8 · 전세가율 #a61e4d · 전세수급 #0b7285 · 전세대출 금리 #495057 · M2 #862e9c · 전환율 #e8590c
+// 지역 분석에 없는 지표는 흰 바탕에서 보이는 같은 계열 색(실거래 전환율 주황·갈색, 주담대 짙은 회색, 스프레드 초록·연두·분홍, 선도단지 실거래 짙은 주황)
+// ---------- 화면 글자 치환표: 연구 용어 → 사람 말(JSON에서 온 문구도 그릴 때 이 표를 거침) ----------
+const pN = p => Math.round(+p * 100);
+const PLAIN = [
+  [/(?:원형 이동\s*)?(?<![%A-Za-z])p\s?(?:값\s?)?([<>]\s?)?(\d?\.\d+)/g, (m, op, v) => `우연히 이만한 차이가 날 확률 100번 중 ${op && op.trim() === '<' ? pN(v) + '번 미만' : pN(v) + '번'}`],
+  [/원형 이동/g, '색 순서 섞기'], [/표본 밖/g, '2021년 이후 새 자료'], [/순위 상관/g, '함께 움직인 정도'],
+  [/상관\s?계수/g, '함께 움직인 정도'], [/상관/g, '함께 움직인 정도'], [/우연과 구별(?:되지|이) 않[^\s,.)]*/g, '뚜렷하지 않음'],
+  [/우연과 구별[^\s,.)]*/g, '뚜렷함'], [/백분위/g, '위치'], [/분위(?!기)/g, '구간'], [/맞춤/g, '규칙 정하기'], [/표준점수/g, '평균에서 떨어진 정도'],
+  [/빨간 구간/g, '회색 구간'], [/파란 구간/g, '초록 구간'],
+  // 시장 29: '검증이 안 됐다'는 뜻의 표시(아래 세 꼴) → "검증 진행 중인 가설"
+  [/검증\s?안\s?됨/g, '검증 진행 중인 가설'], [/검증되지 않(?:음|았음)/g, '검증 진행 중인 가설'], [/미검증/g, '검증 진행 중인 가설'],
+];
+const plain = s => PLAIN.reduce((t, [re, to]) => t.replace(re, to), String(s));
+function plainDOM(root = document.body){
+  const w = document.createTreeWalker(root, NodeFilter.SHOW_TEXT); let n;
+  while ((n = w.nextNode())){ if (n.parentNode && /^(SCRIPT|STYLE)$/.test(n.parentNode.nodeName)) continue; const t = plain(n.nodeValue); if (t !== n.nodeValue) n.nodeValue = t; }
+  root.querySelectorAll('[aria-label]').forEach(e => { const t = plain(e.getAttribute('aria-label')); if (t !== e.getAttribute('aria-label')) e.setAttribute('aria-label', t); });
+}
+// 함께 움직인 정도: |r| 0.5 이상 높음, 0.3 이상 보통, 그 밖 낮음(숫자는 그대로 둠)
+const lvl = r => { const a = Math.abs(+r); return a >= 0.5 ? '높음' : a >= 0.3 ? '보통' : '낮음'; };
+const GRAY1 = '회색 구간(전세대출이 월세보다 비쌈)', GREEN1 = '초록 구간(월세가 더 비쌈)';
+const MO = (sum, body) => `<details class="mo"><summary>${sum || '자세히 보기'}</summary><div class="in">${body}</div></details>`;
+let GR26 = null;   // 지역 분석과 같은 자료(data/지역/회색구간_시장26.json) — 금리 분리 결과를 같이 보여 줌
+// 시장 29: 지역 분석 시장 신호등과 같은 자료(data/지역/신호등_시장27.json) — 전세 1년 방향·전환율−대출금리 값을 같은 말로 보여 줌
+let SG27 = null;
+const SGCODE = {'서울특별시':'11', '강북14개구':'11', '강남11개구':'11', '경기도':'41', '인천광역시':'28'};
+// 지역분석.html stInfo·st7·ANN 과 같은 계산(연 환산 복리 → 7단계, '방향만'이면 방향 + 원래 숫자 p를 '참고' 꼬리표와 함께 — 시장 29 결정 2)
+const ANN = (v, h) => (Math.exp(v / 100 * 12 / h) - 1) * 100;
+const st7 = a => a >= 5 ? '강한 상승' : a >= 3 ? '상승' : a >= 1 ? '약한 상승' : a > -1 ? (a >= 0 ? '강보합' : '약보합') : a > -3 ? '약한 하락' : a > -5 ? '하락' : '강한 하락';
+function stInfo(x, h){ if (!x || x['예측(%)'] == null) return null; const v = x['예측(%)'], a = ANN(v, h);
+  if (x['방향만']) return {st:v > 0 ? '↑' : v < 0 ? '↓' : '→', only:true, a, p:(Math.exp(v / 100) - 1) * 100, dirTxt:v > 0 ? '↑ 오르는 쪽' : v < 0 ? '↓ 내리는 쪽' : '→ 큰 움직임 없음', sign:Math.sign(v)};
+  return {st:st7(a), a, sign:a >= 1 ? 1 : a <= -1 ? -1 : 0}; }
+// 지역 → 지역 분석 신호등 전세 1년. 강북14·강남11은 지역 분석에 같은 묶음이 없어 서울 값을 씀
+function sgJeon(g = region){
+  const c = SGCODE[g], o = SG27 && SG27['지역'] && SG27['지역'][c]; const x = o && o['전세'] && o['전세']['12개월']; if (!x) return null;
+  const i = stInfo(x, 12), rw = ((SG27['원 값'] || {})[c]) || {};
+  return {...i, word:i.only ? i.dirTxt : i.st, ym:x['기준 달'], of:c !== '11' || g === '서울특별시' ? '' : '서울 값', spread:rw['전환율−대출금리(%p)'], usual:rw['평소(%p)']};
+}
+const jeonLine = (J, rn) => J ? `전세 1년 방향(지역 분석 시장 신호등과 같은 결론): <b>${J.word}</b>${J.only && J.p != null ? ` · 1년 ${J.p >= 0 ? '+' : '−'}${Math.abs(J.p).toFixed(1)}% <span class="blank">(과거에 없던 상황 · 참고)</span>` : ''}${J.of ? ` <span class="blank">· ${jsW(rn, '은')} 지역 분석에 같은 묶음이 없어 ${J.of}</span>` : ''}` : '';
+const UNIT = {pct:'전환율·금리 (%)', pp:'차이 (%p)', yoy:'전년동월비 (%)', ratio:'전세가율 (%)', idx:'지수 (0~200)'};
+const UNITSFX = {pct:'%', pp:'%p', yoy:'%', ratio:'%', idx:''};
+// ---------- 시장 35: 해석 먼저, 숫자는 근거로 — 칸마다 결론(색) → 근거(작은 글씨) → 읽는 법 ----------
+// 색: 'cool' 청록 = 여유·완화 쪽 · 'warm' 주황 = 부담·압력 쪽 · 'mid' 회색 = 비슷·보통 · s = 진하게(과거 끝자락)
+const CC = o => o ? `<div class="cc ${o.tone}${o.s ? ' s' : ''}">${o.t}</div>` : '';
+const GZ = t => `<div class="gz"><span class="lb2">근거</span>${t}</div>`;
+const RD = (t, tip) => `<span class="lb2">읽는 법</span>${t}${tip ? TIP(tip) : ''}`;
+const S1_BAND = 0.25;   // 잠정: |전환율 − 전세대출 금리| 0.25%p 안이면 "비슷합니다"(코드에 있던 기준 없음, 새로 둠)
+const S3_BAND = 0.10;   // 잠정: |실거래 신규 − KB 전환율| 0.10%p 안이면 "비슷합니다"
+const POS_HI = 75, POS_LO = 25, POS_XHI = 90, POS_XLO = 10;   // 잠정: 위치로 결론 낼 때(막대의 1/4·3/4 눈금과 같은 선), 10 아래·90 위는 진하게
+const byPos = (r, hi, lo, mid, hiTone = 'warm') => r.p >= POS_HI ? {t:hi, tone:hiTone, s:r.p >= POS_XHI} : r.p <= POS_LO ? {t:lo, tone:hiTone === 'warm' ? 'cool' : 'warm', s:r.p <= POS_XLO} : {t:mid, tone:'mid'};
+const atT = (k, t, g = region) => num(row(g, t)[ind(k).col]);
+const f2p = v => v == null ? '—' : v.toFixed(2) + '%';
+const zoneName = (rk, t) => { const c = (redBlue(rk)[YMS.indexOf(t)] || '')[0]; return c === 'r' ? '회색 구간(2개월 연속)' : c === 'p' ? '회색 확인 중(1개월째)' : c === 'b' ? '초록 구간' : ''; };
+const BOARD = [
+  {k:'s1', from:201501, why:'2015-01 전은 추정 금리라 뺌',
+   read:'전환율이 대출금리보다 높으면 전세가 유리, 낮으면 월세가 유리',
+   readTip:'전환율은 전세금을 월세로 바꿀 때의 연 이율, 대출금리는 전세금을 빌릴 때의 연 이자입니다. **전환율이 더 높으면 월세가 이자보다 비싸 전세가 쌉니다.** 차이가 ±0.25%p 안이면 어느 쪽도 뚜렷하게 싸지 않아 "비슷합니다"로 적습니다(잠정 기준).',
+   cc:r => { const kb = atT('kb', r.t), jl = atT('jl', r.t), v = r.v, z = zoneName('jl', r.t);
+     const o = v <= -S1_BAND ? {t:'지금은 월세가 더 쌉니다', tone:'warm'} : v >= S1_BAND ? {t:'지금은 전세가 더 쌉니다', tone:'cool'}
+       : {t:`전세·월세 비용이 비슷합니다${v < 0 ? '(월세 쪽이 조금 쌈)' : v > 0 ? '(전세 쪽이 조금 쌈)' : ''}`, tone:'mid'};
+     o.gz = `${fmtYM(r.t)} 전월세 전환율 ${f2p(kb)} vs 전세대출 금리 ${f2p(jl)} → 차이 <b>${fmt(v, 'pp')}</b>${z ? ` · ${z}` : ''}`; return o; }},
+  {k:'s2', from:201208,
+   read:'전환율이 주담대 금리보다 낮으면(−) 빌려 사서 세 놓을 때 이자가 월세보다 커 매수 부담',
+   cc:() => { const B = buyState(region); if (!B) return null; const m = BUYCC[buyWord(B)] || [buyWord(B), 'mid'];
+     return {t:m[0], tone:m[1], s:m[2], gz:`${fmtYM(B.t)} 전월세 전환율 ${f2p(B.kb)} vs 주담대 금리 ${f2p(B.mo)} → 차이 <b>${fmt(B.v, 'pp')}</b> · ${B.c === 'r' ? `회색${B.run ? `(${fmtYM(B.run.a)}부터 ${B.run.n}개월 연속)` : ''}` : stName(B.c)}${B.d != null ? ` · 3개월 전(${fmtYM(B.t3)}) ${fmt(B.v3, 'pp')}` : ''}`}; }},
+  {k:'jr', from:201101, read:'높으면 전세가 매매가를 받치고, 낮으면 매매가와 전세가 차이가 큼',
+   cc:r => ({...byPos(r, '전세가 매매가를 받치는 힘이 큰 편입니다', '매매가와 전세가 차이가 큰 편입니다', '전세가율은 과거와 비교해 보통입니다', 'cool'), gz:`${fmtYM(r.t)} 전세가율 <b>${fmt(r.v, 'ratio', 1)}</b>`})},
+  {k:'sup', from:201101, read:'100보다 높으면 전세가 모자라고(구하기 어려움), 낮으면 남음(100 = 수요·공급 같음)',
+   cc:r => ({...(r.v > 100 ? {t:'전세 구하기 어렵다는 응답이 많습니다', tone:'warm', s:r.p >= POS_XHI} : r.v < 100 ? {t:'전세가 남는다는 응답이 많습니다', tone:'cool', s:r.p <= POS_XLO} : {t:'전세 수요와 공급이 비슷합니다', tone:'mid'}),
+     gz:`${fmtYM(r.t)} 전세 수급 지수 <b>${r.v.toFixed(1)}</b>(100 = 같음)`})},
+  {k:'l50', from:201101, read:'높으면 시가총액 상위 50개 단지 가격이 빠르게 오르는 중',
+   cc:r => ({...(r.v < 0 ? {t:'대표 단지 가격이 1년 전보다 내렸습니다', tone:'cool', s:r.p <= POS_XLO}
+     : r.p >= POS_HI ? {t:'대표 단지 가격이 빠르게 오르는 중입니다', tone:'warm', s:r.p >= POS_XHI}
+     : r.p <= POS_LO ? {t:'대표 단지 오름폭이 작은 편입니다', tone:'mid'} : {t:'대표 단지 가격이 보통 속도로 오르는 중입니다', tone:'mid'}),
+     gz:`${fmtYM(r.t)} 1년 전 대비 <b>${sg(r.v)}%</b>`})},
+];
+const BOARD2 = [
+  {k:'s3', from:201208, read:'0보다 높으면 현장 월세가 KB 시세보다 비쌈(KB 숫자가 현장을 늦게 따라가는 중)',
+   readTip:'실제 새 월세 계약으로 낸 전환율에서 KB 전환율을 뺀 값입니다. **차이가 ±0.10%p 안이면 "비슷합니다"로 적습니다(잠정 기준).**',
+   cc:r => { const rt = atT('rtn', r.t), kb = atT('kb', r.t), v = r.v;
+     const o = v >= S3_BAND ? {t:'현장 월세가 KB 시세보다 비쌉니다', tone:'warm', s:r.p >= POS_XHI} : v <= -S3_BAND ? {t:'현장 월세가 KB 시세보다 쌉니다', tone:'cool', s:r.p <= POS_XLO} : {t:'현장 월세와 KB 시세가 비슷합니다', tone:'mid'};
+     o.gz = `${fmtYM(r.t)} 실거래 신규 전환율 ${f2p(rt)} − KB 전환율 ${f2p(kb)} = <b>${fmt(v, 'pp')}</b>`; return o; }},
+  {k:'kb', from:201208, why:'2012-08~2015-12는 KB 대용', read:'높으면 월세가 전세보다 비싼 편, 낮으면 싼 편',
+   cc:r => ({...byPos(r, '월세 환산 이율이 과거보다 높은 편입니다', '월세 환산 이율이 과거보다 낮은 편입니다', '월세 환산 이율은 과거와 비교해 보통입니다'), gz:`${fmtYM(r.t)} KB 전환율 <b>${fmt(r.v, 'pct')}</b>`})},
+  {k:'rtn', from:201101, why:'2020-12까지 계약 구분 없는 방식', read:'높으면 현장에서 새 월세가 비싸게 계약되는 중',
+   cc:r => ({...byPos(r, '현장 새 월세 이율이 과거보다 높은 편입니다', '현장 새 월세 이율이 과거보다 낮은 편입니다', '현장 새 월세 이율은 과거와 비교해 보통입니다'), gz:`${fmtYM(r.t)} 최근 3개월 신규 계약 <b>${fmt(r.v, 'pct')}</b>`})},
+  {k:'rent', from:201101, read:'높으면 월세가 빠르게 오르는 중(월세가 오르면 전세로 돌아오는 수요가 생길 수 있음)',
+   cc:r => ({...(r.v < 0 ? {t:'월세가 1년 전보다 내렸습니다', tone:'cool', s:r.p <= POS_XLO} : byPos(r, '월세가 빠르게 오르는 중입니다', '월세 오름세가 느린 편입니다', '월세 오름 속도는 보통입니다')), gz:`${fmtYM(r.t)} 1년 전 대비 <b>${sg(r.v)}%</b>`})},
+];
+const PALHEX = ['#2F6FE0','#e8590c','#1E8E5A'];   // 같은 색 지표를 둘 고르면 뒤엣것만 이 색으로
+const selCol = s => { const I = ind(s.k), dup = sel.some(o => o !== s && sel.indexOf(o) < sel.indexOf(s) && ind(o.k).c === I.c); return dup ? PALHEX[s.c] : I.c; };
+let DATA = {}, YMS = [], LASTYM = 202610, INFO = {}, R7 = null, P8 = null, region = '서울특별시', LAG = {jw:3, buy:3};
+let sel = [{k:'kb',c:0},{k:'jl',c:1},{k:'rtn',c:2}];
+const $ = s => document.querySelector(s);
+const ind = k => IND.find(x => x.k === k);
+const num = v => (v === '' || v == null) ? null : +v;
+const rname = (g = region) => REG.find(r => r[0] === g)[1];
+const fmtYM = ym => String(ym).slice(0,4) + '-' + String(ym).slice(4);
+const sg = (v, d = 1) => v == null ? '—' : (v < 0 ? '−' : v > 0 ? '+' : '') + Math.abs(v).toFixed(d);
+const fmt = (v, u, d=2) => v == null ? '—' : ((v < 0 ? '−' : (u === 'pp' && v > 0 ? '+' : '')) + Math.abs(v).toFixed(d) + (UNITSFX[u] || ''));
+function parseCSV(t){
+  t = t.replace(/^﻿/, ''); const rows = []; let row = [], f = '', q = false;
+  for (let i = 0; i < t.length; i++){ const c = t[i];
+    if (q){ if (c === '"'){ if (t[i+1] === '"'){ f += '"'; i++; } else q = false; } else f += c; }
+    else if (c === '"') q = true; else if (c === ','){ row.push(f); f = ''; }
+    else if (c === '\n'){ row.push(f.replace(/\r$/, '')); rows.push(row); row = []; f = ''; } else f += c; }
+  if (f || row.length){ row.push(f); rows.push(row); }
+  const h = rows.shift(); return rows.filter(r => r.length > 1).map(r => Object.fromEntries(h.map((k, i) => [k, r[i]])));
+}
+const row = (g, t) => (DATA[g] || {})[t] || {};
+function series(k, g = region){ const c = ind(k).col; return YMS.map(t => num(row(g, t)[c])); }
+function lastOf(k, g = region){ const s = series(k, g); for (let i = s.length - 1; i >= 0; i--) if (s[i] != null) return {t:YMS[i], v:s[i]}; return null; }
+function percentile(k, from){
+  const s = series(k); const pts = YMS.map((t, i) => [t, s[i]]).filter(([t, v]) => t >= from && v != null);
+  if (!pts.length) return null;
+  const [lt, lv] = pts[pts.length - 1]; const arr = pts.map(p => p[1]);
+  const below = arr.filter(v => v < lv).length, eq = arr.filter(v => v === lv).length;
+  return {t:lt, v:lv, p:(below + eq / 2) / arr.length * 100, n:arr.length, a:pts[0][0], b:lt};
+}
+// 회색/초록: 금리 > KB 전환율이면 회색. 추정 금리 달은 흐리게.
+// 시장 29: 전세대출 쪽 회색은 지역 분석(회색구간_시장26.json "2달 이상")과 같은 규칙 — 2개월 연속일 때만 회색 구간,
+// 1개월만 넘은 달은 'p'(회색 확인 중: 옅은 회색, 덩어리·회색 달 수에 넣지 않음).
+// 시장 32(결정 5): 매수 저울(주담대)도 같은 2개월 연속 기준으로 통일. 연구 숫자는 2개월 기준 재검증 값(강북14만 바뀜)을 덧씌움
+const GRAY_MIN = 2;
+function redBlue(rk, g = region){
+  const kb = series('kb', g), r = series(rk, g);
+  const out = YMS.map((t, i) => kb[i] == null || r[i] == null ? null : (r[i] > kb[i] ? 'r' : 'b') + (rk === 'jl' && t < 201501 ? '0' : ''));
+  for (let i = 0; i < out.length; i++){ if (!out[i] || out[i][0] !== 'r') continue; let j = i; while (j + 1 < out.length && out[j + 1] && out[j + 1][0] === 'r') j++;
+    if (j - i + 1 < GRAY_MIN) for (let k = i; k <= j; k++) out[k] = 'p' + out[k].slice(1); i = j; }
+  return out;
+}
+function runs(bg){ const out = []; let cur = null; bg.forEach((c, i) => { if (c && c[0] === 'r'){ if (cur && cur.b === i - 1) cur.b = i; else { cur = {a:i, b:i}; out.push(cur); } } }); return out; }
+// ---------- 공용 겹친 시계열(배경 칠·칸 나눔·십자선) ----------
+function niceTicks(lo, hi, n = 5){
+  if (lo === hi){ lo -= 1; hi += 1; } const span = hi - lo, step0 = span / n, mag = Math.pow(10, Math.floor(Math.log10(step0)));
+  const step = [1, 2, 2.5, 5, 10].map(m => m * mag).find(s => span / s <= n) || 10 * mag;
+  const a = Math.floor(lo / step) * step, b = Math.ceil(hi / step) * step, out = [];
+  for (let v = a; v <= b + step / 2; v += step) out.push(+v.toFixed(6)); return out;
+}
+function stack(el, panels, bg){
+  const W = Math.max(300, el.clientWidth), mob = W < 560, ML = mob ? 34 : 46, MR = 10, MT = 6, MB = 20;
+  const X = i => ML + (W - ML - MR) * i / (YMS.length - 1), bw = (W - ML - MR) / (YMS.length - 1);
+  const P = []; let html = '';
+  panels.forEach((p, pi) => {
+    const H = p.h || (mob ? 150 : 180);
+    const all = p.series.flatMap(s => s.v.filter(v => v != null)).concat(p.zero != null ? [p.zero] : []); if (!all.length) return;
+    const tk = niceTicks(Math.min(...all), Math.max(...all), mob ? 4 : 5); const y0 = tk[0], y1 = tk[tk.length - 1];
+    const Y = v => MT + (H - MT - MB) * (1 - (v - y0) / (y1 - y0));
+    let s = `<svg width="${W}" height="${H}" data-p="${pi}" role="img" aria-label="${p.title}">`;
+    if (bg) bg.forEach((c, i) => { if (!c) return; const x = X(i) - bw / 2;
+      s += `<rect x="${Math.max(ML, x).toFixed(1)}" y="${MT}" width="${(bw + .6).toFixed(1)}" height="${H - MT - MB}" fill="${c[0] === 'b' ? 'var(--green)' : 'var(--gray)'}" opacity="${(c[1] === '0' ? .38 : 1) * (c[0] === 'p' ? .45 : 1)}"/>`; });
+    tk.forEach(v => { s += `<line x1="${ML}" x2="${W - MR}" y1="${Y(v)}" y2="${Y(v)}" stroke="${v === p.zero ? '#93A1AC' : 'var(--grid)'}" stroke-width="1"/><text x="${ML - 6}" y="${Y(v) + 4}" text-anchor="end">${v}</text>`; });
+    if (p.zero != null && !tk.includes(p.zero)) s += `<line x1="${ML}" x2="${W - MR}" y1="${Y(p.zero)}" y2="${Y(p.zero)}" stroke="#93A1AC"/>`;
+    YMS.forEach((t, i) => { if (t % 100 === 1 && (Math.floor(t / 100) % (mob ? 3 : 2) === 1)) s += `<text x="${X(i)}" y="${H - 5}" text-anchor="middle">${Math.floor(t / 100)}</text>`; });
+    p.series.forEach(se => {
+      let segs = [], cur = null;
+      for (let i = 1; i < YMS.length; i++){ const a = se.v[i - 1], b = se.v[i]; if (a == null || b == null){ cur = null; continue; }
+        const d = !!(se.dash && (se.dash[i - 1] || se.dash[i]));
+        if (!cur || cur.d !== d){ cur = {d, p:`M${X(i - 1).toFixed(1)},${Y(a).toFixed(1)}`}; segs.push(cur); }
+        cur.p += `L${X(i).toFixed(1)},${Y(b).toFixed(1)}`; }
+      segs.forEach(g => { const da = se.ls ? (g.d ? '1.5 3.5' : se.ls) : (g.d ? '4 4' : '');
+        s += `<path d="${g.p}" fill="none" stroke="${se.color}" stroke-width="${se.w || 2}" ${da ? `stroke-dasharray="${da}"` : ''} stroke-linejoin="round"/>`; });
+    });
+    s += `<line class="xh" x1="0" x2="0" y1="${MT}" y2="${H - MB}" stroke="#61707D" stroke-width="1" style="display:none"/>`;
+    s += `<rect x="${ML}" y="${MT}" width="${W - ML - MR}" height="${H - MT - MB}" fill="transparent"/></svg>`;
+    html += `<div class="panel-t">${p.title}</div><div class="legend">${p.series.map(se => `<span>${se.ls ? `<i class="dash" style="color:${se.color}"></i>` : `<i style="background:${se.color}"></i>`}${se.name}</span>`).join('')}</div>` + s;
+    P.push(p);
+  });
+  el.innerHTML = html;
+  const svgs = el.querySelectorAll('svg');
+  svgs.forEach(svg => {
+    const move = e => { const r = svg.getBoundingClientRect(); const cx = (e.touches ? e.touches[0].clientX : e.clientX) - r.left;
+      let i = Math.round((cx - ML) / (W - ML - MR) * (YMS.length - 1)); i = Math.max(0, Math.min(YMS.length - 1, i));
+      el.querySelectorAll('.xh').forEach(l => { l.setAttribute('x1', X(i)); l.setAttribute('x2', X(i)); l.style.display = ''; });
+      const rows = P.flatMap(pp => pp.series.map(se => `<div class="r"><span class="k"><i style="background:${se.color}"></i>${se.name}</span><b>${fmt(se.v[i], se.u || pp.u, se.u === 'idx' || pp.u === 'idx' ? 1 : 2)}${se.dash && se.dash[i] ? ' *' : ''}</b></div>`));
+      const c = bg && bg[i]; const tag = c ? `<span style="color:${c[0] === 'b' ? 'var(--greent)' : 'var(--grayt)'}">${c[0] === 'r' ? '회색 구간' : c[0] === 'p' ? '회색 확인 중(1개월, 2개월 연속이면 회색 구간)' : '초록 구간'}${c[1] === '0' ? '(추정 금리)' : ''}</span>` : '';
+      const tip = $('#tip'); tip.innerHTML = `<div style="margin-bottom:4px;color:var(--ink3)">${fmtYM(YMS[i])} ${tag}</div>` + rows.join('') + (rows.join('').includes(' *') ? '<div style="color:var(--ink3);margin-top:4px">* 추정·대용 구간</div>' : '');
+      tip.style.display = 'block'; const tx = (e.touches ? e.touches[0].clientX : e.clientX), ty = (e.touches ? e.touches[0].clientY : e.clientY);
+      tip.style.left = Math.max(8, Math.min(window.innerWidth - tip.offsetWidth - 8, tx + 14)) + 'px'; tip.style.top = Math.max(8, ty - tip.offsetHeight - 12) + 'px'; };
+    svg.addEventListener('mousemove', move); svg.addEventListener('touchmove', move, {passive:true});
+    const out = () => { $('#tip').style.display = 'none'; el.querySelectorAll('.xh').forEach(l => l.style.display = 'none'); };
+    svg.addEventListener('mouseleave', out); svg.addEventListener('touchend', out);
+  });
+}
+const S = (k, color, opt = {}) => { const I = ind(k); const rows = YMS.map(t => row(region, t));
+  return {name:opt.name || I.name, color:color || I.c, ls:I.ls, v:series(k), u:I.u, dash:I.dash ? rows.map(I.dash) : null, w:opt.w}; };
+// ---------- 저울 그림 두 개 ----------
+const SC = {
+  jw:{title:'전세 vs 월세, 어느 쪽이 싼가', rk:'jl', rn:'전세대출 금리', sk:'전월세', main:['KB 전세지수 전년비', '전세수급지수'],
+      outs:[['KB 전세지수 전년비','전세가','%'], ['KB 월세지수 전년비','월세','%'], ['전세수급지수','전세수급','']],
+      red:'회색 구간: 전세대출 금리 > KB 전환율이 2개월 연속(전세대출이 월세보다 비쌈, 지역 분석과 같은 기준)', blue:'초록 구간: 전세대출 금리 < KB 전환율(월세가 더 비쌈)',
+      panels:() => [{title:'금리와 KB 전환율 (%)', u:'pct', series:[S('kb', null, {w:2.4}), S('jl')]},
+                    {title:'전세가·월세 전년비 (%)', u:'yoy', zero:0, series:[S('jy'), S('rent')]},
+                    {title:'전세수급지수 (100 = 수요·공급 같음)', u:'idx', zero:100, h:130, series:[S('sup')]}]},
+  buy:{title:'사서 세 놓으면 남는가', rk:'mo', rn:'주담대 금리', sk:'매수', main:['KB 매매지수 전년비'],
+      outs:[['KB 매매지수 전년비','매매가','%'], ['KB 선도50 전년비','선도50','%'], ['선도단지 실거래 전년비','선도단지 실거래','%']],
+      red:'회색 구간: 주담대 금리 > KB 전환율이 2개월 연속(빌려 사서 세 놓으면 이자가 더 큼)', blue:'초록 구간: 주담대 금리 < KB 전환율(세 놓은 월세가 이자보다 큼)',
+      panels:() => [{title:'금리와 KB 전환율 (%)', u:'pct', series:[S('kb', null, {w:2.4}), S('mo')]},
+                    {title:'매매가 전년비 (%) · 선도50은 전국 상위 50, 선도단지 실거래는 서울 25곳', u:'yoy', zero:0, series:[S('by'), S('l50'), S('ly')]}]},
+};
+// 화면 규칙: 5개 지역 중 4곳 이상 같은 방향 + 공식 금리만도 같은 방향(시장 7번 지시) + 서울 원형 이동 p < 0.10(이번에 더한 확인)
+function verdictOf(key, lag){
+  const c = SC[key]; const rs = c.main.map(o => R7['규칙'][`${c.sk}|${lag}|${o}`]).filter(Boolean);
+  const rule = rs.length && rs.every(r => r.pass); const strict = rule && rs.every(r => r.p != null && r.p < 0.10);
+  return {rule, strict, rs};
+}
+function figSay(key){
+  const c = SC[key], lag = LAG[key], g = region, J = R7['저울'][`${c.sk}|${g}|전체|${lag}`] || {}, Jo = R7['저울'][`${c.sk}|${g}|공식|${lag}`] || {};
+  const bg = redBlue(c.rk), rr = runs(bg), nRed = bg.filter(x => x && x[0] === 'r').length, nBlue = bg.filter(x => x && x[0] === 'b').length;
+  const when = lag ? `시작 ${lag}개월 뒤부터 센` : '동안';
+  const any = J[c.outs[0][0]] || {};
+  let h = '';
+  let more = '';
+  if (!any.nr || any.nr < 3 || any.mr == null){
+    h = `<b>${rname()}</b>: 회색 달이 ${nRed}개월(${rr.length}덩어리)뿐이라 회색·초록 구간 평균을 비교하지 않았습니다.`;
+  } else {
+    const part = (side) => c.outs.map(([o, nm, u]) => { const x = J[o]; if (!x || x[side] == null) return null; return `${nm} ${u ? '연 ' : '평균 '}<b>${u ? sg(x[side]) + '%' : x[side].toFixed(0)}</b>`; }).filter(Boolean).join(', ');
+    h = `<span class="r">회색 구간</span>(${any.nr}개월) ${when} ${part('mr')} / <span class="b">초록 구간</span>(${any.nb}개월) ${part('mb')}.`;
+    const ps = c.outs.map(([o, nm]) => J[o] && J[o].p != null ? `${nm} 100번 중 ${pN(J[o].p)}번` : null).filter(Boolean).join(' · ');
+    const rl = c.outs.map(([o, nm]) => { const r = R7['규칙'][`${c.sk}|${lag}|${o}`]; return r ? `${nm} ${r.same}(공식 금리만 ${r.same_o})` : null; }).filter(Boolean).join(' · ');
+    more += `<div>같은 방향(회색−초록 차이의 부호가 서울과 같은) 지역 수: ${rl}.</div><div>${rname()}에서 색 순서를 밀어 붙여 다시 나눠 봤을 때 우연히 이만한 차이가 난 경우: ${ps}.</div>`;
+  }
+  const first = rr.length ? YMS[rr[0].a] : null;
+  more += `<div>회색 구간 덩어리 ${rr.length}개${first ? `, 첫 회색 달 ${fmtYM(first)}` : ''}${rr.length && first >= 202101 ? (key === 'jw' ? ' — 모두 2021년 이후라 2015년 전 추정 금리를 빼도 결과가 같고, 2022~23년 금리 급등기가 대부분입니다' : ' — 모두 2021년 이후이고 2022~23년 금리 급등기가 대부분입니다') : ''}.</div>`;
+  const pm = bg.map((x, i) => x && x[0] === 'p' ? fmtYM(YMS[i]) : null).filter(Boolean), patched = key === 'buy' && B32 && B32[g];
+  more += `<div>회색 구간은 ${c.rn}가 전환율보다 높은 달이 <b>2개월 연속</b>일 때로 셉니다(지역 분석과 같은 기준, 두 저울 모두 같음). 1개월만 높은 달은 옅은 회색(회색 확인 중)으로 칠하고 덩어리 수에 넣지 않습니다. ` +
+    (pm.length ? `이 지역에는 1개월만 높았던 달이 ${pm.length}개(${pm.join(', ')}) 있어 ${patched ? '회색·초록 평균 비교 숫자도 2개월 기준으로 다시 낸 연구 값을 씁니다.' : '1개월 기준으로 낸 연구의 회색·초록 평균 비교 숫자와 기준이 다릅니다(연구 숫자는 다시 계산하지 않음).'}`
+      : '이 지역의 회색 달은 모두 2개월 이상 이어져, 연구의 회색·초록 평균 비교 숫자와 기준 차이가 없습니다.') + `</div>`;
+  if (rr.length < 3) h += `<div class="note wnote">회색 구간 덩어리가 ${rr.length}개뿐이라(3개 미만) 이 지역의 비교는 한두 번의 경험에 기댑니다.</div>`;
+  return h + MO('자세히 보기', more);
+}
+function renderFig(key, host, folded){
+  const c = SC[key], v = verdictOf(key, LAG[key]);
+  const tag = v.strict ? '<span class="tag ok">뚜렷함</span>' : v.rule ? '<span class="tag weak">약함</span>' : '<span class="tag no">차이 없음</span>';
+  const why = v.strict ? '' : v.rule ? '5개 지역 중 4곳 이상 같은 방향이지만, 서울에서 우연히도 이만한 차이가 날 확률이 100번 중 10번 이상이라 뚜렷하지 않음' : '지역 방향이 엇갈림';
+  const head = `<div class="figh"><div class="seg" data-f="${key}" role="group" aria-label="시차">${[0,3,6].map(l => `<button aria-pressed="${LAG[key] === l}" data-l="${l}">${l ? l + '개월 뒤부터' : '같은 달'}</button>`).join('')}</div>
+    <div class="legend"><span><i class="sw" style="background:var(--gray)"></i>${c.red}${T('gray')}</span><span><i class="sw" style="background:var(--gray);opacity:.45"></i>회색 확인 중(1개월만 높음)</span><span><i class="sw" style="background:var(--green)"></i>${c.blue}${T('green')}</span>${key === 'jw' ? `<span><i style="background:repeating-linear-gradient(90deg,${ind('jl').c} 0 2px,transparent 2px 6px)"></i>2015 전 추정 금리(잔 점선, 배경 흐림)</span>` : ''}</div></div>`;
+  const v3 = verdictOf(key, 3), ps = v3.rs.map(r => r.p).filter(p => p != null), pr = ps.length ? `${pN(Math.min(...ps))}~${pN(Math.max(...ps))}번` : '—';
+  const rule = key === 'buy' ? `<div class="note"><b>접은 기준</b>(대표님 확인): 5개 지역 중 4곳 이상 같은 방향 + 공식 금리만으로도 같은 방향 + 서울에서 우연히 이만한 차이가 날 확률 100번 중 10번 미만, 셋을 모두 만족해야 위로 올립니다. ${v3.strict ? `이 그림은 셋을 모두 만족해 위로 올렸습니다(서울 100번 중 ${pr}, 3개월 뒤).` : v3.rule ? `이 그림은 앞의 둘은 만족하지만 서울에서 100번 중 ${pr}(3개월 뒤)라 접었습니다.` : `이 그림은 지역 방향이 엇갈려 접었습니다.`}</div>` : '';
+  const body = `${head}<div id="fig_${key}"></div><div class="say" id="say_${key}"></div>${why ? `<div class="note">결과 ${tag} — ${why}.</div>` : ''}${rule ? MO('접은 기준 보기', rule) : ''}`;
+  host.insertAdjacentHTML('beforeend', folded
+    ? `<details id="d_${key}"><summary>${c.title} ${tag}<span class="sub">회색 구간과 초록 구간의 차이가 뚜렷하지 않아 접어 둠</span></summary><div class="in"><div class="box">${body}</div></div></details>`
+    : `<section><h2>${c.title} ${tag}<span class="sub">2011~2026 · 위아래 칸이 시간축을 같이 씀</span></h2><div class="box">${body}</div></section>`);
+  const draw = () => { stack($('#fig_' + key), c.panels(), redBlue(c.rk)); $('#say_' + key).innerHTML = figSay(key); plainDOM($('#say_' + key)); };
+  host.querySelector(`.seg[data-f="${key}"]`).querySelectorAll('button').forEach(b => b.onclick = () => { LAG[key] = +b.dataset.l; renderFigs(); });
+  if (folded){ const d = $('#d_' + key); d.addEventListener('toggle', () => { if (d.open) draw(); }); if (d.open) draw(); } else draw();
+}
+let openState = {};
+function renderFigs(){
+  ['jw','buy'].forEach(k => { const d = $('#d_' + k); if (d) openState[k] = d.open; });
+  $('#top').innerHTML = ''; $('#folded').innerHTML = '';
+  ['jw','buy'].forEach(k => { const v = verdictOf(k, 3); renderFig(k, v.strict ? $('#top') : $('#folded'), !v.strict); const d = $('#d_' + k); if (d && openState[k]) d.open = true; });
+}
+// ---------- 결론(사람 말 2~3문장, 추천 없음) ----------
+function renderConcl(){
+  const g = region, rn = rname(), kb = lastOf('kb'), jl = lastOf('jl'), mo = lastOf('mo');
+  const t = jl ? jl.t : null, kbv = t ? series('kb')[YMS.indexOf(t)] : null;
+  const s = []; let lead = '', dir = '';
+  const bgJ = redBlue('jl'), rr = runs(bgJ), last = rr.length ? rr[rr.length - 1] : null, inNow = last && jl && YMS[last.b] === jl.t;
+  const SJ = sgJeon(g);
+  if (jl && kbv != null){
+    const cs = bgJ[YMS.indexOf(t)] || 'b', red1 = cs[0] === 'r', pend = cs[0] === 'p', red2 = mo && mo.v > kbv;
+    const sp = SJ && !SJ.of && SJ.spread != null ? SJ.spread : kbv - jl.v, spT = `전환율 − 대출금리 ${sg(sp, 1)}%p${SJ && !SJ.of && SJ.usual != null ? `, 평소 ${sg(SJ.usual, 1)}%p` : ''}`;
+    lead = `${jsW(rn, '은')} ${fmtYM(t)} 전세대출 금리 <b>${jl.v.toFixed(2)}%</b>가 KB 전환율 <b>${kbv.toFixed(2)}%</b>보다 ` +
+      (red1 ? `높아(${spT}) <b>${GRAY1}</b>에 있습니다${inNow ? `(${fmtYM(YMS[last.a])}부터 ${last.b - last.a + 1}개월 연속)` : ''}.`
+       : pend ? `높지만(${spT}) 1개월째라 <b>회색 확인 중</b>입니다(2개월 연속이면 회색 구간).`
+       : `낮아(${spT}) <b>${GREEN1}</b>에 있습니다.`);
+    if (SJ){ const side = red1 || pend ? -1 : 1;
+      dir = `<div class="dir">${jeonLine(SJ, rn)}. ` + (SJ.sign === 0 ? '' : side === SJ.sign ? `금리 구조(${red1 || pend ? '회색' : '초록'})도 같은 쪽입니다.` :
+        `${red1 || pend ? '회색 구간(금리 구조)은 전세를 누르는' : '초록 구간(금리 구조)은 전세를 받치는'} 한 가지 요인일 뿐이고, 신호등은 전세수급·앞으로 입주·전세가율까지 함께 본 결론입니다.`) + `</div>`; }
+    s.push(`주담대 금리 <b>${mo.v.toFixed(2)}%</b>도 전환율보다 ${red2 ? '높아 빌려 사서 세 놓으면 이자가 월세보다 큰 쪽' : '낮아 세 놓은 월세가 이자보다 큰 쪽'}입니다.`);
+  }
+  const J = R7['저울'][`전월세|${g}|전체|3`] || {}, a = J['KB 전세지수 전년비'] || {}, b = J['전세수급지수'] || {};
+  const fr = !lead || !lead.includes(GRAY1) ? GRAY1 : '회색 구간', fg = !lead || !lead.includes(GREEN1) ? GREEN1 : '초록 구간';
+  if (a.mr != null && b.mr != null)
+    s.push(`과거 ${fr}(${a.nr}개월, ${rr.length}덩어리, 모두 2021년 이후)에서는 3개월 뒤 KB 전세가가 연 <b>${sg(a.mr)}%</b>, 전세수급지수가 평균 <b>${b.mr.toFixed(0)}</b>${jsP(b.mr.toFixed(0), '로')}, ${fg}의 연 ${sg(a.mb)}%·평균 ${b.mb.toFixed(0)}보다 낮았습니다. 월세 상승률 차이는 뚜렷하지 않았습니다.`);
+  else s.push(`${jsW(rn, '은')} 전세대출 금리가 전환율보다 높았던 달이 ${redBlue('jl').filter(x => x && x[0] === 'r').length}개월뿐이라 회색·초록 구간 비교를 하지 않았습니다.`);
+  const gn = GR26note('span'); if (gn) s.push(gn + ' 큰 사례는 2021~23년 한 번(여러 지역이 같은 때)이라 독립된 경험이 적습니다.');
+  const B = (R7['저울'][`매수|${g}|전체|3`] || {})['KB 매매지수 전년비'] || {};
+  if (B.d != null){
+    const clear = B.p != null && B.p < 0.10, few = B.nr < 6 || B.blk < 3;
+    s.push(`매매 쪽 저울에서는 회색 구간의 3개월 뒤 매매가 상승률이 초록 구간보다 <b>${Math.abs(B.d).toFixed(1)}%p ${B.d < 0 ? '낮았' : '높았'}${clear ? '고' : '지만'}</b>, ` +
+      (clear ? `이 차이는 뚜렷했습니다(우연히 이만한 차이가 날 확률 100번 중 ${pN(B.p)}번)` : `뚜렷하지 않습니다(우연히 이만한 차이가 날 확률 100번 중 ${B.p != null ? pN(B.p) : '—'}번)`) +
+      (few ? `. 다만 회색 달이 ${B.nr}개월, ${B.blk}덩어리뿐이라 한두 번의 경험입니다.` : '.'));
+  }
+  $('#concl').innerHTML = `<p>${lead || s.shift()}</p>` + dir + MO('자세히 보기', s.map(x => `<p>${x}</p>`).join(''));
+  $('#conclsub').textContent = `${rn} · 전환율과 금리 비교는 ${jl ? fmtYM(jl.t) : ''}(금리가 나온 마지막 달, 지역 분석과 같은 달) 기준 · 매수·매도 판단 문장 아님`;
+}
+// ---------- 위치판 ----------
+function card(b){
+  const I = ind(b.k), r = percentile(b.k, b.from);
+  const tt = `${I.name}${TIPS[b.k] ? T(b.k) : ''}`;
+  if (!r) return `<div class="card"><div class="t">${tt}</div><div class="v blank">자료 없음</div><div class="mean">${RD(b.read, b.readTip)}</div></div>`;
+  // 시장 35: 결론(색) → 근거(작은 글씨, 값은 위치 계산에 쓴 값 그대로) → 위치 막대 → 읽는 법
+  const c = b.cc ? b.cc(r) : null;
+  return `<div class="card"><div class="t">${tt}</div>
+    ${CC(c)}${GZ(c && c.gz ? c.gz : `${fmtYM(r.t)} ${fmt(r.v, I.u, I.u === 'idx' ? 1 : 2)}`)}
+    <div class="bar" role="img" aria-label="과거 중 위치 ${r.p.toFixed(0)}"><span class="q" style="left:25%"></span><span class="q" style="left:50%"></span><span class="q" style="left:75%"></span><i style="left:${r.p}%"></i></div>
+    <div class="p"><span>낮음</span><span>위치 <b>${r.p.toFixed(0)}</b>/100</span><span>높음</span></div>
+    <div class="mean">${RD(b.read, b.readTip)}</div>
+    <div class="base">기준 ${fmtYM(r.a)} ~ ${fmtYM(r.b)} · ${r.n}개월${b.why ? ' · ' + b.why : ''}</div></div>`;
+}
+// 갱신정보.json(월간 갱신이 씀)으로 출처 칸의 달을 채움. 파일이 없으면 HTML에 적힌 값 그대로.
+const p8Last = () => P8 && P8.length ? Math.max(...P8.map(r => +r['최근 달'])) : 202609;
+const addYM = (t, k) => { let y = Math.floor(t / 100), m = t % 100 + k; while (m < 1){ m += 12; y--; } while (m > 12){ m -= 12; y++; } return y * 100 + m; };
+const recent3 = () => { const b = p8Last(), a = addYM(b, -2); return `${fmtYM(a)}~${String(b % 100).padStart(2, '0')}`; };
+function renderInfo(){
+  $('#ymlast').textContent = fmtYM(LASTYM);
+  const I = INFO, kbm = I['KB 끝달'] || LASTYM, jl = I['전세대출 금리 끝달'], mo = I['주담대 금리 끝달'], bs = I['기준금리 끝달'], m2 = I['M2 끝달'];
+  if (!I['KB 끝달']) return;
+  $('#src_kb').firstChild.textContent = `KB부동산 월간 주택가격동향(${fmtYM(kbm)}): 아파트 매매·전세가격지수, 전월세 전환율, 전세가율, 전세수급지수, 월세지수, 선도50, 매수우위·매매거래활발·매매/전세 전망지수`;
+  $('#src_ecos').textContent = `한국은행 ECOS(금리 ${fmtYM(Math.min(jl || 0, mo || 0) || jl)}까지, M2 ${fmtYM(m2)}까지): 예금은행 신규취급 전세자금대출·주택담보대출 금리, 기준금리(${fmtYM(bs)}까지), M2 평잔 · 갱신 ${I['갱신 시각'] || ''}`;
+  $('#src_rt').textContent = `국토교통부 아파트 매매·전월세 실거래(${fmtYM(kbm)} 신고분까지): 선도단지 실거래 지수(계산기 서울 선도단지 25곳, 같은 단지·평형끼리 ㎡당 가격 3개월 중앙값 비교, ${fmtYM(I['선도단지 실거래 끝달'])}까지), 실거래 전환율(${fmtYM(I['실거래 전환율 끝달'])}까지)`;
+  const gap = [jl < kbm ? '전세대출' : '', mo < kbm ? '주담대' : '', m2 < kbm ? 'M2' : ''].filter(Boolean);
+  $('#src_gap').textContent = gap.length ? `공표 전: ${fmtYM(kbm)} ${gap.join('·')} → "전세 vs 월세"·"사서 세 놓으면"은 ${fmtYM(Math.min(jl, mo))}까지` : `금리·M2 모두 ${fmtYM(kbm)}까지 공표분 반영`;
+  $('#src_p8').textContent = `국토교통부 아파트 전월세 실거래(2021-06~${fmtYM(p8Last())}, 신규·갱신·청구권 구분 칸): 지금 전세 압력 칸. ${jsW(recent3(), '는')} 늦은 신고로 바뀔 수 있음`;
+}
+// 지금 전세 압력(시장 8번, 전세 실거래 신규·갱신 구분 칸) — 지금 상태 칸, 앞서는 신호 아님
+const PRESS_HI = 90;   // 전세 압력 "매우 높음" 기준(위치 90 이상) — 아래 검증 칸 "지금 상태" 줄과 같이 씀
+function pressCard(){
+  const sh = (REG.find(([k]) => k === region) || [])[1], get = n => P8.find(r => r['지표'] === n && r['지역'] === sh);
+  const items = [['갱신 비율', '갱신 계약 비율', v => (+v).toFixed(1) + '%'], ['신규÷갱신 가격비', '신규 ÷ 갱신 가격', v => (+v).toFixed(2) + '배'],
+                 ['2+2 만기 신규÷2년 전 갱신', '2년 전 갱신가 대비 신규가', v => (+v).toFixed(2) + '배']];
+  const cells = items.map(([n, label, fv]) => { const r = get(n); if (!r) return `<div><div class="k">${label}</div><div class="v blank">자료 없음</div></div>`;
+    const p = +r['백분위(자료 있는 기간 안)'], per = r['기간'].split('~').map(x => fmtYM(+x));
+    return `<div><div class="k">${label}</div><div class="v">${fv(r['값'])}<small>${fmtYM(+r['최근 달'])}※</small></div>
+      <div class="bar" role="img" aria-label="과거 중 위치 ${p.toFixed(0)}"><span class="q" style="left:25%"></span><span class="q" style="left:50%"></span><span class="q" style="left:75%"></span><i style="left:${p}%"></i></div>
+      <div class="p"><span>낮음</span><span>위치 <b>${p.toFixed(0)}</b>/100</span><span>높음</span></div>
+      <div class="base">기준 ${per[0]} ~ ${per[1]} · ${r['달 수']}개월</div></div>`; }).join('');
+  // 시장 35: 결론 = 아래 "지금 상태" 줄과 같은 기준(갱신 비율·2년 전 대비 신규가 둘 다 위치 90 이상이면 매우 높음)
+  const a = get('갱신 비율'), b2 = get('2+2 만기 신규÷2년 전 갱신'), c3 = get('신규÷갱신 가격비'), P = r => +r['백분위(자료 있는 기간 안)'];
+  const hi = a && b2 && P(a) >= PRESS_HI && P(b2) >= PRESS_HI;
+  const pc = a && b2 ? (hi ? {t:'새 전세 계약의 압력이 매우 높습니다', tone:'warm', s:true} : {t:'전세 압력이 아주 높지는 않습니다', tone:'mid'}) : null;
+  const pz = [a && `갱신 비율 <b>${(+a['값']).toFixed(1)}%</b>(위치 ${P(a).toFixed(0)})`, b2 && `2년 전 갱신가 대비 신규가 <b>${(+b2['값']).toFixed(2)}배</b>(위치 ${P(b2).toFixed(0)})`,
+              c3 && `신규 ÷ 갱신 ${(+c3['값']).toFixed(2)}배(위치 ${P(c3).toFixed(0)})`].filter(Boolean).join(' · ');
+  return `<div class="card wide"><div class="t">지금 전세 압력${T('press')} <span class="tag no" style="margin-left:6px">지금 상태 · 앞서는 신호 아님</span></div>
+    ${CC(pc)}${pz ? GZ(`${a ? fmtYM(+a['최근 달']) + ' ' : ''}${pz}`) : ''}
+    <div class="press">${cells}</div>
+    <div class="mean">${RD('갱신 비율과 2년 전 대비 신규가가 둘 다 과거 상위 10% 안(위치 90 이상)이면 "매우 높음". 높다 = 기존 세입자는 갱신으로 머무는 경우가 많고, 새로 들어가는 전세는 갱신보다·2년 전보다 비쌈.')}${MO('자세히 보기', `이 칸은 앞으로를 미리 알려 주는 신호가 아니라 <b>지금 상태</b>를 보여 줍니다(연구: KB 전세지수·전세수급과 같은 달에 움직였고, 앞선다는 근거는 없었음).<div class="wnote" style="margin-top:4px">※ ${recent3()} 계약은 신고가 늦게 들어와 수가 평소보다 적습니다. 늦은 신고가 들어오면 값이 바뀔 수 있습니다. 위치(0~100)는 자료가 있는 5년(2+2는 3년) 안의 위치입니다.</div>`)}</div></div>`;
+}
+function renderBoard(){ $('#board').innerHTML = BOARD.map(card).join('') + (P8 ? pressCard() : ''); $('#board2').innerHTML = BOARD2.map(card).join(''); }
+// ---------- 지표 골라 보기 ----------
+function renderChips(){
+  const CH = IND.filter(I => !['jy','by','ly'].includes(I.k) || true);
+  $('#chips').innerHTML = CH.map(I => { const s = sel.find(x => x.k === I.k), cc = s ? selCol(s) : I.c;
+    return `<button aria-pressed="${!!s}" data-k="${I.k}"><span class="c" style="background:${cc}"></span>${I.name}</button>`; }).join('');
+  $('#chips').querySelectorAll('button').forEach(b => b.onclick = () => {
+    const k = b.dataset.k, i = sel.findIndex(x => x.k === k);
+    if (i >= 0) sel.splice(i, 1);
+    else { if (sel.length >= 3) sel.shift(); const used = sel.map(x => x.c); sel.push({k, c:[0,1,2].find(c => !used.includes(c))}); }
+    renderChips(); renderTS();
+  });
+}
+function renderTS(){
+  const groups = []; sel.forEach(s => { const u = ind(s.k).u; let g = groups.find(x => x.u === u); if (!g){ g = {u, items:[]}; groups.push(g); } g.items.push(s); });
+  if (!groups.length){ $('#ts').innerHTML = '<div class="note">지표를 하나 이상 고르세요.</div>'; return; }
+  stack($('#ts'), groups.map(g => ({title:UNIT[g.u], u:g.u, zero:g.u === 'pp' || g.u === 'yoy' ? 0 : null, series:g.items.map(s => S(s.k, selCol(s)))})), null);
+}
+// ---------- 검증된 관계 ① ----------
+function corr(a, b){ const n = a.length; const ma = a.reduce((s, x) => s + x, 0) / n, mb = b.reduce((s, x) => s + x, 0) / n;
+  let sab = 0, sa = 0, sb = 0; for (let i = 0; i < n; i++){ sab += (a[i] - ma) * (b[i] - mb); sa += (a[i] - ma) ** 2; sb += (b[i] - mb) ** 2; } return sab / Math.sqrt(sa * sb); }
+function lagCorr(g, lag, a = 201501, b = LASTYM){
+  const x = series('jl', g), y = series('sup', g), xs = [], ys = [];
+  for (let i = 1; i + lag < YMS.length; i++){ const t0 = YMS[i - 1], u = YMS[i + lag];
+    if (t0 < a || u > b) continue; const dx = x[i] != null && x[i - 1] != null ? x[i] - x[i - 1] : null, dy = y[i + lag] != null && y[i + lag - 1] != null ? y[i + lag] - y[i + lag - 1] : null;
+    if (dx != null && dy != null){ xs.push(dx); ys.push(dy); } }
+  return {r:corr(xs, ys), n:xs.length};
+}
+function lagBars(el, L, thr, hl, foot){
+  const W = Math.max(280, el.clientWidth), H = 200, ML = 40, MR = 10, MT = 10, MB = 34;
+  const Y = v => MT + (H - MT - MB) * (0.8 - v) / 1.6, bw = (W - ML - MR) / 13;
+  let s = `<svg width="${W}" height="${H}" role="img" aria-label="시차별 함께 움직인 정도">`;
+  s += `<rect x="${ML}" y="${Y(thr)}" width="${W - ML - MR}" height="${Y(-thr) - Y(thr)}" fill="#EDF2F4"/>`;
+  [-0.8, -0.4, 0, 0.4, 0.8].forEach(v => s += `<line x1="${ML}" x2="${W - MR}" y1="${Y(v)}" y2="${Y(v)}" stroke="${v === 0 ? '#93A1AC' : 'var(--grid)'}"/><text x="${ML - 6}" y="${Y(v) + 4}" text-anchor="end">${v}</text>`);
+  L.forEach(d => { if (d.r == null) return; const x = ML + d.k * bw + bw * 0.18, w = bw * 0.64, top = Math.min(Y(d.r), Y(0)), h = Math.abs(Y(d.r) - Y(0));
+    const on = hl.includes(d.k); s += `<rect x="${x}" y="${top}" width="${w}" height="${Math.max(h, 1)}" rx="3" fill="${on ? '#ff8a5b' : '#5a7fc4'}"><title>시차 ${d.k}개월: ${d.r.toFixed(2)}</title></rect>`;
+    s += `<text x="${x + w / 2}" y="${H - 18}" text-anchor="middle">${d.k}</text>`;
+    if (on) s += `<text x="${x + w / 2}" y="${d.r < 0 ? Y(d.r) + 14 : Y(d.r) - 4}" text-anchor="middle" style="fill:var(--ink);font-weight:700">${d.r.toFixed(2)}</text>`; });
+  s += `<text x="${(W + ML) / 2}" y="${H - 3}" text-anchor="middle">${foot}</text></svg>`;
+  el.innerHTML = s;
+}
+function renderRel(){
+  const L = [...Array(13).keys()].map(k => ({k, ...lagCorr(region, k)})); const thr = 2 / Math.sqrt(L[1].n);
+  lagBars($('#rel'), L, thr, [1, 2], '시차(개월): 전세대출 금리 변화가 앞섬');
+  const f2 = v => (v < 0 ? '−' : '') + Math.abs(v).toFixed(2);
+  $('#relnote').innerHTML = `${rname()}, 2015-01~${fmtYM(LASTYM)}: 함께 움직인 정도 시차 1개월 <b>${f2(L[1].r)}</b>(${lvl(L[1].r)}), 2개월 <b>${f2(L[2].r)}</b>(${lvl(L[2].r)}) — 음(−)이라 반대로 움직임(같은 달 ${f2(L[0].r)}). ${L[1].n}개월, 우연 기준선${T('thr')} ±${thr.toFixed(2)}. 짙은 띠 = 기준선 안(우연으로도 나올 수 있는 크기).`;
+  const rows = REG.map(([g, n]) => { const a = lagCorr(g, 1), p1 = lagCorr(g, 1, 201501, 202012), p2 = lagCorr(g, 1, 202101, LASTYM);
+    const t = r => `${f2(r.r)}${Math.abs(r.r) >= 2 / Math.sqrt(r.n) ? ` <span class="blank">(${lvl(r.r)})</span>` : ' <span class="blank">(뚜렷하지 않음)</span>'}`;
+    return `<tr${g === region ? ' style="background:var(--accent-soft)"' : ''}><td>${n}</td><td class="num">${t(a)}</td><td class="num">${t(p1)}</td><td class="num">${t(p2)}</td></tr>`; });
+  const neg = REG.filter(([g]) => lagCorr(g, 1).r < 0).length;
+  const sig = (a, b) => REG.filter(([g]) => { const r = lagCorr(g, 1, a, b); return r.r < 0 && Math.abs(r.r) >= 2 / Math.sqrt(r.n); }).length;
+  $('#reltab').innerHTML = `<tr><th>지역 (시차 1개월)</th><th>2015~2026</th><th>2015~2020</th><th>2021~2026</th></tr>` + rows.join('') +
+    `<tr><td colspan="4" class="blank">5개 지역 중 ${neg}개가 음(−). 뚜렷하게 반대로 움직인 지역: 2015~2020 5곳 중 ${sig(201501, 202012)}곳, 2021~${Math.floor(LASTYM / 100)} 5곳 중 ${sig(202101, LASTYM)}곳.</td></tr>`;
+  // ② 매매·전세 전망 → 선도단지(서울만, 시장 7번 연구 결과 그대로). 매수우위는 2021~ 시험에서 0.21이라 판정표에만 남김(시장 10번)
+  const XC = R7['심리_선도'], f2b = v => (+v).toFixed(2);
+  [['전세가격 전망지수', '#rel2a', [2, 3]], ['매매가격 전망지수', '#rel2b', [3]]].forEach(([k, el, hl]) => {
+    const L2 = (XC[k] || []).map(([lag, r]) => ({k:lag, r})), th2 = (XC[k] || [[0, 0, .2]])[0][2];
+    lagBars($(el), L2, th2, hl, '시차(개월): 전망지수 변화가 앞섬'); });
+  const V = R7['판정'].filter(v => v['맞힐 대상'].startsWith('선도단지') && ['매매가격 전망지수', '전세가격 전망지수'].includes(v['설명 변수']));
+  const rk = V.length ? Object.keys(V[0]).find(x => x.startsWith('거꾸로')) : null;
+  const C = R7['합성'].filter(r => r['맞힐 대상'].startsWith('선도단지'));
+  const best = C.find(r => r['구분'].startsWith('합성 2개')), solo = n => C.find(r => r['구분'] === '단독' && r['구성(시차)'].startsWith(n));
+  const sm = solo('매매가격'), sj = solo('전세가격');
+  const nm = s => s.replace('매매가격 전망지수', '매매 전망').replace('전세가격 전망지수', '전세 전망').replace('매수우위지수', '매수우위');
+  const bv = best ? +best['2021~2026 상관(확인 구간)'] : null;
+  $('#rel2note').innerHTML = `<b>2021년 이후 새 자료로 다시 봐도</b>: 2011~2020 자료로만 정한 두 지수 묶음이 2021~2026에서도 함께 움직인 정도 <b>${bv != null ? f2b(bv) : '—'}</b>(${bv != null ? lvl(bv) : '—'})로 유지됐습니다.` +
+    MO('자세히 보기', `서울 2011~2026, 1개월 변화끼리 함께 움직인 정도: ` + V.map(v => `${nm(v['설명 변수'])} 시차 ${v['가장 강한 시차(서울, 1개월 차분, 1~12)']}개월 <b>${f2b(v['서울 상관'])}</b>(${lvl(v['서울 상관'])}, 우연 기준선 ±${f2b(v['서울 기준(±)'])})`).join(' · ') +
+    (rk ? `. 거꾸로(실거래가 심리를 앞섬)는 ${jsW(V.map(v => f2b(String(v[rk]).split('(')[0])).join('·'), '로')} 더 작습니다` : '') + `.` +
+    `<br>2021~2026 시험: 묶음(${best ? nm(best['구성(시차)']) : ''}) ${bv != null ? f2b(bv) : '—'}(우연 기준선 ±${best ? f2b(best['2021~2026 유의 기준(±)']) : ''}).` +
+    (sm ? ` 하나씩 보면 매매 전망 <b>${f2b(sm['2021~2026 상관(확인 구간)'])}</b>${sj ? `, 전세 전망 ${f2b(sj['2021~2026 상관(확인 구간)'])}` : ''}입니다.` : '') +
+    ` 매수우위지수는 2021~2026에서 유지되지 않아(0.21, 뚜렷하지 않음) 이 칸에서 뺐습니다(결과표에 남김).` +
+    `<br><span class="wnote">한계: 선도단지 지수를 3개월 이동 창(같은 단지·평형의 3개월 중앙값)으로 만들어, 시차 3개월 중 1개월쯤은 계산 때문에 생긴 늦음일 수 있습니다(실제 앞섬은 약 2개월일 수 있음). 지역별 선도단지가 없어 다른 지역 확인을 못 했고, 같은 심리지표로 KB 매매지수를 맞힌 결과는 2021~2026에서 뚜렷하지 않았습니다.</span>`);
+}
+// ---------- 판정표 ----------
+const VERD = [
+  ['시장5 가1', '전세 vs 월세 → 전세수급', '1~2개월, 서울 0.50 높음(우연 기준선 ±0.22)', '세 기간 모두 같은 방향(뚜렷한 건 2021~26만) · 4개 지역 모두 뚜렷', 'weak', '약함', '중'],
+  ['시장5 가1', '전세 vs 월세 → 전세가율·월세지수', '4·10개월, 0.13 낮음', '뚜렷한 곳 없음', 'no', '아님', '약'],
+  ['시장5 가2', '현장 월세 vs KB 시세 차이 → KB 전환율·월세지수', '5개월 0.34 보통, 거꾸로 0.44가 더 큼', '차이 안에 KB 전환율이 들어 있음', 'no', '아님', '약'],
+  ['시장5 가3', '사서 세 놓으면 → 선도50 전년비', '10개월 0.22 낮음(우연 기준선 ±0.23)', '세 기간 모두 같은 방향(뚜렷한 건 1개) · 뚜렷한 지역 0', 'weak', '약함', '약'],
+  ['시장5 가3', 'M2 전년비 → 선도50 전년비', '4개월 0.11 낮음', '뚜렷한 곳 없음', 'no', '아님', '약'],
+  ['시장5 가4', '전세 vs 월세 0선 통과 → 선도50 방향', '통과 6번 뒤 2·3·28·25·16·12개월', '아무 때나 본 경우(약 7개월)보다 빠른 것 6번 중 2번', 'no', '아님', '약'],
+  ['시장7 1-1', '선도단지 실거래(서울 25곳) ↔ KB 선도50', '전년비끼리 0.90 높음(188개월)', 'KB 서울 매매지수 3개월 변화와 0.62(높음)', 'ok', '같이 움직임', '강'],
+  ['시장7 1-3', '심리(매수우위·매매/전세 전망) → KB 매매지수', '1~2개월, 서울 0.23~0.30 낮음(우연 기준선 ±0.17~0.26)', '2021~26에서 뚜렷하지 않음, 2011~20에서 정한 묶음도 2021~26 0.11(낮음)', 'weak', '약함', '약'],
+  ['시장7 1-3', '매매·전세 전망 → 선도단지 실거래(서울)', '3개월, 0.46·0.52 보통~높음(우연 기준선 ±0.18·0.24)', '2021년 이후 새 자료로 다시 봄(2021~26): 묶음 0.53, 매매 전망 하나만 0.46 · 거꾸로 0.20~0.24 · 3개월 이동 창 때문에 1개월쯤은 계산 효과일 수 있음', 'ok', '맞음(서울만)', '중'],
+  ['시장7 1-3', '매수우위 → 선도단지 실거래(서울)', '3개월, 0.41 보통(우연 기준선 ±0.17)', '2021년 이후 새 자료로 다시 봄(2021~26): 0.21(기준선 ±0.24 안, 뚜렷하지 않음)', 'weak', '약함', '약'],
+  ['시장7 1-3', '매매 거래량 → 매매가', 'KB 0.11(아님) · 선도단지 3개월 0.39 보통', '선도단지 쪽만 뚜렷', 'weak', '약함', '약'],
+  ['시장7 1-3', '방향 전환을 몇 달 앞서 맞히나', '과거 10번 중 5~9번 맞힘', '아무 달이나 찍어도 100번 중 49~95번 맞아 비슷함', 'no', '아님', '약'],
+  ['시장7 1-4', '전세 vs 월세 저울 → 전세가·전세수급', '회색−초록: 3개월 뒤 전세가 −5.6%p, 수급 −55(서울)', '지역 5곳 중 4곳(인천 회색 달 2개월) · 우연히 이만한 차이가 날 확률 100번 중 3번·0번 · 회색 달 모두 2021년 이후', 'ok', '뚜렷함', '중'],
+  ['시장7 1-4', '전세 vs 월세 저울 → 월세', '회색−초록 +2.7%p(서울)', '우연히 이만한 차이가 날 확률 100번 중 40~60번', 'no', '차이 없음', '약'],
+  ['시장7 1-4', '사서 세 놓으면 저울 → 매매가·선도50·선도단지', '회색−초록 3개월 뒤 −2.9·−7.5·−6.6%p(서울)', '지역 5곳 모두 같은 방향 · 우연히 이만한 차이가 날 확률 100번 중 21~48번(기준 10번 미만, 대표님 확인) · 덩어리 3개', 'weak', '약함', '약'],
+  ['시장7 1-2', '은행연합회 전세대출 금리 ↔ 한국은행 값', '2026-08 취급분 4.32% vs 4.35%', '차이 −0.03%p → 한국은행 값 유지(은행연합회 월별 수집 안 함)', 'ok', '같음', '—'],
+  ['시장8 1', '전세 갱신 비율 → KB 전세지수', '같은 달, 서울 0.44 보통(우연 기준선 ±0.26)', '5개 지역 모두 뚜렷 · 2021~23 0.59 / 2024~26 −0.09 · 거꾸로 0.42', 'weak', '약함', '중'],
+  ['시장8 1', '청구권 사용 비율 → KB 전세지수', '1개월, 서울 0.55 높음(우연 기준선 ±0.33)', '5개 지역 모두 뚜렷 · 2021~23 0.68 / 2024~26 −0.28 · 거꾸로 0.40', 'weak', '약함', '중'],
+  ['시장8 2', '신규 ÷ 갱신 가격 → 전세수급', '같은 달, 서울 0.63 높음(우연 기준선 ±0.48)', '5개 지역 모두 뚜렷 · 2021~23 0.70 / 2024~26 −0.02 · 거꾸로 0.69', 'weak', '약함', '약'],
+  ['시장8 3', '2+2 만기 신규가 → 전세수급·KB 전세지수', '0·4개월, 0.28·0.23 낮음(우연 기준선 ±0.47·0.59)', '뚜렷한 지역 0곳 · 자료 2023-06부터', 'no', '아님', '약'],
+  ['시장8 3', '2+2 만기 신규가: 2024-07 전 vs 후', '2년 전 갱신가 대비 서울 +13.4% → +12.5%', '강북·강남 거의 같음, 경기 −6%p, 인천 +4%p · 동(棟) 정보 없어 짝에 다른 동 섞일 수 있음', 'no', '차이 없음', '약'],
+];
+function renderVerdict(){
+  $('#verdict').innerHTML = `<tr><th>구분</th><th>관계</th><th>가장 강한 시차·함께 움직인 정도</th><th>기간·지역</th><th>결과</th><th>강도</th></tr>` +
+    VERD.map(v => `<tr><td data-l="가설">${v[0]}</td><td data-l="관계"><b>${v[1]}</b></td><td class="num" data-l="시차·함께 움직인 정도">${v[2]}</td><td data-l="기간·지역">${v[3]}</td><td data-l="결과"><span class="tag ${v[4]}">${v[5] === '아님' ? '검증 진행 중인 가설' : v[5]}</span> <span class="m">강도 ${v[6]}</span></td><td data-l="강도" class="d">${v[6]}</td></tr>`).join('') +
+    `<tr><td data-l="구분">효과</td><td data-l="관계"><b>전세가 중 전세대출 효과</b></td><td class="num" data-l="범위"><b>0~5%</b>(국소)</td><td data-l="근거">자연 실험 5개 모두 −3.6~+2.1%p 안, 2022 확대만 최대 +4.2%p</td><td data-l="결과"><span class="tag weak">범위</span> <span class="m">강도 중</span></td><td data-l="강도" class="d">중</td></tr>`;
+}
+// ---------- 검증 결과 한눈에(시장 12번) — 새 계산 없음, 연구 결과 파일 값만 ----------
+// 시장 11번 결과(자료\연구\시장11_가격수준_지금위치.csv · 평균회귀_요약.csv, 2026-11-18). 화면 폴더 밖이라 값을 적어 둠.
+const M11 = {t:'2026-09', raw:0.966, rawP:7.5, tr:58.8, trP:98.7, ld:'−0.79~−0.81', ldP:'0.00~0.03', ldIn:'0.07', ldOut:'−0.72~−0.91', jrIn:'+0.64', jrOut:'−0.48'};
+// KB 2026-10 엑셀(자료\KB공식\25_매매전망.csv · 26_전세전망.csv) 서울 최근 4개월. 월간 갱신 때 자동으로 바뀌지 않음.
+const SIG2 = {ym:['2026-07','2026-08','2026-09','2026-10'], m:[124.0, 117.8, 116.4, 112.8], j:[136.1, 135.6, 132.1, 128.7]};
+function renderSimple(){
+  const g = region, rn = rname(), f2 = v => (v < 0 ? '−' : '') + Math.abs(v).toFixed(2);
+  const badge = (cls, txt) => `<span class="tag ${cls}">${txt}</span>`;
+  // ① 금리 구조 → 전세수급
+  const L1 = lagCorr(g, 1), L2 = lagCorr(g, 2), thr = 2 / Math.sqrt(L1.n);
+  const Jq = (R7['저울'][`전월세|${g}|전체|3`] || {})['전세수급지수'] || {};
+  const jl = lastOf('jl'), kbv = jl ? series('kb')[YMS.indexOf(jl.t)] : null, cs = jl ? (redBlue('jl')[YMS.indexOf(jl.t)] || 'b') : 'b';
+  const red = jl && kbv != null && cs[0] === 'r', pend = jl && kbv != null && cs[0] === 'p', J = sgJeon(g);
+  const grayW = red ? '회색 구간' : pend ? '회색 확인 중(1개월째)' : '초록 구간', jSide = red || pend ? -1 : 1, jOpp = J && J.sign !== 0 && J.sign !== jSide;
+  const pS = s => String(s).split('~').map(x => pN(x)).join('~');
+  // 시장 32: 카드 = ① 짧은 상황(용어는 ⓘ) → ② 규칙(쉬운 문장) → ③ 지금 신호(결론, 크게)
+  const c1 = `<div class="vc"><div class="h"><span class="n">①</span>금리와 전세 수급</div>
+    <div class="tags">${badge('ok', '강도 중')}${badge('no', rn)}</div>
+    <div class="sit"><span class="lb">상황</span>전세대출 금리와 전환율${T('kb')}, 그리고 전세 수급 지수${T('sup')}를 함께 봅니다.</div>
+    <div class="rule"><span class="lb">규칙</span>전세대출 금리가 오르면 1~2개월 안에 전세 수급 지수가 약해집니다. 금리가 전환율보다 높은 회색 구간${T('gray')}에서는 3개월 뒤 전세 수급이 초록 구간${T('green')}보다 약했습니다.</div>
+    <div class="ev">${MO('자세히 보기', `${rn}에서 금리 변화와 전세수급 변화가 함께 움직인 정도 1개월 <b>${f2(L1.r)}</b>(${lvl(L1.r)}), 2개월 <b>${f2(L2.r)}</b>(${lvl(L2.r)}) — 음(−)이라 반대로 움직임(우연 기준선 ±${thr.toFixed(2)}).` +
+    (Jq.mr != null ? ` 금리가 전환율보다 높은 <b>회색 구간</b>에서는 3개월 뒤 전세수급지수가 평균 <b>${Jq.mr.toFixed(0)}</b>${jsP(Jq.mr.toFixed(0), '로')}, 초록 구간(${Jq.mb.toFixed(0)})보다 낮았습니다(우연히 이만한 차이가 날 확률 100번 중 ${pN(Jq.p)}번).` : ` ${jsW(rn, '은')} 회색 구간이 짧아 구간 비교를 하지 않았습니다.`) + GR26note())}</div>
+    <div class="sig"><span class="k">지금 신호</span>${jl && kbv != null ? `${CC({t:`${grayW} → 이 규칙만 보면 전세 수급이 ${jSide < 0 ? '약해지는' : '강해지는'} 쪽`, tone:jSide < 0 ? 'cool' : 'warm'})}
+      <div class="sm">${fmtYM(jl.t)} 전세대출 금리 ${jl.v.toFixed(2)}% ${jl.v > kbv ? '&gt;' : '&lt;'} 전환율 ${kbv.toFixed(2)}%</div>` : '<div class="big">자료 없음</div>'}
+      ${J ? `<div class="sm">${jeonLine(J, rn)}${T('jdir')}${jOpp ? ' — 금리 구조와 방향이 달라, 이 칸의 회색·초록은 결론이 아니라 한 가지 요인으로 봅니다.' : ''}</div>` : ''}</div></div>`;
+  // ② 매매·전세 전망 → 선도단지
+  const C = R7['합성'].filter(r => r['맞힐 대상'].startsWith('선도단지')), best = C.find(r => r['구분'].startsWith('합성 2개'));
+  const solo = n => C.find(r => r['구분'] === '단독' && r['구성(시차)'].startsWith(n)), sm = solo('매매가격'), sj = solo('전세가격');
+  const dn = a => a[a.length - 1] < a[a.length - 2] && a[a.length - 2] < a[a.length - 3] && a[a.length - 3] < a[a.length - 4];
+  const both = dn(SIG2.m) && dn(SIG2.j), L = SIG2.ym.length - 1, bv = best ? +best['2021~2026 상관(확인 구간)'] : null;
+  // 시장 35: 결론 색 — 둘 다 3개월 연속 내려감 = 오름세 약해짐(청록), 둘 다 3개월 연속 오름 = 오름세 세짐(주황, 거울 경우 더함), 그 밖 = 엇갈림(회색)
+  const upn = a => a[a.length - 1] > a[a.length - 2] && a[a.length - 2] > a[a.length - 3] && a[a.length - 3] > a[a.length - 4], bothUp = upn(SIG2.m) && upn(SIG2.j);
+  const o2 = both ? {t:'선도단지 오름세가 약해지는 쪽', tone:'cool'} : bothUp ? {t:'선도단지 오름세가 세지는 쪽', tone:'warm'} : {t:'방향이 엇갈림', tone:'mid'};
+  const c2 = `<div class="vc"><div class="h"><span class="n">②</span>현장의 전망 분위기와 서울 대표 단지</div>
+    <div class="tags">${badge('ok', '강도 중')}${badge('no', '서울만')}</div>
+    <div class="sit"><span class="lb">상황</span>매매·전세 전망 지수${T('outlook')}(현장의 전망 분위기)와 서울 선도단지${T('lead')} 실거래를 함께 봅니다.</div>
+    <div class="rule"><span class="lb">규칙</span>전망 지수가 오르내리면 약 3개월 뒤 서울 선도단지 실거래가 같은 쪽으로 움직입니다. 2021년 이후 새 자료로 다시 봐도 함께 움직였습니다(${bv != null ? lvl(bv) : '—'}).</div>
+    <div class="ev">${MO('자세히 보기', `2011~2020 자료로만 정한 두 지수 묶음이 2021~2026에서 함께 움직인 정도 <b>${bv != null ? f2(bv) : '—'}</b>(우연 기준선 ±${best ? (+best['2021~2026 유의 기준(±)']).toFixed(2) : '—'})로 유지됐습니다. 하나씩 보면 매매 전망 ${sm ? f2(+sm['2021~2026 상관(확인 구간)']) : '—'}, 전세 전망 ${sj ? f2(+sj['2021~2026 상관(확인 구간)']) : '—'}입니다.`)}</div>
+    <div class="sig"><span class="k">지금 신호</span>${CC(o2)}
+      ${GZ(`${SIG2.ym[L]} 매매 전망 <b>${SIG2.m[L].toFixed(1)}</b>, 전세 전망 <b>${SIG2.j[L].toFixed(1)}</b>${both || bothUp ? ` · 둘 다 ${+SIG2.ym[L - 3].slice(5)}월부터 3개월 연속 ${both ? '내려감' : '오름'}` : ''}`)}
+      <div class="rd">${RD('100보다 높으면 오른다는 응답이 많음. 몇 달 연속 같은 쪽으로 움직이면 약 3개월 뒤 서울 선도단지 실거래가 같은 쪽으로 움직인 경향')}</div></div></div>`;
+  // ③ 가격/M2 → 선도단지
+  const c3 = `<div class="vc"><div class="h"><span class="n">③</span>돈의 양에 비한 집값</div>
+    <div class="tags">${badge('weak', '강도 약~중')}${badge('no', '서울만')}</div>
+    <div class="sit"><span class="lb">상황</span>집값을 시중에 풀린 돈으로 나눈 가격/M2${T('pm2')}와 서울 선도단지${T('lead')}를 함께 봅니다.</div>
+    <div class="rule"><span class="lb">규칙</span>가격/M2가 높을 때는 1~3년 뒤 서울 선도단지 상승이 약했습니다. 2021년 이후 새 자료로 다시 봐도 같은 방향이었습니다.</div>
+    <div class="ev">${MO('자세히 보기', `순서끼리 함께 움직인 정도 <b>${M11.ld}</b>(12·24·36개월, 반대 방향, 우연히 나올 확률 100번 중 ${pS(M11.ldP)}번). 규칙을 정한 2011~2020에서 100번 중 ${pS(M11.ldIn)}번, 2021년 이후 새 자료로 다시 봐도 ${M11.ldOut}로 같은 방향입니다. 서울 KB 매매지수로 보면 뚜렷하지 않아 약함~중입니다.`)}</div>
+    <div class="sig"><span class="k">지금 신호</span>${CC({t:'기준에 따라 해석이 갈림', tone:'mid'})}
+      <div class="sm">${M11.t} 가격/M2 원값은 1986년 이후 <b>하위 ${M11.rawP}%</b>(싼 쪽)인데, 40년 추세를 빼면 <b>상위 ${(100 - M11.trP).toFixed(1)}%</b>(비싼 쪽)입니다.</div></div></div>`;
+  $('#vcards').innerHTML = c1 + c2 + c3;
+  // 시장 35: 전세가율 평균 회귀 = 검증 칸 맨 앞 카드(목록에서 옮김). 지금 신호는 위치판의 전세가율 위치(새 계산 없음)
+  // 시장 29: 대표님 관점 — 2021년 이후는 사이클 진행 중(회색·중립 톤, 실패 표시 쓰지 않음)
+  const jrp = percentile('jr', 201101);
+  const oj = !jrp ? null : jrp.p <= POS_LO ? {t:'전세가율이 과거보다 낮은 쪽 → 규칙대로면 서서히 올라오는 쪽', tone:'mid'}
+    : jrp.p >= POS_HI ? {t:'전세가율이 과거보다 높은 쪽 → 규칙대로면 서서히 내려오는 쪽', tone:'mid'} : {t:'전세가율이 과거 가운데쯤 → 규칙으로 볼 쏠림 없음', tone:'mid'};
+  $('#vfirst').innerHTML = `<div class="vc first"><div class="h">전세가율${T('jrr')}은 결국 평균으로 돌아간다</div>
+    <div class="tags">${badge('ok', '검증 완료(2011~2020)')}${badge('weak', '신뢰 강도: 약~중')}${badge('hold', '2021년 이후 검증 진행 중')}</div>
+    <div class="sit"><span class="lb">상황</span>매매가 대비 전세가 비율(전세가율)이 과거 평균에서 멀어졌을 때를 봅니다. 지금 신호의 값은 위 "지금 위치"의 전세가율 칸과 같습니다.</div>
+    <div class="rule"><span class="lb">규칙</span>전세가율이 평균보다 낮으면 언젠가 다시 올라오고, 높으면 내려옵니다. 2011~2020 자료에서 맞았고, 2021년 이후는 사이클이 끝난 뒤 평가합니다.</div>
+    <div class="ev"><span class="holdbox" id="jrhold"><b>대표님 관점</b>: 2021년 이후 맞지 않는 것은 사이클이 아직 진행 중이기 때문입니다. 사이클이 끝난 뒤 평가할 부분이며, 사이클이 끝나 갈수록 아주 서서히 돌아옵니다.
+      ${MO('자세히 보기', `2011~2020: 함께 움직인 정도 ${M11.jrIn}(평균으로 돌아가는 쪽). 2021년 이후: 지금까지 값 ${M11.jrOut} — 사이클이 끝나지 않은 구간이라 맞고 틀림을 따지지 않고 참고로만 적어 둡니다(연구 값). "검증 완료"는 2011~2020 구간에서 맞았다는 뜻입니다.`)}</span></div>
+    <div class="sig"><span class="k">지금 신호</span>${oj ? CC(oj) + GZ(`${fmtYM(jrp.t)} ${rn} 전세가율 <b>${fmt(jrp.v, 'ratio', 1)}</b>, 과거 중 위치 ${jrp.p.toFixed(0)}/100(${fmtYM(jrp.a)} 이후)`) : '<div class="big">자료 없음</div>'}
+      <div class="rd">${RD('몇 년에 걸쳐 아주 서서히 움직이는 규칙이라, 몇 달 안의 방향을 맞히는 데는 쓰지 않습니다.')}</div></div></div>`;
+  // 검증 진행 중인 가설
+  const sb = solo('매수우위');
+  $('#nolist').innerHTML = [
+    `<b>매수우위지수${T('buyAsk')} 하나만 → 선도단지</b>: 함께 움직인 정도 2011~2020 ${sb ? f2(+sb['2011~2020 상관(정한 구간)']) : '—'} → 2021년 이후 새 자료 ${sb ? f2(+sb['2021~2026 상관(확인 구간)']) : '—'}(우연 기준선 ±${sb ? (+sb['2021~2026 유의 기준(±)']).toFixed(2) : '—'} 안), 뚜렷하지 않음`,
+    `<b>M2 증가율${T('m2')} → 매매가</b>: 가장 강한 4개월 뒤 함께 움직인 정도 0.11(낮음), 우연 기준선${T('thr')}을 넘지 못함`,
+    // 시장 35: 전세가율 평균 회귀는 검증 칸 맨 앞 카드(#vfirst)로 옮김
+    `<b>"전세 vs 월세" 0선 통과${T('zero')} 뒤 선도50${T('l50')} 방향 전환</b>: 통과 6번 중 아무 때나 본 경우(약 7개월)보다 빨랐던 것은 2번뿐`,
+    `<b>2+2${T('r22')} 만기 효과</b>: 2024-07 전후로 2년 전 갱신가 대비 서울 신규가 +13.4% → +12.5%, 차이 없음`,
+  ].map(x => `<li>${x}</li>`).join('');
+  // 지금 상태
+  const sh = (REG.find(([k]) => k === g) || [])[1], gp = n => P8 && P8.find(r => r['지표'] === n && r['지역'] === sh);
+  const a = gp('갱신 비율'), b = gp('2+2 만기 신규÷2년 전 갱신');
+  const hi = a && b && +a['백분위(자료 있는 기간 안)'] >= PRESS_HI && +b['백분위(자료 있는 기간 안)'] >= PRESS_HI;
+  const top = r => (100 - +r['백분위(자료 있는 기간 안)']).toFixed(1);
+  $('#nowline').innerHTML = `${rn}: ${J ? `전세 1년 방향은 <b>${J.word}</b>(지역 분석 시장 신호등과 같음)입니다. ` : ''}금리 구조는 <b>${grayW}</b>(이 요인만 보면 전세 수요가 ${jSide < 0 ? '약해지는' : '강해지는'} 쪽)${a && b ? `, 실제 새 전세 계약은 ${hi ? '<b>전세 압력이 매우 높음</b>' : '압력이 아주 높지는 않음'}` : ''}` +
+    (jOpp ? ' → 금리 구조는 결론과 반대쪽을 가리키는 한 가지 요인입니다.' : (red || pend) && hi ? ' → <b>두 신호가 엇갈립니다.</b>' : '.') +
+    (a && b ? MO('자세히 보기', `갱신 비율 ${(+a['값']).toFixed(1)}%(자료 기간 중 상위 ${top(a)}%), 2년 전 갱신가 대비 신규가 ${(+b['값']).toFixed(2)}배(상위 ${top(b)}%) · ${fmtYM(+a['최근 달'])}, 늦은 신고로 바뀔 수 있음.`) : ' 새 전세 계약 자료가 없습니다.');
+}
+// 지역 분석과 같은 자료(회색구간_시장26.json '금리 분리') — 기준금리 효과를 빼면 어떻게 되는지
+function GR26note(tag = 'div'){
+  const G = GR26 && GR26['금리 분리']; if (!G) return '';
+  const f = (n, k) => G.find(r => r[0] === n && (k ? r[1] === '회색만' : r[1] !== '회색만'));
+  const a = f('6개월 뒤 전세수급 변화', 1), b = f('6개월 뒤 전세수급 변화', 0), c = f('6개월 뒤 전세가(%)', 1), d = f('6개월 뒤 전세가(%)', 0);
+  if (!a || !b || !c || !d) return '';
+  return `<${tag} style="display:block;margin-top:4px">지역 분석(구·시 ${a[2]}건, 6개월 뒤)과 같은 자료로 보면, 같은 때 기준금리가 빠르게 오른 효과를 빼면 회색 구간의 전세수급 차이는 ${sg(a[3])} → ${jsW(sg(b[3]), '로')} 거의 사라지고 전세가 차이만 일부(${sg(c[3])}% → ${sg(d[3])}%) 남았습니다.</${tag}>`;
+}
+// ---------- 시장 32: 지금 시황 한 줄(맨 위 결론) — 화면에 이미 있는 값으로만 자동으로 만듦(새 연구 계산 없음) ----------
+// 규칙: ① 전세 = 지역 분석 신호등 전세 1년 방향(없으면 전세 수급 지수 위치) ② 매수 = 주담대 저울 회색/초록(2개월 연속) + 최근 3개월 "전환율 − 주담대" 변화
+//       ③ 비교 = 서울 묶음이면 경기·인천의 매수 저울, 경기·인천이면 서울의 매수 저울
+const SEOULG = ['서울특별시', '강북14개구', '강남11개구'];
+const lastIdx = a => { for (let i = a.length - 1; i >= 0; i--) if (a[i] != null) return i; return -1; };
+function buyState(g){ const bg = redBlue('mo', g), i = lastIdx(bg); if (i < 0) return null;
+  const s = series('s2', g), j = lastIdx(s), d = j >= 3 && s[j - 3] != null ? s[j] - s[j - 3] : null, rr = runs(bg), last = rr.length ? rr[rr.length - 1] : null;
+  return {c:bg[i][0], t:YMS[i], v:s[j], v3:j >= 3 ? s[j - 3] : null, t3:j >= 3 ? YMS[j - 3] : null, d, mo:series('mo', g)[i], kb:series('kb', g)[i], run:last && last.b === i ? {a:YMS[last.a], n:last.b - last.a + 1} : null}; }
+const BUY_D = 0.10;   // 최근 3개월 사이 "전환율 − 주담대"가 0.10%p 이상 줄면 '커짐/줄어듦'
+function buyWord(b){ if (!b) return '매수 부담 자료 없음';
+  if (b.c === 'r') return b.d != null && b.d <= -BUY_D ? '매수 부담 커짐' : b.d != null && b.d >= BUY_D ? '매수 부담 줄어듦' : '매수 부담 큼';
+  if (b.c === 'p') return '매수 부담 커지는 중';
+  return b.d != null && b.d <= -BUY_D ? '매수 여유 줄어듦' : '매수 여유'; }
+// 시장 35: 매수 저울 칸 결론 = 맨 위 한 줄(buyWord)과 같은 판단을 문장으로 → [결론 문장, 색, 진하게]
+const BUYCC = {'매수 부담 커짐':['매수 부담이 커지고 있습니다', 'warm', true], '매수 부담 큼':['매수 부담이 큽니다', 'warm', false],
+  '매수 부담 줄어듦':['매수 부담이 크지만 줄어드는 중입니다', 'warm', false], '매수 부담 커지는 중':['매수 부담이 생기는 중입니다(1개월째)', 'warm', false],
+  '매수 여유 줄어듦':['매수 여유가 줄고 있습니다', 'cool', false], '매수 여유':['매수 여유가 있습니다', 'cool', false]};
+function jeonWord(g){ const J = sgJeon(g);
+  if (J) return {w:J.sign > 0 ? '전세 강세' : J.sign < 0 ? '전세 약세' : '전세 보합', J};
+  const r = percentile('sup', 201101); if (!r) return {w:'전세 자료 없음'};
+  return {w:r.p >= 60 ? '전세 강세' : r.p <= 40 ? '전세 약세' : '전세 보합', sup:r}; }
+const stName = c => c === 'r' ? '회색' : c === 'p' ? '회색 확인 중' : '초록';
+function cmpWord(g){
+  if (SEOULG.includes(g)){ const a = buyState('경기도'), b = buyState('인천광역시'), ca = a && a.c, cb = b && b.c, nm = c => c === 'b' ? '여유' : c === 'r' ? '부담' : '확인 중';
+    const w = ca === cb ? (ca === 'b' ? '경기·인천은 아직 여유' : ca === 'r' ? '경기·인천도 매수 부담' : '경기·인천은 매수 부담 확인 중') : `경기 ${nm(ca)} · 인천 ${nm(cb)}`;
+    return {w, why:[['경기', a], ['인천', b]].map(([n, x]) => x ? `${n} 전환율 − 주담대 ${sg(x.v, 2)}%p(${stName(x.c)})` : `${n} 자료 없음`).join(', ')}; }
+  const s = buyState('서울특별시'), c = s && s.c;
+  return {w:c === 'r' ? '서울은 이미 매수 부담 구간' : c === 'p' ? '서울은 매수 부담 확인 중' : '서울도 매수 여유', why:s ? `서울 전환율 − 주담대 ${sg(s.v, 2)}%p(${stName(c)})` : '서울 자료 없음'}; }
+function renderHead(){
+  const g = region, rn = rname(), J = jeonWord(g), B = buyState(g), bw = buyWord(B), C = cmpWord(g);
+  const jl = lastOf('jl'), cs = jl ? (redBlue('jl')[YMS.indexOf(jl.t)] || 'b')[0] : null, sup = percentile('sup', 201101);
+  const kws = [`${rn} ${J.w}`, bw, C.w];
+  const w1 = (J.J ? `전세 1년 방향 <b>${J.J.word}</b>${T('jdir')}${J.J.of ? `(${jsW(rn, '은')} 서울 값)` : ''}` : `전세 수급 지수 위치 ${J.sup ? J.sup.p.toFixed(0) : '—'}/100`) +
+    (sup ? ` · 전세 수급 지수 ${sup.v.toFixed(1)}(과거 중 위치 ${sup.p.toFixed(0)}/100)${T('sup')}` : '') +
+    (cs ? ` · 전세대출 금리 구조는 ${cs === 'r' ? '회색 구간(전세를 누르는 한 가지 요인)' : cs === 'p' ? '회색 확인 중' : '초록 구간(전세를 받치는 쪽)'}` : '');
+  const w2 = B ? `${fmtYM(B.t)} 주담대 금리 ${B.mo.toFixed(2)}% ${B.mo > B.kb ? '&gt;' : '&lt;'} 전환율 ${B.kb.toFixed(2)}% → ${B.c === 'r' ? `회색${B.run ? `(${fmtYM(B.run.a)}부터 ${B.run.n}개월 연속)` : ''}` : stName(B.c)}${T('buyw')}` +
+    (B.d != null ? ` · 전환율 − 주담대 ${fmtYM(B.t3)} ${sg(B.v3, 2)}%p → ${fmtYM(B.t)} ${sg(B.v, 2)}%p` : '') : '자료 없음';
+  $('#headline').innerHTML = `<div class="hl">${kws.join('<span class="dot">·</span>')}</div>
+    <ul class="why"><li><span class="kw">${J.w}</span><span>${w1}</span></li><li><span class="kw">${bw}</span><span>${w2}</span></li><li><span class="kw">${C.w}</span><span>${C.why}${T('green')}</span></li></ul>
+    <div class="foot">지역 단추를 바꾸면 그 지역 기준으로 다시 만듭니다 · 근거 숫자는 바로 아래 "지금 위치" · 매수·매도 권유 문장 아님</div>`;
+  $('#headsub').textContent = `${rn} 기준 · 금리는 ${jl ? fmtYM(jl.t) : ''}까지(금리가 나온 마지막 달)`;
+}
+// ---------- 시장 32: 겹친 그래프(왼쪽·오른쪽 축 두 개) ----------
+// o = {a:{name,color,v,d}, b:{name,color,v,d,inv}, from, shift, bShiftName}
+function overlay(el, o){
+  const W = Math.max(300, el.clientWidth), mob = W < 560, ML = mob ? 34 : 44, MR = mob ? 36 : 46, MT = 10, MB = 22, H = mob ? 220 : 270;
+  const ia = o.a.v.findIndex((v, i) => v != null && YMS[i] >= o.from), i0 = ia < 0 ? 0 : ia, i1 = YMS.length - 1;
+  const bv = o.shift ? YMS.map((t, i) => o.b.v[i + o.shift] != null ? o.b.v[i + o.shift] : null) : o.b.v;
+  const X = i => ML + (W - ML - MR) * (i - i0) / (i1 - i0);
+  const rng = v => { const a = v.filter((x, i) => x != null && i >= i0); return niceTicks(Math.min(...a), Math.max(...a), mob ? 4 : 5); };
+  const ta = rng(o.a.v), tb = rng(bv), a0 = ta[0], a1 = ta[ta.length - 1], b0 = tb[0], b1 = tb[tb.length - 1], ph = H - MT - MB;
+  const Ya = v => MT + ph * (1 - (v - a0) / (a1 - a0)), Yb = v => MT + ph * (o.b.inv ? (v - b0) / (b1 - b0) : 1 - (v - b0) / (b1 - b0));
+  let s = `<svg width="${W}" height="${H}" role="img" aria-label="${o.a.name}와 ${o.b.name} 겹친 그림">`;
+  ta.forEach(v => { s += `<line x1="${ML}" x2="${W - MR}" y1="${Ya(v)}" y2="${Ya(v)}" stroke="var(--grid)"/><text class="ovl-ax" x="${ML - 5}" y="${Ya(v) + 4}" text-anchor="end" style="fill:${o.a.color}">${v}</text>`; });
+  tb.forEach(v => { s += `<text class="ovl-ax" x="${W - MR + 5}" y="${Yb(v) + 4}" text-anchor="start" style="fill:${o.b.color}">${v}</text>`; });
+  for (let i = i0; i <= i1; i++){ const t = YMS[i]; if (t % 100 === 1 && Math.floor(t / 100) % (mob ? 3 : 2) === 0) s += `<text x="${X(i)}" y="${H - 5}" text-anchor="middle">${Math.floor(t / 100)}</text>`; }
+  const path = (v, Y) => { let d = '', pen = false; for (let i = i0; i <= i1; i++){ if (v[i] == null){ pen = false; continue; } d += `${pen ? 'L' : 'M'}${X(i).toFixed(1)},${Y(v[i]).toFixed(1)}`; pen = true; } return d; };
+  s += `<path d="${path(bv, Yb)}" fill="none" stroke="${o.b.color}" stroke-width="2.2" stroke-linejoin="round"/>`;
+  s += `<path d="${path(o.a.v, Ya)}" fill="none" stroke="${o.a.color}" stroke-width="2.2" stroke-linejoin="round"${o.a.ls ? ` stroke-dasharray="${o.a.ls}"` : ''}/>`;
+  s += `<line class="xh" x1="0" x2="0" y1="${MT}" y2="${H - MB}" stroke="#61707D" style="display:none"/><rect x="${ML}" y="${MT}" width="${W - ML - MR}" height="${ph}" fill="transparent"/></svg>`;
+  const lg = `<div class="legend"><span><i style="background:${o.a.color}"></i>${o.a.name} <span class="blank">(왼쪽 축)</span></span><span><i style="background:${o.b.color}"></i>${o.shift ? o.bShiftName : o.b.name} <span class="blank">(오른쪽 축${o.b.inv ? ', 위아래 뒤집음' : ''})</span></span></div>`;
+  el.innerHTML = lg + s;
+  const svg = el.querySelector('svg');
+  const move = e => { const r = svg.getBoundingClientRect(), cx = (e.touches ? e.touches[0].clientX : e.clientX) - r.left;
+    let i = Math.round(i0 + (cx - ML) / (W - ML - MR) * (i1 - i0)); i = Math.max(i0, Math.min(i1, i));
+    const xh = svg.querySelector('.xh'); xh.setAttribute('x1', X(i)); xh.setAttribute('x2', X(i)); xh.style.display = '';
+    const tip = $('#tip'); tip.innerHTML = `<div style="margin-bottom:4px;color:var(--ink3)">${fmtYM(YMS[i])}</div>` +
+      `<div class="r"><span class="k"><i style="background:${o.a.color}"></i>${o.a.name}</span><b>${o.a.v[i] != null ? o.a.v[i].toFixed(o.a.d) + (o.a.u || '') : '—'}</b></div>` +
+      `<div class="r"><span class="k"><i style="background:${o.b.color}"></i>${o.b.name}${o.shift && i + o.shift <= i1 ? ` (${fmtYM(YMS[i + o.shift])})` : ''}</span><b>${bv[i] != null ? bv[i].toFixed(o.b.d) + (o.b.u || '') : '—'}</b></div>`;
+    tip.style.display = 'block'; const tx = e.touches ? e.touches[0].clientX : e.clientX, ty = e.touches ? e.touches[0].clientY : e.clientY;
+    tip.style.left = Math.max(8, Math.min(innerWidth - tip.offsetWidth - 8, tx + 14)) + 'px'; tip.style.top = Math.max(8, ty - tip.offsetHeight - 12) + 'px'; };
+  const out = () => { $('#tip').style.display = 'none'; svg.querySelector('.xh').style.display = 'none'; };
+  svg.addEventListener('mousemove', move); svg.addEventListener('touchmove', move, {passive:true}); svg.addEventListener('mouseleave', out); svg.addEventListener('touchend', out);
+}
+// 시장 35: 겹친 그림 ① 두 선 색을 뚜렷이 대비 — 금리 = 주황 계열, 수급 = 남색 계열(범례·축 글자·설명이 이 색을 따라감)
+const OV1_RATE_C = '#E8590C', OV1_SUP_C = '#1B3A6B';
+let OV = {s1:0, s2:0, pick:'m'}, OUT32 = null;   // s1·s2 = 시차 맞춤 개월(0 = 그대로), pick = 매매(m)/전세(j) 전망
+const seg = (el, items, cur, on) => { el.innerHTML = items.map(([v, t]) => `<button aria-pressed="${v === cur}" data-v="${v}">${t}</button>`).join(''); el.querySelectorAll('button').forEach(b => b.onclick = () => on(b.dataset.v)); };
+function renderOverlays(){
+  const rn = rname();
+  seg($('#ov1seg'), [['0', '그대로 보기'], ['1', '시차 맞춰 겹쳐 보기(1개월)']], String(OV.s1), v => { OV.s1 = +v; renderOverlays(); });
+  overlay($('#ov1'), {from:201501, shift:OV.s1, a:{name:'전세대출 금리', color:OV1_RATE_C, v:series('jl'), d:2, u:'%'},
+    b:{name:`전세 수급 지수(${rn})`, color:OV1_SUP_C, v:series('sup'), d:1, inv:true}, bShiftName:`전세 수급 지수(${rn}, 1개월 뒤 값을 당겨 그림)`});
+  $('#ov1note').innerHTML = `<b style="color:${OV1_RATE_C}">주황 선 = 전세대출 금리</b>(왼쪽 축), <b style="color:${OV1_SUP_C}">남색 선 = 전세 수급 지수</b>(오른쪽 축). <b>반대로 움직이는 관계</b>라 오른쪽 축(전세 수급 지수)의 위아래를 뒤집었습니다. 그래서 <b>두 선이 같이 오르면 = 금리가 오를 때 전세 수급이 약해진 것</b>입니다(오른쪽 축은 위로 갈수록 수급 지수가 낮음). 2015-01부터(공식 금리).` +
+    (OV.s1 ? ' 시차 맞춤: 각 달 금리 옆에 1개월 뒤 수급 지수를 놓았습니다.' : '');
+  seg($('#ov2pick'), [['m', '매매 전망'], ['j', '전세 전망']], OV.pick, v => { OV.pick = v; renderOverlays(); });
+  seg($('#ov2seg'), [['0', '그대로 보기'], ['3', '시차 맞춰 겹쳐 보기(3개월)']], String(OV.s2), v => { OV.s2 = +v; renderOverlays(); });
+  if (!OUT32){ $('#ov2').innerHTML = '<div class="note">전망 지수 자료를 읽지 못했습니다.</div>'; return; }
+  const col = OV.pick === 'm' ? '매매가격전망지수(서울)' : '전세가격전망지수(서울)', A = YMS.map(t => num((OUT32[t] || {})[col])), B = YMS.map(t => num((OUT32[t] || {})['선도단지_실거래_3개월변화(%)']));
+  overlay($('#ov2'), {from:201101, shift:OV.s2, a:{name:`${OV.pick === 'm' ? '매매' : '전세'} 전망 지수(서울)`, color:OV.pick === 'm' ? '#1f5fd6' : '#7048c8', v:A, d:1},
+    b:{name:'선도단지 실거래 3개월 변화', color:'#e67700', v:B, d:1, u:'%'}, bShiftName:'선도단지 실거래 3개월 변화(3개월 뒤 값을 당겨 그림)'});
+  $('#ov2note').innerHTML = `같은 쪽으로 움직이는 관계라 두 축 모두 그대로입니다(위 = 높음). 선도단지는 서울만 있어 지역 단추와 관계없이 서울입니다.` +
+    (OV.s2 ? ' 시차 맞춤: 각 달 전망 지수 옆에 3개월 뒤 선도단지 실거래 변화를 놓았습니다.' : '') + ' 연구 숫자(함께 움직인 정도)는 달마다 변화끼리 비교한 값이고, 이 그림은 모습을 보려고 값 그대로 겹친 것입니다.';
+}
+function renderRegions(){
+  $('#regions').innerHTML = REG.map(([k, n]) => `<button aria-pressed="${k === region}" data-r="${k}">${n}</button>`).join('');
+  $('#regions').querySelectorAll('button').forEach(b => b.onclick = () => { region = b.dataset.r; renderAll(); });
+}
+function renderAll(){ renderRegions(); renderHead(); renderConcl(); renderSimple();renderFigs(); renderBoard(); renderChips(); renderTS(); renderRel(); renderOverlays(); renderVerdict(); plainDOM(); }
+let B32 = null;   // 시장 32: 매수 저울 회색 2개월 기준으로 연구 숫자를 덧씌운 지역(예: {'강북14개구':true})
+// 월간 갱신(도구\월간갱신.py)이 바꾸는 파일: 모음표_화면용.csv · 시장7_화면추가.csv · 시장8_지금위치.csv · 갱신정보.json (이름 고정)
+Promise.all([fetch(D('모음표_화면용.csv')).then(r => r.ok ? r.text() : Promise.reject(r.status)),
+             fetch(D('시장7_화면추가.csv')).then(r => r.ok ? r.text() : Promise.reject(r.status)),
+             fetch(D('시장7_결과.json')).then(r => r.ok ? r.json() : Promise.reject(r.status)),
+             fetch(D('시장8_지금위치.csv')).then(r => r.ok ? r.text() : '').catch(() => ''),
+             fetch(D('갱신정보.json')).then(r => r.ok ? r.json() : null).catch(() => null),
+             fetch('data/' + encodeURIComponent('지역') + '/' + encodeURIComponent('회색구간_시장26.json')).then(r => r.ok ? r.json() : null).catch(() => null),
+             fetch('data/' + encodeURIComponent('지역') + '/' + encodeURIComponent('신호등_시장27.json')).then(r => r.ok ? r.json() : null).catch(() => null),
+             // 시장 32: 매수 저울 회색 2개월 기준 연구 값(강북14) · 겹친 그림 ②용 전망 지수·선도단지 3개월 변화(서울)
+             fetch(D('시장7_결과_매수회색2개월_시장32.json')).then(r => r.ok ? r.json() : null).catch(() => null),
+             fetch(D('전망_선도단지_서울_시장32.csv')).then(r => r.ok ? r.text() : '').catch(() => '')]).then(([a, b, j, p8, info, gr, sg27, b32, out32]) => {
+  P8 = p8 ? parseCSV(p8) : null; INFO = info || {}; GR26 = gr; SG27 = sg27;
+  if (b32 && b32['저울']){ B32 = {}; Object.entries(b32['저울']).forEach(([k, v]) => { j['저울'][k] = v; B32[k.split('|')[1]] = true; }); }
+  if (out32){ OUT32 = {}; parseCSV(out32).forEach(r => { OUT32[+r['연월']] = r; }); }
+  parseCSV(a).forEach(r => { (DATA[r['지역']] = DATA[r['지역']] || {})[+r['연월']] = r; });
+  parseCSV(b).forEach(r => { const o = (DATA[r['지역']] = DATA[r['지역']] || {})[+r['연월']]; if (o) Object.assign(o, r); });
+  R7 = j; YMS = Object.keys(DATA['서울특별시']).map(Number).sort((x, y) => x - y); LASTYM = YMS[YMS.length - 1]; renderInfo(); renderAll();
+  $('#ts').closest('details').addEventListener('toggle', e => { if (e.target.open) renderTS(); });
+  ['#rel1more', '#rel2more'].forEach(s => $(s).addEventListener('toggle', e => { if (e.target.open){ renderRel(); plainDOM($('#sec_rel')); } }));
+  let w = innerWidth; addEventListener('resize', () => { if (innerWidth !== w){ w = innerWidth; renderFigs(); renderTS(); renderRel(); renderOverlays(); } });
+}).catch(e => { $('#concl').textContent = '자료를 읽지 못했습니다: ' + e; });
+</script>
+</body>
+</html>

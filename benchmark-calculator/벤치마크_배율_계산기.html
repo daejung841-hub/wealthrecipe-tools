@@ -527,6 +527,11 @@ body.l85-map.l120-pick #mapSectionL84{top:92px;}
 .map-head-l85 .mh-tabs{display:flex;gap:4px;}
 .map-head-l85 .mh-tabs button{border:1px solid var(--border);background:var(--surface);color:var(--ink);font:inherit;font-size:13px;font-weight:700;padding:6px 10px;border-radius:999px;cursor:pointer;white-space:nowrap;min-height:34px;}
 .map-head-l85 .mh-tabs button.active{background:var(--accent);border-color:var(--accent);color:#fff;}
+/* 11-25 시장 배포 1차: 탭 줄 맨 앞 [시황 분석][지역 분석](다른 화면으로 가는 링크, 모양은 탭과 같음). 폭이 모자라면 탭 칸만 가로로 밀림 */
+.map-head-l85 .mh-tabs{overflow-x:auto;scrollbar-width:none;}.map-head-l85 .mh-tabs::-webkit-scrollbar{display:none;}
+.map-head-l85 .mh-tabs a.mkt-tab{display:inline-flex;align-items:center;flex:0 0 auto;border:1px solid var(--border);background:var(--surface);color:var(--ink);font:inherit;font-size:13px;font-weight:700;padding:6px 10px;border-radius:999px;white-space:nowrap;min-height:34px;box-sizing:border-box;text-decoration:none;}
+.map-head-l85 .mh-tabs button{flex:0 0 auto;}
+.top-mode-tabs a.mkt-tab{display:inline-flex;align-items:center;justify-content:center;padding:9px 18px;border-radius:10px;border:1px solid var(--border);background:var(--surface);font-size:14px;font-weight:600;color:var(--ink-muted);text-decoration:none;white-space:nowrap;}
 .map-head-l85 .mh-links{margin-left:auto;display:flex;gap:4px;align-items:center;}
 .pk-undo-l128{position:fixed;left:50%;transform:translateX(-50%);top:64px;z-index:3400;background:var(--surface);border:1px solid var(--border);border-radius:999px;box-shadow:0 4px 14px rgba(0,0,0,.12);padding:4px 6px 4px 12px;font-size:12px;color:var(--ink-muted);display:flex;align-items:center;gap:6px;}
 .pk-undo-l128[hidden]{display:none!important;}
@@ -600,6 +605,7 @@ body.twin-open-l87{overflow:hidden;}
   html.l112 .map-head-l85 .mh-links a, html.l112 .map-head-l85 .mh-links button{padding:5px 6px;}
   html.l112 .map-head-l85 .mh-tabs{flex:0 1 auto;min-width:0;gap:3px;}
   html.l112 .map-head-l85 .mh-tabs button{padding:6px 8px;font-size:12.5px;}
+  html.l112 .map-head-l85 .mh-tabs a.mkt-tab{padding:6px 8px;font-size:12.5px;}   /* 11-25 시장 배포 1차 */
 }
 #pyeongNotice:empty{display:none;}
 #pyeongNotice{display:flex;flex-direction:column;gap:6px;margin-bottom:12px;}
@@ -1771,6 +1777,7 @@ body.l36 #baseLibSelect, body.l36 .lib-row:has(> #baseLibSelect){display:none !i
   body.l32 .topbar-actions{flex-wrap:nowrap;justify-content:flex-start;overflow-x:auto;max-width:100%;width:100%;padding-bottom:2px;-webkit-overflow-scrolling:touch;}
   body.l32 .topbar-actions > *{flex:none;white-space:nowrap;}
   body.l32 .top-mode-tabs{gap:6px;margin:10px 0 12px;}
+  body.l32 .top-mode-tabs a.mkt-tab{flex:1 1 0;min-width:0;padding:8px 4px;font-size:12.5px;min-height:44px;white-space:normal;word-break:keep-all;text-align:center;line-height:1.25;}   /* 11-25 시장 배포 1차 */
   body.l32 .top-mode-btn{flex:1 1 0;min-width:0;padding:8px 4px;font-size:12.5px;min-height:44px;word-break:keep-all;overflow-wrap:normal;line-height:1.25;}
   /* (b) 단지 헤더: 이름 한 덩어리(메타는 이름 아래 작은 글씨), 기준 표시·비교 추가는 줄바꿈 없이 */
   body.l32 .single-target-head{flex-wrap:wrap;gap:6px 8px;}
@@ -1811,6 +1818,9 @@ body.l36 #baseLibSelect, body.l36 .lib-row:has(> #baseLibSelect){display:none !i
   </div>
 
   <div class="top-mode-tabs" id="topModeTabs">
+    <!-- 11-25 시장 배포 1차: 맨 앞 [시황 분석][지역 분석] = 다른 화면 링크(.top-mode-btn 아님 → 탭 전환 코드가 건드리지 않음) -->
+    <a class="mkt-tab" href="../market-analysis/index.html">📈 시황 분석</a>
+    <a class="mkt-tab" href="../market-analysis/지역분석.html">📍 지역 분석</a>
     <button class="top-mode-btn active" data-top-mode="single">🏠 우리 단지 진단하기</button>
     <button class="top-mode-btn" data-top-mode="multi">📊 여러 단지 비교</button>
     <button class="top-mode-btn" data-top-mode="map" id="topModeMapBtnL84" hidden>🗺️ 지도로 보기</button>
@@ -1823,7 +1833,7 @@ body.l36 #baseLibSelect, body.l36 .lib-row:has(> #baseLibSelect){display:none !i
   <!-- 묶음 L85: 지도 중심 화면의 최소 머리줄(지도 화면에서만 보임) -->
   <div class="map-head-l85" id="mapHeadL85">
     <h1>저평가 단지 계산기</h1>
-    <div class="mh-tabs"><button type="button" data-l85-mode="map" class="active">🗺️ 지도</button><button type="button" data-l85-mode="multi">📊 <span class="tx2">여러 단지 </span>비교하기</button></div>
+    <div class="mh-tabs"><a class="mkt-tab" href="../market-analysis/index.html">📈 시황<span class="tx2">&nbsp;분석</span></a><a class="mkt-tab" href="../market-analysis/지역분석.html">📍 지역<span class="tx2">&nbsp;분석</span></a><button type="button" data-l85-mode="map" class="active">🗺️ 지도</button><button type="button" data-l85-mode="multi">📊 <span class="tx2">여러 단지 </span>비교하기</button></div>
     <div class="mh-links">
       <button type="button" id="mapHeadGuideL85" hidden>❓<span class="tx"> 사용법</span></button>
       <a href="급지표.html">📋<span class="tx"> 급지표</span></a>
@@ -12061,6 +12071,7 @@ function syncScreenL85(mode){
   document.body.classList.toggle('l85-map', on && mode === 'map');
   const head = document.getElementById('mapHeadL85');
   if (head) head.querySelectorAll('[data-l85-mode]').forEach(x => x.classList.toggle('active', x.dataset.l85Mode === mode));
+  try { const tb = head && head.querySelector('.mh-tabs'), ac = tb && tb.querySelector('[data-l85-mode].active'); const x = ac ? ac.getBoundingClientRect().left - tb.getBoundingClientRect().left + tb.scrollLeft : 0; if (ac && (x + ac.offsetWidth > tb.scrollLeft + tb.clientWidth || x < tb.scrollLeft)) tb.scrollLeft = Math.max(0, x - 8); } catch (e) {}   // 11-25 시장 배포 1차
   const note = document.getElementById('mapNoteL85');
   if (note){
     const txt = mapFailedL85 ? ''   // 지도 실패 안내는 맨 위 안내 줄(showMapFailL85)

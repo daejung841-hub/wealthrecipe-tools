@@ -7,7 +7,7 @@
   var d=document.documentElement,q=new URLSearchParams(location.search),H=location.hash,top=window.top===window.self;
   if(q.get('모드')==='팝업'&&q.get('열기')) window.__rtPop=true;   // 팝업 모드: 본문 표 그리기 등을 건너뜀
   var wantList=q.get('보기')==='목록'||q.has('열기'),explicit=/^#(zone|id)=/.test(H),authed=false;
-  try{authed=sessionStorage.getItem('siteAuthed')==='1';}catch(e){}
+  try{authed=sessionStorage.getItem(typeof SITE_AUTH_KEY==='string'?SITE_AUTH_KEY:'siteAuthed_v2')==='1';}catch(e){}
   if(top&&authed&&location.protocol!=='file:'&&!wantList&&!explicit){   // 기본 = 지도: 정해지기 전에는 목록·지도 둘 다 안 보이게(머리줄과 바탕만)
     d.classList.add('rt-view-hold');
     var MAP='../redevelopment-map/'+encodeURIComponent('재개발_지도.html'),done=false;

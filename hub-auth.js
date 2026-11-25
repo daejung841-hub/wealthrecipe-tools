@@ -5,7 +5,7 @@
  * 이 파일은 index.html 본문 스크립트 "뒤에" 불러온다. 기존 입력·검증 코드는 건드리지 않고, 그 위에 기억만 더한다.
  *
  * 기억 방식
- *  - 입장에 성공했을 때 체크박스가 켜져 있으면 localStorage['hub_auth_v1']에 "지문"을 저장한다.
+ *  - 입장에 성공했을 때 체크박스가 켜져 있으면 localStorage['hub_auth_v2']에 "지문"을 저장한다.
  *    지문 = SHA-256( 'hub|' + 허브 주소(origin + 폴더 경로) + '|' + 현재 SITE_PASSWORD ). 비밀번호 자체는 저장하지 않는다.
  *  - 다음에 열 때 지문을 현재 SITE_PASSWORD로 다시 계산해 같으면 grantSiteAuth()를 부르고 카드를 보여 준다.
  *    비밀번호가 바뀌면 지문이 달라져 기억이 자동으로 무효가 되고, 옛 값은 지운다.
@@ -17,7 +17,7 @@
  */
 (function () {
   'use strict';
-  var KEY = 'hub_auth_v1';
+  var KEY = 'hub_auth_v2';   // 11-25: 이름 바꿈(예전 기억으로 통과 안 되게)
   var $ = function (id) { return document.getElementById(id); };
   var gate = $('gateScreen'), main = $('mainScreen'), form = $('gateForm'), pw = $('gatePassword'), submitBtn = $('gateSubmit');
   // config.js·gate.js 가 없거나 화면 구성이 다르면 아무것도 하지 않는다(기존 동작 그대로)
@@ -100,7 +100,7 @@
   forget.textContent = '이 기기에서 잊기';
   forget.addEventListener('click', function () {
     lsDel();
-    try { window.sessionStorage.removeItem(typeof SITE_AUTH_KEY === 'string' ? SITE_AUTH_KEY : 'siteAuthed'); } catch (e) { /* 무시 */ }
+    try { window.sessionStorage.removeItem(typeof SITE_AUTH_KEY === 'string' ? SITE_AUTH_KEY : 'siteAuthed_v2'); } catch (e) { /* 무시 */ }
     main.hidden = true;
     gate.hidden = false;
     pw.value = '';

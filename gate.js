@@ -9,7 +9,7 @@
  * 같은 사이트 안, 아래 SITE_RETURN_DIRS 폴더 아래 주소만 받는다(바깥 주소·다른 폴더·이상한 주소는 무시하고 첫 화면에 남음).
  * 목록표(redevelopment-list)·재개발 지도(redevelopment-map)는 그 창 담당이라 넣지 않았다(지금처럼 첫 화면으로만).
  */
-var SITE_AUTH_KEY = 'siteAuthed';
+var SITE_AUTH_KEY = 'siteAuthed_v2';   // 11-25 시장 배포 1차: 저장 이름을 바꿔 모든 사람이 다시 로그인
 var SITE_RETURN_DIRS = ['benchmark-calculator/', 'price-correction/', 'rate-simulator/', 'imjang/'];
 
 function isSiteAuthed(){

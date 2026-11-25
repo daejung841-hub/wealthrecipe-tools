@@ -3,10 +3,10 @@
  * 그대로 쓰되, 홈 화면 앱에서 매번 묻지 않도록 "이 기기에서 기억하기"만 더한다. config.js·gate.js는 수정하지 않는다.
  *
  * 기억 방식
- *  - 입장에 성공하면 localStorage['imjang_auth_v1']에 "지문"을 저장한다.
+ *  - 입장에 성공하면 localStorage['imjang_auth_v2']에 "지문"을 저장한다.
  *    지문 = SHA-256( 'imjang|' + 사이트 주소(origin) + '|' + 현재 SITE_PASSWORD ).  (비밀번호 자체는 저장하지 않는다)
  *  - 다음 방문 때 지문을 현재 SITE_PASSWORD로 다시 계산해 같으면 입장시키고 gate.js의 grantSiteAuth()를 불러
- *    sessionStorage['siteAuthed']도 세팅한다(→ 계산기 등 다른 도구로 가도 다시 묻지 않음).
+ *    sessionStorage['siteAuthed_v2']도 세팅한다(→ 계산기 등 다른 도구로 가도 다시 묻지 않음).
  *  - 사이트 비밀번호가 바뀌면 지문이 달라져 기억이 자동으로 무효가 되고(저장값도 지움) 입력 화면이 뜬다.
  *    별도의 버전 값·새 비밀번호·해시 파일은 없다. 지문은 이 기기 브라우저에만 있다.
  *  - 로컬 개발 주소(localhost·127.0.0.1·[::1]·file:)에서는 게이트 없이 열린다. 게이트를 확인하려면 주소 끝에 ?gate=on
@@ -15,7 +15,7 @@
  */
 (function (root) {
   'use strict';
-  const KEY = 'imjang_auth_v1';
+  const KEY = 'imjang_auth_v2';   // 11-25: 이름 바꿈(예전 기억으로 통과 안 되게)
 
   const isLocalDev = () => {
     const l = root.location;
