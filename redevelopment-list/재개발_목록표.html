@@ -870,7 +870,7 @@ window.SBJListLink = (function () {
   function etaOf66(r){ const E = window.RT_ETA66; return E && r ? E[r.id] : null; }
   function etaGroup66(g){ const E = window.RT_ETA66; if (!E || !g || !Array.isArray(g.subs)) return null; const xs = g.subs.map((s) => E[s.id]).filter((x) => x && x.k === 'eta'); if (!xs.length) return null;
     const ys = xs.map((x) => x.y), lo = Math.min.apply(null, ys), hi = Math.max.apply(null, ys); return { k: 'eta', y: lo, y2: hi, c: xs.every((x) => x.c === '보통') ? '보통' : '낮음', tip: '하위 구역 ' + xs.length + '곳의 예상 준공 연도 범위예요. 각 하위 구역은 자세히 보기에서 확인하세요.' }; }
-  const etaDn66 = (e) => e && e.dn ? '<span class="rt-eta-dn" tabindex="0" data-rt-tip="' + esc(e.dq ? '분양 전 예정 이름이라 바뀔 수 있어요(기사 기준)' : '분양 단지 이름(' + (e.dd ? e.dd.replace('-', '.') + ' 모집공고 · ' : '') + (e.ds || '청약홈') + ' 기준)') + '">' + esc(e.dn) + (e.dq ? ' <small>' + esc(e.dq) + '</small>' : '') + '</span>' : '';   // A90: 모집공고 전 예정 이름은 '예정'   // A85: 이미 일반분양한 구역은 분양 단지 이름
+  const etaDn66 = (e) => e && e.dn ? '<span class="rt-eta-dn" tabindex="0" data-rt-tip="' + esc(e.dq ? '분양 전 예정 이름이라 바뀔 수 있어요(기사 기준)' : '분양 단지 이름(' + (e.dd ? e.dd.replace('-', '.') + ' 모집공고 · ' : '') + (e.ds || '청약홈') + ' 기준)') + '">' + esc(e.dn) + (e.dq ? '&nbsp;<small style="white-space:nowrap">' + esc(e.dq) + '</small>' : '') + '</span>' : '';   // A90: 모집공고 전 예정 이름은 '예정'   // A85: 이미 일반분양한 구역은 분양 단지 이름
   function etaHtml66(r){ const e = r && r.isGroup ? etaGroup66(r) : etaOf66(r); if (!e) return (r && r.isGroup) ? '<span class="rt-eta lo">예상 준공 자료 부족</span>' : '';
     if (e.k === 'none') return '<span class="rt-eta lo" tabindex="0" data-rt-tip="' + esc(e.tip).replace(/"/g, '&quot;') + '">예상 준공 자료 부족</span>' + etaDn66(e);
     if (e.k === 'done') return '<span class="rt-eta dn" tabindex="0" data-rt-tip="' + esc(e.tip) + '">준공</span>' + etaDn66(e);
@@ -878,7 +878,7 @@ window.SBJListLink = (function () {
     return '<span class="rt-eta' + (e.c === '낮음' ? ' lo' : '') + '" tabindex="0" data-rt-tip="' + esc(e.tip).replace(/"/g, '&quot;') + '">예상 준공 ' + yr + '<small>추정</small>' + '</span>' + etaDn66(e); }
   function etaHead86(r){   // A86: 구역 이름 바로 아래 예상 준공(이미 입주한 구역은 입주 연월) + 분양 단지 이름
     const e = etaOf66(r); if (!e || (e.k === 'none' && !e.dn && !e.mv)) return '';   // A87: 자료 부족이어도 단지 이름·입주 연월은 보임
-    const dn = (e.dn ? ' · <span class="rt-eh-dn"' + (e.dq ? ' tabindex="0" data-rt-tip="분양 전 예정 이름이라 바뀔 수 있어요(기사 기준)"' : '') + '>' + esc(e.dn) + (e.dq ? ' <small>' + esc(e.dq) + '</small>' : '') + '</span>' : '') + (e.mv && e.k !== 'done' ? ' · <span class="rt-eh-mv">' + esc(e.mk || '입주') + ' ' + esc(e.mv) + (e.ms ? ' <small>' + esc(e.ms) + '</small>' : '') + '</span>' : '');   // A87: 준공·입주 연월(기사·부동산 사이트 근거는 기사 기준)
+    const dn = (e.dn ? ' · <span class="rt-eh-dn"' + (e.dq ? ' tabindex="0" data-rt-tip="분양 전 예정 이름이라 바뀔 수 있어요(기사 기준)"' : '') + '>' + esc(e.dn) + (e.dq ? '&nbsp;<small style="white-space:nowrap">' + esc(e.dq) + '</small>' : '') + '</span>' : '') + (e.mv && e.k !== 'done' ? ' · <span class="rt-eh-mv">' + esc(e.mk || '입주') + ' ' + esc(e.mv) + (e.ms ? ' <small>' + esc(e.ms) + '</small>' : '') + '</span>' : '');   // A87: 준공·입주 연월(기사·부동산 사이트 근거는 기사 기준)
     const ms = e.k === 'done' && e.ms ? ' <small>' + esc(e.ms) + '</small>' : '';
     if (e.k === 'none') return '<div class="rt-eh lo" data-rt-eh>' + dn.replace(/^ · /, '') + '</div>';
     if (e.k === 'done') { const m = String(e.tip || '').match(/(\d{4})년 (\d{1,2})월 입주/); return '<div class="rt-eh dn" data-rt-eh>준공·입주' + (m ? ' ' + m[1] + '년 ' + m[2] + '월' : '') + ms + dn + '</div>'; }
