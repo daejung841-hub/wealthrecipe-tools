@@ -214,21 +214,16 @@ td .m{display:none}
   h2{font-size:16.5px}
 }
 </style>
-<style id="hubtabs-css">
-.hubtabs{display:flex;align-items:center;gap:8px;height:48px;padding:0 12px;background:#fff;border-bottom:1px solid #DCE3E9;box-sizing:border-box;font-family:inherit}
-.hubtabs .ht-tabs{display:flex;gap:4px;min-width:0;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch}
-.hubtabs .ht-tabs::-webkit-scrollbar{display:none}
-.hubtabs a{display:inline-flex;align-items:center;gap:3px;border:1px solid #DCE3E9;background:#fff;color:#182430;font-size:13px;font-weight:700;padding:6px 10px;border-radius:999px;white-space:nowrap;min-height:34px;box-sizing:border-box;text-decoration:none;flex:0 0 auto}
-.hubtabs a:hover{border-color:#0E5C6B}
-.hubtabs a.on{background:#0E5C6B;border-color:#0E5C6B;color:#fff}
-.hubtabs .ht-links{margin-left:auto;display:flex;gap:4px;flex:0 0 auto}
-@media (max-width:767px){.hubtabs{gap:4px;padding:0 6px}.hubtabs a{padding:6px 8px;font-size:12.5px}.hubtabs .ht-links .tx{display:none}}
-@media (max-width:400px){.hubtabs .tx2{display:none}}
+<style id="mktnav-css">
+.mktnav{display:flex;align-items:center;gap:4px;flex-wrap:wrap;padding:6px 12px;background:#F4F7F9;border-bottom:1px solid #DCE3E9;font-size:13px;line-height:1.3}
+.mktnav a{color:#3d4a55;text-decoration:none;padding:4px 9px;border-radius:999px;font-weight:600;white-space:nowrap}
+.mktnav a:hover{background:#E6EDF1;color:#0E5C6B}
+.mktnav a.on{background:#0E5C6B;color:#fff}
+.mktnav .sep{color:#9AA8B4;margin:0 2px}
 </style>
 </head>
 <body>
-<nav class="hubtabs" aria-label="도구 이동"><div class="ht-tabs"><a href="index.html" class="on" aria-current="page">📈 시황<span class="tx2">&nbsp;분석</span></a><a href="지역분석.html">📍 지역<span class="tx2">&nbsp;분석</span></a><a href="../benchmark-calculator/벤치마크_배율_계산기.html" data-calc-tab="map">🗺️ 지도</a><a href="../benchmark-calculator/벤치마크_배율_계산기.html" data-calc-tab="multi">📊&nbsp;<span class="tx2">여러 단지&nbsp;</span>비교하기</a></div><div class="ht-links"><a href="../benchmark-calculator/급지표.html">📋<span class="tx">&nbsp;급지표</span></a><a href="../index.html">🏠<span class="tx">&nbsp;초기화면</span></a></div></nav>
-<script>(function(){var n=document.currentScript.previousElementSibling;n.querySelectorAll("[data-calc-tab]").forEach(function(a){a.addEventListener("click",function(){try{sessionStorage.setItem("benchmarkCalc_lastTab_l85",a.getAttribute("data-calc-tab"));}catch(e){}});});var t=n.querySelector(".ht-tabs"),c=n.querySelector("a.on");if(t&&c&&c.offsetLeft+c.offsetWidth>t.clientWidth)t.scrollLeft=c.offsetLeft-8;})();</script>
+<nav class="mktnav" aria-label="이동"><a href="../index.html">← 전체 기능</a><span class="sep">·</span><a href="index.html" class="on" aria-current="page">시황 분석</a><a href="지역분석.html">지역 분석</a></nav>
 <header><div class="wrap">
   <h1><span id="appName">시황 분석</span></h1>
   <div class="regions" id="regions" role="group" aria-label="지역 선택"></div>
@@ -242,6 +237,7 @@ td .m{display:none}
     <div class="board more" id="board2" style="margin-top:0"></div>
   </section>
   <section><h2>지금 상황 풀어 읽기 <span class="sub" id="conclsub"></span></h2><div class="concl" id="concl">자료를 읽는 중…</div></section>
+  <a class="gocard" href="지역분석.html"><b>지역 분석 →</b><span>서울·경기·인천 구·시별 시세·전세가율·입주·거래량·시장 신호등을 한 화면에서 봅니다.</span></a>
   <section id="sec_rules"><h2><span id="rulesName" data-vt></span> <span class="sub" id="simplesub">지금까지 연구로 확인된 규칙과, 아직 지켜보는 가설 · 숫자는 연구 결과 그대로</span></h2>
     <div id="vfirst"></div>
     <div class="vgrp ok-h">검증됨 <span class="sub">2011~2020 자료로 정한 규칙이 2021년 이후 새 자료로 다시 봐도 맞았거나, 우연으로 보기 어려운 관계</span></div>

@@ -149,6 +149,9 @@ body{background:var(--bg);}
 .tool-card.disabled{border-top-color:var(--border-strong);}
 .tool-card.c6{--c:#1E8E5A;--cs:#E5F5EC;}
 :root[data-theme="dark"] .tool-card.c6{--c:#3FD495;--cs:#123328;}
+/* 11-25 시황 분석·지역 분석 카드(맨 앞 두 칸) */
+.tool-card.c7{--c:#C2410C;--cs:#FDEEE6;} .tool-card.c8{--c:#0B7285;--cs:#E3F4F7;}
+:root[data-theme="dark"] .tool-card.c7{--c:#F08C5A;--cs:#3A2418;} :root[data-theme="dark"] .tool-card.c8{--c:#4FC3D6;--cs:#14323A;}
 .footer{margin-top:34px;text-align:center;color:var(--ink-faint);font-size:12px;}
 [hidden]{display:none !important;}
 </style>
@@ -176,6 +179,12 @@ body{background:var(--bg);}
     </section>
     <h2 class="sec-title">도구 바로가기</h2>
     <div class="card-grid">
+      <a class="tool-card c7" href="market-analysis/index.html"><div class="ico">📊</div>
+        <h3>시황 분석</h3><p>지금 수도권 시장 한 줄 진단 — 전세 흐름·매수 부담과 과거에 검증된 규칙을 한 화면에서 봅니다.</p>
+        <span class="badge">바로가기</span><span class="go">→</span></a>
+      <a class="tool-card c8" href="market-analysis/지역분석.html"><div class="ico">📍</div>
+        <h3>지역 분석</h3><p>구·시별 저평가·매매·전세 신호를 지역마다 한눈에 봅니다.</p>
+        <span class="badge">바로가기</span><span class="go">→</span></a>
       <a class="tool-card c1" href="benchmark-calculator/벤치마크_배율_계산기.html"><div class="ico">📈</div>
         <h3>저평가 단지 계산기</h3><p>대장 단지 대비 매매·전세 배율로 이론적 성장가를 역산해 저평가·고평가 단지를 진단합니다.</p>
         <span class="badge">바로가기</span><span class="go">→</span></a>
