@@ -4100,11 +4100,12 @@ const RT21 = {"meta":{"src":"목록표_연결_v3_4_pub.json · 목록표_시계�
   function spLayout(){
     const de = document.documentElement, zo0 = zOv(), jp = document.getElementById('rtGsOv'), side = isSide(), zo = !!zo0 && !zo0.hidden, jo = zo && !!jp && !jp.hidden;
     de.classList.toggle('rt-sp', side); de.classList.toggle('rt-sp-z', side && zo); de.classList.toggle('rt-sp-j', side && jo);
-    if (!side) { document.body.style.paddingLeft = ''; return; }
+    if (!side) { document.body.style.paddingLeft = ''; de.classList.remove('rt-sp-tight'); return; }
     const zw = zo0 && zo0.classList.contains('rt-fold') ? 30 : SPW.z, jw = jp && jp.classList.contains('rt-fold') ? 30 : SPW.j;
     de.style.setProperty('--rt-zw', zw + 'px'); de.style.setProperty('--rt-jw', jw + 'px');
     const W = window.innerWidth, a = zo ? zw : 0, c = jo ? jw : 0, push = W - a - c >= 400 ? a + c : (W - a >= 400 ? a : 0);
     document.body.style.paddingLeft = push ? push + 'px' : '';
+    de.classList.toggle('rt-sp-tight', !!push && W - push < 1100);   // A92: 남은 폭이 표 최소 폭보다 좁으면 표를 줄이지 않고 옆으로 밀어 봄
   }
   (function spInit(){
     const ov = zOv(); if (!ov) return;
@@ -4190,6 +4191,8 @@ const RT21 = {"meta":{"src":"목록표_연결_v3_4_pub.json · 목록표_시계�
     + '.rt-gsest{font-size:11.5px;color:var(--ink-muted,#5B6670);}.rt-gstag{display:inline-block;margin-left:5px;padding:0 5px;border-radius:8px;font-size:10.5px;font-weight:400;background:var(--neutral-bg,#EEF1F4);color:var(--ink-faint,#8A949C);}'
     + '.rt-gssvg{width:100%;height:auto;}.rt-gsgl{stroke:var(--border,#E2E7EC);stroke-width:1;}.rt-gs0{stroke:var(--ink-muted,#5B6670);stroke-width:1.2;}.rt-gsax{font-size:10px;fill:var(--ink-muted,#5B6670);}.rt-gsln{fill:none;stroke:var(--info,#1E5FA8);stroke-width:2;}.rt-gsdot{fill:var(--warn,#C2410C);}.rt-gsdx{fill:none;stroke:var(--warn,#C2410C);stroke-width:1.5;}'
     + '.rt-gsleg{font-size:11px;color:var(--ink-muted,#5B6670);}.rt-gsk1,.rt-gsk2{display:inline-block;width:12px;height:3px;margin:0 4px 2px 0;vertical-align:middle;}.rt-gsk1{background:var(--warn,#C2410C);height:8px;width:8px;border-radius:50%;}.rt-gsk2{background:var(--info,#1E5FA8);margin-left:8px;}'
+    + 'html.rt-sp-tight .table-wrap{overflow:visible!important;max-width:none!important;}html.rt-sp-tight table.redev-table{min-width:1100px;}'
+    + 'html.rt-sp-tight table.redev-table td .badge,html.rt-sp-tight table.redev-table td .rt-lg,html.rt-sp-tight table.redev-table td .rt-ty{white-space:nowrap;}'   // A92: 배지 한 줄
     + '.rt-sprz,.rt-sptab,.rt-spstrip{display:none;}html.rt-spdrag,html.rt-spdrag *{user-select:none;cursor:col-resize!important;}'
     + 'html.rt-sp #modalOverlay[hidden]{display:none!important;}html.rt-sp-z #modalOverlay{position:fixed;left:0;top:0;bottom:0;right:auto;width:var(--rt-zw,560px);padding:0;background:none;display:block;z-index:10000;}'
     + 'html.rt-sp-z #modalBox{max-width:none;width:100%;height:100%;max-height:none;border-radius:0;box-shadow:2px 0 10px rgba(0,0,0,.12);border-right:1px solid var(--border,#E2E7EC);box-sizing:border-box;}'
