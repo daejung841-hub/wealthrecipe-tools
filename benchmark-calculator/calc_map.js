@@ -956,6 +956,7 @@
     cache.set(it.id, out); return out;
   }
   // 묶음 L89: 고른 평형(34·25)의 값 — 그 평형 칸이 없으면 null(지도에서 숨김). 우리 단지 진단하기의 그 평형과 같은 계산
+  function l133(){ try { return !!BUNDLES.L133; } catch (e) { return false; } }   // 묶음 L133(구현37): 경기·인천 사업성 줄(추정은 검증 중)
   function l131(){ try { return !!BUNDLES.L131; } catch (e) { return false; } }   // 묶음 L131(구현30): 추정 대표 평형 단지 '확인 중'
   function l130(){ try { return !!BUNDLES.L130; } catch (e) { return false; } }   // 묶음 L130(구현29): 추정 사업성 1122판 표시
   function l129(){ try { return !!BUNDLES.L129; } catch (e) { return false; } }   // 묶음 L129(구현28): 폰 25평 KB '-' · 목록표 링크 인증(함수 선언 — infoP가 먼저 불려도 됨)
@@ -2629,10 +2630,11 @@
   }
   // 묶음 L124(구현19·20·21): 1세대당 지을 수 있는 면적(분석 14번 최종 표 원문 51행, seed id 키, 순위는 한양 뺀 48곳) — 구현21부터 BUNDLES.L124B(기본 꺼짐)일 때만 — 재건축 탭 자료와 함께 받음, 못 받으면 줄만 빠짐
   const SY_URL_L124 = '지도자료_202611/saeopseong_l124_1118g17.json'; let SY124 = null, SY124ld = null;
+  const SY_URL_L133 = '지도자료_202611/saeopseong_l133_1125g31.json';   // 묶음 L133(구현37): 라이브 서울 자료 + 경기·인천 0.912판
   const SY_URL_L131 = '지도자료_202611/saeopseong_l131_1123g26.json';   // 묶음 L131(구현30): g25 자료 + 대표평형 17곳
   const SY_URL_L130 = '지도자료_202611/saeopseong_l130_1122g25.json';   // 묶음 L130(구현29): 사업성_화면용_최종_1122(원문 순위 = 맞춘 값)
   const SY_URL_L126 = '지도자료_202611/saeopseong_l126_1119g20.json';   // 묶음 L126(구현24): 분석16(원문+추정 217곳) 1세대당 일반분양 가능 면적
-  function syLoad124(){ if (!l124b() && !l126()) return Promise.resolve(null); if (!SY124ld) SY124ld = fetch(l126() ? (l130() ? (l131() ? SY_URL_L131 : SY_URL_L130) : SY_URL_L126) : SY_URL_L124).then(r => r.ok ? r.json() : null).then(j => (SY124 = j), () => { SY124ld = null; return null; }); return SY124ld; }
+  function syLoad124(){ if (!l124b() && !l126()) return Promise.resolve(null); if (!SY124ld) SY124ld = fetch(l126() ? (l130() ? (l131() ? (l133() ? SY_URL_L133 : SY_URL_L131) : SY_URL_L130) : SY_URL_L126) : SY_URL_L124).then(r => r.ok ? r.json() : null).then(j => (SY124 = j), () => { SY124ld = null; return null; }); return SY124ld; }
   function syRow124(id){
     if (!l124b() || !SY124 || !id || id[0] === '_' || !Object.prototype.hasOwnProperty.call(SY124, id)) return null;
     const s = SY124[id]; if (!s || s.칸A평 == null) return null;
@@ -2648,7 +2650,7 @@
     const s = SY124[id]; if (!s || s.평 == null || isNaN(Number(s.평))) return null;
     const v = Number(s.평), n1 = (x) => Number(x).toFixed(1), est = s.종류 === '추정', gong = s.종류 === '공람안';
     if (est && !syEst127()) return null;   // 묶음 L127: 추정 값은 화면에서 숨김(원문·공람안만)
-    const tg = gong ? '<span class="tg126">[공람안]</span> ' : est ? '<span class="tg126">[추정' + (l130() && (s.확인중 || (l131() && s.대표평형)) ? '(확인 중)' : '') + ']</span> ' : '';
+    const tg = gong ? '<span class="tg126">[공람안]</span> ' : est ? '<span class="tg126">[추정' + (l133() && s.검증중 ? '(검증 중)' : l130() && (s.확인중 || (l131() && s.대표평형)) ? '(확인 중)' : '') + ']</span> ' : '';
     let head;
     if (est && l130()) head = tg + '5단계 중 ' + (SY_STG_L126[s.단계] || '-') + '단계(' + esc(s.단계 || '') + ')';   // 묶음 L130: 추정은 구간만
     else if (v <= 0) head = tg + '조합원 몫만으로 부족 <small>(일반분양 여유 없음)</small>';
@@ -2661,13 +2663,17 @@
       l130() && s.확인중 ? '대지면적 확인 중(건축물대장 대지 — 일부 지번만 잡혔을 수 있음)' : '',
       l131() && s.대표평형 ? '기존 평균 전용 확인 중(대표 평형 사용)' : '',
       l130() && s.여지없음 ? '일반분양 여지 거의 없음' : '',
-      s.고시 ? (gong ? '공람안 · ' : '고시 ') + s.고시 : est ? '추정 근거: 대지면적·묶음 평균' + (s.묶음 ? '(' + s.묶음 + ')' : '') : gong ? '정비계획 공람안 기준(고시 전)' : '',
+      l133() && s.근거2 ? s.근거2 : '',
+      l133() && s.지역 && !est ? s.지역 + ' 원문(정비계획) 값 — 순위는 서울만' : '',
+      l133() && s.근거2 ? '' : s.고시 ? (gong ? '공람안 · ' : '고시 ') + s.고시 : est ? '추정 근거: 대지면적·묶음 평균' + (s.묶음 ? '(' + s.묶음 + ')' : '') : gong ? '정비계획 공람안 기준(고시 전)' : '',
       s.통합 ? '통합: ' + s.통합 : ''].filter(Boolean).join('\n');
-    return ['1세대당 일반분양 가능 면적', head + ' <span class="jg99-ti w124" tabindex="0" role="button" aria-label="1세대당 일반분양 가능 면적 근거" data-tip="' + esc(tip) + '">ⓘ</span>'];
+    return ['1세대당 일반분양 가능 면적', (l133() && (s.검증중 || s.지역) ? '<span style="white-space:normal">' + head + '</span>' : head) + ' <span class="jg99-ti w124" tabindex="0" role="button" aria-label="1세대당 일반분양 가능 면적 근거" data-tip="' + esc(tip) + '">ⓘ</span>'];
   }
   function jgLoad99c(){ if (!JG.ld) JG.ld = Promise.all([fetch(L99A_MAP.jgTab).then(r => r.ok ? r.json() : null).then(j => (JG.d = j), () => { JG.ld = null; return null; }), syLoad124().catch(() => null)]).then(a => a[0]); return JG.ld; }
   function jgHas99c(e){ return !!(e && e.상태 !== '숨김' && ((l111() && !l113() && e.연결해제) || e.지금단계 || Object.values(e.단계날짜 || {}).some(Boolean) || e.평균대지지분 || e.추정비례율 || e.계획세대수 || e.용적률 || e.선도지구 || e.세대구성 || e.시공사)); }
+  function syOnly133(it){ if (!l133() || !it || !it.id || it.id[0] === '_' || !SY124 || !Object.prototype.hasOwnProperty.call(SY124, it.id) || !SY124[it.id].지역) return false; const age = it.built ? new Date().getFullYear() - it.built : null; return age != null && age >= L99A_MAP.jgAge; }   // 묶음 L133
   function jgOk99c(it){
+    if (JG.d && it && !Object.prototype.hasOwnProperty.call(JG.d, it.id) && syOnly133(it)) return true;   // 묶음 L133: 경기·인천 사업성 값만 있는 단지
     if (!JG.d || !it || !Object.prototype.hasOwnProperty.call(JG.d, it.id) || it.id[0] === '_') return false;
     const age = it.built ? new Date().getFullYear() - it.built : null;
     return age != null && age >= L99A_MAP.jgAge && jgHas99c(JG.d[it.id]);
@@ -2689,6 +2695,13 @@
     return '<div class="jg99-gs">근거 고시 · ' + (items.length ? items.join(' · ') : '<span class="jg99-w">확인 중</span>') + '</div>';
   }
   function jgHtml99c(it, e){
+    if (l133() && e && e.$syOnly){   // 묶음 L133: 단계 자료 없이 사업성 줄만
+      const sy = syRow126(it.id);
+      return '<div class="jg99-h"><b>🏗 재건축 진행</b><button type="button" class="i99" aria-expanded="false" aria-label="재건축 자료 출처">ⓘ</button><button type="button" class="jg99-x">✕ 실거래로 돌아가기</button></div>'
+        + '<div class="jg99-b"><div class="jg99-now">지금 <b>재건축 단계 자료 없음</b></div>'
+        + '<div class="jg99-n">이 단지는 재건축 진행 자료(단계·세대)를 아직 모으지 못했어요. 아래 면적은 계획 용적률로 어림한 값이에요.</div>'
+        + (sy ? '<dl class="jg99-r"><div><dt>' + sy[0] + '</dt><dd>' + sy[1] + '</dd></div></dl>' : '') + '<div class="jg99-src" hidden>1세대당 일반분양 가능 면적: 경기·인천 대지 비율 0.912판(잠정) — 추정은 검증 중</div></div>';
+    }
     if (l111() && !l113() && e.연결해제){   // 묶음 L111: 연결을 끊은 단지 — 단계·세대 줄 없이 '정보몽땅 등록 사업장 없음'만
       const z = e.연결해제;
       return '<div class="jg99-h"><b>🏗 재건축 진행</b><button type="button" class="i99" aria-expanded="false" aria-label="재건축 자료 출처">ⓘ</button><button type="button" class="jg99-x">✕ 실거래로 돌아가기</button></div>'
@@ -2738,13 +2751,13 @@
   function openJg99c(){
     const host = panel.querySelector('.cm84-jg99'), it = itemsById.get(panel.dataset.id); if (!host || !it || !JG.d) return false;
     if (panel.classList.contains('tws94')) closeTwin94(true);
-    host.innerHTML = jgHtml99c(it, JG.d[it.id]); host.hidden = false; panel.classList.add('jgs99'); JG.open = true;
+    host.innerHTML = jgHtml99c(it, JG.d[it.id] || (syOnly133(it) ? { $syOnly: 1 } : JG.d[it.id])); host.hidden = false; panel.classList.add('jgs99'); JG.open = true;
     host.querySelector('.jg99-x').onclick = () => closeJg99c();
     if (!window.__jgTi103){ window.__jgTi103 = 1; document.addEventListener('click', (e) => { const t = e.target.closest && e.target.closest('.jg99-ti'); document.querySelectorAll('.jg99-ti.open').forEach(x => { if (x !== t) x.classList.remove('open'); }); if (t) t.classList.toggle('open'); }); }   // 묶음 L103: 임대 근거 ⓘ — PC 올리면·폰 누르면 열림, 바깥 누르면 닫힘
     host.querySelector('.i99').onclick = () => { const s = host.querySelector('.jg99-src'), o = s.hidden; s.hidden = !o; host.querySelector('.i99').setAttribute('aria-expanded', String(o)); };
     const b = panel.querySelector('.jg99b'); if (b) b.setAttribute('aria-pressed', 'true');
     if (window.innerWidth < 768 && panel.dataset.t91 !== 'jg'){ panel.dataset.t91 = 'jg'; panel.querySelectorAll('[data-t91]').forEach(x => x.setAttribute('aria-selected', String(x.dataset.t91 === 'jg'))); }
-    window.CALC_MAP_L84.jg99c = { open: true, id: it.id, cur: jgCur99c(JG.d[it.id])[0] }; setTimeout(resize, 30); return true;
+    window.CALC_MAP_L84.jg99c = { open: true, id: it.id, cur: jgCur99c(JG.d[it.id] || {})[0] }; setTimeout(resize, 30); return true;
   }
   function closeJg99c(keepTab){
     const host = panel.querySelector('.cm84-jg99'); panel.classList.remove('jgs99'); JG.open = false;
@@ -3919,7 +3932,7 @@
     NV = naver.maps;
     map = new NV.Map(mapEl, { center: new NV.LatLng(37.5665, 126.978), zoom: 13, minZoom: 8, maxZoom: 19, zoomControl: true,
       zoomControlOptions: { position: (l118() && window.innerWidth < 768) ? NV.Position.RIGHT_BOTTOM : l89() ? NV.Position.RIGHT_CENTER : NV.Position.LEFT_CENTER, style: NV.ZoomControlStyle.SMALL }, scaleControl: false, mapDataControl: false });   // 묶음 L89: 확대·축소 버튼은 재개발 지도처럼 오른쪽 가운데
-    NV.Event.addListener(map, 'idle', () => { clearTimeout(lt); lt = setTimeout(drawAll, 60); if (l98b()) hint98b(); });
+    window.MAP_L140 = map;   /* 구현39 ⑤ 일자리 층 */ NV.Event.addListener(map, 'idle', () => { clearTimeout(lt); lt = setTimeout(drawAll, 60); if (l98b()) hint98b(); });
     if (l98b()) NV.Event.addListener(map, 'click', (e) => { if (msTake98b(e)) return; if (SV98.on && e && e.coord) svAt98b(e.coord); });   // 묶음 L98B: 거리뷰 길 위를 누르면 그 자리 거리뷰
     if (l99b()) mapWire99b();   // 묶음 L99B: 개발 호재 그리기·누르기, 경사도 깔기·툴팁
     if (l99a()) mapWire99a();   // 묶음 L99A: 경계 이름 말풍선
