@@ -10,7 +10,7 @@
  * 목록표(redevelopment-list)·재개발 지도(redevelopment-map)는 그 창 담당이라 넣지 않았다(지금처럼 첫 화면으로만).
  */
 var SITE_AUTH_KEY = 'siteAuthed_v2';   // 11-25 시장 배포 1차: 저장 이름을 바꿔 모든 사람이 다시 로그인
-var SITE_RETURN_DIRS = ['benchmark-calculator/', 'price-correction/', 'rate-simulator/', 'imjang/'];
+var SITE_RETURN_DIRS = ['benchmark-calculator/', 'price-correction/', 'rate-simulator/', 'imjang/', 'market-analysis/'];   // 11-26 시장 45: 시황 분석·지역 분석도 로그인 뒤 원래 화면으로
 
 function isSiteAuthed(){
   try { return sessionStorage.getItem(SITE_AUTH_KEY) === '1'; } catch (e) { return false; }
