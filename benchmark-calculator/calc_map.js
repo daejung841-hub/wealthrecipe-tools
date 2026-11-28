@@ -938,7 +938,9 @@
   }
   const infoOf = (it) => info(it);   // drawCx 안에서는 info가 '정보 줄 보이기' 변수라 별칭으로 부름
   // 한 단지의 말풍선 값(34평, 34평 시세가 없으면 25평) — 우리 단지 진단하기와 같은 계산(묶음 L86: 가벼운 파일이면 미리 계산한 값 그대로)
+  function nopy146(it){ try { return typeof nopyIdL146 === 'function' && nopyIdL146(it.id); } catch (e) { return false; } }   // 묶음 L146(구현41 ⑤)
   function info(it){
+    if (it.light && nopy146(it) && it.light.p === 34) return it.l25 || null;   // 묶음 L146: 34평형 없는 단지는 25평 값(없으면 숨김)
     if (it.light) return it.light;
     if (cache.has(it.id)) return cache.get(it.id);
     let out = null;
@@ -961,6 +963,7 @@
   function l130(){ try { return !!BUNDLES.L130; } catch (e) { return false; } }   // 묶음 L130(구현29): 추정 사업성 1122판 표시
   function l129(){ try { return !!BUNDLES.L129; } catch (e) { return false; } }   // 묶음 L129(구현28): 폰 25평 KB '-' · 목록표 링크 인증(함수 선언 — infoP가 먼저 불려도 됨)
   function infoP(it, p){
+    if (p === 34 && nopy146(it)) return null;   // 묶음 L146
     if (it.light) return it.light.p === p ? it.light : (p === 25 ? it.l25 : null);
     const k = it.id + '|' + p; if (cache.has(k)) return cache.get(k);
     let out = null;
