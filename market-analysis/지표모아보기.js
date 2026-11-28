@@ -42,7 +42,7 @@ const IND = [
   {k:'sup', g:'공급', name:'입주 물량', unit:'호', int:true, chg:'pct', avg:true, scope:'서울·경기·인천·수도권(시도 단위)',
    tip:'아파트 입주(준공) 물량, 최근 12개월 합(호). 많을수록 새 집이 많이 나와 전세·매매값을 누르는 쪽입니다. 실적 달까지만(추정 빼고). 평균 점선 = 그 지역 자료 기간 평균.',
    get:c => supS(c)},
-  {k:'vol', g:'거래', name:'매매 거래량', unit:'건', int:true, chg:'pct', avg:true, ma3:true, scope:'수도권·시도·구·시',
+  {k:'vol', g:'거래', name:'매매 거래량', unit:'건', int:true, chg:'pct', avg:true, ma3:true, bars:true, scope:'수도권·시도·구·시',
    tip:'한 달 아파트 매매 거래 건수(국토부 실거래, 해제 신고 뺌). 늘면 사려는 사람이 움직이기 시작했다는 뜻입니다. 아직 신고가 덜 들어온 최근 2개월은 뺐습니다. 회색 잔 점선 = 그 지역 최근 3개월 평균(그 달과 앞 2개월, 그리는 선만).',
    get:c => volS(c)},
   {k:'body', g:'저평가', name:'저평가 지수(체력)', unit:'%', chg:'pt', avg:true, ref:{v:5, lab:'+5%'}, now:true, scope:'수도권·시도·구·시',
@@ -263,14 +263,16 @@ function rdHtml(I, col, avgOn, lo, hi){
   const ln = (d, w, da, op) => `<path d="${d}" fill="none" stroke="${col}" stroke-width="${w}"${da ? ` stroke-dasharray="${da}"` : ''}${op ? ` opacity="${op}"` : ''}/>`;
   const base = zero ? '<path d="M2,15 L44,15" stroke="#61707D" stroke-width="1.5"/>' : ln('M2,15 L44,15', 1.6, '5 4', '.75');
   const dot = c => `<circle cx="23" cy="15" r="4" fill="#fff" stroke="${c}" stroke-width="2"/>`;
-  const rc = (up, t, s) => `<div class="rc" role="listitem">${V(base + ln(up ? 'M2,22 C14,20 26,15 44,6' : 'M2,8 C14,10 26,15 44,24', 2.4) + dot(up ? '#C2410C' : '#1E8E5A'))}<div><b class="${up ? 'up' : 'dn'}">${up ? '▲' : '▼'} ${esc(t)}</b>${esc(s)}</div></div>`;
+  const one = typeof RD47_ONE !== 'undefined' && RD47_ONE;   // 시장 47(5-1): 화면 쪽 상수를 따름(한 줄 카드)
+  const rc = (up, t, s) => `<div class="rc" role="listitem"${one ? ` title="${esc(s)}"` : ''}>${V(base + ln(up ? 'M2,22 C14,20 26,15 44,6' : 'M2,8 C14,10 26,15 44,24', 2.4) + dot(up ? '#C2410C' : '#1E8E5A'))}<div><b class="${up ? 'up' : 'dn'}">${up ? '▲' : '▼'} ${esc(t)}</b>${one ? '' : esc(s)}</div></div>`;
   return `<div class="rdk" role="list" aria-label="${esc(I.name)} 그래프 읽는 법">${rc(true, R[0], R[1])}${rc(false, R[2], R[3])}</div>`; }
 const lastV = p => { for (let i = p.length - 1; i >= 0; i--) if (p[i] != null) return p[i]; return null; };
-const legend = (ser, avgOn, I) => `<div class="mo-lg">${ser.map(s => `<span><i style="background:${s.col}"></i>${esc(s.name)}</span>`).join('')}${avgOn ? '<span class="dl"><i></i>지역별 평균(점선)</span>' : ''}${I && I.ma3 ? '<span class="moxMa"><i></i>3개월 평균(회색 잔 점선)</span>' : ''}${I && I.ref ? `<span class="moxMa"><i></i>${esc(I.ref.lab)} 기준선(회색 점선)</span>` : ''}</div>`;
+const legend = (ser, avgOn, I) => `<div class="mo-lg">${ser.map(s => `<span><i style="background:${s.col}"></i>${esc(s.name)}</span>`).join('')}${avgOn ? '<span class="dl"><i></i>지역별 평균(점선)</span>' : ''}${I && I.bars ? '<span class="moxMa">막대 = 한 달 거래량 · 가는 연두 선 = 3개월 평균 · 진한 초록 선 = 12개월 평균 · 초록 면 = 3개월 평균이 12개월 평균 위</span>' : I && I.ma3 ? '<span class="moxMa"><i></i>3개월 평균(회색 잔 점선)</span>' : ''}${I && I.ref ? `<span class="moxMa"><i></i>${esc(I.ref.lab)} 기준선(회색 점선)</span>` : ''}</div>`;
 // 시장 45(8번): 기준선 색 = 시황 분석 100선과 같은 회색(#9AA8B4, 점선 3 3) · 글자 #61707D. 계산 바뀜 없음(그리는 선만)
 const REFC = '#9AA8B4', REFT = '#61707D';
 // 3개월 평균선: 그 달과 앞 2개월이 모두 있는 달만(원래 자료 s.o에서 읽어 기간 첫 두 달도 이어짐)
-const ma3Pts = (s, i0, N) => { const out = []; for (let i = 0; i < N; i++){ const a = [0, 1, 2].map(k => s.o[String(mT(i0 + i - k))]); out.push(a.every(v => v != null && isFinite(v)) ? (+a[0] + +a[1] + +a[2]) / 3 : null); } return out; };
+const maPts = (s, i0, N, n) => { const out = []; for (let i = 0; i < N; i++){ const a = Array.from({length:n}, (_, k) => s.o[String(mT(i0 + i - k))]); out.push(a.every(v => v != null && isFinite(v)) ? a.reduce((x, y) => x + +y, 0) / n : null); } return out; };
+const ma3Pts = (s, i0, N) => maPts(s, i0, N, 3);
 function chart(ser, o){ const {W, H, lo, hi, i0, N, I, avgOn, mob, small} = o;
   const ml = small ? 34 : mob ? 42 : 52, mr = small ? 6 : mob ? 8 : 14, mt = 8, mb = small ? 18 : 24, pw = W - ml - mr, ph = H - mt - mb;
   const X = i => ml + (N <= 1 ? pw / 2 : i / (N - 1) * pw), Y = v => mt + (1 - (v - lo) / (hi - lo)) * ph;
@@ -282,6 +284,15 @@ function chart(ser, o){ const {W, H, lo, hi, i0, N, I, avgOn, mob, small} = o;
   const y0 = Math.floor(mT(i0) / 100), y1 = Math.floor(mT(i0 + N - 1) / 100), ys = Math.max(1, Math.ceil((y1 - y0 + 1) / (small ? 3 : mob ? 4 : 8)));
   for (let y = y0; y <= y1; y++){ if ((y - y0) % ys) continue; const i = y * 12 - i0; if (i < 0 || i >= N) continue; g += `<text x="${X(i).toFixed(1)}" y="${H - 6}" text-anchor="middle" class="mo-ax">${small ? "'" + String(y).slice(2) : y}</text>`; }
   let lines = '';
+  // 시장 47(3): 거래량(지역 하나씩 그릴 때) = 지역 분석과 같은 모양 — 1개월 막대 + 3개월·12개월 이평 + 3개월 > 12개월 구간만 두 선 사이 초록 면
+  if (I.bars && ser.length === 1 && ser[0].o){ const s = ser[0], m3 = maPts(s, i0, N, 3), m12 = maPts(s, i0, N, 12), bw = Math.max(1, pw / Math.max(1, N) * .72), B0 = mt + ph;
+    s.pts.forEach((v, i) => { if (v == null) return; const y = Math.max(mt, Y(v)); lines += `<rect x="${(X(i) - bw / 2).toFixed(1)}" y="${y.toFixed(1)}" width="${bw.toFixed(1)}" height="${Math.max(0, B0 - y).toFixed(1)}" fill="${s.col}" opacity=".38" class="moxBar"/>`; });
+    let run = []; const flush = () => { if (run.length > 1) lines += `<path d="M${run.map(i => X(i).toFixed(1) + ',' + Y(m3[i]).toFixed(1)).join('L')}L${run.slice().reverse().map(i => X(i).toFixed(1) + ',' + Y(m12[i]).toFixed(1)).join('L')}Z" fill="#2f9e44" opacity=".28" class="moxUf"/>`; run = []; };
+    m3.forEach((v, i) => { const m = m12[i]; if (v != null && m != null && v > m){ if (!run.length && i && m3[i - 1] != null && m12[i - 1] != null) run.push(i - 1); run.push(i); } else { if (run.length && v != null && m != null) run.push(i); flush(); } }); flush();
+    if (avgOn) lines += `<line x1="${ml}" x2="${W - mr}" y1="${Y(s.mean).toFixed(1)}" y2="${Y(s.mean).toFixed(1)}" stroke="#343a40" stroke-width="1.3" stroke-dasharray="5 4"/>`;
+    const pl = (a, col, w) => { let d = '', pen = false; a.forEach((v, i) => { if (v == null){ pen = false; return; } d += (pen ? 'L' : 'M') + X(i).toFixed(1) + ' ' + Y(v).toFixed(1); pen = true; }); return d ? `<path d="${d}" fill="none" stroke="${col}" stroke-width="${w}" stroke-linejoin="round"/>` : ''; };
+    lines += pl(m12, '#0B5A36', small ? 2 : 2.4) + pl(m3, '#5c940d', small ? 1.3 : 1.6);
+    return `<svg class="mo-svg" id="${o.id}" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" data-ml="${ml}" data-pw="${pw}" data-n="${N}" data-mt="${mt}" data-ph="${ph}" data-lo="${lo}" data-hi="${hi}" role="img" aria-label="${esc(I.name)} ${esc(s.name)}">${g}${lines}<line class="mo-xh" y1="${mt}" y2="${mt + ph}" style="display:none"/><g class="mo-dots"></g></svg>`; }
   ser.forEach(s => { let d = '', pen = false; s.pts.forEach((v, i) => { if (v == null){ pen = false; return; } d += (pen ? 'L' : 'M') + X(i).toFixed(1) + ' ' + Y(v).toFixed(1); pen = true; });
     if (avgOn) lines += `<line x1="${ml}" x2="${W - mr}" y1="${Y(s.mean).toFixed(1)}" y2="${Y(s.mean).toFixed(1)}" stroke="${s.col}" stroke-width="1.3" stroke-dasharray="5 4" opacity=".75"/>`;
     lines += `<path d="${d}" fill="none" stroke="${s.col}" stroke-width="${small ? 1.8 : 2}" stroke-linejoin="round"/>`;

@@ -636,7 +636,9 @@ const RDP = {up:'M2,22 C14,20 26,15 44,6', dn:'M2,8 C14,10 26,15 44,24', flat:'M
 const rdLn = (d, c, o = {}) => `<path d="${RDP[d] || d}" fill="none" stroke="${c}" stroke-width="${o.w || 2.4}"${o.da ? ` stroke-dasharray="${o.da}"` : ''}/>`;
 const rdDot = (c, x = 23, y = 15) => `<circle cx="${x}" cy="${y}" r="4" fill="#fff" stroke="${c}" stroke-width="2"/>`;
 const rdZone = z => `<rect x="23" y="2" width="21" height="26" fill="${z === 'g' ? 'var(--green)' : 'var(--gray)'}"/>`;
-const RDC = cards => `<div class="rdk" role="list" aria-label="그래프 읽는 법">${cards.map(c => `<div class="rc" role="listitem">${c.ico}<div><b class="${c.cls}">${c.t}</b>${c.s}</div></div>`).join('')}</div>`;
+// 시장 47(5-1): 읽는 법 카드 1장 = 그림 + 한 줄(제목만, 설명 줄은 마우스를 올리면 보임). false로 바꾸면 46판처럼 두 줄
+const RD47_ONE = true;
+const RDC = cards => `<div class="rdk${RD47_ONE ? ' rd47' : ''}" role="list" aria-label="그래프 읽는 법">${cards.map(c => `<div class="rc" role="listitem"${RD47_ONE && c.s ? ` title="${String(c.s).replace(/<[^>]*>/g, '').replace(/"/g, '&quot;')}"` : ''}>${c.ico}<div><b class="${c.cls}">${c.t}</b>${RD47_ONE ? '' : c.s}</div></div>`).join('')}</div>`;
 // 저울 그림(전세 vs 월세 · 사서 세 놓으면): 위 칸 = 금리 선 vs KB 전환율 선 + 회색·초록 배경, 아래 칸 기준선(100·0)
 function rdFig(key){ const K = ind('kb'), R = ind(key === 'jw' ? 'jl' : 'mo'), kl = rdLn('flat', K.c), rl = d => rdLn(d, R.c, {w:2, da:R.ls}), rn = key === 'jw' ? '금리' : '주담대 금리';
   const base = (k, up) => RDV(rdLn('flat', '#93A1AC', {w:1.5}) + rdLn(up ? 'up' : 'dn', ind(k).c, {w:2}) + rdDot(up ? '#C2410C' : '#1E8E5A'));
@@ -647,14 +649,14 @@ function rdFig(key){ const K = ind('kb'), R = ind(key === 'jw' ? 'jl' : 'mo'), k
     key === 'jw' ? {ico:base('sup', true), cls:'up', t:'▲ 전세수급지수가 100 위', s:'전세 구하기 어려움(공급 부족) · 100 아래면 전세가 남음'}
       : {ico:base('by', true), cls:'up', t:'▲ 매매가 전년비가 0 위', s:'1년 전보다 오름 · 0 아래면 1년 전보다 내림'}]); }
 // 겹친 그림 ①(금리 주황 · 수급 남색, 오른쪽 축 뒤집음)·검증 카드 ① 작은 그림
-const rdOv1 = () => RDC([{ico:RDV(rdLn('M2,25 C16,24 28,17 44,10', OV1_SUP_C, {w:2.2}) + rdLn('up', OV1_RATE_C, {w:2.2})), cls:'up', t:'▲ 주황·남색이 같이 오름 → 금리 ↑ · 전세 수급 ↓',
+const rdOv1 = () => RDC([{ico:RDV(rdLn('M2,25 C16,24 28,17 44,10', OV1_SUP_C, {w:2.2}) + rdLn('up', OV1_RATE_C, {w:2.2})), cls:'up', t:'▲ 둘이 같이 오름 → 금리↑ 수급↓',
     s:'남색(수급) 축은 위아래를 뒤집어 그림 — 남색이 오르면 수급 지수가 내려간 것'},
-  {ico:RDV(rdLn('M2,5 C16,6 28,13 44,20', OV1_SUP_C, {w:2.2}) + rdLn('dn', OV1_RATE_C, {w:2.2})), cls:'dn', t:'▼ 주황·남색이 같이 내림 → 금리 ↓ · 전세 수급 ↑',
+  {ico:RDV(rdLn('M2,5 C16,6 28,13 44,20', OV1_SUP_C, {w:2.2}) + rdLn('dn', OV1_RATE_C, {w:2.2})), cls:'dn', t:'▼ 둘이 같이 내림 → 금리↓ 수급↑',
     s:'1~2개월 뒤 전세 구하기가 어려워지는 쪽(전세를 받침)'}]);
 // 겹친 그림 ②(전망 지수 파랑/보라 → 약 3개월 뒤 선도단지 주황)
-const rdOv2 = (ac, an) => RDC([{ico:RDV(rdLn('M2,26 L14,26 C22,25 28,10 36,9 L44,9', '#e67700', {w:2.2}) + rdLn('M2,24 C10,23 16,8 24,7 L44,7', ac, {w:2.2})), cls:'up', t:`▲ 전망 지수(${an})가 먼저 오름 → 약 3개월 뒤 선도단지(주황)도 오르는 쪽`,
+const rdOv2 = (ac, an) => RDC([{ico:RDV(rdLn('M2,26 L14,26 C22,25 28,10 36,9 L44,9', '#e67700', {w:2.2}) + rdLn('M2,24 C10,23 16,8 24,7 L44,7', ac, {w:2.2})), cls:'up', t:`▲ ${an} 먼저 오름 → 3개월 뒤 주황도↑`,
     s:'[시차 맞춰 겹쳐 보기]를 누르면 두 선이 겹쳐 보임'},
-  {ico:RDV(rdLn('M2,4 L14,4 C22,5 28,20 36,21 L44,21', '#e67700', {w:2.2}) + rdLn('M2,6 C10,7 16,22 24,23 L44,23', ac, {w:2.2})), cls:'dn', t:`▼ 전망 지수(${an})가 먼저 내림 → 약 3개월 뒤 선도단지도 내리는 쪽`,
+  {ico:RDV(rdLn('M2,4 L14,4 C22,5 28,20 36,21 L44,21', '#e67700', {w:2.2}) + rdLn('M2,6 C10,7 16,22 24,23 L44,23', ac, {w:2.2})), cls:'dn', t:`▼ ${an} 먼저 내림 → 3개월 뒤 주황도↓`,
     s:'2021년 이후 새 자료로 다시 봐도 같은 쪽으로 움직였음'}]);
 // 시차별 막대(띠 = 우연 기준선 안, 주황 막대 = 규칙에 쓴 시차) — neg = 음(−) 쪽 관계
 const rdLag = neg => { const bar = (x, out, c) => { const h = out ? 12 : 4; return `<rect x="${x}" y="${neg ? 15 : 15 - h}" width="8" height="${h}" rx="1.5" fill="${c}"/>`; };
@@ -662,10 +664,10 @@ const rdLag = neg => { const bar = (x, out, c) => { const h = out ? 12 : 4; retu
   return RDC([{ico:RDV(band + bar(8, true, '#ff8a5b') + bar(28, false, '#5a7fc4')), cls:'up', t:`${neg ? '▼' : '▲'} 막대가 띠 밖까지 → 우연으로 보기 어려움`,
       s:`주황 막대 = 규칙에 쓴 시차 · ${neg ? '아래(−) = 반대로 움직임' : '위(+) = 같은 쪽으로 움직임'}`},
     {ico:RDV(band + bar(8, false, '#5a7fc4') + bar(28, false, '#5a7fc4')), cls:'gr', t:'막대가 띠 안 → 우연으로도 나올 크기', s:'짙은 띠 = 우연 기준선 안 · 그 시차는 뚜렷하지 않음'}]); };
-// 가격/M2 그림(실선 = 집값 ÷ 풀린 돈, 점선 = 평소 기울기 선)
+// 가격/M2 그림(실선 = 풀린 돈 대비 집값 비중, 점선 = 40년 내려가는 추세선)
 const rdM2 = () => { const tr = rdLn('M2,8 L44,22', '#8796A3', {w:1.5, da:'5 4'});
-  return RDC([{ico:RDV(tr + rdLn('M2,10 C14,10 30,9 44,12', '#56636F', {w:1.6}) + '<circle cx="42" cy="12" r="3" fill="var(--warm)"/>'), cls:'up', t:'▲ 실선이 점선(평소 기울기 선) 위 → 평소 흐름보다 비싼 편', s:'규칙: 1~3년 뒤 서울 선도단지 상승이 약했음'},
-    {ico:RDV(tr + rdLn('M2,12 C14,20 30,26 44,28', '#56636F', {w:1.6}) + '<circle cx="42" cy="27.5" r="2.5" fill="var(--warm)"/>'), cls:'dn', t:'▼ 실선이 점선 아래 → 평소 흐름보다 싼 편', s:'반대로 움직이는 관계라 1~3년 뒤 상승이 컸던 쪽'}]); };
+  return RDC([{ico:RDV(tr + rdLn('M2,10 C14,10 30,9 44,12', '#56636F', {w:1.6}) + '<circle cx="42" cy="12" r="3" fill="var(--warm)"/>'), cls:'up', t:'▲ 실선이 추세선 위 → 비싼 편', s:'규칙: 1~3년 뒤 서울 선도단지 상승이 약했음'},
+    {ico:RDV(tr + rdLn('M2,12 C14,20 30,26 44,28', '#56636F', {w:1.6}) + '<circle cx="42" cy="27.5" r="2.5" fill="var(--warm)"/>'), cls:'dn', t:'▼ 실선이 추세선 아래 → 싼 편', s:'반대로 움직이는 관계라 1~3년 뒤 상승이 컸던 쪽'}]); };
 // 검증 카드 ② 작은 그림(매매 전망 지수 파랑 · 점선 100)
 const rdOut = () => { const b = rdLn('flat', '#9AA8B4', {w:1.5, da:'3 3'});
   return RDC([{ico:RDV(b + rdLn('up', '#1f5fd6', {w:2})), cls:'up', t:'▲ 파랑이 점선(100) 위', s:'오를 거라는 응답이 더 많음 · 몇 달 연속 오르면 약 3개월 뒤 선도단지도 오르는 쪽'},
@@ -709,12 +711,19 @@ function spark(lines, base){ const W = 200, H = 46, all = lines.flatMap(l => l.v
     const j = l.v.length - 1; if (l.v[j] != null) o += `<circle cx="${X(j)}" cy="${Y(l.v[j], l)}" r="3" fill="${l.c}"/>`; });
   return o + '</svg>'; }
 const lastN = (arr, n) => arr.slice(Math.max(0, arr.length - n));
-function outlook12(){ if (!OUT32) return null; const ks = Object.keys(OUT32).map(Number).sort((a, b) => a - b).filter(t => num(OUT32[t]['매매가격전망지수(서울)']) != null);
-  const k = lastN(ks, 12); return {t:k, v:k.map(t => num(OUT32[t]['매매가격전망지수(서울)']))}; }
+// 시장 49(3): 경기·인천 탭이면 그 지역 KB 매매전망(자료\KB공식·26, data\전망_경기인천_시장49.json)으로 같은 규칙 — OUTLOOK49_GI = false면 원래대로(서울만)
+const OUTLOOK49_GI = true; let OUTGI = null;
+const OGI = () => OUTLOOK49_GI && OUTGI && OUTGI[region] ? region : null;
+const OCOL = (j = 0) => { const g = OGI(); return g ? (j ? '전세가격전망지수(' : '매매가격전망지수(') + g + ')' : (j ? '전세가격전망지수(서울)' : '매매가격전망지수(서울)'); };
+function outlook12(){ if (!OUT32) return null; const ks = Object.keys(OUT32).map(Number).sort((a, b) => a - b).filter(t => num(OUT32[t][OCOL()]) != null);
+  const k = lastN(ks, 12); return {t:k, v:k.map(t => num(OUT32[t][OCOL()]))}; }
+// 경기·인천: 최근 4개월 [매매, 전세] → SIG2와 같은 모양
+function sig2GI(){ const g = OGI(); if (!g || !OUT32) return null; const ks = Object.keys(OUT32).map(Number).sort((a, b) => a - b).filter(t => num(OUT32[t][OCOL()]) != null && num(OUT32[t][OCOL(1)]) != null).slice(-4);
+  return ks.length === 4 ? {ym:ks.map(t => fmtYM(t)), m:ks.map(t => num(OUT32[t][OCOL()])), j:ks.map(t => num(OUT32[t][OCOL(1)]))} : null; }
 // 시장 43(5번): 매매 전망 지수 풀이 — 화면이 읽은 전망 지수 전체 기간 안의 지금 위치 + 최근 3개월 방향(새 자료 없음)
 let OUT_D = 1.0;   // 잠정: 3개월 전보다 ±1.0 안이면 "비슷" — 시장 45: data\시황_기준값.json 값을 씀(이 값은 파일을 못 읽을 때 예비)
-function outlookNote(){ if (!OUT32) return null; const ks = Object.keys(OUT32).map(Number).sort((a, b) => a - b).filter(t => num(OUT32[t]['매매가격전망지수(서울)']) != null);
-  if (ks.length < 4) return null; const v = ks.map(t => num(OUT32[t]['매매가격전망지수(서울)'])), n = v.length, now = v[n - 1];
+function outlookNote(){ if (!OUT32) return null; const ks = Object.keys(OUT32).map(Number).sort((a, b) => a - b).filter(t => num(OUT32[t][OCOL()]) != null);
+  if (ks.length < 4) return null; const v = ks.map(t => num(OUT32[t][OCOL()])), n = v.length, now = v[n - 1];
   const p = (v.filter(x => x < now).length + v.filter(x => x === now).length / 2) / n * 100, d3 = now - v[n - 4];
   const yrs = Math.round(n / 12), pos = p >= 50 ? `위쪽 ${Math.max(1, Math.round(100 - p))}%` : `아래쪽 ${Math.max(1, Math.round(p))}%`;
   const dir = d3 >= OUT_D ? '오르는 중' : d3 <= -OUT_D ? '내리는 중' : '비슷';
@@ -1157,8 +1166,14 @@ function renderVerdict(){
 // 시장 45: M11·M11L·SIG2·OUT_D는 data\시황_기준값.json(값마다 출처·기준 달)에서 읽어 덮어씀. 아래 적힌 값은 파일을 못 읽을 때 쓰는 예비(파일과 같은 값).
 // 시장 46(A1): 두 해석을 묶는 결론 한 줄 — 실제 값으로 싼/비싼 쪽과 정도를 고름(평소 흐름 기준 상위 10% 안이면 '꽤', 그 밖 '조금')
 const M2CON = () => { const rc = M11.rawP <= 50, te = M11.tr >= 0, top = te ? 100 - M11.trP : M11.trP, deg = top <= 10 ? '꽤' : '조금';
-  return rc === te ? `옛날 평균보다는 ${rc ? '싸' : '비싸'} 보이지만, 돈이 계속 풀리는 걸 감안하면 오히려 ${deg} ${te ? '비싼' : '싼'} 편`
-    : `옛날 평균과 비교해도, 돈이 계속 풀리는 걸 감안해도 ${te ? '비싼' : '싼'} 편`; };
+  return rc === te ? `평균만 보면 ${rc ? '싸' : '비싸'} 보이지만, 추세를 감안하면 ${deg} ${te ? '비싼' : '싼'} 편`
+    : `평균으로 봐도, 추세를 감안해도 ${te ? '비싼' : '싼'} 편`; };
+// 시장 47(1): M2 두 문장 틀(값에 따라 낮은/높은·싼/비싼·하지만 여부가 바뀜)
+const M2P1 = () => M11.rawP <= 50 ? '하위 ' + M11.rawP : '상위 ' + (100 - M11.rawP).toFixed(1);
+const M2P2 = () => M11.trP >= 50 ? '상위 ' + (100 - M11.trP).toFixed(1) : '하위 ' + M11.trP;
+const M2T1 = () => `풀린 돈에 비해 집값 비중은 40년 평균보다 <b>${M11.rawP <= 50 ? '낮은' : '높은'} 편</b>이에요(${M2P1()}%).`;
+const M2T2 = () => { const rc = M11.rawP <= 50, te = M11.tr >= 0;
+  return `${rc === te ? '하지만 ' : ''}이 비중은 돈이 집값보다 빨리 늘어 40년째 꾸준히 내려가는 중이라, 그 추세에 비하면 ${rc === te ? '오히려 ' : ''}<b>${te ? '비싼' : '싼'} 편</b>이에요(${M2P2()}%).`; };
 let M11 = {t:'2026-09', raw:0.966, rawP:7.5, tr:58.8, trP:98.7, ld:'−0.79~−0.81', ldP:'0.00~0.03', ldIn:'0.07', ldOut:'−0.72~−0.91', jrIn:'+0.64', jrOut:'−0.48'};
 // KB 2026-10 엑셀(자료\KB공식\25_매매전망.csv · 26_전세전망.csv) 서울 최근 4개월. 월간 갱신 때 자동으로 바뀌지 않음.
 // 시장 43(12번): 같은 연구 파일(자료\연구\시장11_가격수준_월별.csv)의 ① 가격/M2 — 해마다 1월 값의 자연로그(1986~2026) + 2026-09, 새 계산 없음.
@@ -1168,7 +1183,7 @@ function m2Fig(){ const W = 300, H = 100, L = 6, R = 50, T = 8, B = 16, x0 = 198
   const X = x => L + (W - L - R) * (x - x0) / (x1 - x0), Y = v => T + (H - T - B) * (1 - (v - lo) / (hi - lo));
   const pts = M11L.v.map((v, i) => `${X(M11L.y0 + i).toFixed(1)},${Y(v).toFixed(1)}`).concat(`${X(M11L.now.x).toFixed(1)},${Y(M11L.now.v).toFixed(1)}`);
   const [a, b] = M11L.tr, nx = X(M11L.now.x), ny = Y(M11L.now.v), ty = Y(b[1]);
-  return `<svg class="c3m" viewBox="0 0 ${W} ${H}" role="img" aria-label="집값 ÷ 풀린 돈 비율과 평소 기울기 선(1986~2026)">
+  return `<svg class="c3m" viewBox="0 0 ${W} ${H}" role="img" aria-label="풀린 돈 대비 집값 비중과 40년 내려가는 추세선(1986~2026)">
     <line x1="${X(a[0])}" y1="${Y(a[1])}" x2="${X(b[0])}" y2="${ty}" stroke="#8796A3" stroke-width="1.5" stroke-dasharray="5 4"/>
     <polyline points="${pts.join(' ')}" fill="none" stroke="#56636F" stroke-width="1.6" stroke-linejoin="round"/>
     <line x1="${nx}" y1="${ty}" x2="${nx}" y2="${ny}" stroke="var(--warm)" stroke-width="1.5"/>
@@ -1176,7 +1191,7 @@ function m2Fig(){ const W = 300, H = 100, L = 6, R = 50, T = 8, B = 16, x0 = 198
     <text x="${nx + 6}" y="${ny + 1}" font-size="10" font-weight="700" fill="var(--warm)">지금</text>
     <text x="${nx + 6}" y="${ty + 8}" font-size="9.5" fill="#61707D">평소 선</text>
     <text x="${L}" y="${H - 3}" font-size="9.5" fill="#61707D">1986</text><text x="${X(x1)}" y="${H - 3}" font-size="9.5" fill="#61707D" text-anchor="end">2026</text></svg>
-    <div class="pbl" style="justify-content:flex-start;gap:10px"><span>― 집값 ÷ 풀린 돈</span><span>┄ 평소 기울기 선</span></div>` + rdM2(); }
+    <div class="pbl" style="justify-content:flex-start;gap:10px"><span>― 풀린 돈 대비 집값 비중</span><span>┄ 40년 내려가는 추세선</span></div>` + rdM2(); }
 let SIG2 = {ym:['2026-07','2026-08','2026-09','2026-10'], m:[124.0, 117.8, 116.4, 112.8], j:[136.1, 135.6, 132.1, 128.7]};
 // 시장 45: data\시황_기준값.json → OUT_D·M11·M11L·SIG2. 모양이 맞는 항목만 바꾸고, 틀리거나 파일이 없으면 위 예비 값 그대로(BASEV.ok = 읽었는지)
 const BASEV = {ok:false, bad:[]};
@@ -1212,11 +1227,19 @@ function renderSimple(){
   const C = R7['합성'].filter(r => r['맞힐 대상'].startsWith('선도단지')), best = C.find(r => r['구분'].startsWith('합성 2개'));
   const solo = n => C.find(r => r['구분'] === '단독' && r['구성(시차)'].startsWith(n)), sm = solo('매매가격'), sj = solo('전세가격');
   const dn = a => a[a.length - 1] < a[a.length - 2] && a[a.length - 2] < a[a.length - 3] && a[a.length - 3] < a[a.length - 4];
-  const both = dn(SIG2.m) && dn(SIG2.j), L = SIG2.ym.length - 1, bv = best ? +best['2021~2026 상관(확인 구간)'] : null;
+  const GI = sig2GI(), S2 = GI || SIG2, LDW = GI ? '현장 분위기상 가격 오름세' : '선도단지 오름세';   // 시장 49(3)
+  const both = dn(S2.m) && dn(S2.j), L = S2.ym.length - 1, bv = best ? +best['2021~2026 상관(확인 구간)'] : null;
   // 시장 35: 결론 색 — 둘 다 3개월 연속 내려감 = 오름세 약해짐(청록), 둘 다 3개월 연속 오름 = 오름세 세짐(주황, 거울 경우 더함), 그 밖 = 엇갈림(회색)
-  const upn = a => a[a.length - 1] > a[a.length - 2] && a[a.length - 2] > a[a.length - 3] && a[a.length - 3] > a[a.length - 4], bothUp = upn(SIG2.m) && upn(SIG2.j);
-  const o2 = both ? {t:'선도단지 오름세가 약해지는 쪽', tone:'cool'} : bothUp ? {t:'선도단지 오름세가 세지는 쪽', tone:'warm'} : {t:'방향이 엇갈림', tone:'mid'};
-  const c2 = `<div class="vc"><div class="h"><span class="n">②</span>현장의 전망 분위기와 서울 대표 단지</div>
+  const upn = a => a[a.length - 1] > a[a.length - 2] && a[a.length - 2] > a[a.length - 3] && a[a.length - 3] > a[a.length - 4], bothUp = upn(S2.m) && upn(S2.j);
+  const o2 = both ? {t:`${LDW}가 약해지는 쪽`, tone:'cool'} : bothUp ? {t:`${LDW}가 세지는 쪽`, tone:'warm'} : {t:'방향이 엇갈림', tone:'mid'};
+  const c2 = GI ? `<div class="vc"><div class="h"><span class="n">②</span>현장의 전망 분위기(${rn})</div>
+    <div class="tags">${badge('ok', '강도 중')}${badge('no', '서울과 같은 규칙')}</div>
+    <div class="sit"><span class="lb">상황</span>${rn} 매매·전세 전망 지수${T('outlook')}(현장의 전망 분위기)를 봅니다.</div>
+    <div class="rule"><span class="lb">규칙</span>서울과 같게 봅니다 — 100보다 높으면 오른다는 응답이 많고, 매매·전세 전망이 3개월 연속 같은 쪽으로 움직이면 그 방향을 신호로 봅니다. 약 3개월 뒤 선도단지와 함께 움직이는지는 서울에서만 확인했습니다.</div>
+    <div class="sig"><span class="k">지금 신호</span>${CC(o2)}
+      ${GZ(`${S2.ym[L]} 매매 전망 <b>${S2.m[L].toFixed(1)}</b>, 전세 전망 <b>${S2.j[L].toFixed(1)}</b>${both || bothUp ? ` · 둘 다 ${+S2.ym[L - 3].slice(5)}월부터 3개월 연속 ${both ? '내려감' : '오름'}` : ''}`)}
+      ${(N => N ? `<div class="sm">${N.html}</div>` : '')(outlookNote())}
+      <div class="rd">${RD('100보다 높으면 오른다는 응답이 많음. 매매·전세 전망이 몇 달 연속 같은 쪽으로 움직이는지 봄')}</div></div></div>` : `<div class="vc"><div class="h"><span class="n">②</span>현장의 전망 분위기와 서울 대표 단지</div>
     <div class="tags">${badge('ok', '강도 중')}${badge('no', '서울만')}</div>
     <div class="sit"><span class="lb">상황</span>매매·전세 전망 지수${T('outlook')}(현장의 전망 분위기)와 서울 선도단지${T('lead')} 실거래를 함께 봅니다.</div>
     <div class="rule"><span class="lb">규칙</span>전망 지수가 오르내리면 약 3개월 뒤 서울 선도단지 실거래가 같은 쪽으로 움직입니다. 2021년 이후 새 자료로 다시 봐도 함께 움직였습니다(${bv != null ? lvl(bv) : '—'}).</div>
@@ -1231,9 +1254,9 @@ function renderSimple(){
     <div class="rule"><span class="lb">규칙</span>가격/M2가 높을 때는 1~3년 뒤 서울 선도단지 상승이 약했습니다. 2021년 이후 새 자료로 다시 봐도 같은 방향이었습니다.</div>
     <div class="ev">${MO('자세히 보기', `순서끼리 함께 움직인 정도 <b>${M11.ld}</b>(12·24·36개월, 반대 방향, 우연히 나올 확률 100번 중 ${pS(M11.ldP)}번). 규칙을 정한 2011~2020에서 100번 중 ${pS(M11.ldIn)}번, 2021년 이후 새 자료로 다시 봐도 ${M11.ldOut}로 같은 방향입니다. 서울 KB 매매지수로 보면 뚜렷하지 않아 약함~중입니다.`)}</div>
     <div class="sig"><span class="k">지금 신호</span>${CC({t:'기준에 따라 해석이 갈림', tone:'mid'})}
-      <div class="sm">${M11.t} 풀린 돈(M2) 대비 집값은 그냥 비교하면 1986년 이후 <b>${M11.rawP <= 50 ? '하위 ' + M11.rawP : '상위 ' + (100 - M11.rawP).toFixed(1)}%</b>(${M11.rawP <= 50 ? '싼' : '비싼'} 쪽)인데, 40년 동안의 평소 기울기 선(꾸준히 내려온 선)과 비교하면 <b>${M11.trP >= 50 ? '상위 ' + (100 - M11.trP).toFixed(1) : '하위 ' + M11.trP}%</b>(${M11.trP >= 50 ? '비싼' : '싼'} 쪽)입니다.</div><div class="sm m2c">→ ${M2CON()}</div></div></div>`;
+      <div class="sm">${M11.t} ${M2T1()} ${M2T2()}</div><div class="sm m2c">→ ${M2CON()}</div></div></div>`;
   $('#vcards').innerHTML = c1 + c2 + c3;
-  CARDS.o2 = {o:o2, v:SIG2.m[L], lab:'매매 전망 ' + SIG2.ym[L]}; CARDS.c1 = jl && kbv != null ? {o:{t:`${grayW} → 이 규칙만 보면 전세 수급이 ${jSide < 0 ? '약해지는' : '강해지는'} 쪽`, tone:jSide < 0 ? 'cool' : 'warm'}} : null;
+  CARDS.o2 = {o:o2, v:S2.m[L], lab:'매매 전망 ' + S2.ym[L]}; CARDS.c1 = jl && kbv != null ? {o:{t:`${grayW} → 이 규칙만 보면 전세 수급이 ${jSide < 0 ? '약해지는' : '강해지는'} 쪽`, tone:jSide < 0 ? 'cool' : 'warm'}} : null;
   // 시장 35: 전세가율 평균 회귀 = 검증 칸 맨 앞 카드(목록에서 옮김). 지금 신호는 위치판의 전세가율 위치(새 계산 없음)
   // 시장 29: 대표님 관점 — 2021년 이후는 사이클 진행 중(회색·중립 톤, 실패 표시 쓰지 않음)
   const jrp = percentile('jr', 201101);
@@ -1254,11 +1277,11 @@ function renderSimple(){
       vc1:jl && kbv != null ? {gfx:spark([{v:jl24, c:OV1_RATE_C, own:true}, {v:su24, c:OV1_SUP_C, own:true, inv:true}]) + `<div class="pbl"><span style="color:${OV1_RATE_C}">― 전세대출 금리</span><span style="color:${OV1_SUP_C}">― 전세 수급(뒤집음) · 최근 2년</span></div>` + rdOv1(),
         ri:`지금은 <b>${grayW}</b> — 규칙대로라면 3개월 뒤 전세 수급이 ${jSide < 0 ? '초록 구간 때보다 약한 쪽' : '회색 구간 때보다 강한 쪽'}`} : null,
       vc2:O12 ? {gfx:spark([{v:O12.v, c:'#1f5fd6'}], 100) + `<div class="pbl"><span>${fmtYM(O12.t[0])}</span><span>매매 전망 지수 · 점선 100 = 기준</span><span>${fmtYM(O12.t[O12.t.length - 1])}</span></div>` + rdOut(),
-        ri:both ? `지금은 전망 지수가 <b>3개월 연속 내려감</b> — 규칙대로라면 약 3개월 뒤 선도단지 오름세가 약해지는 쪽` : bothUp ? `지금은 전망 지수가 <b>3개월 연속 오름</b> — 규칙대로라면 약 3개월 뒤 선도단지 오름세가 세지는 쪽` : `지금은 전망 방향이 <b>엇갈림</b> — 규칙으로 볼 신호 없음`} : null,
+        ri:both ? `지금은 전망 지수가 <b>3개월 연속 내려감</b> — 규칙대로라면 ${GI ? '' : '약 3개월 뒤 '}${LDW}가 약해지는 쪽` : bothUp ? `지금은 전망 지수가 <b>3개월 연속 오름</b> — 규칙대로라면 ${GI ? '' : '약 3개월 뒤 '}${LDW}가 세지는 쪽` : `지금은 전망 방향이 <b>엇갈림</b> — 규칙으로 볼 신호 없음`} : null,
       vc3:{gfx:posBar(M11.rawP, 'warm', 'mid', [{p:M11.rawP, tone:'cool', lab:'①'}, {p:M11.trP, tone:'warm', lab:'②'}]) +
-          `<div class="c3lg"><span><i style="background:var(--cool)"></i>① 그냥 비교하면: <b>${M11.rawP <= 50 ? '싼 편' : '비싼 편'}</b>(${M11.rawP <= 50 ? '하위 ' + M11.rawP : '상위 ' + (100 - M11.rawP).toFixed(1)}%) = 지금 '집값 ÷ 풀린 돈' 비율이 과거 40년 평균보다 ${M11.rawP <= 50 ? '낮음' : '높음'}. 다만 이 비율은 돈이 더 빨리 늘어 40년 내내 조금씩 내려오는 게 정상이라, 옛 평균과 비교하면 늘 싸게 보임.</span><span><i style="background:var(--warm)"></i>② 집값 ÷ 풀린 돈 비율은 40년 동안 일정한 기울기로 내려왔음(돈이 집값보다 빨리 늘어서). 지금은 그 평소 기울기 선보다 <b>${M11.tr >= 0 ? '위' : '아래'}</b> → 평소 흐름 기준으로는 <b>${M11.tr >= 0 ? '비싼 편' : '싼 편'}</b>(${M11.trP >= 50 ? '상위 ' + (100 - M11.trP).toFixed(1) : '하위 ' + M11.trP}%)</span></div>` + m2Fig(),
-        ri:`그냥 비교하면 <b>${M11.rawP <= 50 ? '싼 편' : '비싼 편'}</b>, 평소 기울기 선과 비교하면 <b>${M11.tr >= 0 ? '비싼 편' : '싼 편'}</b> — 그래서 1~3년 뒤 흐름은 엇갈림<div class="m2c">→ ${M2CON()}</div>`}};
-    CARDS.o2.gfx = O12 ? spark([{v:O12.v, c:'#1f5fd6'}], 100) : ''; CARDS.o2.sx = ON ? ON.html : ''; CARDS.o2.ri = O12 ? `100 위 · ${both ? '3개월 연속 하락' : bothUp ? '3개월 연속 상승' : '방향 엇갈림'}` : ''; }
+          `<div class="c3lg"><span><i style="background:var(--cool)"></i>① ${M2T1()}</span><span><i style="background:var(--warm)"></i>② ${M2T2()}</span></div>` + m2Fig(),
+        ri:`① 평균 기준 <b>${M11.rawP <= 50 ? '싼 편' : '비싼 편'}</b>, ② 40년 추세 기준 <b>${M11.tr >= 0 ? '비싼 편' : '싼 편'}</b> — 그래서 1~3년 뒤 흐름은 엇갈림<div class="m2c">→ ${M2CON()}</div>`}};
+    CARDS.o2.gfx = O12 ? spark([{v:O12.v, c:'#1f5fd6'}], 100) : ''; CARDS.o2.sx = ON ? ON.html : ''; CARDS.o2.ri = O12 ? `${S2.m[L] >= 100 ? '100 위' : '100 아래'} · ${both ? '3개월 연속 하락' : bothUp ? '3개월 연속 상승' : '방향 엇갈림'}` : ''; }
   CARDS.now = {J, grayW, jSide};
   // 검증 진행 중인 가설
   const sb = solo('매수우위');
@@ -1391,7 +1414,7 @@ function renderRegions(){
 function renderAll(){ CARDS = {}; renderRegions(); renderHead(); renderConcl(); renderSimple();renderFigs(); renderBoard(); renderChips(); renderTS(); renderRel(); renderOverlays(); renderVerdict(); plainDOM(); compact37(); }
 // ---------- 시장 37: 요약판(카드 5개) + 검증 카드·가설 목록·지금 상태·부제 정리(내용은 [왜?]·ⓘ 안으로, 지우지 않음) ----------
 const RULEK = {'전세가율은 결국 평균으로 돌아간다':'전세가율 → 결국 평균으로 돌아옴', '금리와 전세 수급':'전세대출 금리 ↑ → 1~2개월 뒤 전세 수급 ↓',
-  '현장의 전망 분위기와 서울 대표 단지':'전망 분위기 → 약 3개월 뒤 서울 선도단지', '풀린 돈(M2) 대비 집값':'풀린 돈 대비 집값 높음 → 1~3년 뒤 선도단지 상승 약함'};
+  '현장의 전망 분위기와 서울 대표 단지':'전망 분위기 → 약 3개월 뒤 서울 선도단지', '현장의 전망 분위기(경기)':'전망 분위기 → 매매·전세 전망이 3개월 연속 같은 쪽이면 신호(서울과 같은 규칙)', '현장의 전망 분위기(인천)':'전망 분위기 → 매매·전세 전망이 3개월 연속 같은 쪽이면 신호(서울과 같은 규칙)', '풀린 돈(M2) 대비 집값':'풀린 돈 대비 집값 높음 → 1~3년 뒤 선도단지 상승 약함'};
 const plainT = h => { const d = document.createElement('div'); d.innerHTML = h; d.querySelectorAll('.tip').forEach(x => x.remove()); return d.textContent.replace(/\s+/g, ' ').trim(); };
 function renderSummary(){
   const G = k => CARDS[k] ? (CARDS[k].gfx || '') + (CARDS[k].ri ? `<span class="ri">${CARDS[k].ri.replace(/<\/?b>/g, '')}</span>` : '') : '';   // 시장 40: 작은 그림 + 짧은 해석
@@ -1464,11 +1487,13 @@ Promise.all([fetch(D('모음표_화면용.csv')).then(r => r.ok ? r.text() : Pro
              // 시장 32: 매수 저울 회색 2개월 기준 연구 값(강북14) · 겹친 그림 ②용 전망 지수·선도단지 3개월 변화(서울)
              fetch(D('시장7_결과_매수회색2개월_시장32.json')).then(r => r.ok ? r.json() : null).catch(() => null),
              fetch(D('전망_선도단지_서울_시장32.csv')).then(r => r.ok ? r.text() : '').catch(() => ''),
-             fetch(D('시황_기준값.json')).then(r => r.ok ? r.json() : null).catch(() => null)]).then(([a, b, j, p8, info, gr, sg27, b32, out32, bv45]) => {
+             fetch(D('시황_기준값.json')).then(r => r.ok ? r.json() : null).catch(() => null),
+             fetch(D('전망_경기인천_시장49.json')).then(r => r.ok ? r.json() : null).catch(() => null)]).then(([a, b, j, p8, info, gr, sg27, b32, out32, bv45, ogi]) => {
   applyBaseVals(bv45);   // 시장 45: 손으로 적은 기준값·연구 값은 data 파일에서(못 읽으면 예비 상수)
   P8 = p8 ? parseCSV(p8) : null; INFO = info || {}; GR26 = gr; SG27 = sg27;
   if (b32 && b32['저울']){ B32 = {}; Object.entries(b32['저울']).forEach(([k, v]) => { j['저울'][k] = v; B32[k.split('|')[1]] = true; }); }
   if (out32){ OUT32 = {}; parseCSV(out32).forEach(r => { OUT32[+r['연월']] = r; }); }
+  if (OUT32 && ogi){ OUTGI = {}; ['경기도', '인천광역시'].forEach(g => { if (!ogi[g]) return; OUTGI[g] = true; Object.entries(ogi[g]).forEach(([t, v]) => { const o = OUT32[+t] = OUT32[+t] || {'연월':t}; o['매매가격전망지수(' + g + ')'] = v[0] == null ? '' : String(v[0]); o['전세가격전망지수(' + g + ')'] = v[1] == null ? '' : String(v[1]); }); }); }
   parseCSV(a).forEach(r => { (DATA[r['지역']] = DATA[r['지역']] || {})[+r['연월']] = r; });
   parseCSV(b).forEach(r => { const o = (DATA[r['지역']] = DATA[r['지역']] || {})[+r['연월']]; if (o) Object.assign(o, r); });
   R7 = j; YMS = Object.keys(DATA['서울특별시']).map(Number).sort((x, y) => x - y); LASTYM = YMS[YMS.length - 1]; renderInfo(); renderAll();
